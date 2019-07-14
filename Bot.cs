@@ -28,7 +28,8 @@ namespace TerminusDotNetConsoleApp
             //instantiate client and register log event handler
             _client = new DiscordSocketClient();
             _client.Log += Log;
-            _client.MessageReceived += MessageReceived;
+            //_client.MessageReceived += MessageReceived;
+            _client.MessageReceived += HandleCommandAsync;
 
             //log in & start the client
             await _client.LoginAsync(TokenType.Bot, ConfigurationManager.AppSettings["DiscordToken"]);
