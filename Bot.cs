@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Discord;
+using Discord.Commands;
 using Discord.WebSocket;
 
 namespace TerminusDotNetConsoleApp
@@ -12,6 +14,7 @@ namespace TerminusDotNetConsoleApp
     class Bot
     {
         private DiscordSocketClient _client;
+        private CommandService _commandService;
 
         public Bot()
         {
@@ -20,6 +23,8 @@ namespace TerminusDotNetConsoleApp
 
         public async Task Initialize()
         {
+            _commandService = new CommandService();
+
             //instantiate client and register log event handler
             _client = new DiscordSocketClient();
             _client.Log += Log;
@@ -28,6 +33,9 @@ namespace TerminusDotNetConsoleApp
             //log in & start the client
             await _client.LoginAsync(TokenType.Bot, ConfigurationManager.AppSettings["DiscordToken"]);
             await _client.StartAsync();
+
+            //init commands service
+            await _commandService.AddModulesAsync(assembly: Assembly.GetEntryAssembly(), services: null);
 
             //hang out for now
             await Task.Delay(-1);
@@ -60,6 +68,29 @@ namespace TerminusDotNetConsoleApp
             Console.WriteLine(message.ToString());
             Console.ResetColor();
             return Task.CompletedTask;
+        }
+
+        private async Task HandleCommandAsync(SocketMessage messageParam)
+        {
+            var message = messageParam as SocketUserMessage;
+            if (message == null)
+            {
+                return;
+            }
+
+            //track position of command prefix char 
+            int argPos = 0;
+
+            //check if message is command and not sent by a bot
+            if (!(message.HasCharPrefix('!', ref argPos) || message.HasMentionPrefix(_client.CurrentUser, ref argPos))
+                || message.Author.IsBot)
+            {
+                return;
+            }
+
+            //execute the command 
+            var context = new SocketCommandContext(_client, message);
+            await _commandService.ExecuteAsync(context: context, argPos: argPos, services: null);
         }
 
         private async Task MessageReceived(SocketMessage message)
