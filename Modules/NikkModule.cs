@@ -1,4 +1,6 @@
 ﻿using Discord.Commands;
+using System;
+using System.IO;
 using System.Threading.Tasks;
 
 namespace TerminusDotNetConsoleApp.Modules
@@ -9,7 +11,9 @@ namespace TerminusDotNetConsoleApp.Modules
         [Summary("Echoes a spicy nikk quote.")]
         public async Task SayAsync()
         {
-            await Context.Channel.SendMessageAsync("it's me, nikk");
+            var random = new Random();
+            var nikkPastas = File.ReadAllLines(@"RandomMessages\nikk.txt");
+            await Context.Channel.SendMessageAsync(nikkPastas[random.Next(nikkPastas.Length)]);
         }
     }
 }
