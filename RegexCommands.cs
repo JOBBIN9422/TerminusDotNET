@@ -39,7 +39,7 @@ namespace TerminusDotNetConsoleApp
 
             foreach (var regexString in _regexToMsgMap.Keys)
             {
-                if (Regex.IsMatch(message, regexString))
+                if (Regex.IsMatch(message, regexString, RegexOptions.IgnoreCase))
                 {
                     returnMessages.Add(_regexToMsgMap[regexString]);
                 }
