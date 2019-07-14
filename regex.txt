@@ -12,4 +12,4 @@ oh my god jc a bomb|A bomb!
 .*np.*|discovered
 .*pretty good.*|https://i.redd.it/qr97nfztrkjx.gif
 .*mp\d.*|salami allocator
-.*fast(-|\s)?inverse square root.*|{return "float Q_rsqrt( float number )\n{\tlong i;\n\tfloat x2, y;\n\tconst float threehalfs = 1.5F;\n\n\tx2 = number * 0.5F;\n\ty  = number;\n\ti  = * ( long * ) &y;                     // evil floating point bit level hacking\n \ti  = 0x5f3759df - ( i >> 1 );               // what the fuck?\n  \ty  = * ( float * ) &i;\n \ty  = y * ( threehalfs - ( x2 * y * y ) );   // 1st iteration\n //	y  = y * ( threehalfs - ( x2 * y * y ) );   // 2nd iteration, this can be removed\n \treturn y;\n 
+.*fast inverse square root.*|{return "float Q_rsqrt( float number )\n{\tlong i;\n\tfloat x2, y;\n\tconst float threehalfs = 1.5F;\n\n\tx2 = number * 0.5F;\n\ty  = number;\n\ti  = * ( long * ) &y;                     // evil floating point bit level hacking\n \ti  = 0x5f3759df - ( i >> 1 );               // what the fuck?\n  \ty  = * ( float * ) &i;\n \ty  = y * ( threehalfs - ( x2 * y * y ) );   // 1st iteration\n //	y  = y * ( threehalfs - ( x2 * y * y ) );   // 2nd iteration, this can be removed\n \treturn y;\n 
