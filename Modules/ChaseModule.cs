@@ -8,16 +8,15 @@ using Discord.Commands;
 
 namespace TerminusDotNetConsoleApp.Modules
 {
-    class ChaseModule : ModuleBase<SocketCommandContext>
+    public class ChaseModule : ModuleBase<SocketCommandContext>
     {
-        
         [Command("chase")]
         [Summary("Echoes a spicy chase quote.")]
         public async Task SayAsync()
         {
             var random = new Random();
-            var nikkPastas = File.ReadAllLines(@"RandomMessages\chase.txt");
-            await Context.Channel.SendMessageAsync(nikkPastas[random.Next(nikkPastas.Length)]);
+            var chasePastas = File.ReadAllLines(@"RandomMessages\chase.txt");
+            await Context.Channel.SendMessageAsync(chasePastas[random.Next(chasePastas.Length)]);
         }
     }
 }
