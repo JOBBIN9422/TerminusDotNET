@@ -79,6 +79,20 @@ namespace TerminusDotNetConsoleApp
                 return;
             }
 
+            //look for wildcards in the current message 
+            var regexMsgParser = new RegexCommands();
+            var matches = regexMsgParser.ParseMessage(message.Content);
+
+            if (matches.Count > 0)
+            {
+                foreach (var match in matches)
+                {
+                    await message.Channel.SendMessageAsync(match);
+                }
+
+                return;
+            }
+
             //track position of command prefix char 
             int argPos = 0;
 
@@ -89,7 +103,7 @@ namespace TerminusDotNetConsoleApp
                 return;
             }
 
-            //execute the command 
+            //handle commands
             var context = new SocketCommandContext(_client, message);
             await _commandService.ExecuteAsync(context: context, argPos: argPos, services: null);
         }
