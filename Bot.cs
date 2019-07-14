@@ -93,13 +93,5 @@ namespace TerminusDotNetConsoleApp
             var context = new SocketCommandContext(_client, message);
             await _commandService.ExecuteAsync(context: context, argPos: argPos, services: null);
         }
-
-        private async Task MessageReceived(SocketMessage message)
-        {
-            if (message.Content == "!ping")
-            {
-                await message.Channel.SendMessageAsync("fuck you");
-            }
-        }
     }
 }
