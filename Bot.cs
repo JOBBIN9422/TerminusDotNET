@@ -83,7 +83,7 @@ namespace TerminusDotNetConsoleApp
             var regexMsgParser = new RegexCommands();
             var matches = regexMsgParser.ParseMessage(message.Content);
 
-            if (matches.Count > 0)
+            if (matches.Count > 0 && !message.Author.IsBot)
             {
                 foreach (var match in matches)
                 {
