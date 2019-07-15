@@ -79,27 +79,24 @@ namespace TerminusDotNetConsoleApp
                 return;
             }
 
-            //look for wildcards in the current message 
-            var regexMsgParser = new RegexCommands();
-            var matches = regexMsgParser.ParseMessage(message.Content);
-
-            if (matches.Count > 0 && !message.Author.IsBot)
-            {
-                foreach (var match in matches)
-                {
-                    await message.Channel.SendMessageAsync(match);
-                }
-
-                return;
-            }
-
             //track position of command prefix char 
             int argPos = 0;
 
-            //check if message is command and not sent by a bot
+            //check if message is not command or not sent by bot
             if (!(message.HasCharPrefix('!', ref argPos) || message.HasMentionPrefix(_client.CurrentUser, ref argPos))
                 || message.Author.IsBot)
             {
+                //look for wildcards in the current message 
+                var regexMsgParser = new RegexCommands();
+                var matches = regexMsgParser.ParseMessage(message.Content);
+
+                if (matches.Count > 0 && !message.Author.IsBot)
+                {
+                    foreach (var match in matches)
+                    {
+                        await message.Channel.SendMessageAsync(match);
+                    }
+                }
                 return;
             }
 
