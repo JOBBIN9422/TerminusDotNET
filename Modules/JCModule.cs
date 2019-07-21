@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace TerminusDotNetConsoleApp.Modules
 {
-    public class JCModule : ModuleBase<SocketCommandContext>
+    public class JCModule : ModuleBase<SocketCommandContext>, ITextModule
     {
         [Command("JC")]
         [Summary("Echoes a spicy JC quote.")]

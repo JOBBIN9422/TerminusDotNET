@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace TerminusDotNetConsoleApp.Modules
 {
-    public class NikkModule : ModuleBase<SocketCommandContext>
+    public class NikkModule : ModuleBase<SocketCommandContext>, ITextModule
     {
         [Command("nikk")]
         [Summary("Echoes a spicy nikk quote.")]

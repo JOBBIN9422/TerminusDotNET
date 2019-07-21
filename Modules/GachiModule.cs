@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace TerminusDotNetConsoleApp.Modules
 {
-    public class GachiModule : ModuleBase<SocketCommandContext>
+    public class GachiModule : ModuleBase<SocketCommandContext>, ITextModule
     {
         [Command("gachi")]
         [Summary("Echoes a spicy gachi quote.")]

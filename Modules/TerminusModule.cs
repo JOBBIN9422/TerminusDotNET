@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace TerminusDotNetConsoleApp.Modules
 {
-    public class TerminusModule : ModuleBase<SocketCommandContext>
+    public class TerminusModule : ModuleBase<SocketCommandContext>, ITextModule
     {
         [Command("terminus")]
         [Summary("Echoes a spicy terminus quote.")]

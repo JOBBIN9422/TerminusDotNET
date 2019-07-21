@@ -8,7 +8,7 @@ using Discord.Commands;
 
 namespace TerminusDotNetConsoleApp.Modules
 {
-    public class ChaseModule : ModuleBase<SocketCommandContext>
+    public class ChaseModule : ModuleBase<SocketCommandContext>, ITextModule
     {
         [Command("chase")]
         [Summary("Echoes a spicy chase quote.")]
