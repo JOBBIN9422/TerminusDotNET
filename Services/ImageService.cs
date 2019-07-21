@@ -67,6 +67,7 @@ namespace TerminusDotNetConsoleApp.Services
                 var url = attachment.Url;
 
                 var deepfryFilename = $"temp{imgIndex}{Path.GetExtension(filename)}";
+                imgIndex++;
                 webClient.DownloadFile(url, deepfryFilename);
                 //do some shit with the image
 
