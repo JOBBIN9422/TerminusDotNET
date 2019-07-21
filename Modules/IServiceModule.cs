@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace TerminusDotNetConsoleApp.Modules
 {
-    interface IServiceModule
+    public interface IServiceModule
     {
         //allow services to reply on a text channel
         Task ServiceReplyAsync(string s);

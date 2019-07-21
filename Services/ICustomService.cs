@@ -8,7 +8,7 @@ using TerminusDotNetConsoleApp.Modules;
 
 namespace TerminusDotNetConsoleApp.Services
 {
-    interface ICustomService
+    public interface ICustomService
     {
         IServiceModule ParentModule { get; set; }
 
