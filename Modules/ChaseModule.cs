@@ -16,7 +16,7 @@ namespace TerminusDotNetConsoleApp.Modules
         {
             var random = new Random();
             var chasePastas = File.ReadAllLines(@"RandomMessages\chase.txt");
-            await Context.Channel.SendMessageAsync(chasePastas[random.Next(chasePastas.Length)]);
+            await ReplyAsync(chasePastas[random.Next(chasePastas.Length)]);
         }
     }
 }

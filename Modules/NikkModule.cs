@@ -13,7 +13,7 @@ namespace TerminusDotNetConsoleApp.Modules
         {
             var random = new Random();
             var nikkPastas = File.ReadAllLines(@"RandomMessages\nikk.txt");
-            await Context.Channel.SendMessageAsync(nikkPastas[random.Next(nikkPastas.Length)]);
+            await ReplyAsync(nikkPastas[random.Next(nikkPastas.Length)]);
         }
     }
 }

@@ -13,7 +13,7 @@ namespace TerminusDotNetConsoleApp.Modules
         {
             var random = new Random();
             var jcPastas = File.ReadAllLines(@"RandomMessages\jc.txt");
-            await Context.Channel.SendMessageAsync(jcPastas[random.Next(jcPastas.Length)]);
+            await ReplyAsync(jcPastas[random.Next(jcPastas.Length)]);
         }
     }
 }
