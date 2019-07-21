@@ -38,7 +38,7 @@ namespace TerminusDotNetConsoleApp
             _serviceProvider = InstallServices();
 
             //init commands service
-            await _commandService.AddModulesAsync(assembly: Assembly.GetEntryAssembly(), services: null);
+            await _commandService.AddModulesAsync(assembly: Assembly.GetEntryAssembly(), services: _serviceProvider);
 
             //hang out for now
             await Task.Delay(-1);
