@@ -1,13 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Configuration;
-using System.Linq;
 using System.Reflection;
-using System.Text;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using Microsoft.Extensions.DependencyInjection;
+using TerminusDotNetConsoleApp.Services;
 
 namespace TerminusDotNetConsoleApp
 {
@@ -15,6 +14,7 @@ namespace TerminusDotNetConsoleApp
     {
         private DiscordSocketClient _client;
         private CommandService _commandService;
+        private IServiceProvider _serviceProvider;
 
         public Bot()
         {
@@ -28,12 +28,14 @@ namespace TerminusDotNetConsoleApp
             //instantiate client and register log event handler
             _client = new DiscordSocketClient();
             _client.Log += Log;
-            //_client.MessageReceived += MessageReceived;
             _client.MessageReceived += HandleCommandAsync;
 
             //log in & start the client
             await _client.LoginAsync(TokenType.Bot, ConfigurationManager.AppSettings["DiscordToken"]);
             await _client.StartAsync();
+
+            //init custom services
+            _serviceProvider = InstallServices();
 
             //init commands service
             await _commandService.AddModulesAsync(assembly: Assembly.GetEntryAssembly(), services: null);
@@ -102,7 +104,17 @@ namespace TerminusDotNetConsoleApp
 
             //handle commands
             var context = new SocketCommandContext(_client, message);
-            await _commandService.ExecuteAsync(context: context, argPos: argPos, services: null);
+            await _commandService.ExecuteAsync(context: context, argPos: argPos, services: _serviceProvider);
+        }
+
+        private IServiceProvider InstallServices()
+        {
+            var serviceCollection = new ServiceCollection();
+
+            //new custom services get added here
+            serviceCollection.AddSingleton<ImageService>();
+
+            return serviceCollection.BuildServiceProvider();
         }
     }
 }
