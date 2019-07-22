@@ -10,6 +10,7 @@ using TerminusDotNetConsoleApp.Modules;
 using System.Drawing;
 using ImageProcessor.Imaging.Formats;
 using ImageProcessor;
+using ImageProcessor.Imaging;
 
 namespace TerminusDotNetConsoleApp.Services
 {
@@ -26,7 +27,7 @@ namespace TerminusDotNetConsoleApp.Services
             else
             {
                 await ParentModule.ServiceReplyAsync(s, embedBuilder);
-            }  
+            }
         }
 
         //public async Task DeepfryImages(IReadOnlyCollection<Attachment> attachments)
@@ -92,8 +93,6 @@ namespace TerminusDotNetConsoleApp.Services
             var imageBytes = File.ReadAllBytes(imageFilename);
             var format = new JpegFormat { Quality = 10 };
 
-            var random = new Random();
-
             using (var inStream = new MemoryStream(imageBytes))
             using (var outStream = new MemoryStream())
             using (var saveFileStream = new FileStream(imageFilename, FileMode.Open, FileAccess.Write))
@@ -106,6 +105,47 @@ namespace TerminusDotNetConsoleApp.Services
                             //.GaussianSharpen(30)
                             .Format(format)
                             .Save(outStream);
+                outStream.CopyTo(saveFileStream);
+            }
+        }
+
+        private void MemeCaptionImage(string imageFilename, string topText, string bottomText)
+        {
+            var imageBytes = File.ReadAllBytes(imageFilename);
+            var format = new JpegFormat { Quality = 10 };
+
+            int imageWidth = 0;
+            int imageHeight = 0;
+            using (var imageBmp = new Bitmap(imageFilename))
+            {
+                imageWidth = imageBmp.Width;
+                imageHeight = imageBmp.Height;
+            }
+
+            var topTextLayer = new TextLayer()
+            {
+                FontFamily = new FontFamily("Arial"),
+                Position = new Point(imageWidth / 4, imageHeight / 10),
+                FontSize = 32,
+                FontColor = System.Drawing.Color.White
+            };
+
+            var bottomTextLayer = new TextLayer()
+            {
+                FontFamily = new FontFamily("Arial"),
+                Position = new Point(imageWidth * 3 / 4, imageHeight * 9 / 10),
+                FontSize = 32,
+                FontColor = System.Drawing.Color.White
+            };
+
+            using (var inStream = new MemoryStream(imageBytes))
+            using (var outStream = new MemoryStream())
+            using (var saveFileStream = new FileStream(imageFilename, FileMode.Open, FileAccess.Write))
+            using (var imageFactory = new ImageFactory(preserveExifData: true))
+            {
+                imageFactory.Load(inStream)
+                            .Watermark(topTextLayer)
+                            .Watermark(bottomTextLayer);
                 outStream.CopyTo(saveFileStream);
             }
         }
