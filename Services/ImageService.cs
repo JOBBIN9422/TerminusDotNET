@@ -55,29 +55,41 @@ namespace TerminusDotNetConsoleApp.Services
         //    }
         //}
 
-        public List<string> DeepfryImages(IReadOnlyCollection<Attachment> attachments)
+        private List<string> DownloadAttachments(IReadOnlyCollection<Attachment> attachments)
         {
-            WebClient webClient = new WebClient();
-            List<string> returnImgs = new List<string>();
+            var webClient = new WebClient();
+            var returnImgs = new List<string>();
+            var imgIndex = 0;
 
-            //download the image(s)
-            int imgIndex = 0;
             foreach (var attachment in attachments)
             {
                 var filename = attachment.Filename;
                 var url = attachment.Url;
 
-                var deepfryFilename = $"temp{imgIndex}{Path.GetExtension(filename)}";
+                var downloadFilename = $"temp{imgIndex}{Path.GetExtension(filename)}";
                 imgIndex++;
-                webClient.DownloadFile(url, deepfryFilename);
+                webClient.DownloadFile(url, downloadFilename);
                 //do some shit with the image
 
-                DeepfryImage(deepfryFilename);
+                //DeepfryImage(downloadFilename);
 
-                returnImgs.Add(deepfryFilename);
+                returnImgs.Add(downloadFilename);
             }
 
             return returnImgs;
+        }
+
+        public List<string> DeepfryImages(IReadOnlyCollection<Attachment> attachments)
+        {
+            var images = DownloadAttachments(attachments);
+
+            //download the image(s)
+            foreach (var image in images)
+            {
+                DeepfryImage(image);
+            }
+
+            return images;
         }
 
         public void DeleteImages(List<string> images)
@@ -109,33 +121,63 @@ namespace TerminusDotNetConsoleApp.Services
             }
         }
 
+        public List<string> MemeCaptionImages(IReadOnlyCollection<Attachment> attachments, string topText, string bottomText)
+        {
+            var images = DownloadAttachments(attachments);
+
+            foreach (var image in images)
+            {
+                MemeCaptionImage(image, topText, bottomText);
+            }
+
+            return images;
+        }
+
         private void MemeCaptionImage(string imageFilename, string topText, string bottomText)
         {
             var imageBytes = File.ReadAllBytes(imageFilename);
             var format = new JpegFormat { Quality = 10 };
 
-            int imageWidth = 0;
-            int imageHeight = 0;
+            var imageWidth = 0;
+            var imageHeight = 0;
             using (var imageBmp = new Bitmap(imageFilename))
             {
                 imageWidth = imageBmp.Width;
                 imageHeight = imageBmp.Height;
             }
 
+            var fontSize = 0;
+            if (imageWidth > imageHeight)
+            {
+                fontSize = imageWidth / 15;
+            }
+            else
+            {
+                fontSize = imageHeight / 15;
+            }
+
+            var topTextX = imageWidth / 2 - topText.Length * (fontSize / 3);
+            var bottomTextX = imageWidth / 2 - bottomText.Length * (fontSize / 3);
+
             var topTextLayer = new TextLayer()
             {
-                FontFamily = new FontFamily("Arial"),
-                Position = new Point(imageWidth / 4, imageHeight / 10),
-                FontSize = 32,
-                FontColor = System.Drawing.Color.White
+                Text = topText,
+                FontFamily = new FontFamily("Impact"),
+                FontSize = fontSize,
+                FontColor = System.Drawing.Color.White,
+                Style = FontStyle.Bold,
+                Position = new Point(topTextX, imageHeight / 10)
+                
             };
 
             var bottomTextLayer = new TextLayer()
             {
-                FontFamily = new FontFamily("Arial"),
-                Position = new Point(imageWidth * 3 / 4, imageHeight * 9 / 10),
-                FontSize = 32,
-                FontColor = System.Drawing.Color.White
+                Text = bottomText,
+                FontFamily = new FontFamily("Impact"),
+                FontSize = fontSize,
+                FontColor = System.Drawing.Color.White,
+                Style = FontStyle.Bold,
+                Position = new Point(bottomTextX, imageHeight * 8 / 10)
             };
 
             using (var inStream = new MemoryStream(imageBytes))
@@ -145,7 +187,8 @@ namespace TerminusDotNetConsoleApp.Services
             {
                 imageFactory.Load(inStream)
                             .Watermark(topTextLayer)
-                            .Watermark(bottomTextLayer);
+                            .Watermark(bottomTextLayer)
+                            .Save(outStream);
                 outStream.CopyTo(saveFileStream);
             }
         }

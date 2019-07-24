@@ -47,7 +47,7 @@ namespace TerminusDotNetConsoleApp
         //log message to file
         private Task Log(LogMessage message)
         {
-            Logger.WriteMessage(message.Source + ".txt", message.ToString());
+            //Logger.WriteMessage(message.Source + ".txt", message.ToString());
 
             switch (message.Severity)
             {

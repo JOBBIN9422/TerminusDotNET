@@ -59,5 +59,30 @@ namespace TerminusDotNetConsoleApp.Modules
             _imageService.DeleteImages(images);
         }
 
+        [Command("meme", RunMode = RunMode.Async)]
+        public async Task MemeCaptionImageAsync(string topText = null, string bottomText = null)
+        {
+            var attachments = Context.Message.Attachments;
+            if (attachments == null || attachments.Count == 0)
+            {
+                await ServiceReplyAsync("Please attach an image file.");
+                return;
+            }
+
+            if (topText == null || bottomText == null)
+            {
+                await ServiceReplyAsync("Please add a caption.");
+                return;
+            }
+
+            var images = _imageService.MemeCaptionImages(attachments, topText, bottomText);
+
+            foreach (var image in images)
+            {
+                await SendFileAsync(image);
+            }
+
+            _imageService.DeleteImages(images);
+        }
     }
 }
