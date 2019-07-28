@@ -42,7 +42,7 @@ namespace TerminusDotNetConsoleApp.Modules
         }
 
         [Command("deepfry", RunMode = RunMode.Async)]
-        public async Task DeepFryImageAsync()
+        public async Task DeepFryImageAsync(int numPasses = 1)
         {
             var attachments = Context.Message.Attachments;
             if (attachments == null || attachments.Count == 0)
@@ -51,7 +51,7 @@ namespace TerminusDotNetConsoleApp.Modules
                 return;
             }
 
-            var images = _imageService.DeepfryImages(attachments);
+            var images = _imageService.DeepfryImages(attachments, numPasses);
 
             foreach (var image in images)
             {

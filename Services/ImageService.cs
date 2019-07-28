@@ -19,13 +19,13 @@ namespace TerminusDotNetConsoleApp.Services
     {
         public IServiceModule ParentModule { get; set; }
 
-        public List<string> DeepfryImages(IReadOnlyCollection<Attachment> attachments)
+        public List<string> DeepfryImages(IReadOnlyCollection<Attachment> attachments, int numPasses = 1)
         {
             var images = AttachmentHelper.DownloadAttachments(attachments);
 
             foreach (var image in images)
             {
-                DeepfryImage(image);
+                DeepfryImage(image, numPasses);
             }
 
             return images;
@@ -36,24 +36,27 @@ namespace TerminusDotNetConsoleApp.Services
             AttachmentHelper.DeleteFiles(images);
         }
 
-        private void DeepfryImage(string imageFilename)
+        private void DeepfryImage(string imageFilename, int numPasses = 1)
         {
-            var imageBytes = File.ReadAllBytes(imageFilename);
-            var format = new JpegFormat { Quality = 10 };
-
-            using (var inStream = new MemoryStream(imageBytes))
-            using (var outStream = new MemoryStream())
-            using (var saveFileStream = new FileStream(imageFilename, FileMode.Open, FileAccess.Write))
-            using (var imageFactory = new ImageFactory(preserveExifData: true))
+            for (int i = 0; i < numPasses; i++)
             {
-                imageFactory.Load(inStream)
-                            .Saturation(100)
-                            .Contrast(100)
-                            .Gamma(1.0f)
-                            //.GaussianSharpen(30)
-                            .Format(format)
-                            .Save(outStream);
-                outStream.CopyTo(saveFileStream);
+                var imageBytes = File.ReadAllBytes(imageFilename);
+                var format = new JpegFormat { Quality = 10 };
+
+                using (var inStream = new MemoryStream(imageBytes))
+                using (var outStream = new MemoryStream())
+                using (var saveFileStream = new FileStream(imageFilename, FileMode.Open, FileAccess.Write))
+                using (var imageFactory = new ImageFactory(preserveExifData: true))
+                {
+                    imageFactory.Load(inStream)
+                                .Saturation(100)
+                                .Contrast(100)
+                                .Gamma(1.0f)
+                                //.GaussianSharpen(30)
+                                .Format(format)
+                                .Save(outStream);
+                    outStream.CopyTo(saveFileStream);
+                }
             }
         }
 
