@@ -10,7 +10,6 @@ namespace TerminusDotNetConsoleApp.Modules
     public interface IServiceModule
     {
         //allow services to reply on a text channel
-        Task ServiceReplyAsync(string s);
-        Task ServiceReplyAsync(string title, EmbedBuilder embedBuilder);
+        Task ServiceReplyAsync(string s, EmbedBuilder embedBuilder = null);
     }
 }

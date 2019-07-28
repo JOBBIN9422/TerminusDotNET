@@ -19,14 +19,16 @@ namespace TerminusDotNetConsoleApp.Modules
             _imageService.ParentModule = this;
         }
 
-        public async Task ServiceReplyAsync(string s)
+        public async Task ServiceReplyAsync(string s, EmbedBuilder embedBuilder = null)
         {
-            await ReplyAsync(s);
-        }
-
-        public async Task ServiceReplyAsync(string title, EmbedBuilder embedBuilder)
-        {
-            await ReplyAsync(title, false, embedBuilder.Build());
+            if (embedBuilder == null)
+            {
+                await ReplyAsync(s);
+            }
+            else
+            {
+                await ReplyAsync(s, false, embedBuilder.Build());
+            }
         }
 
         public async Task SendFileAsync(string filename)

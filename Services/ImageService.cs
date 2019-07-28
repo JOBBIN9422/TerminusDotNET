@@ -21,14 +21,7 @@ namespace TerminusDotNetConsoleApp.Services
 
         public async Task ServiceReplyAsync(string s, EmbedBuilder embedBuilder = null)
         {
-            if (embedBuilder == null)
-            {
-                await ParentModule.ServiceReplyAsync(s);
-            }
-            else
-            {
-                await ParentModule.ServiceReplyAsync(s, embedBuilder);
-            }
+            await ParentModule.ServiceReplyAsync(s, embedBuilder);
         }
 
         public List<string> DeepfryImages(IReadOnlyCollection<Attachment> attachments)
