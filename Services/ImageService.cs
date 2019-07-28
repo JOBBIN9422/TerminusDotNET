@@ -11,6 +11,7 @@ using System.Drawing;
 using ImageProcessor.Imaging.Formats;
 using ImageProcessor;
 using ImageProcessor.Imaging;
+using TerminusDotNetConsoleApp.Helpers;
 
 namespace TerminusDotNetConsoleApp.Services
 {
@@ -30,60 +31,10 @@ namespace TerminusDotNetConsoleApp.Services
             }
         }
 
-        //public async Task DeepfryImages(IReadOnlyCollection<Attachment> attachments)
-        //{
-        //    WebClient webClient = new WebClient();
-        //    //download the image(s)
-        //    foreach (var attachment in attachments)
-        //    {
-        //        var filename = attachment.Filename;
-        //        var url = attachment.Url;
-
-        //        var deepfryFilename = "temp" + Path.GetExtension(filename);
-        //        webClient.DownloadFile(url, deepfryFilename);
-        //        //do some shit with the image
-
-        //        var embedBuilder = new EmbedBuilder()
-        //        {
-        //            Title = "dab",
-        //            ImageUrl = $"attachment://{deepfryFilename}"
-        //        };
-
-        //        var embed = embedBuilder.Build();
-
-        //        await ParentModule.ServiceReplyAsync("deep fried", embedBuilder);
-        //    }
-        //}
-
-        private List<string> DownloadAttachments(IReadOnlyCollection<Attachment> attachments)
-        {
-            var webClient = new WebClient();
-            var returnImgs = new List<string>();
-            var imgIndex = 0;
-
-            foreach (var attachment in attachments)
-            {
-                var filename = attachment.Filename;
-                var url = attachment.Url;
-
-                var downloadFilename = $"temp{imgIndex}{Path.GetExtension(filename)}";
-                imgIndex++;
-                webClient.DownloadFile(url, downloadFilename);
-                //do some shit with the image
-
-                //DeepfryImage(downloadFilename);
-
-                returnImgs.Add(downloadFilename);
-            }
-
-            return returnImgs;
-        }
-
         public List<string> DeepfryImages(IReadOnlyCollection<Attachment> attachments)
         {
-            var images = DownloadAttachments(attachments);
+            var images = AttachmentHelper.DownloadAttachments(attachments);
 
-            //download the image(s)
             foreach (var image in images)
             {
                 DeepfryImage(image);
@@ -94,10 +45,7 @@ namespace TerminusDotNetConsoleApp.Services
 
         public void DeleteImages(List<string> images)
         {
-            foreach (var image in images)
-            {
-                File.Delete(image);
-            }
+            AttachmentHelper.DeleteFiles(images);
         }
 
         private void DeepfryImage(string imageFilename)
@@ -123,7 +71,7 @@ namespace TerminusDotNetConsoleApp.Services
 
         public List<string> MemeCaptionImages(IReadOnlyCollection<Attachment> attachments, string topText, string bottomText)
         {
-            var images = DownloadAttachments(attachments);
+            var images = AttachmentHelper.DownloadAttachments(attachments);
 
             foreach (var image in images)
             {
