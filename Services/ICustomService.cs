@@ -12,6 +12,6 @@ namespace TerminusDotNetConsoleApp.Services
     {
         IServiceModule ParentModule { get; set; }
 
-        Task ServiceReplyAsync(string s, EmbedBuilder embedBuilder = null);
+        //Task ServiceReplyAsync(string s, EmbedBuilder embedBuilder = null);
     }
 }

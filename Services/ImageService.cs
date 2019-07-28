@@ -19,11 +19,6 @@ namespace TerminusDotNetConsoleApp.Services
     {
         public IServiceModule ParentModule { get; set; }
 
-        public async Task ServiceReplyAsync(string s, EmbedBuilder embedBuilder = null)
-        {
-            await ParentModule.ServiceReplyAsync(s, embedBuilder);
-        }
-
         public List<string> DeepfryImages(IReadOnlyCollection<Attachment> attachments)
         {
             var images = AttachmentHelper.DownloadAttachments(attachments);
