@@ -60,6 +60,18 @@ namespace TerminusDotNetConsoleApp.Services
             }
         }
 
+        public List<string> MorrowindImages(IReadOnlyCollection<Attachment> attachments)
+        {
+            var images = AttachmentHelper.DownloadAttachments(attachments);
+
+            foreach (var image in images)
+            {
+                MorrowindImage(image);
+            }
+
+            return images;
+        }
+
         public List<string> MemeCaptionImages(IReadOnlyCollection<Attachment> attachments, string topText, string bottomText)
         {
             var images = AttachmentHelper.DownloadAttachments(attachments);
@@ -106,7 +118,7 @@ namespace TerminusDotNetConsoleApp.Services
                 FontColor = System.Drawing.Color.White,
                 Style = FontStyle.Bold,
                 Position = new Point(topTextX, imageHeight / 10)
-                
+
             };
 
             var bottomTextLayer = new TextLayer()
@@ -130,6 +142,62 @@ namespace TerminusDotNetConsoleApp.Services
                             .Save(outStream);
                 outStream.CopyTo(saveFileStream);
             }
+        }
+
+        private void MorrowindImage(string imageFilename)
+        {
+            var morrowindImage = System.Drawing.Image.FromFile("morrowind.png");
+
+            //forward declares (need outside of using block)
+            System.Drawing.Image resizeImage;
+            byte[] imageBytes;
+            ImageLayer morrowindLayer;
+
+            //using (var baseImage = System.Drawing.Image.FromFile(imageFilename))
+            using (var baseImageStream = new FileStream(imageFilename, FileMode.Open, FileAccess.Read))
+            {
+                var baseImage = System.Drawing.Image.FromStream(baseImageStream);
+
+                //resize the image if it's smaller than the Morrowind dialogue image 
+                resizeImage = (System.Drawing.Image)baseImage.Clone();
+                int resizeWidth = resizeImage.Width;
+                int resizeHeight = resizeImage.Height;
+                while (resizeWidth < morrowindImage.Width || resizeHeight < morrowindImage.Height)
+                {
+                    resizeWidth *= 2;
+                    resizeHeight *= 2;
+                    //resizeImage = (System.Drawing.Image)new Bitmap(resizeImage, new Size(resizeImage.Width * 2, resizeImage.Height * 2));
+                }
+                resizeImage = (System.Drawing.Image)new Bitmap(resizeImage, new Size(resizeWidth, resizeHeight));
+
+                //get image data after resize
+                var converter = new ImageConverter();
+                imageBytes = (byte[])converter.ConvertTo(resizeImage, typeof(byte[]));
+
+
+                //apply Morrowind dialogue box as a new layer
+                morrowindLayer = new ImageLayer()
+                {
+                    Image = morrowindImage,
+
+                    //center horizontally and position towards bottom of base image
+                    Position = new Point(resizeImage.Width / 2 - morrowindImage.Width / 2, resizeImage.Height - morrowindImage.Height - resizeImage.Height / 10)
+                };
+                resizeImage.Dispose();
+            }
+
+
+            using (var inStream = new MemoryStream(imageBytes))
+            using (var outStream = new MemoryStream())
+            using (var saveFileStream = new FileStream(imageFilename, FileMode.Open, FileAccess.Write))
+            using (var imageFactory = new ImageFactory(preserveExifData: true))
+            {
+                imageFactory.Load(inStream)
+                            .Overlay(morrowindLayer)
+                            .Save(outStream);
+                outStream.CopyTo(saveFileStream);
+            }
+
         }
     }
 }

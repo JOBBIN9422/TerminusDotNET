@@ -61,6 +61,26 @@ namespace TerminusDotNetConsoleApp.Modules
             _imageService.DeleteImages(images);
         }
 
+        [Command("morrowind", RunMode = RunMode.Async)]
+        public async Task MorrowindImageAsync()
+        {
+            var attachments = Context.Message.Attachments;
+            if (attachments == null || attachments.Count == 0)
+            {
+                await ServiceReplyAsync("Please attach an image file.");
+                return;
+            }
+
+            var images = _imageService.MorrowindImages(attachments);
+
+            foreach (var image in images)
+            {
+                await SendFileAsync(image);
+            }
+
+            _imageService.DeleteImages(images);
+        }
+
         [Command("meme", RunMode = RunMode.Async)]
         public async Task MemeCaptionImageAsync(string topText = null, string bottomText = null)
         {
