@@ -197,7 +197,145 @@ namespace TerminusDotNetConsoleApp.Services
                             .Save(outStream);
                 outStream.CopyTo(saveFileStream);
             }
+        }
 
+        public List<string> MosaicImages(IReadOnlyCollection<Attachment> attachments)
+        {
+            var images = AttachmentHelper.DownloadAttachments(attachments);
+
+            foreach (var image in images)
+            {
+                MosaicImage(image);
+            }
+
+            return images;
+        }
+
+        private void MosaicImage(string filename)
+        {
+            //will contain average color of each pepper-sized square of the input image 
+            List<List<System.Drawing.Color>> avgColors = new List<List<System.Drawing.Color>>();
+
+            //will contain the raw image data of the input image 
+            MemoryStream memStream = new MemoryStream();
+
+
+            using (System.Drawing.Bitmap inputImage = new Bitmap(filename))
+            using (Bitmap pepperImage = new Bitmap("GIMP_Pepper.png"))
+            {
+                //calculate the average RGB value of each pepper-sized cell of the input image 
+                for (int y = 0; y < inputImage.Height; y += pepperImage.Height)
+                {
+                    List<System.Drawing.Color> rowAvgColors = new List<System.Drawing.Color>();
+                    for (int x = 0; x < inputImage.Width; x += pepperImage.Width)
+                    {
+                        rowAvgColors.Add(GetAverageColor(inputImage, x, y, pepperImage.Width, pepperImage.Height));
+                    }
+                    avgColors.Add(rowAvgColors);
+                }
+
+                //draw a pepper blended with the average color for each 'cell' of the source image
+                using (Graphics graphics = Graphics.FromImage(inputImage))
+                {
+                    for (int y = 0; y < avgColors.Count; y++)
+                    {
+                        for (int x = 0; x < avgColors[y].Count; x++)
+                        {
+                            using (SolidBrush brush = new SolidBrush(avgColors[y][x]))
+                            {
+                                using (Bitmap blendedPepperImage = new Bitmap("GIMP_Pepper.png"))
+                                {
+                                    BlendImage(blendedPepperImage, avgColors[y][x], 0.5);
+                                    graphics.DrawImage(blendedPepperImage, x * pepperImage.Width, y * pepperImage.Height);
+                                }
+                            }
+                        }
+                    }
+                    //dump the modified image data to mem stream
+                    inputImage.Save(memStream, System.Drawing.Imaging.ImageFormat.Jpeg);
+                }
+            }
+
+            try
+            {
+                using (System.Drawing.Image saveImage = System.Drawing.Image.FromStream(memStream))
+                {
+                    saveImage.Save(filename);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine(ex.ToString());
+            }
+
+        }
+
+        private System.Drawing.Color GetAverageColor(System.Drawing.Bitmap inputImage, int startX, int startY, int width, int height)
+        {
+            //prevent going out of bounds during calculations
+            int maxX = startX + width;
+            int maxY = startY + height;
+            if (startX + width > inputImage.Width)
+            {
+                maxX = inputImage.Width;
+            }
+            if (startY + height > inputImage.Height)
+            {
+                maxY = inputImage.Height;
+            }
+
+            //average RGB values
+            double red = 0;
+            double blue = 0;
+            double green = 0;
+
+            //how many pixels we've calculated
+            int numPixels = 0;
+
+            for (int y = startY; y < maxY; y++)
+            {
+                for (int x = startX; x < maxX; x++)
+                {
+                    System.Drawing.Color currColor = inputImage.GetPixel(x, y);
+
+                    //sum of squares for each color value
+                    red += currColor.R * currColor.R;
+                    blue += currColor.B * currColor.B;
+                    green += currColor.G * currColor.G;
+
+                    numPixels++;
+                }
+            }
+
+            System.Drawing.Color avgColor = System.Drawing.Color.FromArgb(255,
+                (int)Math.Sqrt(red / numPixels),
+                (int)Math.Sqrt(green / numPixels),
+                (int)Math.Sqrt(blue / numPixels));
+            return avgColor;
+        }
+
+        private void BlendImage(Bitmap image, System.Drawing.Color blendColor, double amount)
+        {
+            //blend the argument color into each pixel of the source image 
+            for (int y = 0; y < image.Height; y++)
+            {
+                for (int x = 0; x < image.Width; x++)
+                {
+                    System.Drawing.Color blendedColor = BlendColor(image.GetPixel(x, y), blendColor, amount);
+                    image.SetPixel(x, y, blendedColor);
+                }
+            }
+        }
+
+        
+        private System.Drawing.Color BlendColor(System.Drawing.Color baseColor, System.Drawing.Color blendColor, double amount)
+        {
+            //blend the argument color into the base color by the given amount
+            byte r = (byte)((blendColor.R * amount) + baseColor.R * (1 - amount));
+            byte g = (byte)((blendColor.G * amount) + baseColor.G * (1 - amount));
+            byte b = (byte)((blendColor.B * amount) + baseColor.B * (1 - amount));
+
+            return System.Drawing.Color.FromArgb(r, g, b);
         }
     }
 }
