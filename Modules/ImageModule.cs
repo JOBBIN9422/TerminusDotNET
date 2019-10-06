@@ -41,74 +41,101 @@ namespace TerminusDotNetConsoleApp.Modules
             await Context.Channel.SendFileAsync(filename, embed: embed);
         }
 
-        [Command("deepfry", RunMode = RunMode.Async)]
-        public async Task DeepFryImageAsync(int numPasses = 1)
+        private async Task<IReadOnlyCollection<Attachment>> GetAttachmentsAsync()
         {
             var attachments = Context.Message.Attachments;
             if (attachments == null || attachments.Count == 0)
             {
-                await ServiceReplyAsync("Please attach an image file.");
-                return;
+                //check if the last message before this one has any attachments
+                var priorMessages = await Context.Channel.GetMessagesAsync(2).FlattenAsync();
+                if (priorMessages.Last().Attachments.Count > 0)
+                {
+                    return (IReadOnlyCollection<Attachment>)priorMessages.Last().Attachments;
+                }
+                else
+                {
+                    throw new NullReferenceException("No attachments were found in the current or previous message.");
+                }
             }
+            else
+            {
+                return attachments;
+            }
+        }
 
-            var images = _imageService.DeepfryImages(attachments, numPasses);
-
+        private async Task SendImages(List<string> images)
+        {
             foreach (var image in images)
             {
                 await SendFileAsync(image);
             }
 
             _imageService.DeleteImages(images);
+        }
+
+
+        [Command("deepfry", RunMode = RunMode.Async)]
+        public async Task DeepFryImageAsync(int numPasses = 1)
+        {
+            IReadOnlyCollection<Attachment> attachments = null;
+            try
+            {
+                attachments = await GetAttachmentsAsync();
+            }
+            catch (NullReferenceException)
+            {
+                await ServiceReplyAsync("Please attach an image file.");
+            }
+
+            var images = _imageService.DeepfryImages(attachments, numPasses);
+            await SendImages(images);
         }
 
         [Command("morrowind", RunMode = RunMode.Async)]
         public async Task MorrowindImageAsync()
         {
-            var attachments = Context.Message.Attachments;
-            if (attachments == null || attachments.Count == 0)
+            IReadOnlyCollection<Attachment> attachments = null;
+            try
+            {
+                attachments = await GetAttachmentsAsync();
+            }
+            catch (NullReferenceException)
             {
                 await ServiceReplyAsync("Please attach an image file.");
-                return;
             }
 
             var images = _imageService.MorrowindImages(attachments);
-
-            foreach (var image in images)
-            {
-                await SendFileAsync(image);
-            }
-
-            _imageService.DeleteImages(images);
+            await SendImages(images);
         }
 
         [Command("gimp", RunMode = RunMode.Async)]
         public async Task MosaicImageAsync()
         {
-            var attachments = Context.Message.Attachments;
-            if (attachments == null || attachments.Count == 0)
+            IReadOnlyCollection<Attachment> attachments = null;
+            try
+            {
+                attachments = await GetAttachmentsAsync();
+            }
+            catch (NullReferenceException)
             {
                 await ServiceReplyAsync("Please attach an image file.");
-                return;
             }
 
             var images = _imageService.MosaicImages(attachments);
-
-            foreach (var image in images)
-            {
-                await SendFileAsync(image);
-            }
-
-            _imageService.DeleteImages(images);
+            await SendImages(images);
         }
 
         [Command("meme", RunMode = RunMode.Async)]
         public async Task MemeCaptionImageAsync(string topText = null, string bottomText = null)
         {
-            var attachments = Context.Message.Attachments;
-            if (attachments == null || attachments.Count == 0)
+            IReadOnlyCollection<Attachment> attachments = null;
+            try
+            {
+                attachments = await GetAttachmentsAsync();
+            }
+            catch (NullReferenceException)
             {
                 await ServiceReplyAsync("Please attach an image file.");
-                return;
             }
 
             if (topText == null || bottomText == null)
@@ -118,13 +145,7 @@ namespace TerminusDotNetConsoleApp.Modules
             }
 
             var images = _imageService.MemeCaptionImages(attachments, topText, bottomText);
-
-            foreach (var image in images)
-            {
-                await SendFileAsync(image);
-            }
-
-            _imageService.DeleteImages(images);
+            await SendImages(images);
         }
     }
 }
