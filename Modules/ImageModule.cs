@@ -33,12 +33,13 @@ namespace TerminusDotNetConsoleApp.Modules
 
         public async Task SendFileAsync(string filename)
         {
-            var embed = new EmbedBuilder()
-            {
-                ImageUrl = $"attachment://{filename}"
-            }.Build();
+            //var embed = new EmbedBuilder()
+            //{
+            //    ImageUrl = $"attachment://{filename}"
+            //}.Build();
 
-            await Context.Channel.SendFileAsync(filename, embed: embed);
+            //await Context.Channel.SendFileAsync(filename, embed: embed);
+            await Context.Channel.SendFileAsync(filename);
         }
 
         private async Task<IReadOnlyCollection<Attachment>> GetAttachmentsAsync()
@@ -47,10 +48,11 @@ namespace TerminusDotNetConsoleApp.Modules
             if (attachments == null || attachments.Count == 0)
             {
                 //check if the last message before this one has any attachments
-                var priorMessages = await Context.Channel.GetMessagesAsync(2).FlattenAsync();
-                if (priorMessages.Last().Attachments.Count > 0)
+                var messages = await Context.Channel.GetMessagesAsync(2).FlattenAsync();
+                var priorMessage = messages.Last();
+                if (priorMessage.Attachments.Count > 0)
                 {
-                    return (IReadOnlyCollection<Attachment>)priorMessages.Last().Attachments;
+                    return (IReadOnlyCollection<Attachment>)priorMessage.Attachments;
                 }
                 else
                 {
