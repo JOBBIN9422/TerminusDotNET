@@ -3,7 +3,7 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 
-namespace TerminusDotNetConsoleApp.Modules
+namespace TerminusDotNetCore.Modules
 {
     public class GachiModule : ModuleBase<SocketCommandContext>, ITextModule
     {

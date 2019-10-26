@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace TerminusDotNetConsoleApp.Modules
+namespace TerminusDotNetCore.Modules
 {
     /// <summary>
     /// Interface for simple modules which don't rely on services/dependency injection (text replies/commands only)

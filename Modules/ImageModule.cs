@@ -5,9 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
-using TerminusDotNetConsoleApp.Services;
+using TerminusDotNetCore.Services;
 
-namespace TerminusDotNetConsoleApp.Modules
+namespace TerminusDotNetCore.Modules
 {
     public class ImageModule : ModuleBase<SocketCommandContext>, IServiceModule
     {

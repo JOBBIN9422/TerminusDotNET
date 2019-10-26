@@ -6,9 +6,12 @@ using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
-using TerminusDotNetConsoleApp.Services;
+using TerminusDotNetCore.Services;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Configuration.Json;
+using Microsoft.Extensions.Configuration.FileExtensions;
 
-namespace TerminusDotNetConsoleApp
+namespace TerminusDotNetCore
 {
     class Bot
     {
@@ -30,8 +33,14 @@ namespace TerminusDotNetConsoleApp
             _client.Log += Log;
             _client.MessageReceived += HandleCommandAsync;
 
+            //init config
+            IConfiguration config = new ConfigurationBuilder()
+                                        .AddJsonFile("appsettings.json", true, true)
+                                        .Build();
+
             //log in & start the client
-            await _client.LoginAsync(TokenType.Bot, ConfigurationManager.AppSettings["DiscordToken"]);
+            string token = config["DiscordToken"];
+            await _client.LoginAsync(TokenType.Bot, token);
             await _client.StartAsync();
 
             //init custom services

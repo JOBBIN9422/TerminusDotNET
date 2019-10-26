@@ -1,11 +1,7 @@
-﻿using Discord;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System;
 using System.Threading.Tasks;
 
-namespace TerminusDotNetConsoleApp
+namespace TerminusDotNetCore
 {
     class Program
     {
@@ -19,7 +15,5 @@ namespace TerminusDotNetConsoleApp
             await bot.Initialize();
         }
 
-        //FIX: move me somewhere else?
-        
     }
 }

@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Discord.Commands;
 
-namespace TerminusDotNetConsoleApp.Modules
+namespace TerminusDotNetCore.Modules
 {
     public class ChaseModule : ModuleBase<SocketCommandContext>, ITextModule
     {

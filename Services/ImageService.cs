@@ -6,14 +6,14 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using Discord;
-using TerminusDotNetConsoleApp.Modules;
+using TerminusDotNetCore.Modules;
 using System.Drawing;
 using ImageProcessor.Imaging.Formats;
 using ImageProcessor;
 using ImageProcessor.Imaging;
-using TerminusDotNetConsoleApp.Helpers;
+using TerminusDotNetCore.Helpers;
 
-namespace TerminusDotNetConsoleApp.Services
+namespace TerminusDotNetCore.Services
 {
     public class ImageService : ICustomService
     {

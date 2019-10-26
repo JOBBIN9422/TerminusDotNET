@@ -4,9 +4,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using TerminusDotNetConsoleApp.Modules;
+using TerminusDotNetCore.Modules;
 
-namespace TerminusDotNetConsoleApp.Services
+namespace TerminusDotNetCore.Services
 {
     public interface ICustomService
     {
