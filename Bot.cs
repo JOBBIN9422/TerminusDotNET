@@ -113,7 +113,7 @@ namespace TerminusDotNetCore
 
             //handle commands
             var context = new SocketCommandContext(_client, message);
-            await _commandService.ExecuteAsync(context: context, argPos: argPos, services: _serviceProvider);
+            var commandResult = await _commandService.ExecuteAsync(context: context, argPos: argPos, services: _serviceProvider);
         }
 
         private IServiceProvider InstallServices()
@@ -121,7 +121,9 @@ namespace TerminusDotNetCore
             var serviceCollection = new ServiceCollection();
 
             //new custom services get added here
-            serviceCollection.AddSingleton<ImageService>();
+            serviceCollection.AddSingleton<ImageService>()
+                             .AddSingleton<WideTextService>();
+            //serviceCollection.AddSingleton<WideTextService>();
 
             return serviceCollection.BuildServiceProvider();
         }
