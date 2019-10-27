@@ -149,5 +149,23 @@ namespace TerminusDotNetCore.Modules
             var images = _imageService.MemeCaptionImages(attachments, topText, bottomText);
             await SendImages(images);
         }
+
+        [Command("thicc", RunMode = RunMode.Async)]
+
+        public async Task ThiccImageAsync(int thiccCount = 2)
+        {
+            IReadOnlyCollection<Attachment> attachments = null;
+            try
+            {
+                attachments = await GetAttachmentsAsync();
+            }
+            catch (NullReferenceException)
+            {
+                await ServiceReplyAsync("Please attach an image file.");
+            }
+
+            var images = _imageService.ThiccImages(attachments, thiccCount);
+            await SendImages(images);
+        }
     }
 }

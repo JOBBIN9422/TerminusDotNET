@@ -199,6 +199,48 @@ namespace TerminusDotNetCore.Services
             }
         }
 
+        public List<string> ThiccImages(IReadOnlyCollection<Attachment> attachments, int thiccCount = 2)
+        {
+            var images = AttachmentHelper.DownloadAttachments(attachments);
+
+            foreach (var image in images)
+            {
+                ThiccImage(image, thiccCount);
+            }
+
+            return images;
+        }
+
+        private void ThiccImage(string filename, int thiccCount)
+        {
+            int imgWidth = 0;
+            int imgHeight = 0;
+            using (var image = System.Drawing.Image.FromFile(filename))
+            {
+                imgWidth = image.Width;
+                imgHeight = image.Height;
+            }
+            var imageBytes = File.ReadAllBytes(filename);
+
+            using (var inStream = new MemoryStream(imageBytes))
+            using (var outStream = new MemoryStream())
+            using (var saveFileStream = new FileStream(filename, FileMode.Open, FileAccess.Write))
+            using (var imageFactory = new ImageFactory(preserveExifData: true))
+            {
+                imageFactory.Load(inStream)
+                            .Resize(new ResizeLayer(
+                                new Size(
+                                    imgWidth * thiccCount, imgHeight),
+                                ResizeMode.Stretch,
+                                AnchorPosition.Center,
+                                true)
+                            )
+                            .Resolution(imgWidth * thiccCount, imgHeight)
+                            .Save(outStream);
+                outStream.CopyTo(saveFileStream);
+            }
+        }
+
         public List<string> MosaicImages(IReadOnlyCollection<Attachment> attachments)
         {
             var images = AttachmentHelper.DownloadAttachments(attachments);
@@ -327,7 +369,7 @@ namespace TerminusDotNetCore.Services
             }
         }
 
-        
+
         private System.Drawing.Color BlendColor(System.Drawing.Color baseColor, System.Drawing.Color blendColor, double amount)
         {
             //blend the argument color into the base color by the given amount
