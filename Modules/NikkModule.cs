@@ -8,7 +8,7 @@ namespace TerminusDotNetCore.Modules
     public class NikkModule : ModuleBase<SocketCommandContext>, ITextModule
     {
         [Command("nikk")]
-        [Summary("Echoes a spicy nikk quote.")]
+        [Summary("Responds with a quote from the legendary mercenary koder, Nikk Hemp(weed)street.")]
         public async Task SayAsync()
         {
             var random = new Random();

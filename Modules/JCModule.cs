@@ -8,7 +8,7 @@ namespace TerminusDotNetCore.Modules
     public class JCModule : ModuleBase<SocketCommandContext>, ITextModule
     {
         [Command("JC")]
-        [Summary("Echoes a spicy JC quote.")]
+        [Summary("Responds with a random JC Denton quote.")]
         public async Task SayAsync()
         {
             var random = new Random();

@@ -8,7 +8,7 @@ namespace TerminusDotNetCore.Modules
     public class TerminusModule : ModuleBase<SocketCommandContext>, ITextModule
     {
         [Command("terminus")]
-        [Summary("Echoes a spicy terminus quote.")]
+        [Summary("Have a chat with Terminus :)")]
         public async Task SayAsync()
         {
             var random = new Random();

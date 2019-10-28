@@ -33,7 +33,8 @@ namespace TerminusDotNetCore.Modules
         }
 
         [Command("wide", RunMode = RunMode.Async)]
-        public async Task ConvertMessageToFullWidthAsync([Remainder]string message = null)
+        [Summary("Converts the input message (or the contents of the previous message) into full-width text.")]
+        public async Task ConvertMessageToFullWidthAsync([Summary("the message to convert")][Remainder]string message = null)
         {
             string wideText = string.Empty;
             if (string.IsNullOrEmpty(message))

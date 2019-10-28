@@ -11,7 +11,7 @@ namespace TerminusDotNetCore.Modules
     public class ChaseModule : ModuleBase<SocketCommandContext>, ITextModule
     {
         [Command("chase")]
-        [Summary("Echoes a spicy chase quote.")]
+        [Summary("Responds with a random quote from the legendary mercenary programmer, Solid Chase.")]
         public async Task SayAsync()
         {
             var random = new Random();

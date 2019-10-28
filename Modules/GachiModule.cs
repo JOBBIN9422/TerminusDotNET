@@ -8,7 +8,7 @@ namespace TerminusDotNetCore.Modules
     public class GachiModule : ModuleBase<SocketCommandContext>, ITextModule
     {
         [Command("gachi")]
-        [Summary("Echoes a spicy gachi quote.")]
+        [Summary("Responds with a random gachimuchi quote.")]
         public async Task SayAsync()
         {
             var random = new Random();

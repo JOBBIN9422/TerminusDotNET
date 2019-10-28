@@ -77,7 +77,8 @@ namespace TerminusDotNetCore.Modules
 
 
         [Command("deepfry", RunMode = RunMode.Async)]
-        public async Task DeepFryImageAsync(int numPasses = 1)
+        [Summary("Deep-fries an attached image, or the image in the previous message (if any).")]
+        public async Task DeepFryImageAsync([Summary("how many times to fry the image")]int numPasses = 1)
         {
             IReadOnlyCollection<Attachment> attachments = null;
             try
@@ -94,6 +95,7 @@ namespace TerminusDotNetCore.Modules
         }
 
         [Command("morrowind", RunMode = RunMode.Async)]
+        [Summary("Places a Morrowind prompt on the attached image, or the image in the previous message (if any).")]
         public async Task MorrowindImageAsync()
         {
             IReadOnlyCollection<Attachment> attachments = null;
@@ -111,6 +113,8 @@ namespace TerminusDotNetCore.Modules
         }
 
         [Command("gimp", RunMode = RunMode.Async)]
+        [Summary("Converts the attached image (or the image in the previous message) into a GIMP pepper mosaic.")]
+
         public async Task MosaicImageAsync()
         {
             IReadOnlyCollection<Attachment> attachments = null;
@@ -128,7 +132,8 @@ namespace TerminusDotNetCore.Modules
         }
 
         [Command("meme", RunMode = RunMode.Async)]
-        public async Task MemeCaptionImageAsync(string topText = null, string bottomText = null)
+        [Summary("Adds top text and bottom text to the attached image, or the image in the previous message (if any).")]
+        public async Task MemeCaptionImageAsync([Summary("top text to add")]string topText = null, [Summary("bottom text to add")]string bottomText = null)
         {
             IReadOnlyCollection<Attachment> attachments = null;
             try
@@ -151,8 +156,9 @@ namespace TerminusDotNetCore.Modules
         }
 
         [Command("thicc", RunMode = RunMode.Async)]
+        [Summary("Stretches the attached image, or the image in the previous message (if any).")]
 
-        public async Task ThiccImageAsync(int thiccCount = 2)
+        public async Task ThiccImageAsync([Summary("factor to scale the image width by")]int thiccCount = 2)
         {
             IReadOnlyCollection<Attachment> attachments = null;
             try

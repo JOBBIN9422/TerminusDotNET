@@ -114,6 +114,7 @@ namespace TerminusDotNetCore
             //handle commands
             var context = new SocketCommandContext(_client, message);
             var commandResult = await _commandService.ExecuteAsync(context: context, argPos: argPos, services: _serviceProvider);
+            await Log(new LogMessage(LogSeverity.Debug, "HandleCommandAsync", commandResult.ToString()));
         }
 
         private IServiceProvider InstallServices()
