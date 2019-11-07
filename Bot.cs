@@ -48,6 +48,7 @@ namespace TerminusDotNetCore
 
             //init commands service
             await _commandService.AddModulesAsync(assembly: Assembly.GetEntryAssembly(), services: _serviceProvider);
+            _commandService.CommandExecuted += OnCommandExecutedAsync;
 
             //hang out for now
             await Task.Delay(-1);
@@ -114,7 +115,20 @@ namespace TerminusDotNetCore
             //handle commands
             var context = new SocketCommandContext(_client, message);
             var commandResult = await _commandService.ExecuteAsync(context: context, argPos: argPos, services: _serviceProvider);
-            await Log(new LogMessage(LogSeverity.Debug, "HandleCommandAsync", commandResult.ToString()));
+            //await Log(new LogMessage(LogSeverity.Debug, "HandleCommandAsync", commandResult.ToString()));
+        }
+
+        private async Task OnCommandExecutedAsync(Optional<CommandInfo> command, ICommandContext context, IResult result)
+        {
+            if (!string.IsNullOrEmpty(result?.ErrorReason))
+            {
+                await context.Channel.SendMessageAsync(result.ErrorReason);
+                await Log(new LogMessage(LogSeverity.Error, "CommandExecution", $"Error in command {command.Value.Name}: {result?.ErrorReason}"));
+            }
+            else
+            {
+                await Log(new LogMessage(LogSeverity.Info, "CommandExecution", $"Command {command.Value.Name} executed successfully."));
+            }
         }
 
         private IServiceProvider InstallServices()

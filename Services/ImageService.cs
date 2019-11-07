@@ -38,16 +38,20 @@ namespace TerminusDotNetCore.Services
 
         private void DeepfryImage(string imageFilename, int numPasses = 1)
         {
+            Console.WriteLine($"frying image {imageFilename}...");
             for (int i = 0; i < numPasses; i++)
             {
                 var imageBytes = File.ReadAllBytes(imageFilename);
+                //Console.WriteLine($"loaded image data.");
                 var format = new JpegFormat { Quality = 10 };
 
                 using (var inStream = new MemoryStream(imageBytes))
+                using (var inputImg = System.Drawing.Image.FromFile(imageFilename))
                 using (var outStream = new MemoryStream())
                 using (var saveFileStream = new FileStream(imageFilename, FileMode.Open, FileAccess.Write))
                 using (var imageFactory = new ImageFactory(preserveExifData: true))
                 {
+                    //Console.WriteLine($"loaded image data into streams.");
                     imageFactory.Load(inStream)
                                 .Saturation(100)
                                 .Contrast(100)
@@ -55,7 +59,9 @@ namespace TerminusDotNetCore.Services
                                 //.GaussianSharpen(30)
                                 .Format(format)
                                 .Save(outStream);
+                    //Console.WriteLine($"saved modified image to output stream.");
                     outStream.CopyTo(saveFileStream);
+                    //Console.WriteLine($"saved output stream to file.");
                 }
             }
         }
