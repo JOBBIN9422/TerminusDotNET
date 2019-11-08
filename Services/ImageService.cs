@@ -38,30 +38,26 @@ namespace TerminusDotNetCore.Services
 
         private void DeepfryImage(string imageFilename, int numPasses = 1)
         {
-            Console.WriteLine($"frying image {imageFilename}...");
             for (int i = 0; i < numPasses; i++)
             {
-                var imageBytes = File.ReadAllBytes(imageFilename);
-                //Console.WriteLine($"loaded image data.");
-                var format = new JpegFormat { Quality = 10 };
+                //var imageBytes = File.ReadAllBytes(imageFilename);
+                var format = new PngFormat { Quality = 10 };
 
-                using (var inStream = new MemoryStream(imageBytes))
+                using (var inStream = new MemoryStream())
                 using (var inputImg = System.Drawing.Image.FromFile(imageFilename))
                 using (var outStream = new MemoryStream())
                 using (var saveFileStream = new FileStream(imageFilename, FileMode.Open, FileAccess.Write))
                 using (var imageFactory = new ImageFactory(preserveExifData: true))
                 {
-                    //Console.WriteLine($"loaded image data into streams.");
+                    inputImg.Save(inStream, System.Drawing.Imaging.ImageFormat.Png);
+                    inStream.Position = 0;
                     imageFactory.Load(inStream)
                                 .Saturation(100)
                                 .Contrast(100)
                                 .Gamma(1.0f)
-                                //.GaussianSharpen(30)
                                 .Format(format)
                                 .Save(outStream);
-                    //Console.WriteLine($"saved modified image to output stream.");
                     outStream.CopyTo(saveFileStream);
-                    //Console.WriteLine($"saved output stream to file.");
                 }
             }
         }
@@ -92,8 +88,8 @@ namespace TerminusDotNetCore.Services
 
         private void MemeCaptionImage(string imageFilename, string topText, string bottomText)
         {
-            var imageBytes = File.ReadAllBytes(imageFilename);
-            var format = new JpegFormat { Quality = 10 };
+            //var imageBytes = File.ReadAllBytes(imageFilename);
+            //var format = new JpegFormat { Quality = 10 };
 
             var imageWidth = 0;
             var imageHeight = 0;
@@ -137,11 +133,14 @@ namespace TerminusDotNetCore.Services
                 Position = new Point(bottomTextX, imageHeight * 8 / 10)
             };
 
-            using (var inStream = new MemoryStream(imageBytes))
+            using (var inStream = new MemoryStream())
+            using (var inputImg = System.Drawing.Image.FromFile(imageFilename))
             using (var outStream = new MemoryStream())
             using (var saveFileStream = new FileStream(imageFilename, FileMode.Open, FileAccess.Write))
             using (var imageFactory = new ImageFactory(preserveExifData: true))
             {
+                inputImg.Save(inStream, System.Drawing.Imaging.ImageFormat.Png);
+                inStream.Position = 0;
                 imageFactory.Load(inStream)
                             .Watermark(topTextLayer)
                             .Watermark(bottomTextLayer)
@@ -161,6 +160,7 @@ namespace TerminusDotNetCore.Services
 
             //using (var baseImage = System.Drawing.Image.FromFile(imageFilename))
             using (var baseImageStream = new FileStream(imageFilename, FileMode.Open, FileAccess.Read))
+            using (var memStream = new MemoryStream())
             {
                 var baseImage = System.Drawing.Image.FromStream(baseImageStream);
 
@@ -175,11 +175,10 @@ namespace TerminusDotNetCore.Services
                     //resizeImage = (System.Drawing.Image)new Bitmap(resizeImage, new Size(resizeImage.Width * 2, resizeImage.Height * 2));
                 }
                 resizeImage = (System.Drawing.Image)new Bitmap(resizeImage, new Size(resizeWidth, resizeHeight));
+                resizeImage.Save(memStream, System.Drawing.Imaging.ImageFormat.Png);
 
                 //get image data after resize
-                var converter = new ImageConverter();
-                imageBytes = (byte[])converter.ConvertTo(resizeImage, typeof(byte[]));
-
+                imageBytes = memStream.ToArray();
 
                 //apply Morrowind dialogue box as a new layer
                 morrowindLayer = new ImageLayer()
@@ -228,11 +227,14 @@ namespace TerminusDotNetCore.Services
             }
             var imageBytes = File.ReadAllBytes(filename);
 
-            using (var inStream = new MemoryStream(imageBytes))
+            using (var inputImg = System.Drawing.Image.FromFile(filename))
+            using (var inStream = new MemoryStream())
             using (var outStream = new MemoryStream())
             using (var saveFileStream = new FileStream(filename, FileMode.Open, FileAccess.Write))
             using (var imageFactory = new ImageFactory(preserveExifData: true))
             {
+                inputImg.Save(inStream, System.Drawing.Imaging.ImageFormat.Png);
+                inStream.Position = 0;
                 imageFactory.Load(inStream)
                             .Resize(new ResizeLayer(
                                 new Size(

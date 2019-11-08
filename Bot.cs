@@ -123,11 +123,11 @@ namespace TerminusDotNetCore
             if (!string.IsNullOrEmpty(result?.ErrorReason))
             {
                 await context.Channel.SendMessageAsync(result.ErrorReason);
-                await Log(new LogMessage(LogSeverity.Error, "CommandExecution", $"Error in command {command.Value.Name}: {result?.ErrorReason}"));
+                await Log(new LogMessage(LogSeverity.Error, "CommandExecution", $"Error in command '{command.Value.Name}': {result?.ErrorReason}"));
             }
             else
             {
-                await Log(new LogMessage(LogSeverity.Info, "CommandExecution", $"Command {command.Value.Name} executed successfully."));
+                await Log(new LogMessage(LogSeverity.Info, "CommandExecution", $"Command '{command.Value.Name}' executed successfully."));
             }
         }
 
