@@ -38,7 +38,14 @@ namespace TerminusDotNetCore.Services
             {
                 if (!char.IsWhiteSpace(c))
                 {
-                    message = message.Replace(c, _wideTextMap[c]);
+                    try
+                    {
+                        message = message.Replace(c, _wideTextMap[c]);
+                    }
+                    catch (KeyNotFoundException)
+                    {
+                        continue;
+                    }
                 }
             }
             return message;
