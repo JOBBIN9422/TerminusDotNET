@@ -96,12 +96,14 @@ namespace TerminusDotNetCore
             if (message.Content == "!die")
             {
                 _isActive = false;
+                await _client.SetStatusAsync(UserStatus.AFK);
                 await Log(new LogMessage(LogSeverity.Info, "HandleCommand", $"Going to sleep..."));
                 return;
             }
             if (message.Content == "!live")
             {
                 _isActive = true;
+                await _client.SetStatusAsync(UserStatus.Online);
                 await Log(new LogMessage(LogSeverity.Info, "HandleCommand", $"Resuming..."));
                 return;
             }
