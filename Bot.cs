@@ -18,6 +18,7 @@ namespace TerminusDotNetCore
         private DiscordSocketClient _client;
         private CommandService _commandService;
         private IServiceProvider _serviceProvider;
+        private bool _isActive = true;
 
         public Bot()
         {
@@ -91,31 +92,47 @@ namespace TerminusDotNetCore
                 return;
             }
 
-            //track position of command prefix char 
-            int argPos = 0;
-
-            //check if message is not command or not sent by bot
-            if (!(message.HasCharPrefix('!', ref argPos) || message.HasMentionPrefix(_client.CurrentUser, ref argPos))
-                || message.Author.IsBot)
+            //check for bot state commands 
+            if (message.Content == "!die")
             {
-                //look for wildcards in the current message 
-                var regexMsgParser = new RegexCommands();
-                var matches = regexMsgParser.ParseMessage(message.Content);
-
-                if (matches.Count > 0 && !message.Author.IsBot)
-                {
-                    foreach (var match in matches)
-                    {
-                        await message.Channel.SendMessageAsync(match);
-                    }
-                }
+                _isActive = false;
+                await Log(new LogMessage(LogSeverity.Info, "HandleCommand", $"Going to sleep..."));
+                return;
+            }
+            if (message.Content == "!live")
+            {
+                _isActive = true;
+                await Log(new LogMessage(LogSeverity.Info, "HandleCommand", $"Resuming..."));
                 return;
             }
 
-            //handle commands
-            var context = new SocketCommandContext(_client, message);
-            var commandResult = await _commandService.ExecuteAsync(context: context, argPos: argPos, services: _serviceProvider);
-            //await Log(new LogMessage(LogSeverity.Debug, "HandleCommandAsync", commandResult.ToString()));
+            //track position of command prefix char 
+            int argPos = 0;
+
+            if (_isActive)
+            {
+                //check if message is not command or not sent by bot
+                if (!(message.HasCharPrefix('!', ref argPos) || message.HasMentionPrefix(_client.CurrentUser, ref argPos))
+                    || message.Author.IsBot)
+                {
+                    //look for wildcards in the current message 
+                    var regexMsgParser = new RegexCommands();
+                    var matches = regexMsgParser.ParseMessage(message.Content);
+
+                    if (matches.Count > 0 && !message.Author.IsBot)
+                    {
+                        foreach (var match in matches)
+                        {
+                            await message.Channel.SendMessageAsync(match);
+                        }
+                    }
+                    return;
+                }
+
+                //handle commands
+                var context = new SocketCommandContext(_client, message);
+                var commandResult = await _commandService.ExecuteAsync(context: context, argPos: argPos, services: _serviceProvider);
+            }
         }
 
         private async Task OnCommandExecutedAsync(Optional<CommandInfo> command, ICommandContext context, IResult result)
