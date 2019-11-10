@@ -96,7 +96,7 @@ namespace TerminusDotNetCore
             if (message.Content == "!die")
             {
                 _isActive = false;
-                await _client.SetStatusAsync(UserStatus.AFK);
+                await _client.SetStatusAsync(UserStatus.Idle);
                 await Log(new LogMessage(LogSeverity.Info, "HandleCommand", $"Going to sleep..."));
                 return;
             }
