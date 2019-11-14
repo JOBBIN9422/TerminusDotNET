@@ -197,35 +197,44 @@ namespace TerminusDotNetCore.Services
 
         private void ThiccImage(string filename, int thiccCount)
         {
-            int imgWidth = 0;
-            int imgHeight = 0;
-            using (var image = System.Drawing.Image.FromFile(filename))
+            using (var image = SixLabors.ImageSharp.Image.Load(filename))
             {
-                imgWidth = image.Width;
-                imgHeight = image.Height;
-            }
-            var imageBytes = File.ReadAllBytes(filename);
+                int originalWidth = image.Width;
+                int originalHeight = image.Height;
 
-            using (var inputImg = System.Drawing.Image.FromFile(filename))
-            using (var inStream = new MemoryStream())
-            using (var outStream = new MemoryStream())
-            using (var saveFileStream = new FileStream(filename, FileMode.Open, FileAccess.Write))
-            using (var imageFactory = new ImageFactory(preserveExifData: true))
-            {
-                inputImg.Save(inStream, System.Drawing.Imaging.ImageFormat.Png);
-                inStream.Position = 0;
-                imageFactory.Load(inStream)
-                            .Resize(new ResizeLayer(
-                                new Size(
-                                    imgWidth * thiccCount, imgHeight),
-                                ImageProcessor.Imaging.ResizeMode.Stretch,
-                                AnchorPosition.Center,
-                                true)
-                            )
-                            .Resolution(imgWidth * thiccCount, imgHeight)
-                            .Save(outStream);
-                outStream.CopyTo(saveFileStream);
+                image.Mutate(x => x.Resize(thiccCount * originalWidth, image.Height));
+                image.Save(filename);
             }
+
+            //int imgWidth = 0;
+            //int imgHeight = 0;
+            //using (var image = System.Drawing.Image.FromFile(filename))
+            //{
+            //    imgWidth = image.Width;
+            //    imgHeight = image.Height;
+            //}
+            //var imageBytes = File.ReadAllBytes(filename);
+
+                //using (var inputImg = System.Drawing.Image.FromFile(filename))
+                //using (var inStream = new MemoryStream())
+                //using (var outStream = new MemoryStream())
+                //using (var saveFileStream = new FileStream(filename, FileMode.Open, FileAccess.Write))
+                //using (var imageFactory = new ImageFactory(preserveExifData: true))
+                //{
+                //    inputImg.Save(inStream, System.Drawing.Imaging.ImageFormat.Png);
+                //    inStream.Position = 0;
+                //    imageFactory.Load(inStream)
+                //                .Resize(new ResizeLayer(
+                //                    new Size(
+                //                        imgWidth * thiccCount, imgHeight),
+                //                    ImageProcessor.Imaging.ResizeMode.Stretch,
+                //                    AnchorPosition.Center,
+                //                    true)
+                //                )
+                //                .Resolution(imgWidth * thiccCount, imgHeight)
+                //                .Save(outStream);
+                //    outStream.CopyTo(saveFileStream);
+                //}
         }
 
         public List<string> MosaicImages(IReadOnlyCollection<Attachment> attachments)
