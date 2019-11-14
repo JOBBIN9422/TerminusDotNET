@@ -1,10 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 using Discord;
 using TerminusDotNetCore.Modules;
 using System.Drawing;
@@ -12,6 +8,12 @@ using ImageProcessor.Imaging.Formats;
 using ImageProcessor;
 using ImageProcessor.Imaging;
 using TerminusDotNetCore.Helpers;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Processing;
+using SixLabors.ImageSharp.Formats;
+using SixLabors.ImageSharp.Formats.Jpeg;
+using SixLabors.ImageSharp.Formats.Png;
 
 namespace TerminusDotNetCore.Services
 {
@@ -40,24 +42,34 @@ namespace TerminusDotNetCore.Services
         {
             for (int i = 0; i < numPasses; i++)
             {
-                //var imageBytes = File.ReadAllBytes(imageFilename);
-                var format = new PngFormat { Quality = 10 };
-
-                using (var inStream = new MemoryStream())
-                using (var inputImg = System.Drawing.Image.FromFile(imageFilename))
-                using (var outStream = new MemoryStream())
-                using (var saveFileStream = new FileStream(imageFilename, FileMode.Open, FileAccess.Write))
-                using (var imageFactory = new ImageFactory(preserveExifData: true))
+                using (var image = SixLabors.ImageSharp.Image.Load(imageFilename))
                 {
-                    inputImg.Save(inStream, System.Drawing.Imaging.ImageFormat.Png);
-                    inStream.Position = 0;
-                    imageFactory.Load(inStream)
-                                .Saturation(100)
-                                .Contrast(100)
-                                .Gamma(1.0f)
-                                .Format(format)
-                                .Save(outStream);
-                    outStream.CopyTo(saveFileStream);
+                    image.Mutate(x => x.Saturate(2.0f)
+                                       .Contrast(2.0f)
+                                       .GaussianSharpen());
+
+                    string extenstion = Path.GetExtension(imageFilename);
+                    switch (extenstion)
+                    {
+                        case ".jpeg":
+                        case ".jpg":
+                            image.Save(imageFilename, new JpegEncoder() 
+                            { 
+                                Quality = 10,
+                            });
+                            break;
+
+                        case ".png":
+                            image.Save(imageFilename, new PngEncoder()
+                            {
+                                CompressionLevel = 9
+                            });
+                            break;
+
+                        default:
+                            image.Save(imageFilename);
+                            break;
+                    }
                 }
             }
         }
@@ -239,7 +251,7 @@ namespace TerminusDotNetCore.Services
                             .Resize(new ResizeLayer(
                                 new Size(
                                     imgWidth * thiccCount, imgHeight),
-                                ResizeMode.Stretch,
+                                ImageProcessor.Imaging.ResizeMode.Stretch,
                                 AnchorPosition.Center,
                                 true)
                             )
