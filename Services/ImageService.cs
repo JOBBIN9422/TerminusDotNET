@@ -14,6 +14,7 @@ using SixLabors.ImageSharp.Processing;
 using SixLabors.ImageSharp.Formats;
 using SixLabors.ImageSharp.Formats.Jpeg;
 using SixLabors.ImageSharp.Formats.Png;
+using ImageProcessor.Processors;
 
 namespace TerminusDotNetCore.Services
 {
@@ -163,56 +164,22 @@ namespace TerminusDotNetCore.Services
 
         private void MorrowindImage(string imageFilename)
         {
-            var morrowindImage = System.Drawing.Image.FromFile("morrowind.png");
-
-            //forward declares (need outside of using block)
-            System.Drawing.Image resizeImage;
-            byte[] imageBytes;
-            ImageLayer morrowindLayer;
-
-            //using (var baseImage = System.Drawing.Image.FromFile(imageFilename))
-            using (var baseImageStream = new FileStream(imageFilename, FileMode.Open, FileAccess.Read))
-            using (var memStream = new MemoryStream())
+            using (var image = SixLabors.ImageSharp.Image.Load(imageFilename))
+            using (var morrowindImage = SixLabors.ImageSharp.Image.Load("morrowind.png"))
             {
-                var baseImage = System.Drawing.Image.FromStream(baseImageStream);
-
-                //resize the image if it's smaller than the Morrowind dialogue image 
-                resizeImage = (System.Drawing.Image)baseImage.Clone();
-                int resizeWidth = resizeImage.Width;
-                int resizeHeight = resizeImage.Height;
+                int resizeWidth = image.Width;
+                int resizeHeight = image.Height;
                 while (resizeWidth < morrowindImage.Width || resizeHeight < morrowindImage.Height)
                 {
                     resizeWidth *= 2;
                     resizeHeight *= 2;
-                    //resizeImage = (System.Drawing.Image)new Bitmap(resizeImage, new Size(resizeImage.Width * 2, resizeImage.Height * 2));
                 }
-                resizeImage = (System.Drawing.Image)new Bitmap(resizeImage, new Size(resizeWidth, resizeHeight));
-                resizeImage.Save(memStream, System.Drawing.Imaging.ImageFormat.Png);
 
-                //get image data after resize
-                imageBytes = memStream.ToArray();
+                image.Mutate( x => x.Resize(resizeWidth, resizeHeight));
+                SixLabors.Primitives.Point position = new SixLabors.Primitives.Point(image.Width / 2 - morrowindImage.Width / 2, image.Height - morrowindImage.Height - image.Height / 10);
+                image.Mutate(x => x.DrawImage(morrowindImage, position, 1.0f));
 
-                //apply Morrowind dialogue box as a new layer
-                morrowindLayer = new ImageLayer()
-                {
-                    Image = morrowindImage,
-
-                    //center horizontally and position towards bottom of base image
-                    Position = new Point(resizeImage.Width / 2 - morrowindImage.Width / 2, resizeImage.Height - morrowindImage.Height - resizeImage.Height / 10)
-                };
-                resizeImage.Dispose();
-            }
-
-
-            using (var inStream = new MemoryStream(imageBytes))
-            using (var outStream = new MemoryStream())
-            using (var saveFileStream = new FileStream(imageFilename, FileMode.Open, FileAccess.Write))
-            using (var imageFactory = new ImageFactory(preserveExifData: true))
-            {
-                imageFactory.Load(inStream)
-                            .Overlay(morrowindLayer)
-                            .Save(outStream);
-                outStream.CopyTo(saveFileStream);
+                image.Save(imageFilename);
             }
         }
 
@@ -303,7 +270,7 @@ namespace TerminusDotNetCore.Services
                     {
                         for (int x = 0; x < avgColors[y].Count; x++)
                         {
-                            using (SolidBrush brush = new SolidBrush(avgColors[y][x]))
+                            using (System.Drawing.SolidBrush brush = new System.Drawing.SolidBrush(avgColors[y][x]))
                             {
                                 using (Bitmap blendedPepperImage = new Bitmap("GIMP_Pepper.png"))
                                 {
