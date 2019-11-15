@@ -109,6 +109,7 @@ namespace TerminusDotNetCore.Services
                 SixLabors.Fonts.Font font = SixLabors.Fonts.SystemFonts.CreateFont("Impact", fontSize);
 
                 SixLabors.Primitives.SizeF botTextSize = TextMeasurer.Measure(bottomText, new RendererOptions(font));
+                float outlineSize = fontSize / 15.0f;
 
                 float padding = 10f;
                 float textMaxWidth = image.Width - (padding * 2);
@@ -116,7 +117,7 @@ namespace TerminusDotNetCore.Services
                 SixLabors.Primitives.PointF bottomLeftLocation = new SixLabors.Primitives.PointF(padding, image.Height - botTextSize.Height - padding * 2);
 
                 SixLabors.ImageSharp.Processing.SolidBrush brush = new SixLabors.ImageSharp.Processing.SolidBrush(SixLabors.ImageSharp.Color.White);
-                SixLabors.ImageSharp.Processing.Pen pen = new SixLabors.ImageSharp.Processing.Pen(SixLabors.ImageSharp.Color.Black, 3.0f);
+                SixLabors.ImageSharp.Processing.Pen pen = new SixLabors.ImageSharp.Processing.Pen(SixLabors.ImageSharp.Color.Black, outlineSize);
                 TextGraphicsOptions options = new TextGraphicsOptions()
                 {
                     WrapTextWidth = textMaxWidth,
