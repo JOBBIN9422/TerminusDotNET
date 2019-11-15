@@ -15,6 +15,8 @@ using SixLabors.ImageSharp.Formats;
 using SixLabors.ImageSharp.Formats.Jpeg;
 using SixLabors.ImageSharp.Formats.Png;
 using ImageProcessor.Processors;
+using System.Numerics;
+using SixLabors.Fonts;
 
 namespace TerminusDotNetCore.Services
 {
@@ -54,8 +56,8 @@ namespace TerminusDotNetCore.Services
                     {
                         case ".jpeg":
                         case ".jpg":
-                            image.Save(imageFilename, new JpegEncoder() 
-                            { 
+                            image.Save(imageFilename, new JpegEncoder()
+                            {
                                 Quality = 10,
                             });
                             break;
@@ -101,66 +103,93 @@ namespace TerminusDotNetCore.Services
 
         private void MemeCaptionImage(string imageFilename, string topText, string bottomText)
         {
-            //var imageBytes = File.ReadAllBytes(imageFilename);
-            //var format = new JpegFormat { Quality = 10 };
-
-            var imageWidth = 0;
-            var imageHeight = 0;
-            using (var imageBmp = new Bitmap(imageFilename))
+            using (var image = SixLabors.ImageSharp.Image.Load(imageFilename))
             {
-                imageWidth = imageBmp.Width;
-                imageHeight = imageBmp.Height;
-            }
+                int fontSize = image.Width > image.Height ? image.Width / 12 : image.Height / 12;
+                SixLabors.Fonts.Font font = SixLabors.Fonts.SystemFonts.CreateFont("Impact", fontSize);
 
-            var fontSize = 0;
-            if (imageWidth > imageHeight)
-            {
-                fontSize = imageWidth / 15;
-            }
-            else
-            {
-                fontSize = imageHeight / 15;
-            }
+                SixLabors.Primitives.SizeF botTextSize = TextMeasurer.Measure(bottomText, new RendererOptions(font));
 
-            var topTextX = imageWidth / 2 - topText.Length * (fontSize / 3);
-            var bottomTextX = imageWidth / 2 - bottomText.Length * (fontSize / 3);
+                float padding = 10f;
+                float textMaxWidth = image.Width - (padding * 2);
+                SixLabors.Primitives.PointF topLeftLocation = new SixLabors.Primitives.PointF(padding, padding);
+                SixLabors.Primitives.PointF bottomLeftLocation = new SixLabors.Primitives.PointF(padding, image.Height - botTextSize.Height - padding * 2);
 
-            var topTextLayer = new TextLayer()
-            {
-                Text = topText,
-                FontFamily = new FontFamily("Impact"),
-                FontSize = fontSize,
-                FontColor = System.Drawing.Color.White,
-                Style = FontStyle.Bold,
-                Position = new Point(topTextX, imageHeight / 10)
+                SixLabors.ImageSharp.Processing.SolidBrush brush = new SixLabors.ImageSharp.Processing.SolidBrush(SixLabors.ImageSharp.Color.White);
+                SixLabors.ImageSharp.Processing.Pen pen = new SixLabors.ImageSharp.Processing.Pen(SixLabors.ImageSharp.Color.Black, 3.0f);
+                TextGraphicsOptions options = new TextGraphicsOptions()
+                {
+                    WrapTextWidth = textMaxWidth,
+                    HorizontalAlignment = SixLabors.Fonts.HorizontalAlignment.Center,
+                    //VerticalAlignment = VerticalAlignment.Bottom
+                };
 
-            };
-
-            var bottomTextLayer = new TextLayer()
-            {
-                Text = bottomText,
-                FontFamily = new FontFamily("Impact"),
-                FontSize = fontSize,
-                FontColor = System.Drawing.Color.White,
-                Style = FontStyle.Bold,
-                Position = new Point(bottomTextX, imageHeight * 8 / 10)
-            };
-
-            using (var inStream = new MemoryStream())
-            using (var inputImg = System.Drawing.Image.FromFile(imageFilename))
-            using (var outStream = new MemoryStream())
-            using (var saveFileStream = new FileStream(imageFilename, FileMode.Open, FileAccess.Write))
-            using (var imageFactory = new ImageFactory(preserveExifData: true))
-            {
-                inputImg.Save(inStream, System.Drawing.Imaging.ImageFormat.Png);
-                inStream.Position = 0;
-                imageFactory.Load(inStream)
-                            .Watermark(topTextLayer)
-                            .Watermark(bottomTextLayer)
-                            .Save(outStream);
-                outStream.CopyTo(saveFileStream);
+                image.Mutate(x => x.DrawText(options, topText, font, brush, pen, topLeftLocation)
+                                   .DrawText(options, bottomText, font, brush, pen, bottomLeftLocation));
+                image.Save(imageFilename);
             }
         }
+
+
+        //private void MemeCaptionImage(string imageFilename, string topText, string bottomText)
+        //{
+        //    var imageWidth = 0;
+        //    var imageHeight = 0;
+        //    using (var imageBmp = new Bitmap(imageFilename))
+        //    {
+        //        imageWidth = imageBmp.Width;
+        //        imageHeight = imageBmp.Height;
+        //    }
+
+        //    var fontSize = 0;
+        //    if (imageWidth > imageHeight)
+        //    {
+        //        fontSize = imageWidth / 15;
+        //    }
+        //    else
+        //    {
+        //        fontSize = imageHeight / 15;
+        //    }
+
+        //    var topTextX = imageWidth / 2 - topText.Length * (fontSize / 3);
+        //    var bottomTextX = imageWidth / 2 - bottomText.Length * (fontSize / 3);
+
+        //    var topTextLayer = new TextLayer()
+        //    {
+        //        Text = topText,
+        //        FontFamily = new FontFamily("Impact"),
+        //        FontSize = fontSize,
+        //        FontColor = System.Drawing.Color.White,
+        //        Style = FontStyle.Bold,
+        //        Position = new Point(topTextX, imageHeight / 10)
+
+        //    };
+
+        //    var bottomTextLayer = new TextLayer()
+        //    {
+        //        Text = bottomText,
+        //        FontFamily = new FontFamily("Impact"),
+        //        FontSize = fontSize,
+        //        FontColor = System.Drawing.Color.White,
+        //        Style = FontStyle.Bold,
+        //        Position = new Point(bottomTextX, imageHeight * 8 / 10)
+        //    };
+
+        //    using (var inStream = new MemoryStream())
+        //    using (var inputImg = System.Drawing.Image.FromFile(imageFilename))
+        //    using (var outStream = new MemoryStream())
+        //    using (var saveFileStream = new FileStream(imageFilename, FileMode.Open, FileAccess.Write))
+        //    using (var imageFactory = new ImageFactory(preserveExifData: true))
+        //    {
+        //        inputImg.Save(inStream, System.Drawing.Imaging.ImageFormat.Png);
+        //        inStream.Position = 0;
+        //        imageFactory.Load(inStream)
+        //                    .Watermark(topTextLayer)
+        //                    .Watermark(bottomTextLayer)
+        //                    .Save(outStream);
+        //        outStream.CopyTo(saveFileStream);
+        //    }
+        //}
 
         private void MorrowindImage(string imageFilename)
         {
@@ -175,7 +204,7 @@ namespace TerminusDotNetCore.Services
                     resizeHeight *= 2;
                 }
 
-                image.Mutate( x => x.Resize(resizeWidth, resizeHeight));
+                image.Mutate(x => x.Resize(resizeWidth, resizeHeight));
                 SixLabors.Primitives.Point position = new SixLabors.Primitives.Point(image.Width / 2 - morrowindImage.Width / 2, image.Height - morrowindImage.Height - image.Height / 10);
                 image.Mutate(x => x.DrawImage(morrowindImage, position, 1.0f));
 
@@ -205,36 +234,6 @@ namespace TerminusDotNetCore.Services
                 image.Mutate(x => x.Resize(thiccCount * originalWidth, image.Height));
                 image.Save(filename);
             }
-
-            //int imgWidth = 0;
-            //int imgHeight = 0;
-            //using (var image = System.Drawing.Image.FromFile(filename))
-            //{
-            //    imgWidth = image.Width;
-            //    imgHeight = image.Height;
-            //}
-            //var imageBytes = File.ReadAllBytes(filename);
-
-                //using (var inputImg = System.Drawing.Image.FromFile(filename))
-                //using (var inStream = new MemoryStream())
-                //using (var outStream = new MemoryStream())
-                //using (var saveFileStream = new FileStream(filename, FileMode.Open, FileAccess.Write))
-                //using (var imageFactory = new ImageFactory(preserveExifData: true))
-                //{
-                //    inputImg.Save(inStream, System.Drawing.Imaging.ImageFormat.Png);
-                //    inStream.Position = 0;
-                //    imageFactory.Load(inStream)
-                //                .Resize(new ResizeLayer(
-                //                    new Size(
-                //                        imgWidth * thiccCount, imgHeight),
-                //                    ImageProcessor.Imaging.ResizeMode.Stretch,
-                //                    AnchorPosition.Center,
-                //                    true)
-                //                )
-                //                .Resolution(imgWidth * thiccCount, imgHeight)
-                //                .Save(outStream);
-                //    outStream.CopyTo(saveFileStream);
-                //}
         }
 
         public List<string> MosaicImages(IReadOnlyCollection<Attachment> attachments)
