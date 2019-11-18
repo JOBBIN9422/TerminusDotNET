@@ -131,67 +131,6 @@ namespace TerminusDotNetCore.Services
             }
         }
 
-
-        //private void MemeCaptionImage(string imageFilename, string topText, string bottomText)
-        //{
-        //    var imageWidth = 0;
-        //    var imageHeight = 0;
-        //    using (var imageBmp = new Bitmap(imageFilename))
-        //    {
-        //        imageWidth = imageBmp.Width;
-        //        imageHeight = imageBmp.Height;
-        //    }
-
-        //    var fontSize = 0;
-        //    if (imageWidth > imageHeight)
-        //    {
-        //        fontSize = imageWidth / 15;
-        //    }
-        //    else
-        //    {
-        //        fontSize = imageHeight / 15;
-        //    }
-
-        //    var topTextX = imageWidth / 2 - topText.Length * (fontSize / 3);
-        //    var bottomTextX = imageWidth / 2 - bottomText.Length * (fontSize / 3);
-
-        //    var topTextLayer = new TextLayer()
-        //    {
-        //        Text = topText,
-        //        FontFamily = new FontFamily("Impact"),
-        //        FontSize = fontSize,
-        //        FontColor = System.Drawing.Color.White,
-        //        Style = FontStyle.Bold,
-        //        Position = new Point(topTextX, imageHeight / 10)
-
-        //    };
-
-        //    var bottomTextLayer = new TextLayer()
-        //    {
-        //        Text = bottomText,
-        //        FontFamily = new FontFamily("Impact"),
-        //        FontSize = fontSize,
-        //        FontColor = System.Drawing.Color.White,
-        //        Style = FontStyle.Bold,
-        //        Position = new Point(bottomTextX, imageHeight * 8 / 10)
-        //    };
-
-        //    using (var inStream = new MemoryStream())
-        //    using (var inputImg = System.Drawing.Image.FromFile(imageFilename))
-        //    using (var outStream = new MemoryStream())
-        //    using (var saveFileStream = new FileStream(imageFilename, FileMode.Open, FileAccess.Write))
-        //    using (var imageFactory = new ImageFactory(preserveExifData: true))
-        //    {
-        //        inputImg.Save(inStream, System.Drawing.Imaging.ImageFormat.Png);
-        //        inStream.Position = 0;
-        //        imageFactory.Load(inStream)
-        //                    .Watermark(topTextLayer)
-        //                    .Watermark(bottomTextLayer)
-        //                    .Save(outStream);
-        //        outStream.CopyTo(saveFileStream);
-        //    }
-        //}
-
         private void MorrowindImage(string imageFilename)
         {
             using (var image = SixLabors.ImageSharp.Image.Load(imageFilename))
@@ -304,6 +243,38 @@ namespace TerminusDotNetCore.Services
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine(ex.ToString());
+            }
+
+        }
+
+        public List<string> BobRossImages(IReadOnlyCollection<Attachment> attachments)
+        {
+            var images = AttachmentHelper.DownloadAttachments(attachments);
+
+            foreach (var image in images)
+            {
+                BobRossImage(image);
+            }
+
+            return images;
+        }
+
+        private void BobRossImage(string imageFilename)
+        {
+            using (var projectImage = SixLabors.ImageSharp.Image.Load(imageFilename))
+            using (var bobRossImage = SixLabors.ImageSharp.Image.Load("bobross.jpg"))
+            {
+                //define projection points for the corners of Bob's happy little canvas
+                SixLabors.Primitives.Point topLeft = new SixLabors.Primitives.Point(297, 22);
+                SixLabors.Primitives.Point topRight = new SixLabors.Primitives.Point(490, 5);
+                SixLabors.Primitives.Point bottomRight = new SixLabors.Primitives.Point(493, 213);
+                SixLabors.Primitives.Point bottomLeft = new SixLabors.Primitives.Point(304, 194);
+
+                //compute the transformation matrix based on the destination points and apply it to the input image
+                Matrix4x4 transformMat = TransformHelper.ComputeTransformMatrix(projectImage.Width, projectImage.Height, topLeft, topRight, bottomLeft, bottomRight);
+                projectImage.Mutate(x => x.Transform(new ProjectiveTransformBuilder().AppendMatrix(transformMat)));
+                bobRossImage.Mutate(x => x.DrawImage(projectImage, new SixLabors.Primitives.Point(0, 0), 1.0f));
+                bobRossImage.Save(imageFilename);
             }
 
         }

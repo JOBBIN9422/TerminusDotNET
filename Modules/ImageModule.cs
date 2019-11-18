@@ -173,5 +173,23 @@ namespace TerminusDotNetCore.Modules
             var images = _imageService.ThiccImages(attachments, thiccCount);
             await SendImages(images);
         }
+
+        [Command("bobross", RunMode = RunMode.Async)]
+
+        public async Task BobRossImagesAsync()
+        {
+            IReadOnlyCollection<Attachment> attachments = null;
+            try
+            {
+                attachments = await GetAttachmentsAsync();
+            }
+            catch (NullReferenceException)
+            {
+                await ServiceReplyAsync("Please attach an image file.");
+            }
+
+            var images = _imageService.BobRossImages(attachments);
+            await SendImages(images);
+        }
     }
 }
