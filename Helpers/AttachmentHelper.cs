@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 
-namespace TerminusDotNetCore.Helpers
+namespace TerminusDotNetConsoleApp.Helpers
 {
     public static class AttachmentHelper
     {
@@ -12,15 +12,14 @@ namespace TerminusDotNetCore.Helpers
             using (var webClient = new WebClient())
             {
                 var returnImgs = new List<string>();
-                var imgIndex = 0;
 
                 foreach (var attachment in attachments)
                 {
                     var filename = attachment.Filename;
                     var url = attachment.Url;
-
-                    var downloadFilename = Path.Combine(downloadPath, $"temp{imgIndex}{Path.GetExtension(filename)}");
-                    imgIndex++;
+                    var fileIdString = System.Guid.NewGuid().ToString("N");
+                    
+                    var downloadFilename = Path.Combine(downloadPath, $"{fileIdString}{Path.GetExtension(filename)}");
                     webClient.DownloadFile(url, downloadFilename);
 
                     returnImgs.Add(downloadFilename);
