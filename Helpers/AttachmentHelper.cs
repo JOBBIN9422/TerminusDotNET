@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 
-namespace TerminusDotNetConsoleApp.Helpers
+namespace TerminusDotNetCore.Helpers
 {
     public static class AttachmentHelper
     {
