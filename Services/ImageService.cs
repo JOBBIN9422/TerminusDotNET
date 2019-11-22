@@ -51,6 +51,7 @@ namespace TerminusDotNetCore.Services
                                        .Contrast(2.0f)
                                        .GaussianSharpen());
 
+                    //try to compress the image based on its file-type
                     string extenstion = Path.GetExtension(imageFilename);
                     switch (extenstion)
                     {
@@ -105,26 +106,31 @@ namespace TerminusDotNetCore.Services
         {
             using (var image = SixLabors.ImageSharp.Image.Load(imageFilename))
             {
+                //calculate font size based on largest image dimension
                 int fontSize = image.Width > image.Height ? image.Width / 12 : image.Height / 12;
                 SixLabors.Fonts.Font font = SixLabors.Fonts.SystemFonts.CreateFont("Impact", fontSize);
 
+                //compute text render size and font outline size
                 SixLabors.Primitives.SizeF botTextSize = TextMeasurer.Measure(bottomText, new RendererOptions(font));
                 float outlineSize = fontSize / 15.0f;
 
+                //determine top & bottom text location
                 float padding = 10f;
                 float textMaxWidth = image.Width - (padding * 2);
                 SixLabors.Primitives.PointF topLeftLocation = new SixLabors.Primitives.PointF(padding, padding);
                 SixLabors.Primitives.PointF bottomLeftLocation = new SixLabors.Primitives.PointF(padding, image.Height - botTextSize.Height - padding * 2);
 
+                //white brush for text fill and black pen for text outline
                 SixLabors.ImageSharp.Processing.SolidBrush brush = new SixLabors.ImageSharp.Processing.SolidBrush(SixLabors.ImageSharp.Color.White);
                 SixLabors.ImageSharp.Processing.Pen pen = new SixLabors.ImageSharp.Processing.Pen(SixLabors.ImageSharp.Color.Black, outlineSize);
+
                 TextGraphicsOptions options = new TextGraphicsOptions()
                 {
                     WrapTextWidth = textMaxWidth,
                     HorizontalAlignment = SixLabors.Fonts.HorizontalAlignment.Center,
-                    //VerticalAlignment = VerticalAlignment.Bottom
                 };
 
+                //render text and save image
                 image.Mutate(x => x.DrawText(options, topText, font, brush, pen, topLeftLocation)
                                    .DrawText(options, bottomText, font, brush, pen, bottomLeftLocation));
                 image.Save(imageFilename);
@@ -136,6 +142,7 @@ namespace TerminusDotNetCore.Services
             using (var image = SixLabors.ImageSharp.Image.Load(imageFilename))
             using (var morrowindImage = SixLabors.ImageSharp.Image.Load("morrowind.png"))
             {
+                //resize the source image if it's too small to draw the morrowind dialogue on
                 int resizeWidth = image.Width;
                 int resizeHeight = image.Height;
                 while (resizeWidth < morrowindImage.Width || resizeHeight < morrowindImage.Height)
@@ -143,11 +150,12 @@ namespace TerminusDotNetCore.Services
                     resizeWidth *= 2;
                     resizeHeight *= 2;
                 }
-
                 image.Mutate(x => x.Resize(resizeWidth, resizeHeight));
-                SixLabors.Primitives.Point position = new SixLabors.Primitives.Point(image.Width / 2 - morrowindImage.Width / 2, image.Height - morrowindImage.Height - image.Height / 10);
-                image.Mutate(x => x.DrawImage(morrowindImage, position, 1.0f));
 
+                //compute the position to draw the morrowind image at (based on its top-left corner)
+                SixLabors.Primitives.Point position = new SixLabors.Primitives.Point(image.Width / 2 - morrowindImage.Width / 2, image.Height - morrowindImage.Height - image.Height / 10);
+
+                image.Mutate(x => x.DrawImage(morrowindImage, position, 1.0f));
                 image.Save(imageFilename);
             }
         }
