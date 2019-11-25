@@ -49,11 +49,11 @@ namespace TerminusDotNetCore.Modules
             {
                 //check if the last message before this one has any attachments
                 var messages = await Context.Channel.GetMessagesAsync(50).FlattenAsync();
-                for (int i = messages.Length - 1; i >= 0; i--)
+                foreach (var message in messages.Reverse())
                 {
-                    if (messages.ElementAt(i).Attachments.Count > 0)
+                    if (message.Attachments.Count > 0)
                     {
-                        return (IReadOnlyCollection<Attachment>)messages.ElementAt(i).Attachments;
+                        return (IReadOnlyCollection<Attachment>)message.Attachments;
                     }
                 }
                 throw new NullReferenceException("No attachments were found in the current or previous messages.");
