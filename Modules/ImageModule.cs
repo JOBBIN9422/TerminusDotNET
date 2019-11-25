@@ -48,7 +48,17 @@ namespace TerminusDotNetCore.Modules
             if (attachments == null || attachments.Count == 0)
             {
                 //check if the last message before this one has any attachments
-                var messages = await Context.Channel.GetMessagesAsync(2).FlattenAsync();
+                var messages = await Context.Channel.GetMessagesAsync(50).FlattenAsync();
+                for (int i = messages.Count - 1; i >= 0; i--)
+                {
+                    if (messages.ElementAt(i).Attachments.Count > 0)
+                    {
+                        return (IReadOnlyCollection<Attachment>)messages.ElementAt(i).Attachments;
+                    }
+                }
+                throw new NullReferenceException("No attachments were found in the current or previous messages.");
+                
+                /*
                 var priorMessage = messages.Last();
                 if (priorMessage.Attachments.Count > 0)
                 {
@@ -58,6 +68,7 @@ namespace TerminusDotNetCore.Modules
                 {
                     throw new NullReferenceException("No attachments were found in the current or previous message.");
                 }
+                */
             }
             else
             {
