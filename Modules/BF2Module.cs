@@ -12,7 +12,7 @@ namespace TerminusDotNetCore.Modules
         public async Task SayAsync()
         {
             var random = new Random();
-            var bf2Pastas = File.ReadAllLines(@"RandomMessages\bf2.txt");
+            var bf2Pastas = File.ReadAllLines(Path.Combine("RandomMessages", "bf2.txt"));
             await ReplyAsync(bf2Pastas[random.Next(bf2Pastas.Length)]);
         }
     }
