@@ -49,7 +49,7 @@ namespace TerminusDotNetCore.Modules
             {
                 //check if the last message before this one has any attachments
                 var messages = await Context.Channel.GetMessagesAsync(50).FlattenAsync();
-                for (int i = messages.Count - 1; i >= 0; i--)
+                for (int i = messages.Length - 1; i >= 0; i--)
                 {
                     if (messages.ElementAt(i).Attachments.Count > 0)
                     {
