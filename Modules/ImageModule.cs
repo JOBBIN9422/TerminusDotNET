@@ -76,6 +76,12 @@ namespace TerminusDotNetCore.Modules
             _imageService.DeleteImages(images);
         }
 
+        private async Task SendImage(string image)
+        {
+            await SendFileAsync(image);
+            System.IO.File.Delete(image);
+        }
+
         [Command("deepfry", RunMode = RunMode.Async)]
         [Summary("Deep-fries an attached image, or the image in the previous message (if any).")]
         public async Task DeepFryImageAsync([Summary("how many times to fry the image")]int numPasses = 1)
@@ -180,7 +186,7 @@ namespace TerminusDotNetCore.Modules
             if (!string.IsNullOrEmpty(text))
             {
                 string bobRossTextImg = _imageService.BobRossText(text);
-                await SendFileAsync(bobRossTextImg);
+                await SendImage(bobRossTextImg);
             }
             else
             {
