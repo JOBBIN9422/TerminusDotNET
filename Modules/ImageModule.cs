@@ -56,7 +56,7 @@ namespace TerminusDotNetCore.Modules
                         return (IReadOnlyCollection<Attachment>)message.Attachments;
                     }
                 }
-                
+
                 //if none of the previous messages had any attachments
                 throw new NullReferenceException("No attachments were found in the current or previous messages.");
             }
@@ -75,7 +75,6 @@ namespace TerminusDotNetCore.Modules
 
             _imageService.DeleteImages(images);
         }
-
 
         [Command("deepfry", RunMode = RunMode.Async)]
         [Summary("Deep-fries an attached image, or the image in the previous message (if any).")]
@@ -176,21 +175,28 @@ namespace TerminusDotNetCore.Modules
         }
 
         [Command("bobross", RunMode = RunMode.Async)]
-
-        public async Task BobRossImagesAsync()
+        public async Task BobRossImagesAsync([Remainder]string text = null)
         {
-            IReadOnlyCollection<Attachment> attachments = null;
-            try
+            if (!string.IsNullOrEmpty(text))
             {
-                attachments = await GetAttachmentsAsync();
+                string bobRossTextImg = _imageService.BobRossText(text);
+                await SendFileAsync(bobRossTextImg);
             }
-            catch (NullReferenceException)
+            else
             {
-                await ServiceReplyAsync("Please attach an image file.");
-            }
+                IReadOnlyCollection<Attachment> attachments = null;
+                try
+                {
+                    attachments = await GetAttachmentsAsync();
+                }
+                catch (NullReferenceException)
+                {
+                    await ServiceReplyAsync("Please attach an image file.");
+                }
 
-            var images = _imageService.BobRossImages(attachments);
-            await SendImages(images);
+                var images = _imageService.BobRossImages(attachments);
+                await SendImages(images);
+            }
         }
     }
 }

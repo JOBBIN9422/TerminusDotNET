@@ -287,6 +287,48 @@ namespace TerminusDotNetCore.Services
 
         }
 
+        public string BobRossText(string text)
+        {
+            using (var bobRossImage = SixLabors.ImageSharp.Image.Load("bobross.jpg"))
+            using (var textImage = new Image<Rgba32>(1920, 1080))
+            {
+                //define projection points for the corners of Bob's happy little canvas
+                SixLabors.Primitives.Point topLeft = new SixLabors.Primitives.Point(297, 22);
+                SixLabors.Primitives.Point topRight = new SixLabors.Primitives.Point(490, 5);
+                SixLabors.Primitives.Point bottomRight = new SixLabors.Primitives.Point(493, 213);
+                SixLabors.Primitives.Point bottomLeft = new SixLabors.Primitives.Point(304, 194);
+
+                int fontSize = textImage.Width / 10;
+                SixLabors.Fonts.Font font = SixLabors.Fonts.SystemFonts.CreateFont("Impact", fontSize);
+
+                //determine text location
+                float padding = 10f;
+                float textMaxWidth = textImage.Width - (padding * 2);
+                SixLabors.Primitives.PointF topLeftLocation = new SixLabors.Primitives.PointF(padding, padding * 2);
+
+                //black brush for text fill
+                SixLabors.ImageSharp.Processing.SolidBrush brush = new SixLabors.ImageSharp.Processing.SolidBrush(SixLabors.ImageSharp.Color.Black);
+
+                TextGraphicsOptions options = new TextGraphicsOptions()
+                {
+                    WrapTextWidth = textMaxWidth,
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                };
+
+                textImage.Mutate(x => x.DrawText(options, text, font, brush, topLeftLocation));
+
+                //compute the transformation matrix based on the destination points and apply it to the text image
+                Matrix4x4 transformMat = TransformHelper.ComputeTransformMatrix(textImage.Width, textImage.Height, topLeft, topRight, bottomLeft, bottomRight);
+                textImage.Mutate(x => x.Transform(new ProjectiveTransformBuilder().AppendMatrix(transformMat)));
+                bobRossImage.Mutate(x => x.DrawImage(textImage, new SixLabors.Primitives.Point(0, 0), 1.0f));
+
+                string outputFilename = $"{Guid.NewGuid().ToString("N")}.jpg";
+                bobRossImage.Save(outputFilename);
+
+                return outputFilename;
+            }
+        }
+
         private System.Drawing.Color GetAverageColor(System.Drawing.Bitmap inputImage, int startX, int startY, int width, int height)
         {
             //prevent going out of bounds during calculations
