@@ -157,7 +157,8 @@ namespace TerminusDotNetCore
             //new custom services get added here
             serviceCollection.AddSingleton<ImageService>()
                              .AddSingleton<WideTextService>()
-                             .AddSingleton<TwitterService>();
+                             .AddSingleton<TwitterService>()
+                             .AddSingleton<AudioService>();
             //serviceCollection.AddSingleton<WideTextService>();
 
             return serviceCollection.BuildServiceProvider();
