@@ -4,6 +4,10 @@ using System.IO;
 using System.Threading.Tasks;
 using Discord;
 using TerminusDotNetCore.Services;
+using System.Configuration;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Configuration.Json;
+using Microsoft.Extensions.Configuration.FileExtensions;
 
 namespace TerminusDotNetCore.Modules
 {
@@ -40,8 +44,11 @@ namespace TerminusDotNetCore.Modules
                 await ReplyAsync("File does not exist.");
                 return;
             }
-            //await ReplyAsync(path);
-            await _service.JoinAudio(Context.Guild, (Context.User as IVoiceState).VoiceChannel);
+            IConfiguration config = new ConfigurationBuilder()
+                                        .AddJsonFile("appsettings.json", true, true)
+                                        .Build();
+            ulong voiceID = ulong.Parse(config["AudioChannelId"]);
+            await _service.JoinAudio(Context.Guild, Context.Guild.GetVoiceChannel(voiceID));
             await _service.SendAudioAsync(Context.Guild, path);
             await _service.LeaveAudio(Context.Guild);
         }
