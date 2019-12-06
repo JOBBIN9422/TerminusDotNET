@@ -47,14 +47,14 @@ namespace TerminusDotNetCore.Services
             }
         }
 
-        public async Task SendAudioAsync(IGuild guild, string path)
+        public async Task SendAudioAsync(IGuild guild, string path, string command)
         {
             // Your task: Get a full path to the file if the value of 'path' is only a filename.
             IAudioClient client;
             if (ConnectedChannels.TryGetValue(guild.Id, out client))
             {
                 //await Log(LogSeverity.Debug, $"Starting playback of {path} in {guild.Name}");
-                using (var ffmpeg = CreateProcess(path))
+                using (var ffmpeg = CreateProcess(path, command))
                 using (var stream = client.CreatePCMStream(AudioApplication.Music))
                 {
                     try { await ffmpeg.StandardOutput.BaseStream.CopyToAsync(stream); }
@@ -63,11 +63,11 @@ namespace TerminusDotNetCore.Services
             }
         }
 
-        private Process CreateProcess(string path)
+        private Process CreateProcess(string path, string command)
         {
             return Process.Start(new ProcessStartInfo
             {
-                FileName = "ffmpeg.exe",
+                FileName = command,
                 Arguments = $"-hide_banner -loglevel panic -i \"{path}\" -ac 2 -f s16le -ar 48000 pipe:1",
                 UseShellExecute = false,
                 RedirectStandardOutput = true
