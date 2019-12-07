@@ -39,6 +39,17 @@ namespace TerminusDotNetCore
                                         .AddJsonFile("appsettings.json", true, true)
                                         .Build();
 
+            //verify all required lines are in the config file
+            string[] requiredConfigs = {"DiscordToken","FfmpegCommand","AudioChannelId"};
+            string[] configDescriptions = {"Token to connect to your discord server","should be ffmpeg.exe for windows, ffmpeg for linux","ID of main audio channel to play audio in"};
+            for (int i=0;i<requiredConfigs.Length;i++)
+            {
+                if(config[requiredConfigs[i]] == null)
+                {
+                    await Log(new LogMessage(LogSeverity.Warning, "appsettings.json error", "missing item in appsettings config file :: " + requiredConfigs[i] + " Description :: " + configDescriptions[i]));
+                }
+            }
+
             //log in & start the client
             string token = config["DiscordToken"];
             await _client.LoginAsync(TokenType.Bot, token);
