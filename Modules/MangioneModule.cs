@@ -14,11 +14,9 @@ namespace TerminusDotNetCore.Modules
     public class MangioneModule : ModuleBase<SocketCommandContext>, IServiceModule
     {
         private AudioService _service;
-        private bool weedStarted;
 
         public MangioneModule(AudioService service)
         {
-            weedStarted = false;
             _service = service;
             _service.ParentModule = this;
         }
@@ -39,6 +37,10 @@ namespace TerminusDotNetCore.Modules
         [Summary("Play some chill beats in the verbal shitposting channel")]
         public async Task PlayChuckAsync()
         {
+            if( Context != null && Context.Guild != null)
+            {
+                _service.setGuild(Context.Guild);
+            }
             string path = "assets/feels_so_good.mp3";
             path = Path.GetFullPath(path);
             if (!File.Exists(path))
@@ -51,24 +53,10 @@ namespace TerminusDotNetCore.Modules
                                         .Build();
             ulong voiceID = ulong.Parse(config["AudioChannelId"]);
             string command = config["FfmpegCommand"];
-            await _service.JoinAudio(Context.Guild, Context.Guild.GetVoiceChannel(voiceID));
-            await _service.SendAudioAsync(Context.Guild, path, command);
-            await _service.LeaveAudio(Context.Guild);
+            //await _service.JoinAudio(Context.Guild, Context.Guild.GetVoiceChannel(voiceID));
+            //await _service.SendAudioAsync(Context.Guild, path, command);
+            //await _service.LeaveAudio(Context.Guild);
         }
 
-        [Command("weed", RunMode = RunMode.Async)]
-        [Summary("Probably does nothing. Only needs to be run once when the bot boots up")]
-        public async Task StartWeed()
-        {
-            if (weedStarted == false)
-            {
-                IConfiguration config = new ConfigurationBuilder()
-                                        .AddJsonFile("appsettings.json", true, true)
-                                        .Build();
-                weedStarted = true;
-                ulong voiceID = ulong.Parse(config["WeedChannelId"]);
-                await _service.ScheduleWeed(Context.Guild, Context.Guild.GetVoiceChannel(voiceID), config["FfmpegCommand"]);
-            }
-        }
     }
 }

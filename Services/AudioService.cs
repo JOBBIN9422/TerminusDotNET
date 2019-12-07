@@ -7,6 +7,10 @@ using Discord.Audio;
 using Discord.Commands;
 using TerminusDotNetCore.Modules;
 using System;
+using System.Configuration;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Configuration.Json;
+using Microsoft.Extensions.Configuration.FileExtensions;
 
 namespace TerminusDotNetCore.Services
 {
@@ -14,7 +18,31 @@ namespace TerminusDotNetCore.Services
     {
         public IServiceModule ParentModule { get; set; }
 
+        public IGuild guild { get; set; }
+
+        public async void setGuild(IGuild g)
+        {
+            guild = g;
+            if(weedStarted == false)
+            {
+                weedStarted = true;
+                IConfiguration config = new ConfigurationBuilder()
+                                        .AddJsonFile("appsettings.json", true, true)
+                                        .Build();
+                ulong voiceID = ulong.Parse(config["WeedChannelId"]);
+                IVoiceChannel vc = await guild.GetVoiceChannelAsync(voiceID);
+                this.ScheduleWeed(guild, vc , config["FfmpegCommand"]);
+            }
+        }
+
+        public bool weedStarted;
+
         private readonly ConcurrentDictionary<ulong, IAudioClient> ConnectedChannels = new ConcurrentDictionary<ulong, IAudioClient>();
+
+        public AudioService()
+        {
+            weedStarted = false;
+        }
 
         public async Task JoinAudio(IGuild guild, IVoiceChannel target)
         {
@@ -78,8 +106,7 @@ namespace TerminusDotNetCore.Services
         public async Task ScheduleWeed(IGuild guild, IVoiceChannel channel, string command)
         {
             DateTime now = DateTime.Now;
-            DateTime fourTwenty = DateTime.Today.AddHours(18.95);
-            //DateTime fourTwenty = DateTime.Today.AddHours(16.333);
+            DateTime fourTwenty = DateTime.Today.AddHours(16.333);
             if ( now > fourTwenty ) 
             {
                 fourTwenty = fourTwenty.AddDays(1.0);

@@ -40,8 +40,8 @@ namespace TerminusDotNetCore
                                         .Build();
 
             //verify all required lines are in the config file
-            string[] requiredConfigs = {"DiscordToken","FfmpegCommand","AudioChannelId"};
-            string[] configDescriptions = {"Token to connect to your discord server","should be ffmpeg.exe for windows, ffmpeg for linux","ID of main audio channel to play audio in"};
+            string[] requiredConfigs = {"DiscordToken","FfmpegCommand","AudioChannelId", "WeedChannelId"};
+            string[] configDescriptions = {"Token to connect to your discord server","should be ffmpeg.exe for windows, ffmpeg for linux","ID of main audio channel to play audio in", "ID of weed sesh audio channel"};
             for (int i=0;i<requiredConfigs.Length;i++)
             {
                 if(config[requiredConfigs[i]] == null)
