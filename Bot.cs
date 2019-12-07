@@ -46,7 +46,7 @@ namespace TerminusDotNetCore
             {
                 if(config[requiredConfigs[i]] == null)
                 {
-                    await Log(new LogMessage(LogSeverity.Warning, "appsettings.json error", "missing item in appsettings config file :: " + requiredConfigs[i] + " Description :: " + configDescriptions[i]));
+                    await Log(new LogMessage(LogSeverity.Warning, "[appsettings.json error]", " WARN: Missing item in appsettings config file :: " + requiredConfigs[i] + " --- Description :: " + configDescriptions[i]));
                 }
             }
 
