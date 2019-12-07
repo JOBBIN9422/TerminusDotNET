@@ -20,23 +20,18 @@ namespace TerminusDotNetCore.Services
 
         public async Task JoinAudio(IGuild guild, IVoiceChannel target)
         {
-            Tuple<IAudioClient, IVoiceChannel> client;
-            if (ConnectedChannels.TryGetValue(guild.Id, out client))
-            {
-                if (client.Item2.Id != target.Id)
-                {
-                    await LeaveAudio(guild);
-                }
-                else
-                {
-                    return;
-                }
-            }
+            //Tuple<IAudioClient, IVoiceChannel> client;
+            //if (ConnectedChannels.TryGetValue(guild.Id, out client))
+            //{
+            //    await LeaveAudio(guild);
+            //}
             if (target.Guild.Id != guild.Id)
             {
                 return;
             }
 
+            await LeaveAudio(guild);
+            await Task.Delay(100);
             var audioClient = await target.ConnectAsync();
 
             if (ConnectedChannels.TryAdd(guild.Id, new Tuple<IAudioClient, IVoiceChannel>(audioClient, target)))
@@ -69,7 +64,7 @@ namespace TerminusDotNetCore.Services
                 using (var stream = client.Item1.CreatePCMStream(AudioApplication.Music))
                 {
                     try { await ffmpeg.StandardOutput.BaseStream.CopyToAsync(stream); }
-                    finally { await stream.FlushAsync(); playing = false; PlayNextInQueue(guild,command); }
+                    finally { await stream.FlushAsync(); stream.Close(); ffmpeg.Kill(true); playing = false; await PlayNextInQueue(guild,command); }
                 }
             }
         }
