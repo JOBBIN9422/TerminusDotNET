@@ -6,6 +6,7 @@ using Discord;
 using Discord.Audio;
 using Discord.Commands;
 using TerminusDotNetCore.Modules;
+using System;
 
 namespace TerminusDotNetCore.Services
 {
@@ -73,5 +74,24 @@ namespace TerminusDotNetCore.Services
                 RedirectStandardOutput = true
             });
         }
+
+        public async Task ScheduleWeed(IGuild guild, IVoiceChannel channel, string command)
+        {
+            DateTime now = DateTime.Now;
+            DateTime fourTwenty = DateTime.Today.AddHours(18.95);
+            //DateTime fourTwenty = DateTime.Today.AddHours(16.333);
+            if ( now > fourTwenty ) 
+            {
+                fourTwenty = fourTwenty.AddDays(1.0);
+            }
+            await Task.Delay((int)fourTwenty.Subtract(DateTime.Now).TotalMilliseconds);
+            await JoinAudio(guild, channel);
+            string path = "assets/weedlmao.mp3";
+            path = Path.GetFullPath(path);
+            await SendAudioAsync(guild, path, command);
+            await LeaveAudio(guild);
+            await ScheduleWeed(guild, channel, command);
+        }
+
     }
 }

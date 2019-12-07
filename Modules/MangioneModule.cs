@@ -14,9 +14,11 @@ namespace TerminusDotNetCore.Modules
     public class MangioneModule : ModuleBase<SocketCommandContext>, IServiceModule
     {
         private AudioService _service;
+        private bool weedStarted;
 
         public MangioneModule(AudioService service)
         {
+            weedStarted = false;
             _service = service;
             _service.ParentModule = this;
         }
@@ -52,6 +54,21 @@ namespace TerminusDotNetCore.Modules
             await _service.JoinAudio(Context.Guild, Context.Guild.GetVoiceChannel(voiceID));
             await _service.SendAudioAsync(Context.Guild, path, command);
             await _service.LeaveAudio(Context.Guild);
+        }
+
+        [Command("weed", RunMode = RunMode.Async)]
+        [Summary("Probably does nothing. Only needs to be run once when the bot boots up")]
+        public async Task StartWeed()
+        {
+            if (weedStarted == false)
+            {
+                IConfiguration config = new ConfigurationBuilder()
+                                        .AddJsonFile("appsettings.json", true, true)
+                                        .Build();
+                weedStarted = true;
+                ulong voiceID = ulong.Parse(config["WeedChannelId"]);
+                await _service.ScheduleWeed(Context.Guild, Context.Guild.GetVoiceChannel(voiceID), config["FfmpegCommand"]);
+            }
         }
     }
 }
