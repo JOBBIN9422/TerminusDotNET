@@ -112,6 +112,13 @@ namespace TerminusDotNetCore.Modules
             await _service.QueueSong(Context.Guild, path, voiceID, config["FfmpegCommand"]);
         }
 
+        [Command("killmusic", RunMode = RunMode.Async)]
+        [Summary("Flush song queue and leave voice channels")]
+        public async Task KillMusic()
+        {
+            await _service.StopAllAudio(Context.Guild);
+        }
+
         //[Command("join", RunMode = RunMode.Async)]
         //public async Task joinChannel(int num = 1)
         //{

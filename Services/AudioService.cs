@@ -94,6 +94,13 @@ namespace TerminusDotNetCore.Services
             }
         }
 
+        public async Task StopAllAudio(IGuild guild)
+        {
+            songQueue = new ConcurrentQueue<Tuple<string, ulong>>();
+            playing = false;
+            await LeaveAudio(guild);
+        }
+
         private Process CreateProcess(string path, string command)
         {
             return Process.Start(new ProcessStartInfo
