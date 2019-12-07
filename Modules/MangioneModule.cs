@@ -53,9 +53,9 @@ namespace TerminusDotNetCore.Modules
                                         .Build();
             ulong voiceID = ulong.Parse(config["AudioChannelId"]);
             string command = config["FfmpegCommand"];
-            //await _service.JoinAudio(Context.Guild, Context.Guild.GetVoiceChannel(voiceID));
-            //await _service.SendAudioAsync(Context.Guild, path, command);
-            //await _service.LeaveAudio(Context.Guild);
+            await _service.JoinAudio(Context.Guild, Context.Guild.GetVoiceChannel(voiceID));
+            await _service.SendAudioAsync(Context.Guild, path, command);
+            await _service.LeaveAudio(Context.Guild);
         }
 
     }
