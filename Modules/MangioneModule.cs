@@ -39,7 +39,7 @@ namespace TerminusDotNetCore.Modules
         {
             if( Context != null && Context.Guild != null)
             {
-                _service.setGuild(Context.Guild);
+                _service.setGuildClient(Context.Guild, Context.Client);
             }
             // TODO allow this function to accept mp3 attachments and play those
             //check if channel id is valid and exists

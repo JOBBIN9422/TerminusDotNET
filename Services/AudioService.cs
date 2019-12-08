@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Audio;
 using Discord.Commands;
+using Discord.WebSocket;
 using TerminusDotNetCore.Modules;
 using System;
 using System.Configuration;
@@ -18,16 +19,19 @@ namespace TerminusDotNetCore.Services
     {
         public IServiceModule ParentModule { get; set; }
         private ConcurrentQueue<Tuple<string,ulong>> songQueue = new ConcurrentQueue<Tuple<string, ulong>>();
+        private ConcurrentQueue<Tuple<string,ulong>> backupQueue = new ConcurrentQueue<Tuple<string, ulong>>();
         private bool playing = false;
         private bool weedStarted = false;
+        private bool weedPlaying = false;
         public IGuild guild { get; set; }
+        public DiscordSocketClient _client;
 
-        private readonly ConcurrentDictionary<ulong, IAudioClient> ConnectedChannels = new ConcurrentDictionary<ulong, IAudioClient>();
         private readonly ConcurrentDictionary<ulong, Tuple<IAudioClient, IVoiceChannel>> ConnectedChannels = new ConcurrentDictionary<ulong, Tuple<IAudioClient, IVoiceChannel>>();
 
-        public async void setGuild(IGuild g)
+        public async void setGuildClient(IGuild g, DiscordSocketClient c)
         {
             guild = g;
+            _client = c;
             if(weedStarted == false)
             {
                 weedStarted = true;
@@ -93,11 +97,18 @@ namespace TerminusDotNetCore.Services
 
         public async Task QueueSong(IGuild guild, string path, ulong channelId, string command)
         {
-            songQueue.Enqueue(new Tuple<string,ulong>(path, channelId));
-            if( !playing ) 
+            if ( weedPlaying )
             {
-                //want to trigger playing next song in queue
-                await PlayNextInQueue(guild, command);
+                backupQueue.Enqueue(new Tuple<string,ulong>(path, channelId));
+            }
+            else
+            {
+                songQueue.Enqueue(new Tuple<string,ulong>(path, channelId));
+                if( !playing ) 
+                {
+                    //want to trigger playing next song in queue
+                    await PlayNextInQueue(guild, command);
+                }
             }
         }
 
@@ -108,11 +119,19 @@ namespace TerminusDotNetCore.Services
             {
                 IVoiceChannel channel = await guild.GetVoiceChannelAsync(nextInQueue.Item2);
                 await JoinAudio(guild, channel);
+                if ( _client != null )
+                {
+                    _client.SetGameAsync(Path.GetFileName(nextInQueue.Item1));
+                }
                 await SendAudioAsync(guild, nextInQueue.Item1, command);
             }
             else
             {
                 await LeaveAudio(guild);
+                if ( _client != null )
+                {
+                    _client.SetGameAsync(null);
+                }
             }
         }
 
@@ -121,6 +140,10 @@ namespace TerminusDotNetCore.Services
             songQueue = new ConcurrentQueue<Tuple<string, ulong>>();
             playing = false;
             await LeaveAudio(guild);
+            if ( _client != null )
+            {
+                _client.SetGameAsync(null);
+            }
         }
 
         private Process CreateProcess(string path, string command)
@@ -143,12 +166,27 @@ namespace TerminusDotNetCore.Services
                 fourTwenty = fourTwenty.AddDays(1.0);
             }
             await Task.Delay((int)fourTwenty.Subtract(DateTime.Now).TotalMilliseconds);
+            backupQueue = songQueue;
+            weedPlaying = true;
+            await StopAllAudio(guild);
             await JoinAudio(guild, channel);
             string path = "assets/weedlmao.mp3";
             path = Path.GetFullPath(path);
+            if ( _client != null )
+            {
+                _client.SetGameAsync("weeeeed");
+            }
             await SendAudioAsync(guild, path, command);
             await LeaveAudio(guild);
-            await ScheduleWeed(guild, channel, command);
+            weedPlaying = false;
+            songQueue = backupQueue;
+            backupQueue = new ConcurrentQueue<Tuple<string, ulong>>();
+            if ( _client != null )
+            {
+                _client.SetGameAsync(null);
+            }
+            PlayNextInQueue(guild, command);
+            ScheduleWeed(guild, channel, command);
         }
 
     }
