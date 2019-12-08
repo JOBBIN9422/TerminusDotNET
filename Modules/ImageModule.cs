@@ -118,6 +118,24 @@ namespace TerminusDotNetCore.Modules
             await SendImages(images);
         }
 
+        [Command("dmc", RunMode = RunMode.Async)]
+        [Summary("Places a DMC watermark on the attached image, or the image in the previous message (if any).")]
+        public async Task DMCWatermarkImagesAsync()
+        {
+            IReadOnlyCollection<Attachment> attachments = null;
+            try
+            {
+                attachments = await GetAttachmentsAsync();
+            }
+            catch (NullReferenceException)
+            {
+                await ServiceReplyAsync("Please attach an image file.");
+            }
+
+            var images = _imageService.DMCWatermarkImages(attachments);
+            await SendImages(images);
+        }
+
         [Command("gimp", RunMode = RunMode.Async)]
         [Summary("Converts the attached image (or the image in the previous message) into a GIMP pepper mosaic.")]
 

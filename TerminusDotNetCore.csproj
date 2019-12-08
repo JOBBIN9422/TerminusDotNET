@@ -28,6 +28,9 @@
     <None Update="bobross.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="dmc.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="GIMP_Pepper.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
