@@ -90,6 +90,18 @@ namespace TerminusDotNetCore.Services
             return images;
         }
 
+        public List<string> DMCWatermarkImages(IReadOnlyCollection<Attachment> attachments)
+        {
+            var images = AttachmentHelper.DownloadAttachments(attachments);
+
+            foreach (var image in images)
+            {
+                DMCWatermarkImage(image);
+            }
+
+            return images;
+        }
+
         public List<string> MemeCaptionImages(IReadOnlyCollection<Attachment> attachments, string topText, string bottomText)
         {
             var images = AttachmentHelper.DownloadAttachments(attachments);
@@ -159,6 +171,36 @@ namespace TerminusDotNetCore.Services
                 image.Save(imageFilename);
             }
         }
+
+        private void DMCWatermarkImage(string imageFilename)
+        {
+            using (var image = SixLabors.ImageSharp.Image.Load(imageFilename))
+            using (var dmcImage = SixLabors.ImageSharp.Image.Load("dmc.png"))
+            {
+                //resize the source image if it's too small to draw the mDMC watermark on
+                int resizeWidth = image.Width;
+                int resizeHeight = image.Height;
+                while (resizeWidth < dmcImage.Width || resizeHeight < dmcImage.Height)
+                {
+                    resizeWidth *= 2;
+                    resizeHeight *= 2;
+                }
+                image.Mutate(x => x.Resize(resizeWidth, resizeHeight));
+
+                //scale the DMC watermark so it's proportional in size to the source image
+                dmcImage.Mutate(x => x.Resize(image.Height / 5, image.Height / 5));
+
+                int paddingHorizontal = image.Width / 10;
+                int paddingVertical   = image.Height / 10;
+
+                //compute the position to draw the morrowind image at (based on its top-left corner)
+                SixLabors.Primitives.Point position = new SixLabors.Primitives.Point(image.Width  - dmcImage.Width - paddingHorizontal, image.Height - dmcImage.Height - paddingVertical);
+
+                image.Mutate(x => x.DrawImage(dmcImage, position, 0.8f));
+                image.Save(imageFilename);
+            }
+        }
+    
 
         public List<string> ThiccImages(IReadOnlyCollection<Attachment> attachments, int thiccCount = 2)
         {
