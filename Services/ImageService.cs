@@ -143,8 +143,14 @@ namespace TerminusDotNetCore.Services
                 };
 
                 //render text and save image
-                image.Mutate(x => x.DrawText(options, topText, font, brush, pen, topLeftLocation)
-                                   .DrawText(options, bottomText, font, brush, pen, bottomLeftLocation));
+                if (!string.IsNullOrEmpty(topText))
+                {
+                    image.Mutate(x => x.DrawText(options, topText, font, brush, pen, topLeftLocation));
+                }
+                if (!string.IsNullOrEmpty(bottomText))
+                {
+                    image.Mutate(x => x.DrawText(options, bottomText, font, brush, pen, topLeftLocation));
+                }
                 image.Save(imageFilename);
             }
         }
