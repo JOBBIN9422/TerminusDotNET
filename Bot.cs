@@ -43,12 +43,14 @@ namespace TerminusDotNetCore
             string[] requiredConfigs = {
                 "DiscordToken",
                 "FfmpegCommand",
-                "AudioChannelId"
+                "AudioChannelId",
+                "WeedChannelId"
             };
             string[] configDescriptions = {
                 "Token to connect to your discord server",
                 "should be ffmpeg.exe for windows, ffmpeg for linux",
-                "ID of main audio channel to play audio in"
+                "ID of main audio channel to play audio in",
+                "ID of weed sesh audio channel"
             };
 
             for (int i = 0; i < requiredConfigs.Length; i++)

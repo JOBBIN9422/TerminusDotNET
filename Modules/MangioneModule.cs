@@ -33,31 +33,14 @@ namespace TerminusDotNetCore.Modules
             }
         }
 
-        //[Command("mangione", RunMode = RunMode.Async)]
-        //[Summary("Play some chill beats in the verbal shitposting channel")]
-        //public async Task PlayChuckAsync()
-        //{
-        //    string path = "assets/feels_so_good.mp3";
-        //    path = Path.GetFullPath(path);
-        //    if (!File.Exists(path))
-        //    {
-        //        await ReplyAsync("File does not exist.");
-        //        return;
-        //    }
-        //    IConfiguration config = new ConfigurationBuilder()
-        //                                .AddJsonFile("appsettings.json", true, true)
-        //                                .Build();
-        //    ulong voiceID = ulong.Parse(config["AudioChannelId"]);
-        //    string command = config["FfmpegCommand"];
-        //    await _service.JoinAudio(Context.Guild, Context.Guild.GetVoiceChannel(voiceID));
-        //    await _service.SendAudioAsync(Context.Guild, path, command);
-        //    await _service.LeaveAudio(Context.Guild);
-        //}
-
         [Command("play", RunMode = RunMode.Async)]
         [Summary("Play a song of your choice in an audio channel of your choice (defaults to verbal shitposting)\nAvailable song aliases are: \"mangione1\", \"mangione2\", \"poloski\"")]
         public async Task PlaySong([Summary("name of song to play")]string song, [Summary("ID of channel to play in (defaults to verbal shitposting)")]string channelID = "-1")
         {
+            if( Context != null && Context.Guild != null)
+            {
+                _service.setGuildClient(Context.Guild, Context.Client);
+            }
             // TODO allow this function to accept mp3 attachments and play those
             //check if channel id is valid and exists
             ulong voiceID;
@@ -119,21 +102,5 @@ namespace TerminusDotNetCore.Modules
             await _service.StopAllAudio(Context.Guild);
         }
 
-        //[Command("join", RunMode = RunMode.Async)]
-        //public async Task joinChannel(int num = 1)
-        //{
-        //    IConfiguration config = new ConfigurationBuilder()
-        //                                .AddJsonFile("appsettings.json", true, true)
-        //                                .Build();
-        //    ulong voiceID = ulong.Parse(config["AudioChannelId"]);
-        //    if( num == 2) { voiceID = ulong.Parse(config["WeedChannelId"]); }
-        //    await _service.JoinAudio(Context.Guild, Context.Guild.GetVoiceChannel(voiceID));
-        //}
-        //
-        //[Command("leave", RunMode = RunMode.Async)]
-        //public async Task leaveChannel(int num = 1)
-        //{
-        //    await _service.LeaveAudio(Context.Guild);
-        //}
     }
 }
