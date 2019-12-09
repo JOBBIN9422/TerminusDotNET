@@ -169,7 +169,7 @@ namespace TerminusDotNetCore.Modules
                 await ServiceReplyAsync("Please attach an image file.");
             }
 
-            if (topText == null || bottomText == null)
+            if (topText == null && bottomText == null)
             {
                 await ServiceReplyAsync("Please add a caption.");
                 return;
