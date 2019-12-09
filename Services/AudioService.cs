@@ -40,7 +40,7 @@ namespace TerminusDotNetCore.Services
                                         .Build();
                 ulong voiceID = ulong.Parse(config["WeedChannelId"]);
                 IVoiceChannel vc = await guild.GetVoiceChannelAsync(voiceID);
-                this.ScheduleWeed(guild, vc , config["FfmpegCommand"]);
+                await this.ScheduleWeed(guild, vc , config["FfmpegCommand"]);
             }
         }
 
@@ -121,7 +121,7 @@ namespace TerminusDotNetCore.Services
                 await JoinAudio(guild, channel);
                 if ( _client != null )
                 {
-                    _client.SetGameAsync(Path.GetFileName(nextInQueue.Item1));
+                    await _client.SetGameAsync(Path.GetFileName(nextInQueue.Item1));
                 }
                 await SendAudioAsync(guild, nextInQueue.Item1, command);
             }
@@ -130,7 +130,7 @@ namespace TerminusDotNetCore.Services
                 await LeaveAudio(guild);
                 if ( _client != null )
                 {
-                    _client.SetGameAsync(null);
+                    await _client.SetGameAsync(null);
                 }
             }
         }
@@ -142,7 +142,7 @@ namespace TerminusDotNetCore.Services
             await LeaveAudio(guild);
             if ( _client != null )
             {
-                _client.SetGameAsync(null);
+                await _client.SetGameAsync(null);
             }
         }
 
@@ -174,7 +174,7 @@ namespace TerminusDotNetCore.Services
             path = Path.GetFullPath(path);
             if ( _client != null )
             {
-                _client.SetGameAsync("weeeeed");
+                await _client.SetGameAsync("weeeeed");
             }
             await SendAudioAsync(guild, path, command);
             await LeaveAudio(guild);
@@ -183,10 +183,10 @@ namespace TerminusDotNetCore.Services
             backupQueue = new ConcurrentQueue<Tuple<string, ulong>>();
             if ( _client != null )
             {
-                _client.SetGameAsync(null);
+                await _client.SetGameAsync(null);
             }
-            PlayNextInQueue(guild, command);
-            ScheduleWeed(guild, channel, command);
+            await PlayNextInQueue(guild, command);
+            await ScheduleWeed(guild, channel, command);
         }
 
     }
