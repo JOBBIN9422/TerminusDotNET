@@ -322,6 +322,7 @@ namespace TerminusDotNetCore.Services
 
                 //compute the transformation matrix based on the destination points and apply it to the input image
                 Matrix4x4 transformMat = TransformHelper.ComputeTransformMatrix(projectImage.Width, projectImage.Height, topLeft, topRight, bottomLeft, bottomRight);
+                projectImage.Mutate(x => x.AutoOrient());
                 projectImage.Mutate(x => x.Transform(new ProjectiveTransformBuilder().AppendMatrix(transformMat)));
                 bobRossImage.Mutate(x => x.DrawImage(projectImage, new SixLabors.Primitives.Point(0, 0), 1.0f));
                 bobRossImage.Save(imageFilename);
