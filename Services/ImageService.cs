@@ -149,7 +149,7 @@ namespace TerminusDotNetCore.Services
                 }
                 if (!string.IsNullOrEmpty(bottomText))
                 {
-                    image.Mutate(x => x.DrawText(options, bottomText, font, brush, pen, topLeftLocation));
+                    image.Mutate(x => x.DrawText(options, bottomText, font, brush, pen, bottomLeftLocation));
                 }
                 image.Save(imageFilename);
             }
