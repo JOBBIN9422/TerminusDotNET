@@ -39,6 +39,22 @@ namespace TerminusDotNetCore
                                         .AddJsonFile("appsettings.json", true, true)
                                         .Build();
 
+            Dictionary<string, string> requiredConfigs = new Dictionary<string, string>()
+            {
+                {"DiscordToken", "Token to connect to your discord server"},
+                {"FfmpegCommand", "should be ffmpeg.exe for windows, ffmpeg for linux"},
+                {"AudioChannelId", "ID of main audio channel to play audio in"},
+                {"WeedChannelId", "ID of weed sesh audio channel"}
+            };
+            
+            foreach (var configEntry in requiredConfigs)
+            {
+                if (config[configEntry.Key] == null)
+                {
+                    await Log(new LogMessage(LogSeverity.Warning, "appsettings.json", $"WARN: Missing item in appsettings config file :: {configEntry.Key}--- Description :: {configEntry.Value}"));
+                }
+            }
+            /*
             //verify all required lines are in the config file
             string[] requiredConfigs = {
                 "DiscordToken",
@@ -52,7 +68,7 @@ namespace TerminusDotNetCore
                 "ID of main audio channel to play audio in",
                 "ID of weed sesh audio channel"
             };
-
+            
             for (int i = 0; i < requiredConfigs.Length; i++)
             {
                 if(config[requiredConfigs[i]] == null)
@@ -60,7 +76,7 @@ namespace TerminusDotNetCore
                     await Log(new LogMessage(LogSeverity.Warning, "appsettings.json", $"WARN: Missing item in appsettings config file :: {requiredConfigs[i] }--- Description :: {configDescriptions[i]}"));
                 }
             }
-
+            */
             //log in & start the client
             string token = config["DiscordToken"];
             await _client.LoginAsync(TokenType.Bot, token);
