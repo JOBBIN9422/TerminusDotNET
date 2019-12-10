@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using TerminusDotNetCore.Services;
+using TerminusDotNetCore.Helpers;
 
 namespace TerminusDotNetCore.Modules
 {
@@ -89,7 +90,7 @@ namespace TerminusDotNetCore.Modules
             IReadOnlyCollection<Attachment> attachments = null;
             try
             {
-                attachments = await GetAttachmentsAsync();
+                attachments = await AttachmentHelper.GetAttachmentsAsync(Context, AttachmentFilter.Images);
             }
             catch (NullReferenceException)
             {
