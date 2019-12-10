@@ -203,15 +203,8 @@ namespace TerminusDotNetCore.Modules
 
         [Command("pc", RunMode = RunMode.Async)]
         [Summary("Paints the attached/most recent image(s) on a stock photo of someone at their computer.")]
-        public async Task PCImagesAsync([Remainder]string text = null)
+        public async Task PCImagesAsync()
         {
-            if (!string.IsNullOrEmpty(text))
-            {
-                string bobRossTextImg = _imageService.BobRossText(text);
-                await SendImage(bobRossTextImg);
-            }
-            else
-            {
                 IReadOnlyCollection<Attachment> attachments = null;
                 try
                 {
@@ -224,7 +217,6 @@ namespace TerminusDotNetCore.Modules
 
                 var images = _imageService.PCImages(attachments);
                 await SendImages(images);
-            }
         }
     }
 }
