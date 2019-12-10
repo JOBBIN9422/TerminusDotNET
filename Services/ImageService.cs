@@ -310,6 +310,29 @@ namespace TerminusDotNetCore.Services
             return images;
         }
 
+        Image<Rgba32> ProjectOnto(string projectImageFilename, string baseImageFilename, 
+            SixLabors.Primitives.Point topLeft,
+            SixLabors.Primitives.Point topRight,
+            SixLabors.Primitives.Point bottomLeft,
+            SixLabors.Primitives.Point bottomRight)
+        {
+            using (var projectImage = SixLabors.ImageSharp.Image.Load(projectImageFilename))
+            using (var baseImage = SixLabors.ImageSharp.Image.Load(baseImageFilename))
+            using (var outputImage = new Image<Rgba32>(baseImage.Width, baseImage.Height))
+            {
+
+                //compute the transformation matrix based on the destination points and apply it to the input image
+                Matrix4x4 transformMat = TransformHelper.ComputeTransformMatrix(projectImage.Width, projectImage.Height, topLeft, topRight, bottomLeft, bottomRight);
+                projectImage.Mutate(x => x.AutoOrient());
+                projectImage.Mutate(x => x.Transform(new ProjectiveTransformBuilder().AppendMatrix(transformMat)));
+
+                outputImage.Mutate(x => x.DrawImage(projectImage, 1.0f));
+                outputImage.Mutate(x => x.DrawImage(baseImage, new SixLabors.Primitives.Point(0, 0), 1.0f));
+
+                return outputImage;
+            }
+        }
+
         private void BobRossImage(string imageFilename)
         {
             using (var projectImage = SixLabors.ImageSharp.Image.Load(imageFilename))
