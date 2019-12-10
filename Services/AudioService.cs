@@ -12,6 +12,8 @@ using System.Configuration;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Configuration.Json;
 using Microsoft.Extensions.Configuration.FileExtensions;
+using System.Collections.Generic;
+using TerminusDotNetCore.Helpers;
 
 namespace TerminusDotNetCore.Services
 {
@@ -112,6 +114,25 @@ namespace TerminusDotNetCore.Services
             }
         }
 
+        public async Task QueueTempSong(IGuild guild, IReadOnlyCollection<Attachment> attachments, ulong channelId, string command)
+        {
+            List<string> files = AttachmentHelper.DownloadAttachments(attachments, "assets/temp");
+            string path = files[0];
+            if ( weedPlaying )
+            {
+                backupQueue.Enqueue(new Tuple<string,ulong>(path, channelId));
+            }
+            else
+            {
+                songQueue.Enqueue(new Tuple<string,ulong>(path, channelId));
+                if( !playing ) 
+                {
+                    //want to trigger playing next song in queue
+                    await PlayNextInQueue(guild, command);
+                }
+            }
+        }
+
         public async Task PlayNextInQueue(IGuild guild, string command)
         {
             Tuple<string, ulong> nextInQueue;
@@ -121,7 +142,16 @@ namespace TerminusDotNetCore.Services
                 await JoinAudio(guild, channel);
                 if ( _client != null )
                 {
-                    await _client.SetGameAsync(Path.GetFileName(nextInQueue.Item1));
+                    string path = nextInQueue.Item1;
+                    //I fucking hate windows for making me do this bullshit
+                    if ( path.Contains("/temp/") || path.Contains("\\temp\\") || path.Contains("\\temp/") || path.Contains("/temp\\") )
+                    {
+                        await _client.SetGameAsync("Someone's mp3 file");
+                    }
+                    else
+                    {
+                        await _client.SetGameAsync(Path.GetFileName(nextInQueue.Item1));
+                    }
                 }
                 await SendAudioAsync(guild, nextInQueue.Item1, command);
             }
@@ -132,6 +162,8 @@ namespace TerminusDotNetCore.Services
                 {
                     await _client.SetGameAsync(null);
                 }
+                // Queue is empty, delete all .mp3 files in the assets/temp folder
+                AttachmentHelper.DeleteFiles(AttachmentHelper.GetTempAssets("*.mp3"));
             }
         }
 
@@ -144,6 +176,9 @@ namespace TerminusDotNetCore.Services
             {
                 await _client.SetGameAsync(null);
             }
+            //probably should do this, but we would have to figure out a way to wait til the ffmpeg process dies, which I don't want to do
+            //the files will get wiped out eventually I bet
+            //AttachmentHelper.DeleteFiles(AttachmentHelper.GetTempAssets("*.mp3"));
         }
 
         private Process CreateProcess(string path, string command)
@@ -185,8 +220,8 @@ namespace TerminusDotNetCore.Services
             {
                 await _client.SetGameAsync(null);
             }
-            await PlayNextInQueue(guild, command);
-            await ScheduleWeed(guild, channel, command);
+            PlayNextInQueue(guild, command);
+            ScheduleWeed(guild, channel, command);
         }
 
     }

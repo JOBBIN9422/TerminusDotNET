@@ -28,6 +28,18 @@ namespace TerminusDotNetCore.Helpers
             }
         }
 
+        public static List<string> GetTempAssets(string regex = "*")
+        {
+            DirectoryInfo d = new DirectoryInfo(@"assets/temp");//Assuming Test is your Folder
+            FileInfo[] Files = d.GetFiles(regex); //Getting files based on regex params
+            List<string> filePaths = new List<string>();
+            foreach(FileInfo file in Files )
+            {
+              filePaths.Add(file.FullName);
+            }
+            return filePaths;
+        }
+
         public static void DeleteFiles(List<string> files)
         {
             foreach (var file in files)
