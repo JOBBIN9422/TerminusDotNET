@@ -43,30 +43,6 @@ namespace TerminusDotNetCore.Modules
             await Context.Channel.SendFileAsync(filename);
         }
 
-        private async Task<IReadOnlyCollection<Attachment>> GetAttachmentsAsync()
-        {
-            var attachments = Context.Message.Attachments;
-            if (attachments == null || attachments.Count == 0)
-            {
-                //check the last 20 messages for attachments (from most recent to oldest)
-                var messages = await Context.Channel.GetMessagesAsync(20).FlattenAsync();
-                foreach (var message in messages)
-                {
-                    if (message.Attachments.Count > 0)
-                    {
-                        return (IReadOnlyCollection<Attachment>)message.Attachments;
-                    }
-                }
-
-                //if none of the previous messages had any attachments
-                throw new NullReferenceException("No attachments were found in the current or previous messages.");
-            }
-            else
-            {
-                return attachments;
-            }
-        }
-
         private async Task SendImages(List<string> images)
         {
             foreach (var image in images)
@@ -108,7 +84,7 @@ namespace TerminusDotNetCore.Modules
             IReadOnlyCollection<Attachment> attachments = null;
             try
             {
-                attachments = await GetAttachmentsAsync();
+                attachments = await AttachmentHelper.GetAttachmentsAsync(Context, AttachmentFilter.Images);
             }
             catch (NullReferenceException)
             {
@@ -126,7 +102,7 @@ namespace TerminusDotNetCore.Modules
             IReadOnlyCollection<Attachment> attachments = null;
             try
             {
-                attachments = await GetAttachmentsAsync();
+                attachments = await AttachmentHelper.GetAttachmentsAsync(Context, AttachmentFilter.Images);
             }
             catch (NullReferenceException)
             {
@@ -145,7 +121,7 @@ namespace TerminusDotNetCore.Modules
             IReadOnlyCollection<Attachment> attachments = null;
             try
             {
-                attachments = await GetAttachmentsAsync();
+                attachments = await AttachmentHelper.GetAttachmentsAsync(Context, AttachmentFilter.Images);
             }
             catch (NullReferenceException)
             {
@@ -163,7 +139,7 @@ namespace TerminusDotNetCore.Modules
             IReadOnlyCollection<Attachment> attachments = null;
             try
             {
-                attachments = await GetAttachmentsAsync();
+                attachments = await AttachmentHelper.GetAttachmentsAsync(Context, AttachmentFilter.Images);
             }
             catch (NullReferenceException)
             {
@@ -188,7 +164,7 @@ namespace TerminusDotNetCore.Modules
             IReadOnlyCollection<Attachment> attachments = null;
             try
             {
-                attachments = await GetAttachmentsAsync();
+                attachments = await AttachmentHelper.GetAttachmentsAsync(Context, AttachmentFilter.Images);
             }
             catch (NullReferenceException)
             {
@@ -212,7 +188,7 @@ namespace TerminusDotNetCore.Modules
                 IReadOnlyCollection<Attachment> attachments = null;
                 try
                 {
-                    attachments = await GetAttachmentsAsync();
+                    attachments = await AttachmentHelper.GetAttachmentsAsync(Context, AttachmentFilter.Images);
                 }
                 catch (NullReferenceException)
                 {
@@ -237,7 +213,7 @@ namespace TerminusDotNetCore.Modules
                 IReadOnlyCollection<Attachment> attachments = null;
                 try
                 {
-                    attachments = await GetAttachmentsAsync();
+                    attachments = await AttachmentHelper.GetAttachmentsAsync(Context, AttachmentFilter.Images);
                 }
                 catch (NullReferenceException)
                 {
