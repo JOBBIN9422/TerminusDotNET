@@ -153,7 +153,7 @@ namespace TerminusDotNetCore.Services
         private void MorrowindImage(string imageFilename)
         {
             using (var image = SixLabors.ImageSharp.Image.Load(imageFilename))
-            using (var morrowindImage = SixLabors.ImageSharp.Image.Load("morrowind.png"))
+            using (var morrowindImage = SixLabors.ImageSharp.Image.Load(Path.Combine("assets", "images", "morrowind.png")))
             {
                 //resize the source image if it's too small to draw the morrowind dialogue on
                 int resizeWidth = image.Width;
@@ -176,7 +176,7 @@ namespace TerminusDotNetCore.Services
         private void DMCWatermarkImage(string imageFilename)
         {
             using (var image = SixLabors.ImageSharp.Image.Load(imageFilename))
-            using (var dmcImage = SixLabors.ImageSharp.Image.Load("dmc.png"))
+            using (var dmcImage = SixLabors.ImageSharp.Image.Load(Path.Combine("assets", "images", "dmc.png")))
             {
                 //resize the source image if it's too small to draw the mDMC watermark on
                 int resizeWidth = image.Width;
@@ -249,7 +249,7 @@ namespace TerminusDotNetCore.Services
 
 
             using (System.Drawing.Bitmap inputImage = new Bitmap(filename))
-            using (Bitmap pepperImage = new Bitmap("GIMP_Pepper.png"))
+            using (Bitmap pepperImage = new Bitmap(Path.Combine("assets", "images", "GIMP_Pepper.png")))
             {
                 //calculate the average RGB value of each pepper-sized cell of the input image 
                 for (int y = 0; y < inputImage.Height; y += pepperImage.Height)
@@ -271,7 +271,7 @@ namespace TerminusDotNetCore.Services
                         {
                             using (System.Drawing.SolidBrush brush = new System.Drawing.SolidBrush(avgColors[y][x]))
                             {
-                                using (Bitmap blendedPepperImage = new Bitmap("GIMP_Pepper.png"))
+                                using (Bitmap blendedPepperImage = new Bitmap(Path.Combine("assets", "images", "GIMP_Pepper.png")))
                                 {
                                     BlendImage(blendedPepperImage, avgColors[y][x], 0.5);
                                     graphics.DrawImage(blendedPepperImage, x * pepperImage.Width, y * pepperImage.Height);
@@ -318,7 +318,7 @@ namespace TerminusDotNetCore.Services
             SixLabors.Primitives.Point bottomRight = new SixLabors.Primitives.Point(437, 407);
             SixLabors.Primitives.Point bottomLeft = new SixLabors.Primitives.Point(23, 388);
 
-            using (var outputImage = ProjectOnto(imageFilename, "bobross.png", topLeft, topRight, bottomLeft, bottomRight))
+            using (var outputImage = ProjectOnto(imageFilename, Path.Combine("assets", "images", "bobross.png"), topLeft, topRight, bottomLeft, bottomRight))
             {
                 outputImage.Save(imageFilename);
             }
@@ -326,7 +326,7 @@ namespace TerminusDotNetCore.Services
 
         public string BobRossText(string text)
         {
-            using (var bobRossImage = SixLabors.ImageSharp.Image.Load("bobross.png"))
+            using (var bobRossImage = SixLabors.ImageSharp.Image.Load(Path.Combine("assets", "images", "bobross.png")))
             using (var textImage = new Image<Rgba32>(1920, 1080))
             using (var outputImage = new Image<Rgba32>(bobRossImage.Width, bobRossImage.Height))
             {
@@ -389,7 +389,7 @@ namespace TerminusDotNetCore.Services
             SixLabors.Primitives.Point bottomRight = new SixLabors.Primitives.Point(432, 579);
             SixLabors.Primitives.Point bottomLeft = new SixLabors.Primitives.Point(214, 726);
 
-            using (var outputImage = ProjectOnto(imageFilename, "suicide.png", topLeft, topRight, bottomLeft, bottomRight))
+            using (var outputImage = ProjectOnto(imageFilename, Path.Combine("assets", "images", "suicide.png"), topLeft, topRight, bottomLeft, bottomRight))
             {
                 outputImage.Save(imageFilename);
             }
