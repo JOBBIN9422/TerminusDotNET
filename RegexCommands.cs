@@ -17,7 +17,7 @@ namespace TerminusDotNetCore
             _regexToMsgMap = new Dictionary<string, string>();
 
             //init regex-message map from file
-            using (StreamReader reader = new StreamReader("regex.txt"))
+            using (StreamReader reader = new StreamReader(Path.Combine("assets","regex.txt")))
             {
                 var currLine = string.Empty;
                 while ((currLine = reader.ReadLine()) != null)
