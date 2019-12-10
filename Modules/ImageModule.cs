@@ -176,6 +176,7 @@ namespace TerminusDotNetCore.Modules
         }
 
         [Command("bobross", RunMode = RunMode.Async)]
+        [Summary("Paints the attached/most recent image(s) on Bob's happy little canvas. If text is supplied, draws the text on Bob's canvas instead.")]
         public async Task BobRossImagesAsync([Remainder]string text = null)
         {
             if (!string.IsNullOrEmpty(text))
@@ -201,6 +202,7 @@ namespace TerminusDotNetCore.Modules
         }
 
         [Command("pc", RunMode = RunMode.Async)]
+        [Summary("Paints the attached/most recent image(s) on a stock photo of someone at their computer.")]
         public async Task PCImagesAsync([Remainder]string text = null)
         {
             if (!string.IsNullOrEmpty(text))
