@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Reflection;
@@ -157,10 +158,18 @@ namespace TerminusDotNetCore
 
         private async Task OnCommandExecutedAsync(Optional<CommandInfo> command, ICommandContext context, IResult result)
         {
-            if (!string.IsNullOrEmpty(result?.ErrorReason))
+            if (!result?.IsSuccess && result is ExecuteResult execResult)
             {
                 await context.Channel.SendMessageAsync(result.ErrorReason);
-                await Log(new LogMessage(LogSeverity.Error, "CommandExecution", $"Error in command '{command.Value.Name}': {result?.ErrorReason}"));
+                await Log(new LogMessage(LogSeverity.Error, "CommandExecution", $"Error in command '{command.Value.Name}': {execResult?.ErrorReason}"));
+                await Log(new LogMessage(LogSeverity.Error, "CommandExecution", $"Exception details (see errors.txt): {execResult?.Exception.StackTrace}"));
+                
+                using (StreamWriter writer = new StreamWriter("errors.txt", true))
+                {
+                    writer.WriteLine(DateTime.Now.ToString());
+                    writer.WriteLine("--------------------------------------------------");
+                    writer.WriteLine(execResult?.Exception.StackTrace);
+                }
             }
             else
             {
