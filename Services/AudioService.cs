@@ -142,7 +142,16 @@ namespace TerminusDotNetCore.Services
                 await JoinAudio(guild, channel);
                 if ( _client != null )
                 {
-                    await _client.SetGameAsync(Path.GetFileName(nextInQueue.Item1));
+                    string path = nextInQueue.Item1;
+                    //I fucking hate windows for making me do this bullshit
+                    if ( path.Contains("/temp/") || path.Contains("\\temp\\") || path.Contains("\\temp/") || path.Contains("/temp\\") )
+                    {
+                        await _client.SetGameAsync("Someone's mp3 file");
+                    }
+                    else
+                    {
+                        await _client.SetGameAsync(Path.GetFileName(nextInQueue.Item1));
+                    }
                 }
                 await SendAudioAsync(guild, nextInQueue.Item1, command);
             }
@@ -167,6 +176,9 @@ namespace TerminusDotNetCore.Services
             {
                 await _client.SetGameAsync(null);
             }
+            //probably should do this, but we would have to figure out a way to wait til the ffmpeg process dies, which I don't want to do
+            //the files will get wiped out eventually I bet
+            //AttachmentHelper.DeleteFiles(AttachmentHelper.GetTempAssets("*.mp3"));
         }
 
         private Process CreateProcess(string path, string command)
