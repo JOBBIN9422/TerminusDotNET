@@ -101,7 +101,7 @@ namespace TerminusDotNetCore.Helpers
 
         private static bool FileIsValid(string filename, string[] validExtensions)
         {
-            string extension = Path.GetExtension(filename);
+            string extension = Path.GetExtension(filename).ToLower();
             return Array.Exists(validExtensions, element => element == extension);
         }
         
