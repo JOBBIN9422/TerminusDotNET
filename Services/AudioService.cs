@@ -12,6 +12,8 @@ using System.Configuration;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Configuration.Json;
 using Microsoft.Extensions.Configuration.FileExtensions;
+using System.Collections.Generic;
+using TerminusDotNetCore.Helpers;
 
 namespace TerminusDotNetCore.Services
 {
@@ -112,6 +114,25 @@ namespace TerminusDotNetCore.Services
             }
         }
 
+        public async Task QueueTempSong(IGuild guild, IReadOnlyCollection<Attachment> attachments, ulong channelId, string command)
+        {
+            List<string> files = AttachmentHelper.DownloadAttachments(attachments, "assets/temp");
+            string path = files[0];
+            if ( weedPlaying )
+            {
+                backupQueue.Enqueue(new Tuple<string,ulong>(path, channelId));
+            }
+            else
+            {
+                songQueue.Enqueue(new Tuple<string,ulong>(path, channelId));
+                if( !playing ) 
+                {
+                    //want to trigger playing next song in queue
+                    await PlayNextInQueue(guild, command);
+                }
+            }
+        }
+
         public async Task PlayNextInQueue(IGuild guild, string command)
         {
             Tuple<string, ulong> nextInQueue;
@@ -132,6 +153,8 @@ namespace TerminusDotNetCore.Services
                 {
                     await _client.SetGameAsync(null);
                 }
+                // Queue is empty, delete all .mp3 files in the assets/temp folder
+                AttachmentHelper.DeleteFiles(AttachmentHelper.GetTempAssets("*.mp3"));
             }
         }
 
