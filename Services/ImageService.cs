@@ -4,17 +4,12 @@ using System.IO;
 using Discord;
 using TerminusDotNetCore.Modules;
 using System.Drawing;
-using ImageProcessor.Imaging.Formats;
-using ImageProcessor;
-using ImageProcessor.Imaging;
 using TerminusDotNetCore.Helpers;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
-using SixLabors.ImageSharp.Formats;
 using SixLabors.ImageSharp.Formats.Jpeg;
 using SixLabors.ImageSharp.Formats.Png;
-using ImageProcessor.Processors;
 using System.Numerics;
 using SixLabors.Fonts;
 
