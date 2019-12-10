@@ -9,7 +9,6 @@
     <PackageReference Include="Discord.Net" Version="2.1.1" />
     <PackageReference Include="Discord.Net.Webhook" Version="2.1.1" />
     <PackageReference Include="Discord.Net.WebSocket" Version="2.1.1" />
-    <PackageReference Include="ImageProcessor" Version="2.7.0.100" />
     <PackageReference Include="linqtotwitter" Version="5.0.0" />
     <PackageReference Include="MathNet.Numerics" Version="4.9.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="3.0.0" />
@@ -59,6 +58,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="assets/feels_so_good.mp3">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="suicide.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>

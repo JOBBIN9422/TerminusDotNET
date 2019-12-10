@@ -222,5 +222,30 @@ namespace TerminusDotNetCore.Modules
                 await SendImages(images);
             }
         }
+
+        [Command("pc", RunMode = RunMode.Async)]
+        public async Task PCImagesAsync([Remainder]string text = null)
+        {
+            if (!string.IsNullOrEmpty(text))
+            {
+                string bobRossTextImg = _imageService.BobRossText(text);
+                await SendImage(bobRossTextImg);
+            }
+            else
+            {
+                IReadOnlyCollection<Attachment> attachments = null;
+                try
+                {
+                    attachments = await GetAttachmentsAsync();
+                }
+                catch (NullReferenceException)
+                {
+                    await ServiceReplyAsync("Please attach an image file.");
+                }
+
+                var images = _imageService.PCImages(attachments);
+                await SendImages(images);
+            }
+        }
     }
 }
