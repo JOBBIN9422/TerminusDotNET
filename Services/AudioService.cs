@@ -185,8 +185,8 @@ namespace TerminusDotNetCore.Services
             {
                 await _client.SetGameAsync(null);
             }
-            await PlayNextInQueue(guild, command);
-            await ScheduleWeed(guild, channel, command);
+            PlayNextInQueue(guild, command);
+            ScheduleWeed(guild, channel, command);
         }
 
     }
