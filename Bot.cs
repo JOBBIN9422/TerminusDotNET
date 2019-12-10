@@ -158,7 +158,7 @@ namespace TerminusDotNetCore
 
         private async Task OnCommandExecutedAsync(Optional<CommandInfo> command, ICommandContext context, IResult result)
         {
-            if (!result?.IsSuccess && result is ExecuteResult execResult)
+            if (!result.IsSuccess && result is ExecuteResult execResult)
             {
                 await context.Channel.SendMessageAsync(result.ErrorReason);
                 await Log(new LogMessage(LogSeverity.Error, "CommandExecution", $"Error in command '{command.Value.Name}': {execResult.ErrorReason}"));
