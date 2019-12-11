@@ -137,15 +137,16 @@ namespace TerminusDotNetCore.Services
         public async Task QueueStreamedSong(IGuild guild, string path, ulong channelId, string command)
         {
             //download the youtube video from the URL
-            //move the downloaded mp3 to the assets dir
+            string tempSongFilename = await DownloadYoutubeVideoAsync(path);
+            
             //queue the downloaded file as normal
             if (weedPlaying)
             {
-                backupQueue.Enqueue(new AudioItem() { Path = path, PlayChannelId = channelId, AudioSource = AudioType.YouTube });
+                backupQueue.Enqueue(new AudioItem() { Path = tempSongFilename, PlayChannelId = channelId, AudioSource = AudioType.YouTube });
             }
             else
             {
-                songQueue.Enqueue(new AudioItem() { Path = path, PlayChannelId = channelId, AudioSource = AudioType.YouTube });
+                songQueue.Enqueue(new AudioItem() { Path = tempSongFilename, PlayChannelId = channelId, AudioSource = AudioType.YouTube });
                 if (!playing)
                 {
                     //want to trigger playing next song in queue
@@ -200,7 +201,7 @@ namespace TerminusDotNetCore.Services
                         break;
 
                     case AudioType.YouTube:
-                        await StreamAudioAsync(guild, nextInQueue.Path, command);
+                        await SendAudioAsync(guild, nextInQueue.Path, command);
                         break;
 
                     default:
