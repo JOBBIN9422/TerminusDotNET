@@ -17,7 +17,7 @@ namespace TerminusDotNetCore.Helpers
             return Process.Start(new ProcessStartInfo
                 {
                     FileName = "/bin/bash",
-                    Arguments = $"youtube-dl -o - \"[{path}]\" | ffmpeg -i pipe:0 -ac 2 -f s16le -ar 48000 pipe:1",
+                    Arguments = $"youtube-dl \"{path}\" -o - | ffmpeg -i pipe:0 -ac 2 -f s16le -ar 48000 pipe:1",
                     UseShellExecute = false,
                     RedirectStandardOutput = true,
                     CreateNoWindow = true
