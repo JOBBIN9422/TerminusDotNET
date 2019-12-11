@@ -134,7 +134,7 @@ namespace TerminusDotNetCore.Modules
             }
         }
 
-        [Command("youtube", RunMode = RunMode.Async)]
+        [Command("yt", RunMode = RunMode.Async)]
         public async Task StreamSong(string url, string channelID = "-1")
         {
             if (Context != null && Context.Guild != null)
