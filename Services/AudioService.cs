@@ -199,7 +199,6 @@ namespace TerminusDotNetCore.Services
 
                     default:
                         throw new ArgumentException("Unknown audio type/source.");
-                        break;
                 }
             }
             else
