@@ -298,7 +298,7 @@ namespace TerminusDotNetCore.Services
                 Console.WriteLine($"BEGIN CONVERSION TO MP3...");
                 
                 //convert the youtube video to mp3 format
-                string outputFilename = Path.Combine(tempPath, "{video.FullName}.mp3");
+                string outputFilename = Path.Combine(tempPath, $"{video.FullName}.mp3");
                 var inputFile = new MediaFile { Filename = videoDataFilename };
                 var outputFile = new MediaFile { Filename = outputFilename };
                 using (var engine = new Engine("/bin/ffmpeg"))
