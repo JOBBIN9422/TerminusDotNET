@@ -14,6 +14,9 @@ using Microsoft.Extensions.Configuration.Json;
 using Microsoft.Extensions.Configuration.FileExtensions;
 using System.Collections.Generic;
 using TerminusDotNetCore.Helpers;
+using MediaToolkit;
+using MediaToolkit.Model;
+using VideoLibrary;
 
 namespace TerminusDotNetCore.Services
 {
@@ -133,6 +136,9 @@ namespace TerminusDotNetCore.Services
 
         public async Task QueueStreamedSong(IGuild guild, string path, ulong channelId, string command)
         {
+            //download the youtube video from the URL
+            //move the downloaded mp3 to the assets dir
+            //queue the downloaded file as normal
             if (weedPlaying)
             {
                 backupQueue.Enqueue(new AudioItem() { Path = path, PlayChannelId = channelId, AudioSource = AudioType.YouTube });
@@ -270,5 +276,38 @@ namespace TerminusDotNetCore.Services
             ScheduleWeed(guild, channel, command);
         }
 
+        private async Task<string> DownloadYoutubeVideoAsync(string url)
+        {
+            string tempPath = Path.Combine(Environment.CurrentDirectory, "assets", "temp");
+            
+            try
+            {
+                //download the youtube video to the temp directory
+                var youtube = YouTube.Default;
+                var video = await youtube.GetVideoAsync(url);
+                var videoData = await video.GetBytesAsync();
+                string videoDataFilename = Path.Combine(tempPath, video.FullName);
+                File.WriteAllBytes(videoDataFilename, videoData);
+
+                //convert the youtube video to mp3 format
+                var inputFile = new MediaFile { Filename = videoDataFilename };
+                var outputFile = new MediaFile { Filename = $"{video.FullName}.mp3" };
+                using (var engine = new Engine("/bin/ffmpeg"))
+                {
+                    engine.GetMetadata(inputFile);
+                    engine.Convert(inputFile, outputFile);
+                }
+            
+                return Path.Combine(tempPath, "{video.FullName}.mp3");
+            }
+            finally
+            {
+                if (File.Exists(videoDataFilename))
+                {
+                    //remove the temp-downloaded video file
+                    File.Delete(videoDataFilename);
+                }
+            }
+        }
     }
 }
