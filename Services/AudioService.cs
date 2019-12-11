@@ -279,6 +279,7 @@ namespace TerminusDotNetCore.Services
         private async Task<string> DownloadYoutubeVideoAsync(string url)
         {
             string tempPath = Path.Combine(Environment.CurrentDirectory, "assets", "temp");
+            string videoDataFilename = string.Empty;
             
             try
             {
@@ -286,7 +287,7 @@ namespace TerminusDotNetCore.Services
                 var youtube = YouTube.Default;
                 var video = await youtube.GetVideoAsync(url);
                 var videoData = await video.GetBytesAsync();
-                string videoDataFilename = Path.Combine(tempPath, video.FullName);
+                videoDataFilename = Path.Combine(tempPath, video.FullName);
                 File.WriteAllBytes(videoDataFilename, videoData);
 
                 //convert the youtube video to mp3 format
