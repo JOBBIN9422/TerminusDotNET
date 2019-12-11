@@ -130,7 +130,7 @@ namespace TerminusDotNetCore.Modules
                     await ReplyAsync("File does not exist.");
                     return;
                 }
-                await _service.QueueSong(Context.Guild, path, voiceID, config["FfmpegCommand"]);
+                await _service.QueueLocalSong(Context.Guild, path, voiceID, config["FfmpegCommand"]);
             }
         }
 

@@ -20,8 +20,8 @@ namespace TerminusDotNetCore.Services
     public class AudioService : ICustomService
     {
         public IServiceModule ParentModule { get; set; }
-        private ConcurrentQueue<Tuple<string,ulong>> songQueue = new ConcurrentQueue<Tuple<string, ulong>>();
-        private ConcurrentQueue<Tuple<string,ulong>> backupQueue = new ConcurrentQueue<Tuple<string, ulong>>();
+        private ConcurrentQueue<AudioItem> songQueue = new ConcurrentQueue<AudioItem>();
+        private ConcurrentQueue<AudioItem> backupQueue = new ConcurrentQueue<AudioItem>();
         private bool playing = false;
         private bool weedStarted = false;
         private bool weedPlaying = false;
@@ -97,15 +97,15 @@ namespace TerminusDotNetCore.Services
             }
         }
 
-        public async Task QueueSong(IGuild guild, string path, ulong channelId, string command)
+        public async Task QueueLocalSong(IGuild guild, string path, ulong channelId, string command)
         {
             if ( weedPlaying )
             {
-                backupQueue.Enqueue(new Tuple<string,ulong>(path, channelId));
+                backupQueue.Enqueue(new AudioItem() { Path = path, PlayChannelId = channelId, AudioSource = AudioType.Local});
             }
             else
             {
-                songQueue.Enqueue(new Tuple<string,ulong>(path, channelId));
+                songQueue.Enqueue(new AudioItem() { Path = path, PlayChannelId = channelId, AudioSource = AudioType.Local });
                 if( !playing ) 
                 {
                     //want to trigger playing next song in queue
@@ -120,11 +120,11 @@ namespace TerminusDotNetCore.Services
             string path = files[0];
             if ( weedPlaying )
             {
-                backupQueue.Enqueue(new Tuple<string,ulong>(path, channelId));
+                backupQueue.Enqueue(new AudioItem() { Path = path, PlayChannelId = channelId, AudioSource = AudioType.Local });
             }
             else
             {
-                songQueue.Enqueue(new Tuple<string,ulong>(path, channelId));
+                songQueue.Enqueue(new AudioItem() { Path = path, PlayChannelId = channelId, AudioSource = AudioType.Local });
                 if( !playing ) 
                 {
                     //want to trigger playing next song in queue
@@ -135,14 +135,14 @@ namespace TerminusDotNetCore.Services
 
         public async Task PlayNextInQueue(IGuild guild, string command)
         {
-            Tuple<string, ulong> nextInQueue;
+            AudioItem nextInQueue;
             if (songQueue.TryDequeue(out nextInQueue))
             {
-                IVoiceChannel channel = await guild.GetVoiceChannelAsync(nextInQueue.Item2);
+                IVoiceChannel channel = await guild.GetVoiceChannelAsync(nextInQueue.PlayChannelId);
                 await JoinAudio(guild, channel);
                 if ( _client != null )
                 {
-                    string path = nextInQueue.Item1;
+                    string path = nextInQueue.Path;
                     //I fucking hate windows for making me do this bullshit
                     if ( path.Contains("/temp/") || path.Contains("\\temp\\") || path.Contains("\\temp/") || path.Contains("/temp\\") )
                     {
@@ -150,10 +150,10 @@ namespace TerminusDotNetCore.Services
                     }
                     else
                     {
-                        await _client.SetGameAsync(Path.GetFileName(nextInQueue.Item1));
+                        await _client.SetGameAsync(Path.GetFileName(nextInQueue.Path));
                     }
                 }
-                await SendAudioAsync(guild, nextInQueue.Item1, command);
+                await SendAudioAsync(guild, nextInQueue.Path, command);
             }
             else
             {
@@ -169,7 +169,7 @@ namespace TerminusDotNetCore.Services
 
         public async Task StopAllAudio(IGuild guild)
         {
-            songQueue = new ConcurrentQueue<Tuple<string, ulong>>();
+            songQueue = new ConcurrentQueue<AudioItem>();
             playing = false;
             await LeaveAudio(guild);
             if ( _client != null )
@@ -215,7 +215,7 @@ namespace TerminusDotNetCore.Services
             await LeaveAudio(guild);
             weedPlaying = false;
             songQueue = backupQueue;
-            backupQueue = new ConcurrentQueue<Tuple<string, ulong>>();
+            backupQueue = new ConcurrentQueue<AudioItem>();
             if ( _client != null )
             {
                 await _client.SetGameAsync(null);
