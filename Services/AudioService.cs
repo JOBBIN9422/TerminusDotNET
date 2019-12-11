@@ -282,15 +282,21 @@ namespace TerminusDotNetCore.Services
             string tempPath = Path.Combine(Environment.CurrentDirectory, "assets", "temp");
             string videoDataFilename = string.Empty;
             
+            Console.WriteLine($"TEMP AUDIO FILES PATH: {tempPath}");
+            
             try
             {
+                Console.WriteLine($"INIT YOUTUBE CLIENT...");
                 //download the youtube video to the temp directory
                 var youtube = YouTube.Default;
                 var video = await youtube.GetVideoAsync(url);
                 var videoData = await video.GetBytesAsync();
                 videoDataFilename = Path.Combine(tempPath, video.FullName);
                 File.WriteAllBytes(videoDataFilename, videoData);
-
+                
+                Console.WriteLine($"DOWNLOADED VIDEO: {video.FullName}");
+                Console.WriteLine($"BEGIN CONVERSION TO MP3...");
+                
                 //convert the youtube video to mp3 format
                 var inputFile = new MediaFile { Filename = videoDataFilename };
                 var outputFile = new MediaFile { Filename = $"{video.FullName}.mp3" };
@@ -299,7 +305,9 @@ namespace TerminusDotNetCore.Services
                     engine.GetMetadata(inputFile);
                     engine.Convert(inputFile, outputFile);
                 }
-            
+                
+                Console.WriteLine($"CONVERTED TO MP3 FILE: {video.FullName}.mp3");
+                
                 return Path.Combine(tempPath, "{video.FullName}.mp3");
             }
             finally
