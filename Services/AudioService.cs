@@ -121,8 +121,8 @@ namespace TerminusDotNetCore.Services
         {
             Console.WriteLine($"CURRENTLY PLAYING ANYTHING: {playing}");
             //download the youtube video from the URL
-            string tempSongFilename = await DownloadYoutubeVideoAsync(path);
-            Console.WriteLine($"DOWNLOADED FILE FROM YOUTUBE: {tempSongFilename}");
+            //string tempSongFilename = await DownloadYoutubeVideoAsync(path);
+            //Console.WriteLine($"DOWNLOADED FILE FROM YOUTUBE: {tempSongFilename}");
             
             //queue the downloaded file as normal
             if (weedPlaying)
