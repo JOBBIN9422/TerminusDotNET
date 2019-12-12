@@ -272,7 +272,7 @@ namespace TerminusDotNetCore.Services
             
             try
             {
-                //Console.WriteLine($"INIT YOUTUBE CLIENT...");
+                Console.WriteLine($"INIT YOUTUBE CLIENT...");
                 //download the youtube video to the temp directory
                 var youtube = YouTube.Default;
                 var video = await youtube.GetVideoAsync(url);
@@ -280,8 +280,8 @@ namespace TerminusDotNetCore.Services
                 videoDataFilename = Path.Combine(tempPath, video.FullName);
                 File.WriteAllBytes(videoDataFilename, videoData);
                 
-                //Console.WriteLine($"DOWNLOADED VIDEO: {video.FullName}");
-                //Console.WriteLine($"BEGIN CONVERSION TO MP3...");
+                Console.WriteLine($"DOWNLOADED VIDEO: {video.FullName}");
+                Console.WriteLine($"BEGIN CONVERSION TO MP3 (FFMPEG ENGINE)...");
                 
                 //convert the youtube video to mp3 format
                 string outputFilename = Path.Combine(tempPath, $"{video.FullName}.mp3");
@@ -293,7 +293,7 @@ namespace TerminusDotNetCore.Services
                     engine.Convert(inputFile, outputFile);
                 }
                 
-                //Console.WriteLine($"CONVERTED TO MP3 FILE: {video.FullName}.mp3");
+                Console.WriteLine($"CONVERTED TO MP3 FILE: {video.FullName}.mp3");
                 
                 return outputFilename;
             }
