@@ -205,6 +205,7 @@ namespace TerminusDotNetCore.Services
                 }
                 // Queue is empty, delete all .mp3 files in the assets/temp folder
                 AttachmentHelper.DeleteFiles(AttachmentHelper.GetTempAssets("*.mp3"));
+                AttachmentHelper.DeleteFiles(AttachmentHelper.GetTempAssets("*.mp4"));
             }
         }
 
