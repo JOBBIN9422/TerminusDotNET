@@ -119,11 +119,8 @@ namespace TerminusDotNetCore.Services
 
         public async Task QueueStreamedSong(IGuild guild, string path, ulong channelId, string command)
         {
-            Console.WriteLine($"CURRENTLY PLAYING ANYTHING: {playing}");
             //download the youtube video from the URL
             string tempSongFilename = await DownloadYoutubeVideoAsync(path);
-            Console.WriteLine($"DOWNLOADED FILE FROM YOUTUBE: {tempSongFilename}");
-            Console.WriteLine($"CURRENTLY PLAYING ANYTHING: {playing}");
 
             //queue the downloaded file as normal
             if (weedPlaying)
@@ -133,10 +130,9 @@ namespace TerminusDotNetCore.Services
             else
             {
                 songQueue.Enqueue(new AudioItem() { Path = tempSongFilename, PlayChannelId = channelId, AudioSource = AudioType.YouTube });
-                Console.WriteLine($"ENQUEUED SONG {tempSongFilename}");
+
                 if (!playing)
                 {
-                    Console.WriteLine($"NOT CURRENTLY PLAYING - PLAYING NEXT SONG IN QUEUE");
                     //want to trigger playing next song in queue
                     await PlayNextInQueue(guild, command);
                 }
@@ -273,10 +269,12 @@ namespace TerminusDotNetCore.Services
             
             try
             {
-                //download the youtube video to the temp directory
+                //download the youtube video data (mp4 format)
                 var youtube = YouTube.Default;
                 var video = await youtube.GetVideoAsync(url);
                 var videoData = await video.GetBytesAsync();
+                
+                //write the mp4 file to the temp assets dir
                 videoDataFilename = Path.Combine(tempPath, video.FullName);
                 File.WriteAllBytes(videoDataFilename, videoData);
                 return videoDataFilename;
