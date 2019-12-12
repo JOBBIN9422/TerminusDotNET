@@ -122,9 +122,13 @@ namespace TerminusDotNetCore
             }
             if (message.Content == "!live")
             {
+                if (!_isActive)
+                {
+                    await message.Channel.SendMessageAsync("real shit?");
+                }
+                
                 _isActive = true;
                 await _client.SetStatusAsync(UserStatus.Online);
-                await message.Channel.SendMessageAsync("real shit?");
                 await Log(new LogMessage(LogSeverity.Info, "HandleCommand", $"Resuming..."));
                 return;
             }
