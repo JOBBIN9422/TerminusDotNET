@@ -138,6 +138,7 @@ namespace TerminusDotNetCore.Services
         {
             //download the youtube video from the URL
             string tempSongFilename = await DownloadYoutubeVideoAsync(path);
+            Console.WriteLine($"DOWNLOADED FILE FROM YOUTUBE: {tempSongFilename}");
             
             //queue the downloaded file as normal
             if (weedPlaying)
@@ -147,8 +148,10 @@ namespace TerminusDotNetCore.Services
             else
             {
                 songQueue.Enqueue(new AudioItem() { Path = tempSongFilename, PlayChannelId = channelId, AudioSource = AudioType.YouTube });
+                Console.WriteLine($"ENQUEUED SONG {tempSongFilename}");
                 if (!playing)
                 {
+                    Console.WriteLine($"NOT CURRENTLY PLAYING - PLAYING NEXT SONG IN QUEUE");
                     //want to trigger playing next song in queue
                     await PlayNextInQueue(guild, command);
                 }
@@ -286,7 +289,7 @@ namespace TerminusDotNetCore.Services
             
             try
             {
-                Console.WriteLine($"INIT YOUTUBE CLIENT...");
+                //Console.WriteLine($"INIT YOUTUBE CLIENT...");
                 //download the youtube video to the temp directory
                 var youtube = YouTube.Default;
                 var video = await youtube.GetVideoAsync(url);
@@ -294,8 +297,8 @@ namespace TerminusDotNetCore.Services
                 videoDataFilename = Path.Combine(tempPath, video.FullName);
                 File.WriteAllBytes(videoDataFilename, videoData);
                 
-                Console.WriteLine($"DOWNLOADED VIDEO: {video.FullName}");
-                Console.WriteLine($"BEGIN CONVERSION TO MP3...");
+                //Console.WriteLine($"DOWNLOADED VIDEO: {video.FullName}");
+                //Console.WriteLine($"BEGIN CONVERSION TO MP3...");
                 
                 //convert the youtube video to mp3 format
                 string outputFilename = Path.Combine(tempPath, $"{video.FullName}.mp3");
@@ -307,7 +310,7 @@ namespace TerminusDotNetCore.Services
                     engine.Convert(inputFile, outputFile);
                 }
                 
-                Console.WriteLine($"CONVERTED TO MP3 FILE: {video.FullName}.mp3");
+                //Console.WriteLine($"CONVERTED TO MP3 FILE: {video.FullName}.mp3");
                 
                 return outputFilename;
             }
