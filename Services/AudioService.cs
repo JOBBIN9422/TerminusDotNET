@@ -136,6 +136,7 @@ namespace TerminusDotNetCore.Services
 
         public async Task QueueStreamedSong(IGuild guild, string path, ulong channelId, string command)
         {
+            Console.WriteLine($"CURRENTLY PLAYING ANYTHING: {playing}");
             //download the youtube video from the URL
             string tempSongFilename = await DownloadYoutubeVideoAsync(path);
             Console.WriteLine($"DOWNLOADED FILE FROM YOUTUBE: {tempSongFilename}");
