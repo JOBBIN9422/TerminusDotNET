@@ -115,7 +115,7 @@ namespace TerminusDotNetCore
             if (message.Content == "!die")
             {
                 _isActive = false;
-                await context.Channel.SendMessageAsync("aight, I'm finna head out...");
+                await message.Channel.SendMessageAsync("aight, I'm finna head out...");
                 await _client.SetStatusAsync(UserStatus.Idle);
                 await Log(new LogMessage(LogSeverity.Info, "HandleCommand", $"Going to sleep..."));
                 return;
@@ -124,7 +124,7 @@ namespace TerminusDotNetCore
             {
                 _isActive = true;
                 await _client.SetStatusAsync(UserStatus.Online);
-                await context.Channel.SendMessageAsync("real shit?");
+                await message.Channel.SendMessageAsync("real shit?");
                 await Log(new LogMessage(LogSeverity.Info, "HandleCommand", $"Resuming..."));
                 return;
             }
