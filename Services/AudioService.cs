@@ -141,7 +141,7 @@ namespace TerminusDotNetCore.Services
 
         public async Task QueueTempSong(IGuild guild, IReadOnlyCollection<Attachment> attachments, ulong channelId, string command)
         {
-            List<string> files = AttachmentHelper.DownloadAttachments(attachments, "assets/temp");
+            List<string> files = AttachmentHelper.DownloadAttachments(attachments);
             string path = files[0];
             if (weedPlaying)
             {
