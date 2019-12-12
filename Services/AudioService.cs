@@ -285,8 +285,6 @@ namespace TerminusDotNetCore.Services
             string tempPath = Path.Combine(Environment.CurrentDirectory, "assets", "temp");
             string videoDataFilename = string.Empty;
             
-            Console.WriteLine($"TEMP AUDIO FILES PATH: {tempPath}");
-            
             try
             {
                 //Console.WriteLine($"INIT YOUTUBE CLIENT...");
