@@ -166,9 +166,19 @@ namespace TerminusDotNetCore
                 
                 using (StreamWriter writer = new StreamWriter("errors.txt", true))
                 {
-                    writer.WriteLine(DateTime.Now.ToString());
-                    writer.WriteLine("--------------------------------------------------");
+                    writer.WriteLine("----- BEGIN ENTRY -----");
+                    writer.WriteLine($"ERROR DATETIME: {DateTime.Now.ToString()}");
+                    writer.WriteLine($"ERROR MESSAGE : {execResult.Exception.Message}");
+                    writer.WriteLine($"ERROR SOURCE  : {execResult.Exception.Source}");
+                    if (execResult.Exception.InnerException != null && !string.IsNullOrEmpty(execResult.Exception.InnerException.Message))
+                    {
+                        writer.WriteLine($"INNER MESSAGE: {execResult.Exception.InnerException.Message}");
+                    }
+                    
+                    writer.WriteLine($"STACK TRACE:");
                     writer.WriteLine(execResult.Exception.StackTrace);
+                    writer.WriteLine("----- END ENTRY   -----");
+                    writer.WriteLine();
                 }
             }
             else
