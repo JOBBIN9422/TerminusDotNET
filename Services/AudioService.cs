@@ -123,6 +123,8 @@ namespace TerminusDotNetCore.Services
             //download the youtube video from the URL
             //string tempSongFilename = await DownloadYoutubeVideoAsync(path);
             //Console.WriteLine($"DOWNLOADED FILE FROM YOUTUBE: {tempSongFilename}");
+            string tempSongFilename = path;
+            
             
             //queue the downloaded file as normal
             if (weedPlaying)
