@@ -95,23 +95,6 @@ namespace TerminusDotNetCore.Services
                 using (var stream = client.Item1.CreatePCMStream(AudioApplication.Music))
                 {
                     try { await ffmpeg.StandardOutput.BaseStream.CopyToAsync(stream); }
-                    finally { await stream.FlushAsync(); stream.Close(); ffmpeg.Kill(true); playing = false; Console.WriteLine("ffmpeg IS KILL"); await PlayNextInQueue(guild, command); }
-                }
-            }
-        }
-
-        public async Task StreamAudioAsync(IGuild guild, string url, string command)
-        {
-            // Your task: Get a full path to the file if the value of 'path' is only a filename.
-            Tuple<IAudioClient, IVoiceChannel> client;
-            if (ConnectedChannels.TryGetValue(guild.Id, out client))
-            {
-                //await Log(LogSeverity.Debug, $"Starting playback of {path} in {guild.Name}");
-                playing = true;
-                using (var ffmpeg = AudioHelper.CreateYTStreamProcess(url))
-                using (var stream = client.Item1.CreatePCMStream(AudioApplication.Music))
-                {
-                    try { await ffmpeg.StandardOutput.BaseStream.CopyToAsync(stream); }
                     finally { await stream.FlushAsync(); stream.Close(); ffmpeg.Kill(true); playing = false; await PlayNextInQueue(guild, command); }
                 }
             }
