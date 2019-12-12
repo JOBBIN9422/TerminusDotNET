@@ -105,7 +105,7 @@ namespace TerminusDotNetCore.Helpers
             return Array.Exists(validExtensions, element => element == extension);
         }
         
-        public static List<string> DownloadAttachments(IReadOnlyCollection<Attachment> attachments, string downloadPath = "")
+        public static List<string> DownloadAttachments(IReadOnlyCollection<Attachment> attachments)
         {
             using (var webClient = new WebClient())
             {
@@ -117,7 +117,7 @@ namespace TerminusDotNetCore.Helpers
                     var url = attachment.Url;
                     var fileIdString = System.Guid.NewGuid().ToString("N");
                     
-                    var downloadFilename = Path.Combine(downloadPath, $"{fileIdString}{Path.GetExtension(filename)}");
+                    var downloadFilename = Path.Combine("assets", "temp", $"{fileIdString}{Path.GetExtension(filename)}");
                     webClient.DownloadFile(url, downloadFilename);
 
                     returnImgs.Add(downloadFilename);
