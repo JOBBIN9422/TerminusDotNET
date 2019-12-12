@@ -160,10 +160,12 @@ namespace TerminusDotNetCore
         {
             if (!result.IsSuccess && result is ExecuteResult execResult)
             {
+                //alert user and print error details to console
                 await context.Channel.SendMessageAsync(result.ErrorReason);
                 await Log(new LogMessage(LogSeverity.Error, "CommandExecution", $"Error in command '{command.Value.Name}': {execResult.ErrorReason}"));
                 await Log(new LogMessage(LogSeverity.Error, "CommandExecution", $"Exception details (see errors.txt): {execResult.Exception.StackTrace}"));
                 
+                //dump exception details to error log
                 using (StreamWriter writer = new StreamWriter("errors.txt", true))
                 {
                     writer.WriteLine("----- BEGIN ENTRY -----");
@@ -179,6 +181,14 @@ namespace TerminusDotNetCore
                     writer.WriteLine(execResult.Exception.StackTrace);
                     writer.WriteLine("----- END ENTRY   -----");
                     writer.WriteLine();
+                }
+                
+                //clean up the temp directory
+                string tempDir = Path.Combine("assets", "temp");
+                string[] tempFiles = Directory.GetFiles(tempDir);
+                foreach (string file in tempFiles)
+                {
+                    File.Delete(file);
                 }
             }
             else
