@@ -95,7 +95,7 @@ namespace TerminusDotNetCore.Services
                 using (var stream = client.Item1.CreatePCMStream(AudioApplication.Music))
                 {
                     try { await ffmpeg.StandardOutput.BaseStream.CopyToAsync(stream); }
-                    finally { await stream.FlushAsync(); stream.Close(); ffmpeg.Kill(true); playing = false; await PlayNextInQueue(guild, command); }
+                    finally { await stream.FlushAsync(); stream.Close(); ffmpeg.Kill(true); playing = false; Console.WriteLine("ffmpeg IS KILL"); await PlayNextInQueue(guild, command); }
                 }
             }
         }
