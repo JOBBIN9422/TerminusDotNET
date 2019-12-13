@@ -145,11 +145,11 @@ namespace TerminusDotNetCore.Services
             string path = files[0];
             if (weedPlaying)
             {
-                backupQueue.Enqueue(new AudioItem() { Path = path, PlayChannelId = channelId, AudioSource = AudioType.Local });
+                backupQueue.Enqueue(new AudioItem() { Path = path, PlayChannelId = channelId, AudioSource = AudioType.Attachment });
             }
             else
             {
-                songQueue.Enqueue(new AudioItem() { Path = path, PlayChannelId = channelId, AudioSource = AudioType.Local });
+                songQueue.Enqueue(new AudioItem() { Path = path, PlayChannelId = channelId, AudioSource = AudioType.Attachment });
                 if (!playing)
                 {
                     //want to trigger playing next song in queue
@@ -178,6 +178,10 @@ namespace TerminusDotNetCore.Services
                         await _client.SetGameAsync(Path.GetFileName(nextInQueue.Path));
                     }
                 }
+                
+                await SendAudioAsync(guild, nextInQueue.Path, command);
+                //probably don't need switch case for now, but maybe if we support more audio types/sources later
+                /*
                 switch (nextInQueue.AudioSource)
                 {
                     case AudioType.Local:
@@ -191,6 +195,7 @@ namespace TerminusDotNetCore.Services
                     default:
                         throw new ArgumentException("Unknown audio type/source.");
                 }
+                */
             }
             else
             {
