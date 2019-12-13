@@ -13,7 +13,8 @@ namespace TerminusDotNetCore.Helpers
     public enum AudioType
     {
         Local,
-        YouTube
+        YouTube,
+        Attachment
     }
     
     public class AudioItem
