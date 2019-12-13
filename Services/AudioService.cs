@@ -25,6 +25,7 @@ namespace TerminusDotNetCore.Services
         public IServiceModule ParentModule { get; set; }
         private ConcurrentQueue<AudioItem> songQueue = new ConcurrentQueue<AudioItem>();
         private ConcurrentQueue<AudioItem> backupQueue = new ConcurrentQueue<AudioItem>();
+        private AudioItem _currentSong = null;
         private bool playing = false;
         private bool weedStarted = false;
         private bool weedPlaying = false;
@@ -75,6 +76,7 @@ namespace TerminusDotNetCore.Services
 
         public async Task LeaveAudio(IGuild guild)
         {
+            _currentSong = null;
             Tuple<IAudioClient, IVoiceChannel> client;
             if (ConnectedChannels.TryRemove(guild.Id, out client))
             {
@@ -179,6 +181,7 @@ namespace TerminusDotNetCore.Services
                     }
                 }
                 
+                _currentSong = nextInQueue;
                 await SendAudioAsync(guild, nextInQueue.Path, command);
                 //probably don't need switch case for now, but maybe if we support more audio types/sources later
                 /*
@@ -214,6 +217,7 @@ namespace TerminusDotNetCore.Services
         {
             songQueue = new ConcurrentQueue<AudioItem>();
             playing = false;
+            _currentSong = null;
             await LeaveAudio(guild);
             if (_client != null)
             {
@@ -270,10 +274,32 @@ namespace TerminusDotNetCore.Services
         public Embed ListQueueContents()
         {
             int numSongs = songQueue.Count;
+            
             var embed = new EmbedBuilder
             {
-                Title = $"{numSongs} Songs Queued"
+                Title = $"{numSongs} Songs"
             };
+            
+            if (_currentSong != null)
+            {
+                string songSource = string.Empty;
+                switch (songItem.AudioSource)
+                {
+                    case AudioType.Local:
+                        songSource = "Local audio file";
+                        break;
+                    case AudioType.YouTube:
+                        songSource = "YouTube download";
+                        break;
+                    case AudioType.Attachment:
+                        songSource = "User-attached file";
+                        break;
+                    default:
+                        songSource = "Unknown";
+                        break;
+                }
+                embed.AddField($"{Path.GetFileName(_currentSong.Path)} (currently playing)", songSource);
+            }
             
             foreach (var songItem in songQueue)
             {
