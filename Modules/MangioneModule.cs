@@ -181,6 +181,14 @@ namespace TerminusDotNetCore.Modules
                                         .Build();
             await _service.PlayNextInQueue(Context.Guild, config["FfmpegCommand"]);
         }
+        
+        [Command("songs", RunMode = RunMode.Async)]
+        [Summary("List the contents of the song queue, if any.")]
+        public async Task ListSongs()
+        {
+            Embed embed = _service.ListQueueContents();
+            await ReplyAsync(embed: embed);
+        }
 
         [Command("killmusic", RunMode = RunMode.Async)]
         [Summary("Flush song queue and leave voice channels")]
