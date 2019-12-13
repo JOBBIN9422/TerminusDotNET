@@ -283,7 +283,7 @@ namespace TerminusDotNetCore.Services
             if (_currentSong != null)
             {
                 string songSource = string.Empty;
-                switch (songItem.AudioSource)
+                switch (_currentSong.AudioSource)
                 {
                     case AudioType.Local:
                         songSource = "Local audio file";
