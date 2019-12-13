@@ -267,6 +267,40 @@ namespace TerminusDotNetCore.Services
             ScheduleWeed(guild, channel, command);
         }
 
+        public Embed ListQueueContents()
+        {
+            int numSongs = songQueue.Count;
+            var embed = new EmbedBuilder
+            {
+                Title = $"{numSongs} Songs Queued"
+            };
+            
+            foreach (var songItem in songQueue)
+            {
+                string songName = Path.GetFileName(songItem.Path);
+                string songSource = string.Empty;
+                switch (songItem.AudioSource)
+                {
+                    case AudioType.Local:
+                        songSource = "Local audio file";
+                        break;
+                    case AudioType.YouTube:
+                        songSource = "YouTube download";
+                        break;
+                    case AudioType.Attachment:
+                        songSource = "User-attached file";
+                        break;
+                    default:
+                        songSource = "Unknown";
+                        break;
+                }
+                
+                embed.AddField(songName, songSource);
+            }
+            
+            return embed.Build();
+        }
+    
         private async Task<string> DownloadYoutubeVideoAsync(string url)
         {
             string tempPath = Path.Combine(Environment.CurrentDirectory, "assets", "temp");
