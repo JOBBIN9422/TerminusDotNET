@@ -274,6 +274,10 @@ namespace TerminusDotNetCore.Services
         public Embed ListQueueContents()
         {
             int numSongs = songQueue.Count;
+            if (_currentSong != null)
+            {
+                numSongs++;
+            }
             
             var embed = new EmbedBuilder
             {
