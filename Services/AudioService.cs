@@ -184,7 +184,7 @@ namespace TerminusDotNetCore.Services
                 }
                 
                 _currentSong = nextInQueue;
-                if (ffmpeg != null && !_ffmpeg.HasExited)
+                if (_ffmpeg != null && !_ffmpeg.HasExited)
                 {
                     _ffmpeg.Kill(true);
                 }
