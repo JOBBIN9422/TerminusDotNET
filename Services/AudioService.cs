@@ -26,6 +26,7 @@ namespace TerminusDotNetCore.Services
         private ConcurrentQueue<AudioItem> songQueue = new ConcurrentQueue<AudioItem>();
         private ConcurrentQueue<AudioItem> backupQueue = new ConcurrentQueue<AudioItem>();
         private AudioItem _currentSong = null;
+        private Process _ffmpeg = null;
         private bool playing = false;
         private bool weedStarted = false;
         private bool weedPlaying = false;
@@ -93,11 +94,12 @@ namespace TerminusDotNetCore.Services
             {
                 //await Log(LogSeverity.Debug, $"Starting playback of {path} in {guild.Name}");
                 playing = true;
-                using (var ffmpeg = CreateProcess(path, command))
+                _ffmpeg = CreateProcess(path, command);
+                //using (var ffmpeg = CreateProcess(path, command))
                 using (var stream = client.Item1.CreatePCMStream(AudioApplication.Music))
                 {
-                    try { await ffmpeg.StandardOutput.BaseStream.CopyToAsync(stream); }
-                    finally { await stream.FlushAsync(); stream.Close(); ffmpeg.Kill(true); playing = false; await PlayNextInQueue(guild, command); }
+                    try { await _ffmpeg.StandardOutput.BaseStream.CopyToAsync(stream); }
+                    finally { await stream.FlushAsync(); stream.Close(); _ffmpeg.Kill(true); playing = false; await PlayNextInQueue(guild, command); }
                 }
             }
         }
@@ -182,6 +184,11 @@ namespace TerminusDotNetCore.Services
                 }
                 
                 _currentSong = nextInQueue;
+                if (ffmpeg != null && !_ffmpeg.HasExited)
+                {
+                    _ffmpeg.Kill(true);
+                }
+                
                 await SendAudioAsync(guild, nextInQueue.Path, command);
                 //probably don't need switch case for now, but maybe if we support more audio types/sources later
                 /*
