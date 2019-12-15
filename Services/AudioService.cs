@@ -78,6 +78,11 @@ namespace TerminusDotNetCore.Services
         public async Task LeaveAudio(IGuild guild)
         {
             _currentSong = null;
+            if (_ffmpeg != null && !_ffmpeg.HasExited)
+            {
+                _ffmpeg.Kill(true);
+            }
+
             Tuple<IAudioClient, IVoiceChannel> client;
             if (ConnectedChannels.TryRemove(guild.Id, out client))
             {
@@ -183,6 +188,7 @@ namespace TerminusDotNetCore.Services
                     }
                 }
                 
+                //update the currently-playing song and kill the audio process if it's running
                 _currentSong = nextInQueue;
                 if (_ffmpeg != null && !_ffmpeg.HasExited)
                 {
@@ -190,22 +196,6 @@ namespace TerminusDotNetCore.Services
                 }
                 
                 await SendAudioAsync(guild, nextInQueue.Path, command);
-                //probably don't need switch case for now, but maybe if we support more audio types/sources later
-                /*
-                switch (nextInQueue.AudioSource)
-                {
-                    case AudioType.Local:
-                        await SendAudioAsync(guild, nextInQueue.Path, command);
-                        break;
-
-                    case AudioType.YouTube:
-                        await SendAudioAsync(guild, nextInQueue.Path, command);
-                        break;
-
-                    default:
-                        throw new ArgumentException("Unknown audio type/source.");
-                }
-                */
             }
             else
             {
@@ -217,6 +207,8 @@ namespace TerminusDotNetCore.Services
                 // Queue is empty, delete all .mp3 files in the assets/temp folder
                 AttachmentHelper.DeleteFiles(AttachmentHelper.GetTempAssets("*.mp3"));
                 AttachmentHelper.DeleteFiles(AttachmentHelper.GetTempAssets("*.mp4"));
+                AttachmentHelper.DeleteFiles(AttachmentHelper.GetTempAssets("*.webm"));
+
             }
         }
 
@@ -280,14 +272,15 @@ namespace TerminusDotNetCore.Services
 
         public List<Embed> ListQueueContents()
         {
+            //need a list of embeds since each embed can only have 25 fields max
             List<Embed> songList = new List<Embed>();
             int numSongs   = songQueue.Count;
             int entryCount = 0;
 
+            //count the currently-playing song if any (it's not in the queue but needs to be listed)
             if (_currentSong != null)
             {
                 numSongs++;
-                entryCount++;
             }
             
             var embed = new EmbedBuilder
@@ -295,6 +288,7 @@ namespace TerminusDotNetCore.Services
                 Title = $"{numSongs} Songs"
             };
             
+            //add the currently-playing song to the list, if any
             if (_currentSong != null)
             {
                 string songSource = string.Empty;
@@ -318,12 +312,17 @@ namespace TerminusDotNetCore.Services
             
             foreach (var songItem in songQueue)
             {
-                if (entryCount % 24 == 0)
+                entryCount++;
+
+                //if we have 25 entries in an embed already, need to make a new one 
+                if (entryCount % 25 == 0 && entryCount > 0)
                 {
                     songList.Add(embed.Build());
                     embed = new EmbedBuilder();
                 }
-                string songName = $"{entryCount++}: {Path.GetFileName(songItem.Path)}";
+
+                //add the current queue item to the song list 
+                string songName = $"{entryCount + 1}: {Path.GetFileName(songItem.Path)}";
                 string songSource = string.Empty;
                 switch (songItem.AudioSource)
                 {
@@ -342,10 +341,10 @@ namespace TerminusDotNetCore.Services
                 }
                 
                 embed.AddField(songName, songSource);
-                entryCount++;
             }
             
-            if (songList.Count == 0)
+            //add the most recently built embed if it's not in the list yet 
+            if (songList.Count == 0 || !songList.Contains(embed.Build()))
             {
                 songList.Add(embed.Build());
             }
@@ -356,7 +355,7 @@ namespace TerminusDotNetCore.Services
         private async Task<string> DownloadYoutubeVideoAsync(string url)
         {
             string tempPath = Path.Combine(Environment.CurrentDirectory, "assets", "temp");
-            string videoDataFilename = string.Empty;
+            string videoDataFilename;
             
             try
             {
@@ -369,30 +368,11 @@ namespace TerminusDotNetCore.Services
                 videoDataFilename = Path.Combine(tempPath, video.FullName);
                 File.WriteAllBytes(videoDataFilename, videoData);
                 return videoDataFilename;
-                
-                /*
-                //convert the youtube video to mp3 format
-                string outputFilename = Path.Combine(tempPath, $"{video.FullName}.mp3");
-                var inputFile = new MediaFile { Filename = videoDataFilename };
-                var outputFile = new MediaFile { Filename = outputFilename };
-                using (var engine = new Engine("/bin/ffmpeg"))
-                {
-                    engine.GetMetadata(inputFile);
-                    engine.Convert(inputFile, outputFile);
-                }
-                
-                return outputFilename;
-                */
             }
-            finally
+            catch (Exception)
             {
-                /*
-                if (File.Exists(videoDataFilename))
-                {
-                    //remove the temp-downloaded video file
-                    File.Delete(videoDataFilename);
-                }
-                */
+                //give a more helpful error message
+                throw new FileNotFoundException("Could not download a video file for the given URL.");
             }
         }
     }
