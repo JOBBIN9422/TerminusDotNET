@@ -188,14 +188,6 @@ namespace TerminusDotNetCore
                     writer.WriteLine("----- END ENTRY   -----");
                     writer.WriteLine();
                 }
-                
-                //clean up the temp directory
-                string tempDir = Path.Combine("assets", "temp");
-                string[] tempFiles = Directory.GetFiles(tempDir);
-                foreach (string file in tempFiles)
-                {
-                    File.Delete(file);
-                }
             }
             else
             {
