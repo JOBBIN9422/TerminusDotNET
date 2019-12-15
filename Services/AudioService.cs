@@ -278,12 +278,16 @@ namespace TerminusDotNetCore.Services
             ScheduleWeed(guild, channel, command);
         }
 
-        public Embed ListQueueContents()
+        public List<Embed> ListQueueContents()
         {
-            int numSongs = songQueue.Count;
+            List<Embed> songList = new List<Embed>();
+            int numSongs   = songQueue.Count;
+            int entryCount = 0;
+
             if (_currentSong != null)
             {
                 numSongs++;
+                entryCount++;
             }
             
             var embed = new EmbedBuilder
@@ -309,12 +313,17 @@ namespace TerminusDotNetCore.Services
                         songSource = "Unknown";
                         break;
                 }
-                embed.AddField($"{Path.GetFileName(_currentSong.Path)} (currently playing)", songSource);
+                embed.AddField($"{entryCount + 1}: {Path.GetFileName(_currentSong.Path)} (currently playing)", songSource);
             }
             
             foreach (var songItem in songQueue)
             {
-                string songName = Path.GetFileName(songItem.Path);
+                if (entryCount % 24 == 0)
+                {
+                    songList.Add(embed.Build());
+                    embed = new EmbedBuilder();
+                }
+                string songName = $"{entryCount++}: {Path.GetFileName(songItem.Path)}";
                 string songSource = string.Empty;
                 switch (songItem.AudioSource)
                 {
@@ -333,9 +342,15 @@ namespace TerminusDotNetCore.Services
                 }
                 
                 embed.AddField(songName, songSource);
+                entryCount++;
             }
             
-            return embed.Build();
+            if (songList.Count == 0)
+            {
+                songList.Add(embed.Build());
+            }
+
+            return songList;
         }
     
         private async Task<string> DownloadYoutubeVideoAsync(string url)
