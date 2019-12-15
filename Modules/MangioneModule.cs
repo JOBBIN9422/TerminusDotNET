@@ -186,8 +186,12 @@ namespace TerminusDotNetCore.Modules
         [Summary("List the contents of the song queue, if any.")]
         public async Task ListSongs()
         {
-            Embed embed = _service.ListQueueContents();
-            await ReplyAsync(embed: embed);
+            List<Embed> songsList = _service.ListQueueContents();
+
+            foreach (Embed embed in songsList)
+            {
+                await ReplyAsync(embed: embed);
+            }
         }
 
         [Command("killmusic", RunMode = RunMode.Async)]
