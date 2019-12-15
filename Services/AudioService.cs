@@ -205,9 +205,7 @@ namespace TerminusDotNetCore.Services
                     await _client.SetGameAsync(null);
                 }
                 // Queue is empty, delete all .mp3 files in the assets/temp folder
-                AttachmentHelper.DeleteFiles(AttachmentHelper.GetTempAssets("*.mp3"));
-                AttachmentHelper.DeleteFiles(AttachmentHelper.GetTempAssets("*.mp4"));
-                AttachmentHelper.DeleteFiles(AttachmentHelper.GetTempAssets("*.webm"));
+                CleanAudioFiles();
 
             }
         }
@@ -218,6 +216,8 @@ namespace TerminusDotNetCore.Services
             playing = false;
             _currentSong = null;
             await LeaveAudio(guild);
+            CleanAudioFiles();
+
             if (_client != null)
             {
                 await _client.SetGameAsync(null);
@@ -374,6 +374,13 @@ namespace TerminusDotNetCore.Services
                 //give a more helpful error message
                 throw new FileNotFoundException("Could not download a video file for the given URL.");
             }
+        }
+
+        private void CleanAudioFiles()
+        {
+            AttachmentHelper.DeleteFiles(AttachmentHelper.GetTempAssets("*.mp3"));
+            AttachmentHelper.DeleteFiles(AttachmentHelper.GetTempAssets("*.mp4"));
+            AttachmentHelper.DeleteFiles(AttachmentHelper.GetTempAssets("*.webm"));
         }
     }
 }
