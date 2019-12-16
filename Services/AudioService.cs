@@ -300,7 +300,7 @@ namespace TerminusDotNetCore.Services
                 entryCount++;
 
                 //if we have 25 entries in an embed already, need to make a new one 
-                if (entryCount % embed.MaxFieldCount == 0 && entryCount > 0)
+                if (entryCount % EmbedBuilder.MaxFieldCount == 0 && entryCount > 0)
                 {
                     songList.Add(embed.Build());
                     embed = new EmbedBuilder();
