@@ -188,6 +188,8 @@ namespace TerminusDotNetCore
                     
                     writer.WriteLine($"STACK TRACE   :");
                     writer.WriteLine(execResult.Exception.StackTrace);
+                    writer.WriteLine("ERROR STRING   :");
+                    writer.WriteLine(execResult.Exception.ToString());
                     writer.WriteLine("----- END ENTRY   -----");
                     writer.WriteLine();
                 }
