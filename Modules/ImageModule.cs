@@ -70,7 +70,8 @@ namespace TerminusDotNetCore.Modules
             }
             catch (NullReferenceException)
             {
-                await ServiceReplyAsync("Please attach an image file.");
+                await ServiceReplyAsync("No images were found in the current message or previous messages.");
+                return;
             }
 
             var images = _imageService.DeepfryImages(attachments, numPasses);
@@ -88,7 +89,8 @@ namespace TerminusDotNetCore.Modules
             }
             catch (NullReferenceException)
             {
-                await ServiceReplyAsync("Please attach an image file.");
+                await ServiceReplyAsync("No images were found in the current message or previous messages.");
+                return;
             }
 
             var images = _imageService.MorrowindImages(attachments);
@@ -106,7 +108,8 @@ namespace TerminusDotNetCore.Modules
             }
             catch (NullReferenceException)
             {
-                await ServiceReplyAsync("Please attach an image file.");
+                await ServiceReplyAsync("No images were found in the current message or previous messages.");
+                return;
             }
 
             var images = _imageService.DMCWatermarkImages(attachments);
@@ -125,7 +128,8 @@ namespace TerminusDotNetCore.Modules
             }
             catch (NullReferenceException)
             {
-                await ServiceReplyAsync("Please attach an image file.");
+                await ServiceReplyAsync("No images were found in the current message or previous messages.");
+                return;
             }
 
             var images = _imageService.MosaicImages(attachments);
@@ -143,7 +147,8 @@ namespace TerminusDotNetCore.Modules
             }
             catch (NullReferenceException)
             {
-                await ServiceReplyAsync("Please attach an image file.");
+                await ServiceReplyAsync("No images were found in the current message or previous messages.");
+                return;
             }
 
             if (topText == null && bottomText == null)
@@ -168,7 +173,8 @@ namespace TerminusDotNetCore.Modules
             }
             catch (NullReferenceException)
             {
-                await ServiceReplyAsync("Please attach an image file.");
+                await ServiceReplyAsync("No images were found in the current message or previous messages.");
+                return;
             }
 
             var images = _imageService.ThiccImages(attachments, thiccCount);
@@ -193,7 +199,8 @@ namespace TerminusDotNetCore.Modules
                 }
                 catch (NullReferenceException)
                 {
-                    await ServiceReplyAsync("Please attach an image file.");
+                    await ServiceReplyAsync("No images were found in the current message or previous messages.");
+                    return;
                 }
 
                 var images = _imageService.BobRossImages(attachments);
@@ -212,7 +219,8 @@ namespace TerminusDotNetCore.Modules
                 }
                 catch (NullReferenceException)
                 {
-                    await ServiceReplyAsync("Please attach an image file.");
+                    await ServiceReplyAsync("No images were found in the current message or previous messages.");
+                    return;
                 }
 
                 var images = _imageService.PCImages(attachments);
