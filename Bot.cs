@@ -176,19 +176,8 @@ namespace TerminusDotNetCore
                 {
                     writer.WriteLine("----- BEGIN ENTRY -----");
                     writer.WriteLine($"ERROR DATETIME: {DateTime.Now.ToString()}");
-                    writer.WriteLine($"ERROR TYPE    : {execResult.Exception.GetType().FullName}");
-                    writer.WriteLine($"ERROR MESSAGE : {execResult.Exception.Message}");
-                    writer.WriteLine($"ERROR SOURCE  : {execResult.Exception.Source}");
-                    writer.WriteLine($"ERROR METHOD  : {execResult.Exception.TargetSite}");
-                    if (execResult.Exception.InnerException != null && !string.IsNullOrEmpty(execResult.Exception.InnerException.Message))
-                    {
-                        writer.WriteLine($"INNER ERROR   : {execResult.Exception.InnerException.GetType().FullName}");
-                        writer.WriteLine($"INNER MESSAGE : {execResult.Exception.InnerException.Message}");
-                    }
-                    
-                    writer.WriteLine($"STACK TRACE   :");
-                    writer.WriteLine(execResult.Exception.StackTrace);
-                    writer.WriteLine("ERROR STRING   :");
+                    writer.WriteLine($"COMMAND NAME  : {command.Value.Name}");
+                    writer.WriteLine();
                     writer.WriteLine(execResult.Exception.ToString());
                     writer.WriteLine("----- END ENTRY   -----");
                     writer.WriteLine();
