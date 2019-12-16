@@ -360,10 +360,10 @@ namespace TerminusDotNetCore.Services
                 File.WriteAllBytes(videoDataFilename, videoData);
                 return videoDataFilename;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 //give a more helpful error message
-                throw new FileNotFoundException("Could not download a video file for the given URL.");
+                throw new ArgumentException("Could not download a video file for the given URL.", ex);
             }
         }
 
