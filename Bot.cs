@@ -182,10 +182,11 @@ namespace TerminusDotNetCore
                     writer.WriteLine($"ERROR METHOD  : {execResult.Exception.TargetSite}");
                     if (execResult.Exception.InnerException != null && !string.IsNullOrEmpty(execResult.Exception.InnerException.Message))
                     {
-                        writer.WriteLine($"INNER MESSAGE: {execResult.Exception.InnerException.Message}");
+                        writer.WriteLine($"INNER ERROR   : {execResult.Exception.InnerException.GetType().FullName}");
+                        writer.WriteLine($"INNER MESSAGE : {execResult.Exception.InnerException.Message}");
                     }
                     
-                    writer.WriteLine($"STACK TRACE:");
+                    writer.WriteLine($"STACK TRACE   :");
                     writer.WriteLine(execResult.Exception.StackTrace);
                     writer.WriteLine("----- END ENTRY   -----");
                     writer.WriteLine();
