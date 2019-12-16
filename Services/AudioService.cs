@@ -291,22 +291,7 @@ namespace TerminusDotNetCore.Services
             //add the currently-playing song to the list, if any
             if (_currentSong != null)
             {
-                string songSource = string.Empty;
-                switch (_currentSong.AudioSource)
-                {
-                    case AudioType.Local:
-                        songSource = "Local audio file";
-                        break;
-                    case AudioType.YouTube:
-                        songSource = "YouTube download";
-                        break;
-                    case AudioType.Attachment:
-                        songSource = "User-attached file";
-                        break;
-                    default:
-                        songSource = "Unknown";
-                        break;
-                }
+                string songSource = GetAudioSourceString(_currentSong.AudioSource);
                 embed.AddField($"{entryCount + 1}: {Path.GetFileName(_currentSong.Path)} (currently playing)", songSource);
             }
             
@@ -323,22 +308,7 @@ namespace TerminusDotNetCore.Services
 
                 //add the current queue item to the song list 
                 string songName = $"{entryCount + 1}: {Path.GetFileName(songItem.Path)}";
-                string songSource = string.Empty;
-                switch (songItem.AudioSource)
-                {
-                    case AudioType.Local:
-                        songSource = "Local audio file";
-                        break;
-                    case AudioType.YouTube:
-                        songSource = "YouTube download";
-                        break;
-                    case AudioType.Attachment:
-                        songSource = "User-attached file";
-                        break;
-                    default:
-                        songSource = "Unknown";
-                        break;
-                }
+                string songSource = GetAudioSourceString(songItem.AudioSource);
                 
                 embed.AddField(songName, songSource);
             }
@@ -351,7 +321,28 @@ namespace TerminusDotNetCore.Services
 
             return songList;
         }
-    
+        
+        private string GetAudioSourceString(AudioType audioType)
+        {
+            string songSource = string.Empty;
+            switch (audioType)
+            {
+                case AudioType.Local:
+                    songSource = "Local audio file";
+                    break;
+                case AudioType.YouTube:
+                    songSource = "YouTube download";
+                    break;
+                case AudioType.Attachment:
+                    songSource = "User-attached file";
+                    break;
+                default:
+                    songSource = "Unknown";
+                    break;
+            }
+            return songSource;
+        }
+        
         private async Task<string> DownloadYoutubeVideoAsync(string url)
         {
             string tempPath = Path.Combine(Environment.CurrentDirectory, "assets", "temp");
