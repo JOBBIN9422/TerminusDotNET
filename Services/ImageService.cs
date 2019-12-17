@@ -298,13 +298,13 @@ namespace TerminusDotNetCore.Services
 
         }
 
-        public List<string> BobRossImages(IReadOnlyCollection<Attachment> attachments)
+        public List<string> BobRossImages(IReadOnlyCollection<Attachment> attachments, int numTimes = 1)
         {
             var images = AttachmentHelper.DownloadAttachments(attachments);
 
             foreach (var image in images)
             {
-                BobRossImage(image);
+                BobRossImage(image, numTimes);
             }
 
             return images;
