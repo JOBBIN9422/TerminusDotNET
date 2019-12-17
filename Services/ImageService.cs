@@ -19,7 +19,7 @@ namespace TerminusDotNetCore.Services
     {
         public IServiceModule ParentModule { get; set; }
 
-        public List<string> DeepfryImages(IReadOnlyCollection<Attachment> attachments, int numPasses = 1)
+        public List<string> DeepfryImages(IReadOnlyCollection<Attachment> attachments, uint numPasses = 1)
         {
             var images = AttachmentHelper.DownloadAttachments(attachments);
 
@@ -36,7 +36,7 @@ namespace TerminusDotNetCore.Services
             AttachmentHelper.DeleteFiles(images);
         }
 
-        private void DeepfryImage(string imageFilename, int numPasses = 1)
+        private void DeepfryImage(string imageFilename, uint numPasses = 1)
         {
             for (int i = 0; i < numPasses; i++)
             {
@@ -203,7 +203,7 @@ namespace TerminusDotNetCore.Services
         }
     
 
-        public List<string> ThiccImages(IReadOnlyCollection<Attachment> attachments, int thiccCount = 2)
+        public List<string> ThiccImages(IReadOnlyCollection<Attachment> attachments, uint thiccCount = 2)
         {
             var images = AttachmentHelper.DownloadAttachments(attachments);
 
@@ -215,7 +215,7 @@ namespace TerminusDotNetCore.Services
             return images;
         }
 
-        private void ThiccImage(string filename, int thiccCount)
+        private void ThiccImage(string filename, uint thiccCount)
         {
             using (var image = SixLabors.ImageSharp.Image.Load(filename))
             {
@@ -298,7 +298,7 @@ namespace TerminusDotNetCore.Services
 
         }
 
-        public List<string> BobRossImages(IReadOnlyCollection<Attachment> attachments, int numTimes = 1)
+        public List<string> BobRossImages(IReadOnlyCollection<Attachment> attachments, uint numTimes = 1)
         {
             var images = AttachmentHelper.DownloadAttachments(attachments);
 
@@ -310,7 +310,7 @@ namespace TerminusDotNetCore.Services
             return images;
         }
 
-        private void BobRossImage(string imageFilename, int numTimes = 1)
+        private void BobRossImage(string imageFilename, uint numTimes = 1)
         {
             //define projection points for the corners of Bob's happy little canvas
             SixLabors.Primitives.Point topLeft = new SixLabors.Primitives.Point(24, 72);
