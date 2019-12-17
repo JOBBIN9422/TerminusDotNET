@@ -310,7 +310,7 @@ namespace TerminusDotNetCore.Services
             return images;
         }
 
-        private void BobRossImage(string imageFilename)
+        private void BobRossImage(string imageFilename, int numTimes = 1)
         {
             //define projection points for the corners of Bob's happy little canvas
             SixLabors.Primitives.Point topLeft = new SixLabors.Primitives.Point(24, 72);
@@ -318,9 +318,13 @@ namespace TerminusDotNetCore.Services
             SixLabors.Primitives.Point bottomRight = new SixLabors.Primitives.Point(437, 407);
             SixLabors.Primitives.Point bottomLeft = new SixLabors.Primitives.Point(23, 388);
 
-            using (var outputImage = ProjectOnto(imageFilename, Path.Combine("assets", "images", "bobross.png"), topLeft, topRight, bottomLeft, bottomRight))
+            using (var outputImage = new Image<Rgba32>(640, 480))
             {
-                outputImage.Save(imageFilename);
+                for (int i = 0; i < numTimes; i++)
+                {
+                    outputImage = ProjectOnto(imageFilename, Path.Combine("assets", "images", "bobross.png"), topLeft, topRight, bottomLeft, bottomRight)
+                    outputImage.Save(imageFilename);
+                }
             }
         }
 
