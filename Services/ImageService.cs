@@ -203,7 +203,7 @@ namespace TerminusDotNetCore.Services
         }
     
 
-        public List<string> ThiccImages(IReadOnlyCollection<Attachment> attachments, uint thiccCount = 2)
+        public List<string> ThiccImages(IReadOnlyCollection<Attachment> attachments, int thiccCount = 2)
         {
             var images = AttachmentHelper.DownloadAttachments(attachments);
 
@@ -215,7 +215,7 @@ namespace TerminusDotNetCore.Services
             return images;
         }
 
-        private void ThiccImage(string filename, uint thiccCount)
+        private void ThiccImage(string filename, int thiccCount)
         {
             using (var image = SixLabors.ImageSharp.Image.Load(filename))
             {
