@@ -14,5 +14,10 @@ namespace TerminusDotNetCore.Modules
         //Task ServiceReplyAsync(string s, EmbedBuilder embedBuilder = null);
 
 	public CustomService Service { get; set; }
+	    
+	public ServiceControlModule(CustomService service)
+	{
+	    Service = service;
+	}
     }
 }
