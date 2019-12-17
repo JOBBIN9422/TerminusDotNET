@@ -63,12 +63,8 @@ namespace TerminusDotNetCore.Modules
         [Summary("Deep-fries an attached image, or the image in the previous message (if any).")]
         public async Task DeepFryImageAsync([Summary("how many times to fry the image")]int numPasses = 1)
         {
-            IReadOnlyCollection<Attachment> attachments = null;
-            try
-            {
-                attachments = await AttachmentHelper.GetAttachmentsAsync(Context, AttachmentFilter.Images);
-            }
-            catch (NullReferenceException)
+            IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetAttachmentsAsync(Context, AttachmentFilter.Images);
+            if (attachments == null)
             {
                 await ServiceReplyAsync("No images were found in the current message or previous messages.");
                 return;
@@ -82,12 +78,8 @@ namespace TerminusDotNetCore.Modules
         [Summary("Places a Morrowind prompt on the attached image, or the image in the previous message (if any).")]
         public async Task MorrowindImageAsync()
         {
-            IReadOnlyCollection<Attachment> attachments = null;
-            try
-            {
-                attachments = await AttachmentHelper.GetAttachmentsAsync(Context, AttachmentFilter.Images);
-            }
-            catch (NullReferenceException)
+            IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetAttachmentsAsync(Context, AttachmentFilter.Images);
+            if (attachments == null)
             {
                 await ServiceReplyAsync("No images were found in the current message or previous messages.");
                 return;
@@ -101,12 +93,8 @@ namespace TerminusDotNetCore.Modules
         [Summary("Places a DMC watermark on the attached image, or the image in the previous message (if any).")]
         public async Task DMCWatermarkImagesAsync()
         {
-            IReadOnlyCollection<Attachment> attachments = null;
-            try
-            {
-                attachments = await AttachmentHelper.GetAttachmentsAsync(Context, AttachmentFilter.Images);
-            }
-            catch (NullReferenceException)
+            IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetAttachmentsAsync(Context, AttachmentFilter.Images);
+            if (attachments == null)
             {
                 await ServiceReplyAsync("No images were found in the current message or previous messages.");
                 return;
@@ -121,12 +109,8 @@ namespace TerminusDotNetCore.Modules
 
         public async Task MosaicImageAsync()
         {
-            IReadOnlyCollection<Attachment> attachments = null;
-            try
-            {
-                attachments = await AttachmentHelper.GetAttachmentsAsync(Context, AttachmentFilter.Images);
-            }
-            catch (NullReferenceException)
+            IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetAttachmentsAsync(Context, AttachmentFilter.Images);
+            if (attachments == null)
             {
                 await ServiceReplyAsync("No images were found in the current message or previous messages.");
                 return;
@@ -140,12 +124,8 @@ namespace TerminusDotNetCore.Modules
         [Summary("Adds top text and bottom text to the attached image, or the image in the previous message (if any).")]
         public async Task MemeCaptionImageAsync([Summary("top text to add")]string topText = null, [Summary("bottom text to add")]string bottomText = null)
         {
-            IReadOnlyCollection<Attachment> attachments = null;
-            try
-            {
-                attachments = await AttachmentHelper.GetAttachmentsAsync(Context, AttachmentFilter.Images);
-            }
-            catch (NullReferenceException)
+            IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetAttachmentsAsync(Context, AttachmentFilter.Images);
+            if (attachments == null)
             {
                 await ServiceReplyAsync("No images were found in the current message or previous messages.");
                 return;
@@ -166,12 +146,8 @@ namespace TerminusDotNetCore.Modules
 
         public async Task ThiccImageAsync([Summary("factor to scale the image width by")]int thiccCount = 2)
         {
-            IReadOnlyCollection<Attachment> attachments = null;
-            try
-            {
-                attachments = await AttachmentHelper.GetAttachmentsAsync(Context, AttachmentFilter.Images);
-            }
-            catch (NullReferenceException)
+            IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetAttachmentsAsync(Context, AttachmentFilter.Images);
+            if (attachments == null)
             {
                 await ServiceReplyAsync("No images were found in the current message or previous messages.");
                 return;
@@ -192,12 +168,8 @@ namespace TerminusDotNetCore.Modules
             }
             else
             {
-                IReadOnlyCollection<Attachment> attachments = null;
-                try
-                {
-                    attachments = await AttachmentHelper.GetAttachmentsAsync(Context, AttachmentFilter.Images);
-                }
-                catch (NullReferenceException)
+                IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetAttachmentsAsync(Context, AttachmentFilter.Images);
+                if (attachments == null)
                 {
                     await ServiceReplyAsync("No images were found in the current message or previous messages.");
                     return;
@@ -212,19 +184,15 @@ namespace TerminusDotNetCore.Modules
         [Summary("Paints the attached/most recent image(s) on a stock photo of someone at their computer.")]
         public async Task PCImagesAsync()
         {
-                IReadOnlyCollection<Attachment> attachments = null;
-                try
-                {
-                    attachments = await AttachmentHelper.GetAttachmentsAsync(Context, AttachmentFilter.Images);
-                }
-                catch (NullReferenceException)
-                {
-                    await ServiceReplyAsync("No images were found in the current message or previous messages.");
-                    return;
-                }
+            IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetAttachmentsAsync(Context, AttachmentFilter.Images);
+            if (attachments == null)
+            {
+                await ServiceReplyAsync("No images were found in the current message or previous messages.");
+                return;
+            }
 
-                var images = _imageService.PCImages(attachments);
-                await SendImages(images);
+            var images = _imageService.PCImages(attachments);
+            await SendImages(images);
         }
     }
 }
