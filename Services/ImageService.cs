@@ -318,11 +318,11 @@ namespace TerminusDotNetCore.Services
             SixLabors.Primitives.Point bottomRight = new SixLabors.Primitives.Point(437, 407);
             SixLabors.Primitives.Point bottomLeft = new SixLabors.Primitives.Point(23, 388);
 
-            using (var outputImage = new Image<Rgba32>(640, 480))
+            
+            for (int i = 0; i < numTimes; i++)
             {
-                for (int i = 0; i < numTimes; i++)
+                using (var outputImage = ProjectOnto(imageFilename, Path.Combine("assets", "images", "bobross.png"), topLeft, topRight, bottomLeft, bottomRight))
                 {
-                    outputImage = ProjectOnto(imageFilename, Path.Combine("assets", "images", "bobross.png"), topLeft, topRight, bottomLeft, bottomRight);
                     outputImage.Save(imageFilename);
                 }
             }
