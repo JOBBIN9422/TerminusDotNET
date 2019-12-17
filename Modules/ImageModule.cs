@@ -165,7 +165,7 @@ namespace TerminusDotNetCore.Modules
             if (!string.IsNullOrEmpty(text))
             {
                 int numTimes;
-                if (int.TryParse(text, numTimes) && attachments != null)
+                if (int.TryParse(text, out numTimes) && attachments != null)
                 {
                     var images = _imageService.BobRossImages(attachments, numTimes);
                     await SendImages(images);
