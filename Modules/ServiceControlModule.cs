@@ -18,6 +18,7 @@ namespace TerminusDotNetCore.Modules
 	public ServiceControlModule(CustomService service)
 	{
 	    Service = service;
+	    Service.ParentModule = this;
 	}
     }
 }
