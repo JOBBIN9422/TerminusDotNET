@@ -71,7 +71,8 @@ namespace TerminusDotNetCore.Helpers
                 }
 
                 //if none of the previous messages had any attachments
-                throw new NullReferenceException("No attachments were found in the current or previous messages.");
+                //throw new NullReferenceException("No attachments were found in the current or previous messages.");
+                return null;
             }
             else
             {
@@ -81,7 +82,8 @@ namespace TerminusDotNetCore.Helpers
                 }
                 else
                 {
-                    throw new NullReferenceException("No attachments were found in the current or previous messages.");
+                    //throw new NullReferenceException("No attachments were found in the current or previous messages.");
+                    return null;
                 }
             }
         }
