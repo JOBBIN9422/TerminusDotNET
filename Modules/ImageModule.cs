@@ -143,7 +143,6 @@ namespace TerminusDotNetCore.Modules
 
         [Command("thicc", RunMode = RunMode.Async)]
         [Summary("Stretches the attached image, or the image in the previous message (if any).")]
-
         public async Task ThiccImageAsync([Summary("factor to scale the image width by")]int thiccCount = 2)
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetAttachmentsAsync(Context, AttachmentFilter.Images);
@@ -162,20 +161,27 @@ namespace TerminusDotNetCore.Modules
         public async Task BobRossImagesAsync([Remainder]string text = null)
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetAttachmentsAsync(Context, AttachmentFilter.Images);
+            
+            //check if an argument was provided
             if (!string.IsNullOrEmpty(text))
             {
+                //is the argument solely a number?
                 int numTimes;
                 if (int.TryParse(text, out numTimes) && attachments != null)
                 {
                     var images = _imageService.BobRossImages(attachments, numTimes);
                     await SendImages(images);
                 }
+                
+                //if not, treat it as text
                 else
                 {
                     string bobRossTextImg = _imageService.BobRossText(text);
                     await SendImage(bobRossTextImg);
                 }
             }
+            
+            //if no argument was provided, try to process each image once
             else
             {
                 if (attachments == null)
