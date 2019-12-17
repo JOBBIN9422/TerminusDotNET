@@ -143,7 +143,7 @@ namespace TerminusDotNetCore.Modules
 
         [Command("thicc", RunMode = RunMode.Async)]
         [Summary("Stretches the attached image, or the image in the previous message (if any).")]
-        public async Task ThiccImageAsync([Summary("factor to scale the image width by")]uint thiccCount = 2)
+        public async Task ThiccImageAsync([Summary("factor to scale the image width by")]int thiccCount = 2)
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null)
