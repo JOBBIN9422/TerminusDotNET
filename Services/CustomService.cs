@@ -10,7 +10,7 @@ namespace TerminusDotNetCore.Services
 {
     public class CustomService
     {
-        ServiceControlModule ParentModule { get; set; }
+        public ServiceControlModule ParentModule { get; set; }
 
         //Task ServiceReplyAsync(string s, EmbedBuilder embedBuilder = null);
     }
