@@ -322,7 +322,7 @@ namespace TerminusDotNetCore.Services
             {
                 for (int i = 0; i < numTimes; i++)
                 {
-                    outputImage = ProjectOnto(imageFilename, Path.Combine("assets", "images", "bobross.png"), topLeft, topRight, bottomLeft, bottomRight)
+                    outputImage = ProjectOnto(imageFilename, Path.Combine("assets", "images", "bobross.png"), topLeft, topRight, bottomLeft, bottomRight);
                     outputImage.Save(imageFilename);
                 }
             }
