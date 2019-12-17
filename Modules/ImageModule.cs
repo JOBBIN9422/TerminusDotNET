@@ -61,7 +61,7 @@ namespace TerminusDotNetCore.Modules
 
         [Command("deepfry", RunMode = RunMode.Async)]
         [Summary("Deep-fries an attached image, or the image in the previous message (if any).")]
-        public async Task DeepFryImageAsync([Summary("how many times to fry the image")]int numPasses = 1)
+        public async Task DeepFryImageAsync([Summary("how many times to fry the image")]uint numPasses = 1)
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null)
@@ -143,7 +143,7 @@ namespace TerminusDotNetCore.Modules
 
         [Command("thicc", RunMode = RunMode.Async)]
         [Summary("Stretches the attached image, or the image in the previous message (if any).")]
-        public async Task ThiccImageAsync([Summary("factor to scale the image width by")]int thiccCount = 2)
+        public async Task ThiccImageAsync([Summary("factor to scale the image width by")]uint thiccCount = 2)
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null)
@@ -166,8 +166,8 @@ namespace TerminusDotNetCore.Modules
             if (!string.IsNullOrEmpty(text))
             {
                 //is the argument solely a number?
-                int numTimes;
-                if (int.TryParse(text, out numTimes) && attachments != null)
+                uint numTimes;
+                if (uint.TryParse(text, out numTimes) && attachments != null)
                 {
                     var images = _imageService.BobRossImages(attachments, numTimes);
                     await SendImages(images);
