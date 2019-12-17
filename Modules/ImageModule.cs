@@ -161,14 +161,23 @@ namespace TerminusDotNetCore.Modules
         [Summary("Paints the attached/most recent image(s) on Bob's happy little canvas. If text is supplied, draws the text on Bob's canvas instead.")]
         public async Task BobRossImagesAsync([Remainder]string text = null)
         {
+            IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetAttachmentsAsync(Context, AttachmentFilter.Images);
             if (!string.IsNullOrEmpty(text))
             {
-                string bobRossTextImg = _imageService.BobRossText(text);
-                await SendImage(bobRossTextImg);
+                int numTimes;
+                if (int.TryParse(text, numTimes) && attachments != null)
+                {
+                    var images = _imageService.BobRossImages(attachments, numTimes);
+                    await SendImages(images);
+                }
+                else
+                {
+                    string bobRossTextImg = _imageService.BobRossText(text);
+                    await SendImage(bobRossTextImg);
+                }
             }
             else
             {
-                IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetAttachmentsAsync(Context, AttachmentFilter.Images);
                 if (attachments == null)
                 {
                     await ServiceReplyAsync("No images were found in the current message or previous messages.");
