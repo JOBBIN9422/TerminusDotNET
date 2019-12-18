@@ -165,7 +165,7 @@ namespace TerminusDotNetCore
 
         private async Task OnCommandExecutedAsync(Optional<CommandInfo> command, ICommandContext context, IResult result)
         {
-            if (command.Value == null)
+            if (command == null)
             {
                 await context.Channel.SendMessageAsync("Unknown command.");
                 await Log(new LogMessage(LogSeverity.Error, "CommandExecution", $"Unknown command."));
