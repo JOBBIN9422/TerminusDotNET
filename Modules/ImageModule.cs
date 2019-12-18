@@ -10,7 +10,7 @@ using TerminusDotNetCore.Helpers;
 
 namespace TerminusDotNetCore.Modules
 {
-    public class ImageModule : ModuleBase<SocketCommandContext>, IServiceModule
+    public class ImageModule : ServiceControlModule
     {
         private ImageService _imageService;
 
@@ -18,18 +18,6 @@ namespace TerminusDotNetCore.Modules
         {
             _imageService = service;
             _imageService.ParentModule = this;
-        }
-
-        public async Task ServiceReplyAsync(string s, EmbedBuilder embedBuilder = null)
-        {
-            if (embedBuilder == null)
-            {
-                await ReplyAsync(s);
-            }
-            else
-            {
-                await ReplyAsync(s, false, embedBuilder.Build());
-            }
         }
 
         public async Task SendFileAsync(string filename)

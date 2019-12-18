@@ -17,7 +17,7 @@ namespace TerminusDotNetCore.Services
 {
     public class ImageService : ICustomService
     {
-        public IServiceModule ParentModule { get; set; }
+        public ServiceControlModule ParentModule { get; set; }
 
         public List<string> DeepfryImages(IReadOnlyCollection<Attachment> attachments, uint numPasses = 1)
         {

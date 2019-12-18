@@ -12,7 +12,7 @@ using Microsoft.Extensions.Configuration.FileExtensions;
 
 namespace TerminusDotNetCore.Modules
 {
-    public class MangioneModule : ModuleBase<SocketCommandContext>, IServiceModule
+    public class MangioneModule : ServiceControlModule
     {
         private AudioService _service;
 
@@ -20,18 +20,6 @@ namespace TerminusDotNetCore.Modules
         {
             _service = service;
             _service.ParentModule = this;
-        }
-
-        public async Task ServiceReplyAsync(string s, EmbedBuilder embedBuilder = null)
-        {
-            if (embedBuilder == null)
-            {
-                await ReplyAsync(s);
-            }
-            else
-            {
-                await ReplyAsync(s, false, embedBuilder.Build());
-            }
         }
 
         private async Task<IReadOnlyCollection<Attachment>> GetAttachmentsAsync()

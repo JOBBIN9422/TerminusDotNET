@@ -22,7 +22,7 @@ namespace TerminusDotNetCore.Services
 {
     public class AudioService : ICustomService
     {
-        public IServiceModule ParentModule { get; set; }
+        public ServiceControlModule ParentModule { get; set; }
         private ConcurrentQueue<AudioItem> songQueue = new ConcurrentQueue<AudioItem>();
         private ConcurrentQueue<AudioItem> backupQueue = new ConcurrentQueue<AudioItem>();
         private AudioItem _currentSong = null;

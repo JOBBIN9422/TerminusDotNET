@@ -53,6 +53,9 @@
     <None Update="assets\images\suicide.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="assets\regex.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="bobross.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

@@ -7,7 +7,7 @@ namespace TerminusDotNetCore.Services
 {
     public class WideTextService : ICustomService
     {
-        public IServiceModule ParentModule { get; set; }
+        public ServiceControlModule ParentModule { get; set; }
 
         private Dictionary<char, char> _wideTextMap = new Dictionary<char, char>();
 

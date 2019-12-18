@@ -10,7 +10,7 @@ using TerminusDotNetCore.Services;
 
 namespace TerminusDotNetCore.Modules
 {
-    public class WideTextModule : ModuleBase<SocketCommandContext>, IServiceModule
+    public class WideTextModule : ServiceControlModule
     {
         private WideTextService _wideTextService;
 
@@ -18,18 +18,6 @@ namespace TerminusDotNetCore.Modules
         {
             _wideTextService = service;
             _wideTextService.ParentModule = this;
-        }
-
-        public async Task ServiceReplyAsync(string s, EmbedBuilder embedBuilder = null)
-        {
-            if (embedBuilder == null)
-            {
-                await ReplyAsync(s);
-            }
-            else
-            {
-                await ReplyAsync(s, false, embedBuilder.Build());
-            }
         }
 
         [Command("wide", RunMode = RunMode.Async)]

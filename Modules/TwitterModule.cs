@@ -9,7 +9,7 @@ using TerminusDotNetCore.Services;
 
 namespace TerminusDotNetCore.Modules
 {
-    public class TwitterModule : ModuleBase<SocketCommandContext>, IServiceModule
+    public class TwitterModule : ServiceControlModule
     {
         private TwitterService _twitterService;
 
@@ -17,18 +17,6 @@ namespace TerminusDotNetCore.Modules
         {
             _twitterService = service;
             _twitterService.ParentModule = this;
-        }
-
-        public async Task ServiceReplyAsync(string s, EmbedBuilder embedBuilder = null)
-        {
-            if (embedBuilder == null)
-            {
-                await ReplyAsync(s);
-            }
-            else
-            {
-                await ReplyAsync(s, false, embedBuilder.Build());
-            }
         }
 
         [Command("twitter", RunMode = RunMode.Async)]

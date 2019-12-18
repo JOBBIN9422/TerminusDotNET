@@ -12,7 +12,7 @@ namespace TerminusDotNetCore.Services
 {
     public class TwitterService : ICustomService
     {
-        public IServiceModule ParentModule { get; set; }
+        public ServiceControlModule ParentModule { get; set; }
         private TwitterContext _twitterContext;
         private Random _random = new Random();
 
