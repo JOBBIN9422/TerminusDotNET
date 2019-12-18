@@ -8,9 +8,9 @@ using Discord.Commands;
 
 namespace TerminusDotNetCore.Modules
 {
-    public abstract class TextModule
+    public abstract class TextModule : ModuleBase<SocketCommandContext>
     {
-        private Random _random;
+        protected Random _random;
         
         public TextModule(Random random)
         {
