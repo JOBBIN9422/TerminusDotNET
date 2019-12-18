@@ -165,31 +165,29 @@ namespace TerminusDotNetCore
 
         private async Task OnCommandExecutedAsync(Optional<CommandInfo> command, ICommandContext context, IResult result)
         {
+            if (command.Value == null)
+            {
+                await context.Channel.SendMessageAsync("Unknown command.");
+                await Log(new LogMessage(LogSeverity.Error, "CommandExecution", $"Unknown command."));
+                return;
+            }
             if (!result.IsSuccess && result is ExecuteResult execResult)
             {
-                if (command.Value == null)
-                {
-                    await context.Channel.SendMessageAsync("Unknown command.");
-                    await Log(new LogMessage(LogSeverity.Error, "CommandExecution", $"Unknown command."));
-                }
-                else
-                {
-                    //alert user and print error details to console
-                    await context.Channel.SendMessageAsync(result.ErrorReason);
-                    await Log(new LogMessage(LogSeverity.Error, "CommandExecution", $"Error in command '{command.Value.Name}': {execResult.ErrorReason}"));
-                    await Log(new LogMessage(LogSeverity.Error, "CommandExecution", $"Exception details (see errors.txt): {execResult.Exception.StackTrace}"));
+                //alert user and print error details to console
+                await context.Channel.SendMessageAsync(result.ErrorReason);
+                await Log(new LogMessage(LogSeverity.Error, "CommandExecution", $"Error in command '{command.Value.Name}': {execResult.ErrorReason}"));
+                await Log(new LogMessage(LogSeverity.Error, "CommandExecution", $"Exception details (see errors.txt): {execResult.Exception.StackTrace}"));
                 
-                    //dump exception details to error log
-                    using (StreamWriter writer = new StreamWriter("errors.txt", true))
-                    {
-                        writer.WriteLine("----- BEGIN ENTRY -----");
-                        writer.WriteLine($"ERROR DATETIME: {DateTime.Now.ToString()}");
-                        writer.WriteLine($"COMMAND NAME  : {command.Value.Name}");
-                        writer.WriteLine();
-                        writer.WriteLine(execResult.Exception.ToString());
-                        writer.WriteLine("----- END ENTRY   -----");
-                        writer.WriteLine();
-                    }
+                //dump exception details to error log
+                using (StreamWriter writer = new StreamWriter("errors.txt", true))
+                {
+                    writer.WriteLine("----- BEGIN ENTRY -----");
+                    writer.WriteLine($"ERROR DATETIME: {DateTime.Now.ToString()}");
+                    writer.WriteLine($"COMMAND NAME  : {command.Value.Name}");
+                    writer.WriteLine();
+                    writer.WriteLine(execResult.Exception.ToString());
+                    writer.WriteLine("----- END ENTRY   -----");
+                    writer.WriteLine();
                 }
             }
             else
