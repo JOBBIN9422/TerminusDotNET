@@ -14,6 +14,8 @@ namespace TerminusDotNetCore.Modules
         public async Task PingAsync([Remainder]string message = null)
         {
             IPAddress IP;
+
+            //Validates whether argument exists
             if (string.IsNullOrEmpty(message))
             {
                 await ReplyAsync("Must supply an IP address.");
@@ -22,6 +24,7 @@ namespace TerminusDotNetCore.Modules
             {
                 string ip_addr = "";
 
+                //Custom ip for minecraft
                 if (message == "minecraft")
                 {
                     ip_addr = "98.200.245.252";
@@ -31,6 +34,7 @@ namespace TerminusDotNetCore.Modules
                     ip_addr = message;
                 }
 
+                //Validates given ip address
                 if (!(IPAddress.TryParse(ip_addr.Split(':')[0], out IP)))
                 {
                     await ReplyAsync(ip_addr + " is not a valid IP address.");
