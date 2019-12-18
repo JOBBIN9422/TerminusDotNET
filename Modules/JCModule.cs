@@ -5,15 +5,16 @@ using System.Threading.Tasks;
 
 namespace TerminusDotNetCore.Modules
 {
-    public class JCModule : ModuleBase<SocketCommandContext>, ITextModule
+    public class JCModule : TextModule
     {
+        public JCModule(Random random) : base(random) {}
+        
         [Command("JC")]
         [Summary("Responds with a random JC Denton quote.")]
-        public async Task SayAsync()
+        public override async Task SayAsync()
         {
-            var random = new Random();
             var jcPastas = File.ReadAllLines(Path.Combine("RandomMessages", "jc.txt"));
-            await ReplyAsync(jcPastas[random.Next(jcPastas.Length)]);
+            await ReplyAsync(jcPastas[_random.Next(jcPastas.Length)]);
         }
     }
 }
