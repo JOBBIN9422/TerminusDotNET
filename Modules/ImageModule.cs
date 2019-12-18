@@ -209,5 +209,19 @@ namespace TerminusDotNetCore.Modules
             var images = _imageService.PCImages(attachments);
             await SendImages(images);
         }
+        [Command("trump", RunMode = RunMode.Async)]
+        [Summary("Overlays a custom image attachment onto a book held by President Trump.")]
+        public async Task TrumpImagesAsync()
+        {
+            IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetAttachmentsAsync(Context, AttachmentFilter.Images);
+            if (attachments == null)
+            {
+                await ServiceReplyAsync("No images were found in the current message or previous messages.");
+                return;
+            }
+
+            var images = _imageService.TrumpImages(attachments);
+            await SendImages(image);
+        }
     }
 }
