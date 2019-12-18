@@ -17,7 +17,7 @@ namespace TerminusDotNetCore
 {
     class Bot
     {
-        private RegexCommands _regexMsgParser = new RegexCommands();
+        private RegexCommands _regexMsgParser;
         private DiscordSocketClient _client;
         private CommandService _commandService;
         private IServiceProvider _serviceProvider;
@@ -30,6 +30,7 @@ namespace TerminusDotNetCore
 
         public async Task Initialize()
         {
+            _regexMsgParser = new RegexCommands();
             _commandService = new CommandService();
 
             //instantiate client and register log event handler
