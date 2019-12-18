@@ -11,7 +11,7 @@ namespace TerminusDotNetCore.Modules
         
         [Command("BF2")]
         [Summary("Star Wars Battlefront 2 Video Game Clone Trooper Quotes")]
-        public async Task SayAsync()
+        public override async Task SayAsync()
         {
             var bf2Pastas = File.ReadAllLines(Path.Combine("RandomMessages", "bf2.txt"));
             await ReplyAsync(bf2Pastas[_random.Next(bf2Pastas.Length)]);
