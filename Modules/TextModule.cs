@@ -17,6 +17,6 @@ namespace TerminusDotNetCore.Modules
             _random = random;
         }
         
-        public abstract async Task SayAsync();
+        public abstract Task SayAsync();
     }
 }
