@@ -8,7 +8,7 @@ using Discord.Commands;
 
 namespace TerminusDotNetCore.Modules
 {
-    public class TextModule
+    public abstract class TextModule
     {
         private Random _random;
         
