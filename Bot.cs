@@ -17,6 +17,7 @@ namespace TerminusDotNetCore
 {
     class Bot
     {
+        private RegexCommands _regexMsgParser = new RegexCommands();
         private DiscordSocketClient _client;
         private CommandService _commandService;
         private IServiceProvider _serviceProvider;
@@ -143,8 +144,7 @@ namespace TerminusDotNetCore
                     || message.Author.IsBot)
                 {
                     //look for wildcards in the current message 
-                    var regexMsgParser = new RegexCommands();
-                    var matches = regexMsgParser.ParseMessage(message.Content);
+                    var matches = _regexMsgParser.ParseMessage(message.Content);
 
                     if (matches.Count > 0 && !message.Author.IsBot)
                     {
