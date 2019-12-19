@@ -1,7 +1,9 @@
 ﻿using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Text;
 using TerminusDotNetCore.Modules;
+using TerminusDotNetCore.Helpers;
 using LinqToTwitter;
 using Microsoft.Extensions.Configuration;
 using System.Threading.Tasks;
@@ -14,12 +16,11 @@ namespace TerminusDotNetCore.Services
     {
         public ServiceControlModule ParentModule { get; set; }
         private Random _random = new Random();
+	private MarkovHelper _clickbaitMarkov = new MarkovHelper(Path.Combine("assets", "clickbait.txt"));
 
-        public MarkovService()
-        {
-            IConfiguration config = new ConfigurationBuilder()
-                                        .AddJsonFile("appsettings.json", true, true)
-                                        .Build();
-        }
+	public string GenerateClickbaitSentence()
+	{
+            return _clickbaitMarkov.GenerateSentence();
+	}
     }
 }

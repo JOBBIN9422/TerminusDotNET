@@ -23,6 +23,8 @@ namespace TerminusDotNetCore.Modules
         [Summary("Generate a random clickbait article title.")]
         public async Task GenerateClickbaitSentence()
         {
+            string clickbaitTitle = _markovService.GenerateClickbaitSentence();
+	    await ServiceReplyAsync(clickbaitTitle);
         }
 
     }
