@@ -15,7 +15,6 @@ namespace TerminusDotNetCore.Services
     public class MarkovService : ICustomService
     {
         public ServiceControlModule ParentModule { get; set; }
-        private Random _random = new Random();
 	private MarkovHelper _clickbaitMarkov = new MarkovHelper(Path.Combine("assets", "clickbait.txt"));
 
 	public string GenerateClickbaitSentence()
