@@ -35,6 +35,9 @@
     <None Update="appsettings.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="assets\clickbait.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="assets\images\bobross.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

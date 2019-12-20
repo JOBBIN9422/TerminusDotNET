@@ -22,6 +22,7 @@ namespace TerminusDotNetCore
         private CommandService _commandService;
         private IServiceProvider _serviceProvider;
         private bool _isActive = true;
+        private List<ulong> _blacklistChannels = new List<ulong>();
 
         public Bot()
         {
@@ -64,6 +65,14 @@ namespace TerminusDotNetCore
             string token = config["DiscordToken"];
             await _client.LoginAsync(TokenType.Bot, token);
             await _client.StartAsync();
+
+            //load blacklisted channels
+            var blacklistSection = config.GetSection("BlacklistChannels");
+            foreach (var section in blacklistSection.GetChildren())
+            {
+                ulong id = ulong.Parse(section.Value);
+                _blacklistChannels.Add(id);
+            }
 
             //init custom services
             _serviceProvider = InstallServices();
@@ -108,7 +117,7 @@ namespace TerminusDotNetCore
         private async Task HandleCommandAsync(SocketMessage messageParam)
         {
             var message = messageParam as SocketUserMessage;
-            if (message == null)
+            if (message == null || _blacklistChannels.Contains(message.Channel.Id))
             {
                 return;
             }
