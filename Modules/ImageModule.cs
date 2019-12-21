@@ -185,7 +185,7 @@ namespace TerminusDotNetCore.Modules
 
         [Command("pc", RunMode = RunMode.Async)]
         [Summary("Paints the attached/most recent image(s) on a stock photo of someone at their computer.")]
-        public async Task PCImagesAsync()
+        public async Task PCImagesAsync(int numTimes = 1)
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null)
@@ -194,13 +194,13 @@ namespace TerminusDotNetCore.Modules
                 return;
             }
 
-            var images = _imageService.PCImages(attachments);
+            var images = _imageService.PCImages(attachments, numTimes);
             await SendImages(images);
         }
 
         [Command("trump", RunMode = RunMode.Async)]
         [Summary("Overlays a custom image attachment onto a book held by President Trump.")]
-        public async Task TrumpImagesAsync()
+        public async Task TrumpImagesAsync(int numTimes = 1)
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null)
@@ -209,7 +209,7 @@ namespace TerminusDotNetCore.Modules
                 return;
             }
 
-            var images = _imageService.TrumpImages(attachments);
+            var images = _imageService.TrumpImages(attachments, numTimes);
             await SendImages(images);
         }
     }

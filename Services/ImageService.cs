@@ -373,19 +373,19 @@ namespace TerminusDotNetCore.Services
             }
         }
 
-        public List<string> PCImages(IReadOnlyCollection<Attachment> attachments)
+        public List<string> PCImages(IReadOnlyCollection<Attachment> attachments, int numTimes = 1)
         {
             var images = AttachmentHelper.DownloadAttachments(attachments);
 
             foreach (var image in images)
             {
-                PCImage(image);
+                PCImage(image, numTimes);
             }
 
             return images;
         }
 
-        private void PCImage(string imageFilename)
+        private void PCImage(string imageFilename, int numTimes = 1)
         {
             //define projection points for the corners of Bob's happy little canvas
             SixLabors.Primitives.Point topLeft = new SixLabors.Primitives.Point(69, 334);
@@ -393,25 +393,28 @@ namespace TerminusDotNetCore.Services
             SixLabors.Primitives.Point bottomRight = new SixLabors.Primitives.Point(432, 579);
             SixLabors.Primitives.Point bottomLeft = new SixLabors.Primitives.Point(214, 726);
 
-            using (var outputImage = ProjectOnto(imageFilename, Path.Combine("assets", "images", "suicide.png"), topLeft, topRight, bottomLeft, bottomRight))
+            for (int i = 0; i < numTimes; i++)
             {
-                outputImage.Save(imageFilename);
+                using (var outputImage = ProjectOnto(imageFilename, Path.Combine("assets", "images", "suicide.png"), topLeft, topRight, bottomLeft, bottomRight))
+                {
+                    outputImage.Save(imageFilename);
+                }
             }
         }
 
-        public List<string> TrumpImages(IReadOnlyCollection<Attachment> attachments)
+        public List<string> TrumpImages(IReadOnlyCollection<Attachment> attachments, int numTimes = 1)
         {
             var images = AttachmentHelper.DownloadAttachments(attachments);
 
             foreach (var image in images)
             {
-                TrumpImage(image);
+                TrumpImage(image, numTimes);
             }
 
             return images;
         }
 
-        private void TrumpImage(string imageFilename)
+        private void TrumpImage(string imageFilename, int numTimes = 1)
         {
             //defince projection points for corners of book
             SixLabors.Primitives.Point topLeft = new SixLabors.Primitives.Point(218, 164);
@@ -419,9 +422,12 @@ namespace TerminusDotNetCore.Services
             SixLabors.Primitives.Point bottomRight = new SixLabors.Primitives.Point(368, 361);
             SixLabors.Primitives.Point bottomLeft = new SixLabors.Primitives.Point(220, 365);
 
-            using (var outputImage = ProjectOnto(imageFilename, Path.Combine("assets", "images", "don.png"), topLeft, topRight, bottomLeft, bottomRight))
+            for (int i = 0; i < numTimes; i++)
             {
-                outputImage.Save(imageFilename);
+                using (var outputImage = ProjectOnto(imageFilename, Path.Combine("assets", "images", "don.png"), topLeft, topRight, bottomLeft, bottomRight))
+                {
+                    outputImage.Save(imageFilename);
+                }
             }
         }    
 
