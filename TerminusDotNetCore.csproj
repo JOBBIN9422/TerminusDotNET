@@ -95,6 +95,9 @@
     <None Update="assets/feels_so_good.mp3">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="secrets.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="suicide.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

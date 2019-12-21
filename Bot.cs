@@ -43,7 +43,17 @@ namespace TerminusDotNetCore
             IConfiguration config = new ConfigurationBuilder()
                                         .AddJsonFile("appsettings.json", true, true)
                                         .Build();
-            
+
+            IConfiguration secrets = new ConfigurationBuilder()
+                                        .AddJsonFile("secrets.json", true, true)
+                                        .Build();
+
+            //verify that each required client secret is in the secrets file
+            Dictionary<string, string> requiredSecrets = new Dictionary<string, string>()
+            {
+                {"DiscordToken", "Token to connect to your discord server"}
+            };
+
             //verify that each required config entry is in the appsettings file
             Dictionary<string, string> requiredConfigs = new Dictionary<string, string>()
             {
@@ -57,12 +67,20 @@ namespace TerminusDotNetCore
             {
                 if (config[configEntry.Key] == null)
                 {
-                    await Log(new LogMessage(LogSeverity.Warning, "appsettings.json", $"WARN: Missing item in appsettings config file :: {configEntry.Key}--- Description :: {configEntry.Value}"));
+                    await Log(new LogMessage(LogSeverity.Warning, "appsettings.json", $"WARN: Missing item in appsettings config file :: {configEntry.Key} --- Description :: {configEntry.Value}"));
                 }
             }
-            
+
+            foreach (var secretEntry in requiredSecrets)
+            {
+                if (secrets[secretEntry.Key] == null)
+                {
+                    await Log(new LogMessage(LogSeverity.Warning, "secrets.json", $"WARN: Missing item in secrets file :: {secretEntry.Key} --- Description :: {secretEntry.Value}"));
+                }
+            }
+
             //log in & start the client
-            string token = config["DiscordToken"];
+            string token = secrets["DiscordToken"];
             await _client.LoginAsync(TokenType.Bot, token);
             await _client.StartAsync();
 

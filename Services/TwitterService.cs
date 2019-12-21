@@ -19,7 +19,7 @@ namespace TerminusDotNetCore.Services
         public TwitterService()
         {
             IConfiguration config = new ConfigurationBuilder()
-                                        .AddJsonFile("appsettings.json", true, true)
+                                        .AddJsonFile("secrets.json", true, true)
                                         .Build();
 
             string consumerKey = config["TwitterConsumerKey"];
