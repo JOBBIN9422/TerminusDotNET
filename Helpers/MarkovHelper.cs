@@ -2,6 +2,7 @@
 using System.IO;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Linq;
 
 namespace TerminusDotNetCore.Helpers
@@ -35,46 +36,73 @@ namespace TerminusDotNetCore.Helpers
                         continue;
                     }
 
-                    //preprocess sentence
-                    foreach (string removeStr in preprocessChars)
-                    {
-                        currSentence = currSentence.Replace(removeStr, "");
-                    }
+                    AddSentenceToCorpus(currSentence, preprocessChars);
+                }
+            }
+        }
 
-                    //add start and end marker-keywords
-                    currSentence = $"*START* {currSentence} *END*";
+        public MarkovHelper(List<string> sentences, params string[] preprocessChars)
+        {
+            foreach (string sentence in sentences)
+            {
+                //ignore commands
+                if (!Regex.IsMatch(sentence, @"\!\w"))
+                {
+                    //strip emojis
+                    AddSentenceToCorpus(Regex.Replace(sentence, @"\<:\w+:\d+\>", ""), preprocessChars);
+                }
+            }
+        }
 
-                    //tokenize by spaces
-                    string[] tokens = currSentence.Split(' ');
-                    TokenCount += tokens.Length;
+        private void AddSentenceToCorpus(string sentence, string[] preprocessChars = null)
+        {
+            //ignore empty sentences
+            if (string.IsNullOrEmpty(sentence))
+            {
+                return;
+            }
 
-                    //add any potential keys to the corpus
-                    foreach (string token in tokens)
-                    {
-                        if (!_markovCorpus.ContainsKey(token))
-                        {
-                            _markovCorpus.Add(token, new Dictionary<string, int>());
-                        }
-                    }
+            if (preprocessChars != null)
+            {
+                //preprocess sentence
+                foreach (string removeStr in preprocessChars)
+                {
+                    sentence = sentence.Replace(removeStr, "");
+                }
+            }
 
-                    //slide the "window" across the current sentence and build word relationships
-                    for (int i = 0; i < tokens.Length - 1; i++)
-                    {
-                        //get the current key and the word following it
-                        string currKey = tokens[i];
-                        string currNextWord = tokens[i + 1];
+            //add start and end marker-keywords
+            sentence = $"*START* {sentence} *END*";
 
-                        //count the number of times the current word has appeared after the current keyword
-                        Dictionary<string, int> currHistogram = _markovCorpus[currKey];
-                        if (!currHistogram.ContainsKey(currNextWord))
-                        {
-                            currHistogram.Add(currNextWord, 1);
-                        }
-                        else
-                        {
-                            currHistogram[currNextWord] += 1;
-                        }
-                    }
+            //tokenize by spaces
+            string[] tokens = sentence.Split(' ');
+            TokenCount += tokens.Length;
+
+            //add any potential keys to the corpus
+            foreach (string token in tokens)
+            {
+                if (!_markovCorpus.ContainsKey(token))
+                {
+                    _markovCorpus.Add(token, new Dictionary<string, int>());
+                }
+            }
+
+            //slide the "window" across the current sentence and build word relationships
+            for (int i = 0; i < tokens.Length - 1; i++)
+            {
+                //get the current key and the word following it
+                string currKey = tokens[i];
+                string currNextWord = tokens[i + 1];
+
+                //count the number of times the current word has appeared after the current keyword
+                Dictionary<string, int> currHistogram = _markovCorpus[currKey];
+                if (!currHistogram.ContainsKey(currNextWord))
+                {
+                    currHistogram.Add(currNextWord, 1);
+                }
+                else
+                {
+                    currHistogram[currNextWord] += 1;
                 }
             }
         }
