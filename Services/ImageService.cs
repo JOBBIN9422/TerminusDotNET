@@ -399,6 +399,32 @@ namespace TerminusDotNetCore.Services
             }
         }
 
+        public List<string> TrumpImages(IReadOnlyCollection<Attachment> attachments)
+        {
+            var images = AttachmentHelper.DownloadAttachments(attachments);
+
+            foreach (var image in images)
+            {
+                TrumpImage(image);
+            }
+
+            return images;
+        }
+
+        private void TrumpImage(string imageFilename)
+        {
+            //defince projection points for corners of book
+            SixLabors.Primitives.Point topLeft = new SixLabors.Primitives.Point(218, 164);
+            SixLabors.Primitives.Point topRight = new SixLabors.Primitive.Point(366, 164);
+            SixLabors.Primitives.Point bottomRight = new SixLabors.Primitive.Point(368, 361);
+            SixLabors.Primitives.Point bottomLeft = new SixLabors.Primitive.Point(220, 365);
+
+            using (var outputImage = ProjectOnto(imageFilename, Path.Combine("assets", "images", "trumpalumpagus.jpg"), topLeft, topRight, bottomLeft, bottomRight))
+            {
+                outputImage.Save(imageFilename);
+            }
+        }    
+
         private System.Drawing.Color GetAverageColor(System.Drawing.Bitmap inputImage, int startX, int startY, int width, int height)
         {
             //prevent going out of bounds during calculations

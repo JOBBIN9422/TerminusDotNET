@@ -1,11 +1,12 @@
 {
   "ExpandedNodes": [
     "",
+    "\\assets",
+    "\\assets\\images",
     "\\Helpers",
     "\\Modules",
     "\\RandomMessages",
     "\\Services"
   ],
-  "SelectedNode": "\\RandomMessages\\bf2.txt",
   "PreviewInSolutionExplorer": false
 }
