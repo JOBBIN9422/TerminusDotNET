@@ -25,15 +25,20 @@ namespace TerminusDotNetCore.Modules
         public async Task GenerateClickbaitSentence()
         {
             string clickbaitTitle = _markovService.GenerateClickbaitSentence();
-	    await ServiceReplyAsync(clickbaitTitle);
+	        await ServiceReplyAsync(clickbaitTitle);
         }
 
         [Command("usersim", RunMode = RunMode.Async)]
         [Summary("Generate a sentence based on a user's messages in a given channel.")]
         public async Task GenerateUserSentence([Summary("@user to generate the sentence for.")]IUser user, [Summary("#channel to pull user messages from.")]ISocketMessageChannel channel)
         {
+            if (user == null || channel == null)
+            {
+                await ServiceReplyAsync("Please provide both a @user and a #channel.");
+                return;
+            }
             string userSentence = await _markovService.GenerateUserSentence(user, channel);
-            await ReplyAsync(userSentence);
+            await ServiceReplyAsync(userSentence);
         }
 
     }
