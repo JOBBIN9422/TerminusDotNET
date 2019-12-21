@@ -47,6 +47,9 @@
     <None Update="assets\images\dmc.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="assets\images\don.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="assets\images\GIMP_Pepper.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

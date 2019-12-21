@@ -415,11 +415,11 @@ namespace TerminusDotNetCore.Services
         {
             //defince projection points for corners of book
             SixLabors.Primitives.Point topLeft = new SixLabors.Primitives.Point(218, 164);
-            SixLabors.Primitives.Point topRight = new SixLabors.Primitive.Point(366, 164);
-            SixLabors.Primitives.Point bottomRight = new SixLabors.Primitive.Point(368, 361);
-            SixLabors.Primitives.Point bottomLeft = new SixLabors.Primitive.Point(220, 365);
+            SixLabors.Primitives.Point topRight = new SixLabors.Primitives.Point(366, 164);
+            SixLabors.Primitives.Point bottomRight = new SixLabors.Primitives.Point(368, 361);
+            SixLabors.Primitives.Point bottomLeft = new SixLabors.Primitives.Point(220, 365);
 
-            using (var outputImage = ProjectOnto(imageFilename, Path.Combine("assets", "images", "trumpalumpagus.jpg"), topLeft, topRight, bottomLeft, bottomRight))
+            using (var outputImage = ProjectOnto(imageFilename, Path.Combine("assets", "images", "don.png"), topLeft, topRight, bottomLeft, bottomRight))
             {
                 outputImage.Save(imageFilename);
             }

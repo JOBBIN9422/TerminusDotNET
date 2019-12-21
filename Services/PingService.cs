@@ -1,9 +1,9 @@
 using System;
 using System.Net.NetworkInformation;
-using Text;
+using System.Text;
 
 namespace TerminusDotNetCore.Services
-{ }
+{
     class PingService
     {
         public static PingReply PingRequest(string ip_addr)

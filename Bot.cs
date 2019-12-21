@@ -57,7 +57,6 @@ namespace TerminusDotNetCore
             //verify that each required config entry is in the appsettings file
             Dictionary<string, string> requiredConfigs = new Dictionary<string, string>()
             {
-                {"DiscordToken", "Token to connect to your discord server"},
                 {"FfmpegCommand", "should be ffmpeg.exe for windows, ffmpeg for linux"},
                 {"AudioChannelId", "ID of main audio channel to play audio in"},
                 {"WeedChannelId", "ID of weed sesh audio channel"}

@@ -197,6 +197,7 @@ namespace TerminusDotNetCore.Modules
             var images = _imageService.PCImages(attachments);
             await SendImages(images);
         }
+
         [Command("trump", RunMode = RunMode.Async)]
         [Summary("Overlays a custom image attachment onto a book held by President Trump.")]
         public async Task TrumpImagesAsync()
@@ -209,7 +210,7 @@ namespace TerminusDotNetCore.Modules
             }
 
             var images = _imageService.TrumpImages(attachments);
-            await SendImages(image);
+            await SendImages(images);
         }
     }
 }

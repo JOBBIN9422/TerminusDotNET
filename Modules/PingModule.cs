@@ -43,7 +43,7 @@ namespace TerminusDotNetCore.Modules
                 {
                     //Ping the specified server
                     PingReply reply;
-                    reply = PingServer.PingRequest(ip_addr);
+                    reply = PingService.PingRequest(ip_addr);
 
                     if (reply.Status == IPStatus.Success)
                     {
