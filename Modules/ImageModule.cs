@@ -146,7 +146,7 @@ namespace TerminusDotNetCore.Modules
 
         [Command("bobross", RunMode = RunMode.Async)]
         [Summary("Paints the attached/most recent image(s) on Bob's happy little canvas. If text is supplied, draws the text on Bob's canvas instead.")]
-        public async Task BobRossImagesAsync([Remainder]string text = null)
+        public async Task BobRossImagesAsync([Remainder][Summary("Text to project onto the canvas. If a number is supplied, number of times to repeat the projection instead.")]string text = null)
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetAttachmentsAsync(Context, AttachmentFilter.Images);
             
@@ -185,7 +185,7 @@ namespace TerminusDotNetCore.Modules
 
         [Command("pc", RunMode = RunMode.Async)]
         [Summary("Paints the attached/most recent image(s) on a stock photo of someone at their computer.")]
-        public async Task PCImagesAsync(int numTimes = 1)
+        public async Task PCImagesAsync([Summary("number of times to repeat the projection.")]int numTimes = 1)
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null)
@@ -200,7 +200,7 @@ namespace TerminusDotNetCore.Modules
 
         [Command("trump", RunMode = RunMode.Async)]
         [Summary("Overlays a custom image attachment onto a book held by President Trump.")]
-        public async Task TrumpImagesAsync(int numTimes = 1)
+        public async Task TrumpImagesAsync([Summary("number of times to repeat the projection.")]int numTimes = 1)
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null)
