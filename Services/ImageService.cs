@@ -328,54 +328,6 @@ namespace TerminusDotNetCore.Services
             }
         }
 
-        private string ProjectText(string text, string baseImageFilename,
-            SixLabors.Primitives.Point topLeft,
-            SixLabors.Primitives.Point topRight,
-            SixLabors.Primitives.Point bottomLeft,
-            SixLabors.Primitives.Point bottomRight)
-        {
-            using (var baseImage = SixLabors.ImageSharp.Image.Load(baseImageFilename))
-            using (var textImage = new Image<Rgba32>(1920, 1080))
-            using (var outputImage = new Image<Rgba32>(baseImage.Width, baseImage.Height))
-
-            {
-                int fontSize = textImage.Width / 10;
-                SixLabors.Fonts.Font font = SixLabors.Fonts.SystemFonts.CreateFont("Impact", fontSize);
-
-                //determine text location
-                float padding = 10f;
-                float textMaxWidth = textImage.Width - (padding * 2);
-                SixLabors.Primitives.PointF topLeftLocation = new SixLabors.Primitives.PointF(padding, padding * 2);
-
-                //black brush for text fill
-                SixLabors.ImageSharp.Processing.SolidBrush brush = new SixLabors.ImageSharp.Processing.SolidBrush(SixLabors.ImageSharp.Color.Black);
-
-                //wrap and align text before drawing
-                TextGraphicsOptions options = new TextGraphicsOptions()
-                {
-                    WrapTextWidth = textMaxWidth,
-                    HorizontalAlignment = HorizontalAlignment.Center,
-                };
-
-                //draw text on the text canvas
-                textImage.Mutate(x => x.BackgroundColor(SixLabors.ImageSharp.Color.White));
-                textImage.Mutate(x => x.DrawText(options, text, font, brush, topLeftLocation));
-
-                //compute the transformation matrix based on the destination points and apply it to the text image
-                Matrix4x4 transformMat = TransformHelper.ComputeTransformMatrix(textImage.Width, textImage.Height, topLeft, topRight, bottomLeft, bottomRight);
-                textImage.Mutate(x => x.Transform(new ProjectiveTransformBuilder().AppendMatrix(transformMat)));
-
-                //draw the projected text and the base image on the output image
-                outputImage.Mutate(x => x.DrawImage(textImage, new SixLabors.Primitives.Point(0, 0), 1.0f));
-                outputImage.Mutate(x => x.DrawImage(baseImage, 1.0f));
-
-                string outputFilename = $"{Guid.NewGuid().ToString("N")}.jpg";
-                outputImage.Save(outputFilename);
-
-                return outputFilename;
-            }
-        }
-
         public string BobRossText(string text)
         {
 
@@ -403,7 +355,6 @@ namespace TerminusDotNetCore.Services
 
         private void PCImage(string imageFilename, int numTimes = 1)
         {
-            //define projection points for the corners of Bob's happy little canvas
             SixLabors.Primitives.Point topLeft = new SixLabors.Primitives.Point(69, 334);
             SixLabors.Primitives.Point topRight = new SixLabors.Primitives.Point(335, 292);
             SixLabors.Primitives.Point bottomRight = new SixLabors.Primitives.Point(432, 579);
@@ -416,6 +367,16 @@ namespace TerminusDotNetCore.Services
                     outputImage.Save(imageFilename);
                 }
             }
+        }
+
+        public string PCText(string text)
+        {
+            SixLabors.Primitives.Point topLeft = new SixLabors.Primitives.Point(69, 334);
+            SixLabors.Primitives.Point topRight = new SixLabors.Primitives.Point(335, 292);
+            SixLabors.Primitives.Point bottomRight = new SixLabors.Primitives.Point(432, 579);
+            SixLabors.Primitives.Point bottomLeft = new SixLabors.Primitives.Point(214, 726);
+
+            return ProjectText(text, Path.Combine("assets", "images", "suicide.png"), topLeft, topRight, bottomLeft, bottomRight);
         }
 
         public List<string> TrumpImages(IReadOnlyCollection<Attachment> attachments, int numTimes = 1)
@@ -445,6 +406,16 @@ namespace TerminusDotNetCore.Services
                     outputImage.Save(imageFilename);
                 }
             }
+        }
+
+        public string TrumpText(string text)
+        {
+            SixLabors.Primitives.Point topLeft = new SixLabors.Primitives.Point(218, 164);
+            SixLabors.Primitives.Point topRight = new SixLabors.Primitives.Point(366, 164);
+            SixLabors.Primitives.Point bottomRight = new SixLabors.Primitives.Point(368, 361);
+            SixLabors.Primitives.Point bottomLeft = new SixLabors.Primitives.Point(220, 365);
+
+            return ProjectText(text, Path.Combine("assets", "images", "don.png"), topLeft, topRight, bottomLeft, bottomRight);
         }
 
         private System.Drawing.Color GetAverageColor(System.Drawing.Bitmap inputImage, int startX, int startY, int width, int height)
@@ -538,6 +509,54 @@ namespace TerminusDotNetCore.Services
                 outputImage.Mutate(x => x.DrawImage(baseImage, new SixLabors.Primitives.Point(0, 0), 1.0f));
 
                 return outputImage;
+            }
+        }
+
+        private string ProjectText(string text, string baseImageFilename,
+            SixLabors.Primitives.Point topLeft,
+            SixLabors.Primitives.Point topRight,
+            SixLabors.Primitives.Point bottomLeft,
+            SixLabors.Primitives.Point bottomRight)
+        {
+            using (var baseImage = SixLabors.ImageSharp.Image.Load(baseImageFilename))
+            using (var textImage = new Image<Rgba32>(1920, 1080))
+            using (var outputImage = new Image<Rgba32>(baseImage.Width, baseImage.Height))
+
+            {
+                int fontSize = textImage.Width / 10;
+                SixLabors.Fonts.Font font = SixLabors.Fonts.SystemFonts.CreateFont("Impact", fontSize);
+
+                //determine text location
+                float padding = 10f;
+                float textMaxWidth = textImage.Width - (padding * 2);
+                SixLabors.Primitives.PointF topLeftLocation = new SixLabors.Primitives.PointF(padding, padding * 2);
+
+                //black brush for text fill
+                SixLabors.ImageSharp.Processing.SolidBrush brush = new SixLabors.ImageSharp.Processing.SolidBrush(SixLabors.ImageSharp.Color.Black);
+
+                //wrap and align text before drawing
+                TextGraphicsOptions options = new TextGraphicsOptions()
+                {
+                    WrapTextWidth = textMaxWidth,
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                };
+
+                //draw text on the text canvas
+                textImage.Mutate(x => x.BackgroundColor(SixLabors.ImageSharp.Color.White));
+                textImage.Mutate(x => x.DrawText(options, text, font, brush, topLeftLocation));
+
+                //compute the transformation matrix based on the destination points and apply it to the text image
+                Matrix4x4 transformMat = TransformHelper.ComputeTransformMatrix(textImage.Width, textImage.Height, topLeft, topRight, bottomLeft, bottomRight);
+                textImage.Mutate(x => x.Transform(new ProjectiveTransformBuilder().AppendMatrix(transformMat)));
+
+                //draw the projected text and the base image on the output image
+                outputImage.Mutate(x => x.DrawImage(textImage, new SixLabors.Primitives.Point(0, 0), 1.0f));
+                outputImage.Mutate(x => x.DrawImage(baseImage, 1.0f));
+
+                string outputFilename = $"{Guid.NewGuid().ToString("N")}.jpg";
+                outputImage.Save(outputFilename);
+
+                return outputFilename;
             }
         }
     }
