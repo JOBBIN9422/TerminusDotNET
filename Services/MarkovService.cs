@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Collections.Generic;
 using TerminusDotNetCore.Modules;
 using TerminusDotNetCore.Helpers;
@@ -26,8 +27,11 @@ namespace TerminusDotNetCore.Services
             List<string> userMessagesContent = new List<string>();
             foreach (var message in userMessages)
             {
-                if (message.Author == user)
+                //ignore commands
+                if (message.Author == user && !Regex.IsMatch(message.Content, @"\!\w"))
                 {
+                    //strip emotes
+                    //string messageNoEmotes = Regex.Replace(message.Content, @"\<:\w+:\d+\>", "");
                     userMessagesContent.Add(message.Content);
                 }
             }

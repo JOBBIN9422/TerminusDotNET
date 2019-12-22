@@ -45,12 +45,7 @@ namespace TerminusDotNetCore.Helpers
         {
             foreach (string sentence in sentences)
             {
-                //ignore commands
-                if (!Regex.IsMatch(sentence, @"\!\w"))
-                {
-                    //strip emojis
-                    AddSentenceToCorpus(Regex.Replace(sentence, @"\<:\w+:\d+\>", ""), preprocessChars);
-                }
+                AddSentenceToCorpus(sentence, preprocessChars);
             }
         }
 
