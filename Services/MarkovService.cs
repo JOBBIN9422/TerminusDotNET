@@ -22,7 +22,7 @@ namespace TerminusDotNetCore.Services
 
         public async Task<string> GenerateUserSentence(IUser user, ISocketMessageChannel channel)
         {
-            var messages = await channel.GetMessagesAsync(1000, CacheMode.AllowDownload).FlattenAsync();
+            var messages = await channel.GetMessagesAsync(2000, CacheMode.AllowDownload).FlattenAsync();
             var userMessages = messages.Where(msg => msg.Author == user);
             List<string> userMessagesContent = new List<string>();
             foreach (var message in userMessages)
