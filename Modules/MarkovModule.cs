@@ -37,6 +37,7 @@ namespace TerminusDotNetCore.Modules
                 await ServiceReplyAsync("Please provide both a @user and a #channel.");
                 return;
             }
+
             string userSentence = await _markovService.GenerateUserSentence(user, channel);
             await ServiceReplyAsync(userSentence);
         }

@@ -192,16 +192,16 @@ namespace TerminusDotNetCore.Services
                 dmcImage.Mutate(x => x.Resize(image.Height / 5, image.Height / 5));
 
                 int paddingHorizontal = image.Width / 10;
-                int paddingVertical   = image.Height / 10;
+                int paddingVertical = image.Height / 10;
 
                 //compute the position to draw the morrowind image at (based on its top-left corner)
-                SixLabors.Primitives.Point position = new SixLabors.Primitives.Point(image.Width  - dmcImage.Width - paddingHorizontal, image.Height - dmcImage.Height - paddingVertical);
+                SixLabors.Primitives.Point position = new SixLabors.Primitives.Point(image.Width - dmcImage.Width - paddingHorizontal, image.Height - dmcImage.Height - paddingVertical);
 
                 image.Mutate(x => x.DrawImage(dmcImage, position, 0.8f));
                 image.Save(imageFilename);
             }
         }
-    
+
 
         public List<string> ThiccImages(IReadOnlyCollection<Attachment> attachments, int thiccCount = 2)
         {
@@ -318,7 +318,7 @@ namespace TerminusDotNetCore.Services
             SixLabors.Primitives.Point bottomRight = new SixLabors.Primitives.Point(437, 407);
             SixLabors.Primitives.Point bottomLeft = new SixLabors.Primitives.Point(23, 388);
 
-            
+
             for (int i = 0; i < numTimes; i++)
             {
                 using (var outputImage = ProjectOnto(imageFilename, Path.Combine("assets", "images", "bobross.png"), topLeft, topRight, bottomLeft, bottomRight))
@@ -328,18 +328,17 @@ namespace TerminusDotNetCore.Services
             }
         }
 
-        public string BobRossText(string text)
+        private string ProjectText(string text, string baseImageFilename,
+            SixLabors.Primitives.Point topLeft,
+            SixLabors.Primitives.Point topRight,
+            SixLabors.Primitives.Point bottomLeft,
+            SixLabors.Primitives.Point bottomRight)
         {
-            using (var bobRossImage = SixLabors.ImageSharp.Image.Load(Path.Combine("assets", "images", "bobross.png")))
+            using (var baseImage = SixLabors.ImageSharp.Image.Load(baseImageFilename))
             using (var textImage = new Image<Rgba32>(1920, 1080))
-            using (var outputImage = new Image<Rgba32>(bobRossImage.Width, bobRossImage.Height))
-            {
-                //define projection points for the corners of Bob's happy little canvas
-                SixLabors.Primitives.Point topLeft = new SixLabors.Primitives.Point(24, 72);
-                SixLabors.Primitives.Point topRight = new SixLabors.Primitives.Point(451, 91);
-                SixLabors.Primitives.Point bottomRight = new SixLabors.Primitives.Point(437, 407);
-                SixLabors.Primitives.Point bottomLeft = new SixLabors.Primitives.Point(23, 388);
+            using (var outputImage = new Image<Rgba32>(baseImage.Width, baseImage.Height))
 
+            {
                 int fontSize = textImage.Width / 10;
                 SixLabors.Fonts.Font font = SixLabors.Fonts.SystemFonts.CreateFont("Impact", fontSize);
 
@@ -351,26 +350,43 @@ namespace TerminusDotNetCore.Services
                 //black brush for text fill
                 SixLabors.ImageSharp.Processing.SolidBrush brush = new SixLabors.ImageSharp.Processing.SolidBrush(SixLabors.ImageSharp.Color.Black);
 
+                //wrap and align text before drawing
                 TextGraphicsOptions options = new TextGraphicsOptions()
                 {
                     WrapTextWidth = textMaxWidth,
                     HorizontalAlignment = HorizontalAlignment.Center,
                 };
 
+                //draw text on the text canvas
                 textImage.Mutate(x => x.BackgroundColor(SixLabors.ImageSharp.Color.White));
                 textImage.Mutate(x => x.DrawText(options, text, font, brush, topLeftLocation));
 
                 //compute the transformation matrix based on the destination points and apply it to the text image
                 Matrix4x4 transformMat = TransformHelper.ComputeTransformMatrix(textImage.Width, textImage.Height, topLeft, topRight, bottomLeft, bottomRight);
                 textImage.Mutate(x => x.Transform(new ProjectiveTransformBuilder().AppendMatrix(transformMat)));
+
+                //draw the projected text and the base image on the output image
                 outputImage.Mutate(x => x.DrawImage(textImage, new SixLabors.Primitives.Point(0, 0), 1.0f));
-                outputImage.Mutate(x => x.DrawImage(bobRossImage, 1.0f));
+                outputImage.Mutate(x => x.DrawImage(baseImage, 1.0f));
 
                 string outputFilename = $"{Guid.NewGuid().ToString("N")}.jpg";
                 outputImage.Save(outputFilename);
 
                 return outputFilename;
             }
+        }
+
+        public string BobRossText(string text)
+        {
+
+            //define projection points for the corners of Bob's happy little canvas
+            SixLabors.Primitives.Point topLeft = new SixLabors.Primitives.Point(24, 72);
+            SixLabors.Primitives.Point topRight = new SixLabors.Primitives.Point(451, 91);
+            SixLabors.Primitives.Point bottomRight = new SixLabors.Primitives.Point(437, 407);
+            SixLabors.Primitives.Point bottomLeft = new SixLabors.Primitives.Point(23, 388);
+
+            return ProjectText(text, Path.Combine("assets", "images", "bobross.png"), topLeft, topRight, bottomLeft, bottomRight);
+
         }
 
         public List<string> PCImages(IReadOnlyCollection<Attachment> attachments, int numTimes = 1)
@@ -429,7 +445,7 @@ namespace TerminusDotNetCore.Services
                     outputImage.Save(imageFilename);
                 }
             }
-        }    
+        }
 
         private System.Drawing.Color GetAverageColor(System.Drawing.Bitmap inputImage, int startX, int startY, int width, int height)
         {
