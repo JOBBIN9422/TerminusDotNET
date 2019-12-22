@@ -22,12 +22,6 @@ namespace TerminusDotNetCore.Modules
 
         public async Task SendFileAsync(string filename)
         {
-            //var embed = new EmbedBuilder()
-            //{
-            //    ImageUrl = $"attachment://{filename}"
-            //}.Build();
-
-            //await Context.Channel.SendFileAsync(filename, embed: embed);
             await Context.Channel.SendFileAsync(filename);
         }
 
@@ -185,32 +179,80 @@ namespace TerminusDotNetCore.Modules
 
         [Command("pc", RunMode = RunMode.Async)]
         [Summary("Paints the attached/most recent image(s) on a stock photo of someone at their computer.")]
-        public async Task PCImagesAsync([Summary("number of times to repeat the projection.")]int numTimes = 1)
+        public async Task PCImagesAsync([Remainder][Summary("Text to project onto the canvas. If a number is supplied, number of times to repeat the projection instead.")]string text = null)
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetAttachmentsAsync(Context, AttachmentFilter.Images);
-            if (attachments == null)
+
+            //check if an argument was provided
+            if (!string.IsNullOrEmpty(text))
             {
-                await ServiceReplyAsync("No images were found in the current message or previous messages.");
-                return;
+                //is the argument solely a number?
+                uint numTimes;
+                if (uint.TryParse(text, out numTimes) && attachments != null)
+                {
+                    var images = _imageService.PCImages(attachments, numTimes);
+                    await SendImages(images);
+                }
+
+                //if not, treat it as text
+                else
+                {
+                    string bobRossTextImg = _imageService.PCText(text);
+                    await SendImage(bobRossTextImg);
+                }
             }
 
-            var images = _imageService.PCImages(attachments, numTimes);
-            await SendImages(images);
+            //if no argument was provided, try to process each image once
+            else
+            {
+                if (attachments == null)
+                {
+                    await ServiceReplyAsync("No images were found in the current message or previous messages.");
+                    return;
+                }
+
+                var images = _imageService.PCImages(attachments);
+                await SendImages(images);
+            }
         }
 
         [Command("trump", RunMode = RunMode.Async)]
         [Summary("Overlays a custom image attachment onto a book held by President Trump.")]
-        public async Task TrumpImagesAsync([Summary("number of times to repeat the projection.")]int numTimes = 1)
+        public async Task TrumpImagesAsync([Remainder][Summary("Text to project onto the canvas. If a number is supplied, number of times to repeat the projection instead.")]string text = null)
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetAttachmentsAsync(Context, AttachmentFilter.Images);
-            if (attachments == null)
+
+            //check if an argument was provided
+            if (!string.IsNullOrEmpty(text))
             {
-                await ServiceReplyAsync("No images were found in the current message or previous messages.");
-                return;
+                //is the argument solely a number?
+                uint numTimes;
+                if (uint.TryParse(text, out numTimes) && attachments != null)
+                {
+                    var images = _imageService.TrumpImages(attachments, numTimes);
+                    await SendImages(images);
+                }
+
+                //if not, treat it as text
+                else
+                {
+                    string bobRossTextImg = _imageService.TrumpText(text);
+                    await SendImage(bobRossTextImg);
+                }
             }
 
-            var images = _imageService.TrumpImages(attachments, numTimes);
-            await SendImages(images);
+            //if no argument was provided, try to process each image once
+            else
+            {
+                if (attachments == null)
+                {
+                    await ServiceReplyAsync("No images were found in the current message or previous messages.");
+                    return;
+                }
+
+                var images = _imageService.TrumpImages(attachments);
+                await SendImages(images);
+            }
         }
     }
 }

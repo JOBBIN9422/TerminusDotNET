@@ -341,7 +341,7 @@ namespace TerminusDotNetCore.Services
 
         }
 
-        public List<string> PCImages(IReadOnlyCollection<Attachment> attachments, int numTimes = 1)
+        public List<string> PCImages(IReadOnlyCollection<Attachment> attachments, uint numTimes = 1)
         {
             var images = AttachmentHelper.DownloadAttachments(attachments);
 
@@ -353,7 +353,7 @@ namespace TerminusDotNetCore.Services
             return images;
         }
 
-        private void PCImage(string imageFilename, int numTimes = 1)
+        private void PCImage(string imageFilename, uint numTimes = 1)
         {
             SixLabors.Primitives.Point topLeft = new SixLabors.Primitives.Point(69, 334);
             SixLabors.Primitives.Point topRight = new SixLabors.Primitives.Point(335, 292);
@@ -379,7 +379,7 @@ namespace TerminusDotNetCore.Services
             return ProjectText(text, Path.Combine("assets", "images", "suicide.png"), topLeft, topRight, bottomLeft, bottomRight);
         }
 
-        public List<string> TrumpImages(IReadOnlyCollection<Attachment> attachments, int numTimes = 1)
+        public List<string> TrumpImages(IReadOnlyCollection<Attachment> attachments, uint numTimes = 1)
         {
             var images = AttachmentHelper.DownloadAttachments(attachments);
 
@@ -391,7 +391,7 @@ namespace TerminusDotNetCore.Services
             return images;
         }
 
-        private void TrumpImage(string imageFilename, int numTimes = 1)
+        private void TrumpImage(string imageFilename, uint numTimes = 1)
         {
             //defince projection points for corners of book
             SixLabors.Primitives.Point topLeft = new SixLabors.Primitives.Point(218, 164);
