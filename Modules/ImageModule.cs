@@ -27,12 +27,24 @@ namespace TerminusDotNetCore.Modules
 
         private async Task SendImages(List<string> images)
         {
-            foreach (var image in images)
+            try
             {
-                await SendFileAsync(image);
+                foreach (var image in images)
+                {
+                    try
+                    {
+                        await SendFileAsync(image);
+                    }
+                    catch (Exception)
+                    {
+                        await ServiceReplyAsync($"Error sending file {System.IO.Path.GetFileName(image)}.");
+                    }
+                }
             }
-
-            _imageService.DeleteImages(images);
+            finally
+            {
+                _imageService.DeleteImages(images);
+            }
         }
 
         private async Task SendImage(string image)
