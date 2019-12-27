@@ -40,5 +40,19 @@ namespace TerminusDotNetCore.Services
 
             return userMarkov.GenerateSentence();
         }
+
+        public async Task<string> GenerateChannelSentence(ISocketMessageChannel channel)
+        {
+            var messages = await channel.GetMessagesAsync(2000, CacheMode.AllowDownload).FlattenAsync();
+            List<string> messagesContent = new List<string>();
+
+            foreach (var message in messages)
+            {
+                messagesContent.Add(message.Content);
+            }
+
+            MarkovHelper markov = new MarkovHelper(messagesContent);
+            return markov.GenerateSentence();
+        }
     }
 }

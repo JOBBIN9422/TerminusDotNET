@@ -42,5 +42,18 @@ namespace TerminusDotNetCore.Modules
             await ServiceReplyAsync(userSentence);
         }
 
+        [Command("channelsim", RunMode = RunMode.Async)]
+        [Summary("Generate a sentence based on a given channel.")]
+        public async Task GenerateChannelSentence([Summary("#channel to pull user messages from.")]ISocketMessageChannel channel)
+        {
+            if (channel == null)
+            {
+                await ServiceReplyAsync("Please provide a #channel.");
+                return;
+            }
+
+            string channelSentence = await _markovService.GenerateChannelSentence(channel);
+            await ServiceReplyAsync(channelSentence);
+        }
     }
 }
