@@ -24,14 +24,28 @@ namespace TerminusDotNetCore.Modules
             if (string.IsNullOrEmpty(commandName))
             {
                 IEnumerable<CommandInfo> commands = _commandService.Commands;
+                List<Embed> helpTexts = new List<Embed>();
                 EmbedBuilder embedBuilder = new EmbedBuilder();
 
                 foreach (CommandInfo command in commands)
                 {
+                    if (embedBuilder.Fields.Count % EmbedBuilder.MaxFieldCount == 0 && embedBuilder.Fields.Count > 0)
+                    {
+                        helpTexts.Add(embedBuilder.Build());
+                        embedBuilder = new EmbedBuilder();
+                    }
                     AddCommandField(embedBuilder, command);
                 }
 
-                await ReplyAsync("Available commands: ", false, embedBuilder.Build());
+                if (helpTexts.Count == 0 || !helpTexts.Contains(embedBuilder.Build()))
+                {
+                    helpTexts.Add(embedBuilder.Build());
+                }
+
+                foreach (var helpEmbed in helpTexts)
+                {
+                    await ReplyAsync("Available commands: ", false, helpEmbed);
+                }
             }
             else
             {
@@ -43,14 +57,28 @@ namespace TerminusDotNetCore.Modules
                 }
                 else
                 {
+                    List<Embed> helpTexts = new List<Embed>();
                     EmbedBuilder embedBuilder = new EmbedBuilder();
 
                     foreach (CommandMatch commandMatch in cmdSearchResult.Commands)
                     {
+                        if (embedBuilder.Fields.Count % EmbedBuilder.MaxFieldCount == 0 && embedBuilder.Fields.Count > 0)
+                        {
+                            helpTexts.Add(embedBuilder.Build());
+                            embedBuilder = new EmbedBuilder();
+                        }
                         AddCommandField(embedBuilder, commandMatch.Command);
                     }
 
-                    await ReplyAsync("Available commands: ", false, embedBuilder.Build());
+                    if (helpTexts.Count == 0 || !helpTexts.Contains(embedBuilder.Build()))
+                    {
+                        helpTexts.Add(embedBuilder.Build());
+                    }
+
+                    foreach (var helpEmbed in helpTexts)
+                    {
+                        await ReplyAsync("Available commands: ", false, helpEmbed);
+                    }
                 }
             }
         }

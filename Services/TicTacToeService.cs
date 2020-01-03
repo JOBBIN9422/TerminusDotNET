@@ -82,6 +82,14 @@ namespace TerminusDotNetCore.Services
             }
         }
 
+        public void EndGame()
+        {
+            Player1 = null;
+            Player2 = null;
+            GameActive = false;
+            Board = null;
+        }
+
         public bool CheckTie()
         {
             foreach (var row in Board.State)

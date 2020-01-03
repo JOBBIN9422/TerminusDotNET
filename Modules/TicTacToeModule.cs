@@ -21,7 +21,8 @@ namespace TerminusDotNetCore.Modules
         }
 
         [Command("new")]
-        public async Task StartNewGame(IUser player2, int numRows = 3, int numCols = 3, int winCount = 3)
+        [Summary("Starts a new game with the given parameters.")]
+        public async Task StartNewGame([Summary("The player to challenge.")]IUser player2, [Summary("Number of rows.")]int numRows = 3, [Summary("Number of columns.")]int numCols = 3, [Summary("How many pieces in a row count as a win.")]int winCount = 3)
         {
             if (player2 == null)
             {
@@ -33,18 +34,57 @@ namespace TerminusDotNetCore.Modules
         }
 
         [Command("place")]
-        public async Task Place(int row, int col)
+        [Summary("If you are the active player, place your piece at the specified location.")]
+        public async Task Place([Summary("the zero-indexed row number to place at.")]int row, [Summary("the zero-indexed column to place at.")]int col)
         {
             //if (row == null || col == null)
             //{
             //    throw new ArgumentException("Please provide a row and column number (e.g. 'place 1 1').");
             //}
 
+            if (!_tttService.GameActive)
+            {
+                await ServiceReplyAsync("No game is currently active.");
+                return;
+            }
             bool successfulPlay = await _tttService.Place(Context.Message.Author, row, col);
 
             if (successfulPlay)
             {
                 await ServiceReplyAsync(_tttService.GetBoardStateString());
+            }
+        }
+
+        [Command("show")]
+        [Summary("Print the current board and next player to the chat.")]
+        public async Task ShowBoard()
+        {
+            if (!_tttService.GameActive)
+            {
+                await ServiceReplyAsync("No game is currently active.");
+                return;
+            }
+            await ServiceReplyAsync(_tttService.GetBoardStateString());
+        }
+
+        [Command("resign")]
+        [Summary("If you are the active player, quit the game.")]
+        public async Task Quit()
+        {
+            if (!_tttService.GameActive)
+            {
+                await ServiceReplyAsync("No game is currently active.");
+                return;
+            }
+
+            if (Context.Message.Author != _tttService.CurrentPlayer)
+            {
+                await ServiceReplyAsync($"Only the active player ({_tttService.CurrentPlayer.Username}) can forfeit the game.");
+            }
+            else
+            {
+                _tttService.EndGame();
+                await ServiceReplyAsync($"{Context.Message.Author.Username} has resigned.");
             }
         }
     }
