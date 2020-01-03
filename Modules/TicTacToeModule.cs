@@ -77,9 +77,9 @@ namespace TerminusDotNetCore.Modules
                 return;
             }
 
-            if (Context.Message.Author != _tttService.CurrentPlayer)
+            if (Context.Message.Author != _tttService.NextPlayer)
             {
-                await ServiceReplyAsync($"Only the active player ({_tttService.CurrentPlayer.Username}) can forfeit the game.");
+                await ServiceReplyAsync($"Only the active player ({_tttService.NextPlayer.Username}) can forfeit the game.");
             }
             else
             {

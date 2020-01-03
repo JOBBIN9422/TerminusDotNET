@@ -50,7 +50,7 @@ namespace TerminusDotNetCore.Services
         //make these readonly?
         public IUser Player1 { get; private set; }
         public IUser Player2 { get; private set; }
-        public IUser CurrentPlayer { get; private set; }
+        public IUser NextPlayer { get; private set; }
 
         public ServiceControlModule ParentModule { get; set; }
 
@@ -76,7 +76,7 @@ namespace TerminusDotNetCore.Services
                 Board = new GameBoard(numRows, numCols);
                 _winCount = winCount;
                 Player1 = player1;
-                CurrentPlayer = Player1;
+                NextPlayer = Player2;
                 Player2 = player2;
                 GameActive = true;
             }
@@ -86,6 +86,7 @@ namespace TerminusDotNetCore.Services
         {
             Player1 = null;
             Player2 = null;
+            NextPlayer = null;
             GameActive = false;
             Board = null;
         }
@@ -132,7 +133,7 @@ namespace TerminusDotNetCore.Services
         public async Task<bool> Place(IUser player, int row, int col)
         {
             //make sure that the proper player is placing 
-            if (player != CurrentPlayer)
+            if (player != NextPlayer)
             {
                 await ParentModule.ServiceReplyAsync($"{player.Username} is not the current player.");
                 return false;
@@ -147,15 +148,15 @@ namespace TerminusDotNetCore.Services
                     return false;
                 }
 
-                if (CurrentPlayer == Player1)
+                if (NextPlayer == Player1)
                 {
                     Board.State[row][col] = CellState.Player1;
-                    CurrentPlayer = Player2;
+                    NextPlayer = Player2;
                 }
                 else
                 {
                     Board.State[row][col] = CellState.Player2;
-                    CurrentPlayer = Player1;
+                    NextPlayer = Player1;
                 }
 
                 if (CheckWin(row, col))
@@ -218,7 +219,7 @@ namespace TerminusDotNetCore.Services
                 }
                 sb.AppendLine();
             }
-            sb.AppendLine($"Next player: {CurrentPlayer.Username}\n```");
+            sb.AppendLine($"Next player: {NextPlayer.Username}\n```");
 
             return sb.ToString();
         }
