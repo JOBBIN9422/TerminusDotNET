@@ -166,20 +166,13 @@ namespace TerminusDotNetCore
 
             if (_isActive)
             {
+                //look for regex matches and reply if any are found
+                await CheckRegexWildcards(message);
+
                 //check if message is not command or not sent by bot
                 if (!(message.HasCharPrefix('!', ref argPos) || message.HasMentionPrefix(_client.CurrentUser, ref argPos))
                     || message.Author.IsBot)
                 {
-                    //look for wildcards in the current message 
-                    var matches = _regexMsgParser.ParseMessage(message.Content);
-
-                    if (matches.Count > 0 && !message.Author.IsBot)
-                    {
-                        foreach (var match in matches)
-                        {
-                            await message.Channel.SendMessageAsync(match);
-                        }
-                    }
                     return;
                 }
 
@@ -239,6 +232,20 @@ namespace TerminusDotNetCore
             //serviceCollection.AddSingleton<WideTextService>();
 
             return serviceCollection.BuildServiceProvider();
+        }
+
+        private async Task CheckRegexWildcards(SocketUserMessage message)
+        {
+            //look for wildcards in the current message 
+            var matches = _regexMsgParser.ParseMessage(message.Content);
+
+            if (matches.Count > 0 && !message.Author.IsBot)
+            {
+                foreach (var match in matches)
+                {
+                    await message.Channel.SendMessageAsync(match);
+                }
+            }
         }
     }
 }

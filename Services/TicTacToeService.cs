@@ -173,7 +173,8 @@ namespace TerminusDotNetCore.Services
 
         public string GetBoardStateString()
         {
-            StringBuilder sb = new StringBuilder("  | ", NumRows * NumCols * 2);
+            StringBuilder sb = new StringBuilder("```", NumRows * NumCols * 2);
+            sb.Append("  | ");
             for (int i = 0; i < Board.State[0].Count; i++)
             {
                 sb.Append($"{i} ");
@@ -209,7 +210,7 @@ namespace TerminusDotNetCore.Services
                 }
                 sb.AppendLine();
             }
-            sb.AppendLine($"Next player: {CurrentPlayer.Username}");
+            sb.AppendLine($"Next player: {CurrentPlayer.Username}\n```");
 
             return sb.ToString();
         }
