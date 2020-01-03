@@ -5,6 +5,7 @@ using TerminusDotNetCore.Helpers;
 using Discord;
 using TerminusDotNetCore.Modules;
 using System.Threading.Tasks;
+using System.Text;
 
 namespace TerminusDotNetCore.Services
 {
@@ -59,7 +60,7 @@ namespace TerminusDotNetCore.Services
             Init(numRows, numCols, winCount, player1, player2);
         }
 
-        private void Init(int numRows, int numCols, int winCount, IUser player1, IUser player2)
+        public void Init(int numRows, int numCols, int winCount, IUser player1, IUser player2)
         {
             if (numRows <= 0 || numCols <= 0 || winCount <= 0)
             {
@@ -167,6 +168,49 @@ namespace TerminusDotNetCore.Services
                 await ParentModule.ServiceReplyAsync("Invalid move (out of bounds).");
                 return false;
             }
+        }
+
+        public string GetBoardStateString()
+        {
+            StringBuilder sb = new StringBuilder("  | ", NumRows * NumCols * 2);
+            for (int i = 0; i < Board.State[0].Count; i++)
+            {
+                sb.Append($"{i} ");
+            }
+            sb.AppendLine();
+            sb.Append("--+-");
+
+            for (int i = 0; i < Board.State[0].Count; i++)
+            {
+                sb.Append($"--");
+            }
+            sb.AppendLine();
+
+            for (int i = 0; i < Board.State.Count; i++)
+            {
+                sb.Append($"{i} | ");
+                for (int j = 0; j < Board.State[i].Count; j++)
+                {
+                    switch (Board.State[i][j])
+                    {
+                        case CellState.Empty:
+                            sb.Append("- ");
+                            break;
+
+                        case CellState.Player1:
+                            sb.Append("X ");
+                            break;
+
+                        case CellState.Player2:
+                            sb.Append("O ");
+                            break;
+                    }
+                }
+                sb.AppendLine();
+            }
+            sb.AppendLine($"Next player: {CurrentPlayer.Username}");
+
+            return sb.ToString();
         }
 
         private int CountDirection(int startRow, int startCol, BoardDirection direction)
