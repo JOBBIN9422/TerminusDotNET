@@ -55,9 +55,9 @@ namespace TerminusDotNetCore.Services
         public ServiceControlModule ParentModule { get; set; }
 
 
-        public TicTacToeService(int numRows, int numCols, int winCount, IUser player1, IUser player2)
+        public TicTacToeService()
         {
-            Init(numRows, numCols, winCount, player1, player2);
+            //Init(numRows, numCols, winCount, player1, player2);
         }
 
         public void Init(int numRows, int numCols, int winCount, IUser player1, IUser player2)
@@ -76,6 +76,7 @@ namespace TerminusDotNetCore.Services
                 Board = new GameBoard(numRows, numCols);
                 _winCount = winCount;
                 Player1 = player1;
+                CurrentPlayer = Player1;
                 Player2 = player2;
                 GameActive = true;
             }
