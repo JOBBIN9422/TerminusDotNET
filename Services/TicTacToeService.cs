@@ -76,7 +76,7 @@ namespace TerminusDotNetCore.Services
                 Board = new GameBoard(numRows, numCols);
                 _winCount = winCount;
                 Player1 = player1;
-                NextPlayer = Player2;
+                NextPlayer = player2;
                 Player2 = player2;
                 GameActive = true;
             }
