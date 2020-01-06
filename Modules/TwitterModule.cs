@@ -38,8 +38,8 @@ namespace TerminusDotNetCore.Modules
             }
         }
 
-        [Command("okboomer", RunMode = RunMode.Async)]
-        public async Task GetBoomerTweet()
+        [Command("notch", RunMode = RunMode.Async)]
+        public async Task GetLastNotchTweet()
         {
             string tweet = await _twitterService.SearchTweetRandom("\"boomer memes\" OR \"boomer meme\" OR \"boomer quotes\" OR milennial OR milennials OR genz OR \"gen z\" OR genz OR zoomer");
             try
