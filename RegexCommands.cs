@@ -39,9 +39,19 @@ namespace TerminusDotNetCore
 
             foreach (var regexString in _regexToMsgMap.Keys)
             {
-                if (Regex.IsMatch(message, regexString, RegexOptions.IgnoreCase))
+                Match match = Regex.Match(message, regexString, RegexOptions.IgnoreCase);
+                if (match.Success)
                 {
-                    returnMessages.Add(_regexToMsgMap[regexString]);
+                    String returnString = _regexToMsgMap[regexString];
+                    for( int i = 1; match.Groups.Count >= i; i++ )
+                    {
+                        Console.WriteLine(match.Groups[i].Value);
+                        if( returnString.Contains("%s") )
+                        {
+                            returnString = returnString.Replace("%s",match.Groups[i].Value);
+                        }
+                    }
+                    returnMessages.Add(returnString);
                 }
             }
 
