@@ -51,7 +51,7 @@ namespace TerminusDotNetCore.Services
         {
             var user =
                 await
-                (from tweet in twitterCtx.User
+                (from tweet in _twitterContext.User
                  where tweet.Type == UserType.Show &&
                        tweet.ScreenName == "notch"
                  select tweet)
