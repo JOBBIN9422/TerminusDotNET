@@ -46,7 +46,27 @@ namespace TerminusDotNetCore.Services
             await auth.AuthorizeAsync();
             _twitterContext = new TwitterContext(auth);
         }
+        
+        public async Task<string> GetLastNotchTweet()
+        {
+            var user =
+                await
+                (from tweet in twitterCtx.User
+                 where tweet.Type == UserType.Show &&
+                       tweet.ScreenName == "notch"
+                 select tweet)
+                .SingleOrDefaultAsync();
 
+            if (user != null)
+            {
+                var name = user.ScreenNameResponse;
+                var lastStatus =
+                    user.Status == null ? "No recent tweet(s) found." : user.Status.Text;
+                return lastStatus;
+            }
+            return "No user found.";
+        }
+        
         public async Task<string> SearchTweetRandom(string searchTerm)
         {
             List<Search> userQuery = new List<Search>();
