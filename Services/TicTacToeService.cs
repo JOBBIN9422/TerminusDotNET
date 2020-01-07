@@ -30,8 +30,10 @@ namespace TerminusDotNetCore.Services
     public class TicTacToeService : ICustomService
     {
         private int _winCount;
+        
         public GameBoard Board { get; private set; }
         public bool GameActive { get; private set; }
+        
         public int NumRows
         {
             get
@@ -47,18 +49,11 @@ namespace TerminusDotNetCore.Services
             }
         }
 
-        //make these readonly?
         public IUser Player1 { get; private set; }
         public IUser Player2 { get; private set; }
         public IUser NextPlayer { get; private set; }
 
         public ServiceControlModule ParentModule { get; set; }
-
-
-        public TicTacToeService()
-        {
-            //Init(numRows, numCols, winCount, player1, player2);
-        }
 
         public void Init(int numRows, int numCols, int winCount, IUser player1, IUser player2)
         {
@@ -73,6 +68,7 @@ namespace TerminusDotNetCore.Services
             }
             else
             {
+                //instantiate board, set players and game state
                 Board = new GameBoard(numRows, numCols);
                 _winCount = winCount;
                 Player1 = player1;
@@ -93,6 +89,7 @@ namespace TerminusDotNetCore.Services
 
         public bool CheckTie()
         {
+            //check if the board has empty cells
             foreach (var row in Board.State)
             {
                 List<CellState> emptyCells = row.Where(cell => cell == CellState.Empty).ToList();
@@ -148,6 +145,7 @@ namespace TerminusDotNetCore.Services
                     return false;
                 }
 
+                //place a piece in the requested spot for the current player and cycle players
                 if (NextPlayer == Player1)
                 {
                     Board.State[row][col] = CellState.Player1;
@@ -159,18 +157,21 @@ namespace TerminusDotNetCore.Services
                     NextPlayer = Player1;
                 }
 
+                //check wins and ties
                 if (CheckWin(row, col))
                 {
                     await ParentModule.ServiceReplyAsync($"{player.Username} wins!");
                     GameActive = false;
+                    return true;
                 }
 
                 if (CheckTie())
                 {
                     await ParentModule.ServiceReplyAsync("It's a draw...");
                     GameActive = false;
+                    return true;
                 }
-
+                
                 return true;
             }
             catch (ArgumentOutOfRangeException)
@@ -180,28 +181,40 @@ namespace TerminusDotNetCore.Services
             }
         }
 
+        //return a textual representation of the board (should change this to emotes or something)
         public string GetBoardStateString()
         {
+            //use code-block markdown (```) to allow for monospaced text
             StringBuilder sb = new StringBuilder("```", NumRows * NumCols * 2);
+            
+            //print the start of the vertical separator
             sb.Append("  | ");
+            
+            //print column indices
             for (int i = 0; i < Board.State[0].Count; i++)
             {
                 sb.Append($"{i} ");
             }
             sb.AppendLine();
+            
+            //print separator intersection
             sb.Append("--+-");
 
+            //print the rest of the column indices separator
             for (int i = 0; i < Board.State[0].Count; i++)
             {
                 sb.Append($"--");
             }
             sb.AppendLine();
 
+            //print each row
             for (int i = 0; i < Board.State.Count; i++)
             {
+                //print the current row index + separator
                 sb.Append($"{i} | ");
                 for (int j = 0; j < Board.State[i].Count; j++)
                 {
+                    //print the current board cell
                     switch (Board.State[i][j])
                     {
                         case CellState.Empty:
@@ -219,7 +232,10 @@ namespace TerminusDotNetCore.Services
                 }
                 sb.AppendLine();
             }
-            sb.AppendLine($"Next player: {NextPlayer.Username}\n```");
+            if (GameActive)
+            {
+                sb.AppendLine($"Next player: {NextPlayer.Username}\n```");
+            }
 
             return sb.ToString();
         }
@@ -230,6 +246,7 @@ namespace TerminusDotNetCore.Services
             int deltaRow;
             int deltaCol;
 
+            //determine step direction
             switch (direction)
             {
                 case BoardDirection.Up:
@@ -282,6 +299,7 @@ namespace TerminusDotNetCore.Services
             CellState playerPiece = Board.State[startRow][startCol];
             int pieceCount = 0;
 
+            //start in the given cell location
             int currRow = startRow;
             int currCol = startCol;
 
@@ -289,6 +307,7 @@ namespace TerminusDotNetCore.Services
             {
                 while (Board.State[currRow][currCol] == playerPiece)
                 {
+                    //if the current cell is the same piece as the starting cell, count the piece and take a step
                     pieceCount++;
                     currRow += deltaRow;
                     currCol += deltaCol;
