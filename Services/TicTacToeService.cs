@@ -236,6 +236,10 @@ namespace TerminusDotNetCore.Services
             {
                 sb.AppendLine($"Next player: {NextPlayer.Username}\n```");
             }
+            else
+            {
+                sb.AppendLine("\n```");
+            }
 
             return sb.ToString();
         }
