@@ -54,8 +54,10 @@ namespace TerminusDotNetCore.Modules
                     result = await _twitterService.TweetAsync(priorMessage.Content);
                 }
             }
-            
-            result = await _twitterService.TweetAsync(tweet);
+            else
+            {
+                result = await _twitterService.TweetAsync(tweet);
+            }
             await ReplyAsync(result);
         }
 
