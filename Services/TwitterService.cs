@@ -47,6 +47,26 @@ namespace TerminusDotNetCore.Services
             _twitterContext = new TwitterContext(auth);
         }
         
+        public async Task<string> TweetAsync(string tweetContent)
+        {
+            if (!string.IsNullOrEmpty(tweetContent))
+            {
+                var tweet = await _twitterContext.TweetAsync(tweetContent);
+                if (tweet != null)
+                {
+                    return $"Successfully tweeted status {tweet.StatusID}.";
+                }
+                else
+                {
+                    return "An error occurred while attempting to post the tweet.";
+                }
+            }
+            else
+            {
+                return "No tweet content was provided.";
+            }
+        }
+        
         public async Task<string> GetLastNotchTweet()
         {
             var user =
