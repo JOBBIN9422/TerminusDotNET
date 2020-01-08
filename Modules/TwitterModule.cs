@@ -42,7 +42,7 @@ namespace TerminusDotNetCore.Modules
         [Command("tweet", RunMode = RunMode.Async)]
         public async Task Tweet([Remainder]string tweet = null)
         {
-            string result;
+            string result = "";
             
             if (string.IsNullOrEmpty(tweet))
             {
