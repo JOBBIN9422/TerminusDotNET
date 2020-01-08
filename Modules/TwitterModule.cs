@@ -41,13 +41,20 @@ namespace TerminusDotNetCore.Modules
         [Command("tweet", RunMode = RunMode.Async)]
         public async Task Tweet([Remainder]string tweet)
         {
+            string result;
+            
             if (string.IsNullOrEmpty(tweet))
             {
-                await ReplyAsync("Please provide text to tweet.");
-                return;
+                //check if the previous message has any text
+                var messages = await Context.Channel.GetMessagesAsync(2).FlattenAsync();
+                var priorMessage = messages.Last();
+                if (!string.IsNullOrEmpty(priorMessage.Content))
+                {
+                    result = await _twitterService.TweetAsync(priorMessage.Content);
+                }
             }
             
-            string result = await _twitterService.TweetAsync(tweet);
+            result = await _twitterService.TweetAsync(tweet);
             await ReplyAsync(result);
         }
 
