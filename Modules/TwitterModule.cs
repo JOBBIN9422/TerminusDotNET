@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Text;
 using System.Threading.Tasks;
 using TerminusDotNetCore.Services;
+using System.Linq;
 
 namespace TerminusDotNetCore.Modules
 {
