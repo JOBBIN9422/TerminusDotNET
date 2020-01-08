@@ -40,7 +40,7 @@ namespace TerminusDotNetCore.Modules
         }
 
         [Command("tweet", RunMode = RunMode.Async)]
-        public async Task Tweet([Remainder]string tweet)
+        public async Task Tweet([Remainder]string tweet = null)
         {
             string result;
             
