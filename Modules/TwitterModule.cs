@@ -38,6 +38,19 @@ namespace TerminusDotNetCore.Modules
             }
         }
 
+        [Command("tweet", RunMode = RunMode.Async)]
+        public async Task Tweet([Remainder]string tweet)
+        {
+            if (string.IsNullOrEmpty(tweet))
+            {
+                await ReplyAsync("Please provide text to tweet.");
+                return;
+            }
+            
+            string result = await _twitterService.TweetAsync(tweet);
+            await ReplyAsync(result);
+        }
+
         [Command("notch", RunMode = RunMode.Async)]
         public async Task GetLastNotchTweet()
         {
