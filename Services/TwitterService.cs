@@ -54,7 +54,7 @@ namespace TerminusDotNetCore.Services
                 var tweet = await _twitterContext.TweetAsync(tweetContent);
                 if (tweet != null)
                 {
-                    return $"Successfully tweeted status:  https://twitter.com/statuses/{tweet.ID}.";
+                    return $"Successfully tweeted status:  https://twitter.com/statuses/{tweet.StatusID}.";
                 }
                 else
                 {
