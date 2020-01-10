@@ -44,6 +44,46 @@ namespace TerminusDotNetCore.Helpers
             }
         }
 
+        public static SixLabors.ImageSharp.Image MemeCaptionImage(string imageFilename, string topText, string bottomText)
+        {
+            SixLabors.ImageSharp.Image image = SixLabors.ImageSharp.Image.Load(imageFilename);
+            //calculate font size based on largest image dimension
+            int fontSize = image.Width > image.Height ? image.Width / 12 : image.Height / 12;
+            SixLabors.Fonts.Font font = SixLabors.Fonts.SystemFonts.CreateFont("Impact", fontSize);
+
+            //compute text render size and font outline size
+            SixLabors.Primitives.SizeF botTextSize = TextMeasurer.Measure(bottomText, new RendererOptions(font));
+            float outlineSize = fontSize / 15.0f;
+
+            //determine top & bottom text location
+            float padding = 10f;
+            float textMaxWidth = image.Width - (padding * 2);
+            SixLabors.Primitives.PointF topLeftLocation = new SixLabors.Primitives.PointF(padding, padding);
+            SixLabors.Primitives.PointF bottomLeftLocation = new SixLabors.Primitives.PointF(padding, image.Height - botTextSize.Height - padding * 2);
+
+            //white brush for text fill and black pen for text outline
+            SixLabors.ImageSharp.Processing.SolidBrush brush = new SixLabors.ImageSharp.Processing.SolidBrush(SixLabors.ImageSharp.Color.White);
+            SixLabors.ImageSharp.Processing.Pen pen = new SixLabors.ImageSharp.Processing.Pen(SixLabors.ImageSharp.Color.Black, outlineSize);
+
+            TextGraphicsOptions options = new TextGraphicsOptions()
+            {
+                WrapTextWidth = textMaxWidth,
+                HorizontalAlignment = SixLabors.Fonts.HorizontalAlignment.Center,
+            };
+
+            //render text and save image
+            if (!string.IsNullOrEmpty(topText))
+            {
+                image.Mutate(x => x.DrawText(options, topText, font, brush, pen, topLeftLocation));
+            }
+            if (!string.IsNullOrEmpty(bottomText))
+            {
+                image.Mutate(x => x.DrawText(options, bottomText, font, brush, pen, bottomLeftLocation));
+            }
+
+            return image;
+        }
+
         public static System.Drawing.Color GetAverageColor(System.Drawing.Bitmap inputImage, int startX, int startY, int width, int height)
         {
             //prevent going out of bounds during calculations
