@@ -154,7 +154,7 @@ namespace TerminusDotNetCore
                 int argPos = 0;
 
                 //look for regex matches and reply if any are found
-                await CheckRegexWildcards(message);
+                await HandleRegexResponses(message);
 
                 //check if message is not command or not sent by bot
                 if (!(message.HasCharPrefix('!', ref argPos) || message.HasMentionPrefix(_client.CurrentUser, ref argPos))
@@ -241,8 +241,14 @@ namespace TerminusDotNetCore
             await Log(new LogMessage(LogSeverity.Info, "HandleCommand", $"Resuming..."));
         }
         
-        private async Task CheckRegexWildcards(SocketUserMessage message)
+        private async Task HandleRegexResponses(SocketUserMessage message)
         {
+            //don't respond to yourself
+            if (message.Author == _client.CurrentUser)
+            {
+                return;
+            }
+            
             //look for wildcards in the current message 
             var matches = _regexMsgParser.ParseMessage(message.Content);
 
