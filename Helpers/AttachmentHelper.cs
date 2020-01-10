@@ -107,7 +107,17 @@ namespace TerminusDotNetCore.Helpers
             return Array.Exists(validExtensions, element => element == extension);
         }
         
-        public static List<string> DownloadAttachments(IReadOnlyCollection<Attachment> attachments)
+        public static List<string> DownloadAttachments(IMessage message)
+        {
+            if (message.Attachments.Count == 0)
+            {
+                throw new ArgumentException("The given message did not have any attachments.");
+            }
+
+            return DownloadAttachments(message.Attachments);
+        }
+
+        public static List<string> DownloadAttachments(IReadOnlyCollection<IAttachment> attachments)
         {
             using (var webClient = new WebClient())
             {
