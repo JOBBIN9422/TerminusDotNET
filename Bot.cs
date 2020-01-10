@@ -24,10 +24,9 @@ namespace TerminusDotNetCore
         private bool _isActive = true;
         private List<ulong> _blacklistChannels = new List<ulong>();
 
-        public Bot()
-        {
-            //Initialize();
-        }
+        //public Bot()
+        //{
+        //}
 
         public async Task Initialize()
         {
@@ -44,6 +43,7 @@ namespace TerminusDotNetCore
                                         .AddJsonFile("appsettings.json", true, true)
                                         .Build();
 
+            //init client secrets
             IConfiguration secrets = new ConfigurationBuilder()
                                         .AddJsonFile("secrets.json", true, true)
                                         .Build();
@@ -62,6 +62,7 @@ namespace TerminusDotNetCore
                 {"WeedChannelId", "ID of weed sesh audio channel"}
             };
             
+            //alert in console for each missing config field
             foreach (var configEntry in requiredConfigs)
             {
                 if (config[configEntry.Key] == null)
@@ -70,6 +71,7 @@ namespace TerminusDotNetCore
                 }
             }
 
+            //alert in console for each missing client secret field
             foreach (var secretEntry in requiredSecrets)
             {
                 if (secrets[secretEntry.Key] == null)
@@ -134,12 +136,14 @@ namespace TerminusDotNetCore
         private async Task HandleCommandAsync(SocketMessage messageParam)
         {
             var message = messageParam as SocketUserMessage;
+            
+            //don't act in blacklisted channels
             if (message == null || _blacklistChannels.Contains(message.Channel.Id))
             {
                 return;
             }
 
-            //check for bot state commands 
+            //check for bot state pseudo-commands 
             if (message.Content == "!die")
             {
                 await DisableBot(message);
@@ -194,6 +198,7 @@ namespace TerminusDotNetCore
                 }
                 else
                 {
+                    //on successful command execution
                     await Log(new LogMessage(LogSeverity.Info, "CommandExecution", $"Command '{command.Value.Name}' executed successfully."));
                 }
             }
@@ -223,6 +228,7 @@ namespace TerminusDotNetCore
 
         private async Task DisableBot(SocketUserMessage message)
         {
+            //disable the bot and set the status to idle
             _isActive = false;
             await message.Channel.SendMessageAsync("aight, I'm finna head out...");
             await _client.SetStatusAsync(UserStatus.Idle);
@@ -231,20 +237,23 @@ namespace TerminusDotNetCore
         
         private async Task EnableBot(SocketUserMessage message)
         {
+            //only respond if we're actually asleep
             if (!_isActive)
             {
                 await message.Channel.SendMessageAsync("real shit?");
             }
-                
+               
+            //re-enable the bot and set status accordingly
             _isActive = true;
             await _client.SetStatusAsync(UserStatus.Online);
             await Log(new LogMessage(LogSeverity.Info, "HandleCommand", $"Resuming..."));
         }
         
+        //check the given message for regex matches and send responses accordingly
         private async Task HandleRegexResponses(SocketUserMessage message)
         {
-            //don't respond to yourself
-            if (message.Author == _client.CurrentUser)
+            //don't respond to bots (maybe change this to only ignore itself)
+            if (message.Author.IsBot)
             {
                 return;
             }
@@ -252,6 +261,7 @@ namespace TerminusDotNetCore
             //look for wildcards in the current message 
             var matches = _regexMsgParser.ParseMessage(message.Content);
 
+            //respond for each matching regex
             if (matches.Count > 0 && !message.Author.IsBot)
             {
                 foreach (var match in matches)
