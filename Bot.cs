@@ -234,6 +234,26 @@ namespace TerminusDotNetCore
             return serviceCollection.BuildServiceProvider();
         }
 
+        private async Task DisableBot(SocketUserMessage message)
+        {
+            _isActive = false;
+            await message.Channel.SendMessageAsync("aight, I'm finna head out...");
+            await _client.SetStatusAsync(UserStatus.Idle);
+            await Log(new LogMessage(LogSeverity.Info, "HandleCommand", $"Going to sleep..."));
+        }
+        
+        private async Task EnableBot(SocketUserMessage message)
+        {
+            if (!_isActive)
+            {
+                await message.Channel.SendMessageAsync("real shit?");
+            }
+                
+            _isActive = true;
+            await _client.SetStatusAsync(UserStatus.Online);
+            await Log(new LogMessage(LogSeverity.Info, "HandleCommand", $"Resuming..."));
+        }
+        
         private async Task CheckRegexWildcards(SocketUserMessage message)
         {
             //look for wildcards in the current message 
