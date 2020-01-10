@@ -38,38 +38,9 @@ namespace TerminusDotNetCore.Services
 
         private void DeepfryImage(string imageFilename, uint numPasses = 1)
         {
-            for (int i = 0; i < numPasses; i++)
+            using (var image = ImageHelper.DeepfryImage(imageFilename, numPasses))
             {
-                using (var image = SixLabors.ImageSharp.Image.Load(imageFilename))
-                {
-                    image.Mutate(x => x.Saturate(2.0f)
-                                       .Contrast(2.0f)
-                                       .GaussianSharpen());
-
-                    //try to compress the image based on its file-type
-                    string extenstion = Path.GetExtension(imageFilename);
-                    switch (extenstion)
-                    {
-                        case ".jpeg":
-                        case ".jpg":
-                            image.Save(imageFilename, new JpegEncoder()
-                            {
-                                Quality = 10,
-                            });
-                            break;
-
-                        case ".png":
-                            image.Save(imageFilename, new PngEncoder()
-                            {
-                                CompressionLevel = 9
-                            });
-                            break;
-
-                        default:
-                            image.Save(imageFilename);
-                            break;
-                    }
-                }
+                image.Save(imageFilename);
             }
         }
 

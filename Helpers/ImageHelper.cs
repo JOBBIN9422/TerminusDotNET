@@ -12,11 +12,38 @@ using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.Fonts;
 using System.Drawing;
 using System.Numerics;
+using System.IO;
+using SixLabors.ImageSharp.Formats;
 
 namespace TerminusDotNetCore.Helpers
 {
     public class ImageHelper
     {
+        public static SixLabors.ImageSharp.Image DeepfryImage(string imageFilename, uint numPasses = 1)
+        {
+            using (var image = SixLabors.ImageSharp.Image.Load(imageFilename))
+            using (var tempStream = new MemoryStream())
+            {
+                image.SaveAsJpeg(tempStream);
+
+                var tempJpg = SixLabors.ImageSharp.Image.Load(tempStream.ToArray(), new JpegDecoder());
+                for (uint i = 0; i < numPasses; i++)
+                {
+                    tempJpg.Mutate(x => x.Saturate(2.0f)
+                                               .Contrast(2.0f)
+                                               .GaussianSharpen());
+
+                    //try to compress the image based on its file-type
+                    tempJpg.SaveAsJpeg(tempStream, new JpegEncoder()
+                    {
+                        Quality = 10,
+                    });
+                }
+
+                return tempJpg;
+            }
+        }
+
         public static System.Drawing.Color GetAverageColor(System.Drawing.Bitmap inputImage, int startX, int startY, int width, int height)
         {
             //prevent going out of bounds during calculations
@@ -74,7 +101,7 @@ namespace TerminusDotNetCore.Helpers
             }
         }
 
-        public static System.Drawing.Color BlendColor(System.Drawing.Color baseColor, System.Drawing.Color blendColor, double amount)
+        private static System.Drawing.Color BlendColor(System.Drawing.Color baseColor, System.Drawing.Color blendColor, double amount)
         {
             //blend the argument color into the base color by the given amount
             byte r = (byte)((blendColor.R * amount) + baseColor.R * (1 - amount));
