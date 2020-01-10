@@ -257,7 +257,7 @@ namespace TerminusDotNetCore.Services
                     List<System.Drawing.Color> rowAvgColors = new List<System.Drawing.Color>();
                     for (int x = 0; x < inputImage.Width; x += pepperImage.Width)
                     {
-                        rowAvgColors.Add(GetAverageColor(inputImage, x, y, pepperImage.Width, pepperImage.Height));
+                        rowAvgColors.Add(ImageHelper.GetAverageColor(inputImage, x, y, pepperImage.Width, pepperImage.Height));
                     }
                     avgColors.Add(rowAvgColors);
                 }
@@ -273,7 +273,7 @@ namespace TerminusDotNetCore.Services
                             {
                                 using (Bitmap blendedPepperImage = new Bitmap(Path.Combine("assets", "images", "GIMP_Pepper.png")))
                                 {
-                                    BlendImage(blendedPepperImage, avgColors[y][x], 0.5);
+                                    ImageHelper.BlendImage(blendedPepperImage, avgColors[y][x], 0.5);
                                     graphics.DrawImage(blendedPepperImage, x * pepperImage.Width, y * pepperImage.Height);
                                 }
                             }
@@ -321,7 +321,7 @@ namespace TerminusDotNetCore.Services
 
             for (int i = 0; i < numTimes; i++)
             {
-                using (var outputImage = ProjectOnto(imageFilename, Path.Combine("assets", "images", "bobross.png"), topLeft, topRight, bottomLeft, bottomRight))
+                using (var outputImage = ImageHelper.ProjectOnto(imageFilename, Path.Combine("assets", "images", "bobross.png"), topLeft, topRight, bottomLeft, bottomRight))
                 {
                     outputImage.Save(imageFilename);
                 }
@@ -337,7 +337,7 @@ namespace TerminusDotNetCore.Services
             SixLabors.Primitives.Point bottomRight = new SixLabors.Primitives.Point(437, 407);
             SixLabors.Primitives.Point bottomLeft = new SixLabors.Primitives.Point(23, 388);
 
-            return ProjectText(text, Path.Combine("assets", "images", "bobross.png"), topLeft, topRight, bottomLeft, bottomRight);
+            return ImageHelper.ProjectText(text, Path.Combine("assets", "images", "bobross.png"), topLeft, topRight, bottomLeft, bottomRight);
 
         }
 
@@ -362,7 +362,7 @@ namespace TerminusDotNetCore.Services
 
             for (int i = 0; i < numTimes; i++)
             {
-                using (var outputImage = ProjectOnto(imageFilename, Path.Combine("assets", "images", "suicide.png"), topLeft, topRight, bottomLeft, bottomRight))
+                using (var outputImage = ImageHelper.ProjectOnto(imageFilename, Path.Combine("assets", "images", "suicide.png"), topLeft, topRight, bottomLeft, bottomRight))
                 {
                     outputImage.Save(imageFilename);
                 }
@@ -376,7 +376,7 @@ namespace TerminusDotNetCore.Services
             SixLabors.Primitives.Point bottomRight = new SixLabors.Primitives.Point(432, 579);
             SixLabors.Primitives.Point bottomLeft = new SixLabors.Primitives.Point(214, 726);
 
-            return ProjectText(text, Path.Combine("assets", "images", "suicide.png"), topLeft, topRight, bottomLeft, bottomRight);
+            return ImageHelper.ProjectText(text, Path.Combine("assets", "images", "suicide.png"), topLeft, topRight, bottomLeft, bottomRight);
         }
 
         public List<string> TrumpImages(IReadOnlyCollection<Attachment> attachments, uint numTimes = 1)
@@ -401,7 +401,7 @@ namespace TerminusDotNetCore.Services
 
             for (int i = 0; i < numTimes; i++)
             {
-                using (var outputImage = ProjectOnto(imageFilename, Path.Combine("assets", "images", "don.png"), topLeft, topRight, bottomLeft, bottomRight))
+                using (var outputImage = ImageHelper.ProjectOnto(imageFilename, Path.Combine("assets", "images", "don.png"), topLeft, topRight, bottomLeft, bottomRight))
                 {
                     outputImage.Save(imageFilename);
                 }
@@ -415,7 +415,7 @@ namespace TerminusDotNetCore.Services
             SixLabors.Primitives.Point bottomRight = new SixLabors.Primitives.Point(368, 361);
             SixLabors.Primitives.Point bottomLeft = new SixLabors.Primitives.Point(220, 365);
 
-            return ProjectText(text, Path.Combine("assets", "images", "don.png"), topLeft, topRight, bottomLeft, bottomRight);
+            return ImageHelper.ProjectText(text, Path.Combine("assets", "images", "don.png"), topLeft, topRight, bottomLeft, bottomRight);
         }
 
         private System.Drawing.Color GetAverageColor(System.Drawing.Bitmap inputImage, int startX, int startY, int width, int height)
