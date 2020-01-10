@@ -142,36 +142,23 @@ namespace TerminusDotNetCore
             //check for bot state commands 
             if (message.Content == "!die")
             {
-                _isActive = false;
-                await message.Channel.SendMessageAsync("aight, I'm finna head out...");
-                await _client.SetStatusAsync(UserStatus.Idle);
-                await Log(new LogMessage(LogSeverity.Info, "HandleCommand", $"Going to sleep..."));
-                return;
+                await DisableBot(message);
             }
-            if (message.Content == "!live")
+            else if (message.Content == "!live")
             {
-                if (!_isActive)
-                {
-                    await message.Channel.SendMessageAsync("real shit?");
-                }
-                
-                _isActive = true;
-                await _client.SetStatusAsync(UserStatus.Online);
-                await Log(new LogMessage(LogSeverity.Info, "HandleCommand", $"Resuming..."));
-                return;
+                await EnableBot(message);
             }
-
-            //track position of command prefix char 
-            int argPos = 0;
-
-            if (_isActive)
+            else if (_isActive)
             {
+                //track position of command prefix char 
+                int argPos = 0;
+
                 //look for regex matches and reply if any are found
                 await CheckRegexWildcards(message);
 
                 //check if message is not command or not sent by bot
                 if (!(message.HasCharPrefix('!', ref argPos) || message.HasMentionPrefix(_client.CurrentUser, ref argPos))
-                    || message.Author.IsBot)
+                || message.Author.IsBot)
                 {
                     return;
                 }
