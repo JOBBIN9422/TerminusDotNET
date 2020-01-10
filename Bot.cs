@@ -253,7 +253,7 @@ namespace TerminusDotNetCore
         private async Task HandleRegexResponses(SocketUserMessage message)
         {
             //don't respond to bots (maybe change this to only ignore itself)
-            if (message.Author.IsBot)
+            if (message.HasCharPrefix('!', ref int x))
             {
                 return;
             }
