@@ -28,7 +28,7 @@ namespace TerminusDotNetCore.Helpers
             ".mp3"
         };
 
-        public async static Task<IReadOnlyCollection<Attachment>> GetAttachmentsAsync(SocketCommandContext context, AttachmentFilter filter)
+        public async static Task<IReadOnlyCollection<Attachment>> GetMostRecentAttachmentsAsync(SocketCommandContext context, AttachmentFilter filter, int priorMsgCount = 20)
         {
             //choose the array containing the proper file extensions to filter by 
             string[] validExtensions = new string[] { };
@@ -51,7 +51,7 @@ namespace TerminusDotNetCore.Helpers
             if (attachments == null || attachments.Count == 0)
             {
                 //check the last 20 messages for attachments (from most recent to oldest)
-                var messages = await context.Channel.GetMessagesAsync(20).FlattenAsync();
+                var messages = await context.Channel.GetMessagesAsync(priorMsgCount).FlattenAsync();
                 foreach (var message in messages)
                 {
                     if (message.Attachments.Count > 0)
