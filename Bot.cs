@@ -133,8 +133,14 @@ namespace TerminusDotNetCore
 
         private async Task HandleCommandAsync(SocketMessage messageParam)
         {
+            int argPos = 0;
             var message = messageParam as SocketUserMessage;
-            if (message == null || _blacklistChannels.Contains(message.Channel.Id))
+            if (message == null 
+                || _blacklistChannels.Contains(message.Channel.Id) 
+                ||!(message.HasCharPrefix('!', ref argPos) 
+                || message.HasMentionPrefix(_client.CurrentUser, ref argPos)) 
+                || message.Author.IsBot
+                || !_isActive)
             {
                 return;
             }
@@ -161,24 +167,28 @@ namespace TerminusDotNetCore
                 return;
             }
 
+            await CheckRegexWildcards(message);
+            var context = new SocketCommandContext(_client, message);
+            var commandResult = await _commandService.ExecuteAsync(context: context, argPos: argPos, services: _serviceProvider);
+
             //track position of command prefix char 
-            int argPos = 0;
+            //int argPos = 0;
 
             if (_isActive)
             {
                 //look for regex matches and reply if any are found
-                await CheckRegexWildcards(message);
+                //await CheckRegexWildcards(message);
 
                 //check if message is not command or not sent by bot
-                if (!(message.HasCharPrefix('!', ref argPos) || message.HasMentionPrefix(_client.CurrentUser, ref argPos))
-                    || message.Author.IsBot)
-                {
-                    return;
-                }
+                //if (!(message.HasCharPrefix('!', ref argPos) || message.HasMentionPrefix(_client.CurrentUser, ref argPos))
+                //    || message.Author.IsBot)
+                //{
+                //    return;
+                //}
 
                 //handle commands
-                var context = new SocketCommandContext(_client, message);
-                var commandResult = await _commandService.ExecuteAsync(context: context, argPos: argPos, services: _serviceProvider);
+                //var context = new SocketCommandContext(_client, message);
+                //var commandResult = await _commandService.ExecuteAsync(context: context, argPos: argPos, services: _serviceProvider);
             }
         }
 
