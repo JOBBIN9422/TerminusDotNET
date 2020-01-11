@@ -90,52 +90,16 @@ namespace TerminusDotNetCore.Services
 
         private void MorrowindImage(string imageFilename)
         {
-            using (var image = SixLabors.ImageSharp.Image.Load(imageFilename))
-            using (var morrowindImage = SixLabors.ImageSharp.Image.Load(Path.Combine("assets", "images", "morrowind.png")))
+            using (var image = ImageHelper.WatermarkImage(imageFilename, Path.Combine("assets", "images", "morrowind.png"), AnchorPositionMode.Bottom, 10, 5))
             {
-                //resize the source image if it's too small to draw the morrowind dialogue on
-                int resizeWidth = image.Width;
-                int resizeHeight = image.Height;
-                while (resizeWidth < morrowindImage.Width || resizeHeight < morrowindImage.Height)
-                {
-                    resizeWidth *= 2;
-                    resizeHeight *= 2;
-                }
-                image.Mutate(x => x.Resize(resizeWidth, resizeHeight));
-
-                //compute the position to draw the morrowind image at (based on its top-left corner)
-                SixLabors.Primitives.Point position = new SixLabors.Primitives.Point(image.Width / 2 - morrowindImage.Width / 2, image.Height - morrowindImage.Height - image.Height / 10);
-
-                image.Mutate(x => x.DrawImage(morrowindImage, position, 1.0f));
                 image.Save(imageFilename);
             }
         }
 
         private void DMCWatermarkImage(string imageFilename)
         {
-            using (var image = SixLabors.ImageSharp.Image.Load(imageFilename))
-            using (var dmcImage = SixLabors.ImageSharp.Image.Load(Path.Combine("assets", "images", "dmc.png")))
+            using (var image = ImageHelper.WatermarkImage(imageFilename, Path.Combine("assets", "images", "dmc.png"), AnchorPositionMode.BottomRight, 10, 4))
             {
-                //resize the source image if it's too small to draw the mDMC watermark on
-                int resizeWidth = image.Width;
-                int resizeHeight = image.Height;
-                while (resizeWidth < dmcImage.Width || resizeHeight < dmcImage.Height)
-                {
-                    resizeWidth *= 2;
-                    resizeHeight *= 2;
-                }
-                image.Mutate(x => x.Resize(resizeWidth, resizeHeight));
-
-                //scale the DMC watermark so it's proportional in size to the source image
-                dmcImage.Mutate(x => x.Resize(image.Height / 5, image.Height / 5));
-
-                int paddingHorizontal = image.Width / 10;
-                int paddingVertical = image.Height / 10;
-
-                //compute the position to draw the morrowind image at (based on its top-left corner)
-                SixLabors.Primitives.Point position = new SixLabors.Primitives.Point(image.Width - dmcImage.Width - paddingHorizontal, image.Height - dmcImage.Height - paddingVertical);
-
-                image.Mutate(x => x.DrawImage(dmcImage, position, 0.8f));
                 image.Save(imageFilename);
             }
         }

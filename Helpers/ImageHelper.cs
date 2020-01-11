@@ -17,6 +17,12 @@ using SixLabors.ImageSharp.Formats;
 
 namespace TerminusDotNetCore.Helpers
 {
+    public enum AnchorType
+    {
+        BottomCenter,
+        BotttomRight
+    }
+
     public class ImageHelper
     {
         public static SixLabors.ImageSharp.Image DeepfryImage(string imageFilename, uint numPasses = 1)
@@ -82,6 +88,65 @@ namespace TerminusDotNetCore.Helpers
             }
 
             return image;
+        }
+
+        public static SixLabors.ImageSharp.Image WatermarkImage(string baseImageFilename, string watermarkImageFilename, AnchorPositionMode anchorPos = AnchorPositionMode.Bottom, int paddingScale = 10, int watermarkScale = 5)
+        {
+            var baseImage = SixLabors.ImageSharp.Image.Load(baseImageFilename);
+            using (var watermarkImage = SixLabors.ImageSharp.Image.Load(watermarkImageFilename))
+            {
+                //resize the source image if it's too small to draw the mDMC watermark on
+                int resizeWidth = baseImage.Width;
+                int resizeHeight = baseImage.Height;
+                while (resizeWidth < watermarkImage.Width || resizeHeight < watermarkImage.Height)
+                {
+                    resizeWidth *= 2;
+                    resizeHeight *= 2;
+                }
+                baseImage.Mutate(x => x.Resize(resizeWidth, resizeHeight));
+
+                //scale the watermark so it's proportional in size to the source image
+                double watermarkAspectRatio = watermarkImage.Width / watermarkImage.Height;
+                int resizeX;
+                int resizeY;
+                if (watermarkImage.Width > watermarkImage.Height)
+                {
+                    resizeY = (int)(baseImage.Height / (double)watermarkScale);
+                    resizeX = (int)(resizeY * watermarkAspectRatio);
+                }
+                else
+                {
+                    resizeX = (int)(baseImage.Width / (double)watermarkScale);
+                    resizeY = (int)(resizeX * watermarkAspectRatio);
+                }
+
+                watermarkImage.Mutate(x => x.Resize(resizeX, resizeY));
+
+                int paddingHorizontal = baseImage.Width / paddingScale;
+                int paddingVertical = baseImage.Height / paddingScale;
+
+                //compute the position to draw the morrowind image at (based on its top-left corner)
+                SixLabors.Primitives.Point position;
+                switch (anchorPos)
+                {
+                    case AnchorPositionMode.BottomRight:
+                        position = new SixLabors.Primitives.Point(baseImage.Width - watermarkImage.Width - paddingHorizontal, baseImage.Height - watermarkImage.Height - paddingVertical);
+                        break;
+
+                    case AnchorPositionMode.Bottom:
+                        position = new SixLabors.Primitives.Point(baseImage.Width / 2 - watermarkImage.Width / 2, baseImage.Height - watermarkImage.Height - paddingVertical);
+                        break;
+
+                    default:
+                        position = new SixLabors.Primitives.Point(0, 0);
+                        break;
+
+                }
+
+                baseImage.Mutate(x => x.DrawImage(watermarkImage, position, 0.8f));
+
+                return baseImage;
+            }
         }
 
         public static System.Drawing.Color GetAverageColor(System.Drawing.Bitmap inputImage, int startX, int startY, int width, int height)
