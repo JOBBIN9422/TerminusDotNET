@@ -11,7 +11,6 @@ using SixLabors.ImageSharp.Formats.Jpeg;
 using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.Fonts;
 using System.Drawing;
-using System.Numerics;
 using System.IO;
 using SixLabors.ImageSharp.Formats;
 
@@ -23,7 +22,7 @@ namespace TerminusDotNetCore.Helpers
         BotttomRight
     }
 
-    public class ImageHelper
+    public static class ImageHelper
     {
         public static SixLabors.ImageSharp.Image DeepfryImage(string imageFilename, uint numPasses = 1)
         {
@@ -90,7 +89,29 @@ namespace TerminusDotNetCore.Helpers
             return image;
         }
 
-        public static SixLabors.ImageSharp.Image WatermarkImage(string baseImageFilename, string watermarkImageFilename, AnchorPositionMode anchorPos = AnchorPositionMode.Bottom, int paddingScale = 10, int watermarkScale = 5)
+        public static void ResizeProportional(this SixLabors.ImageSharp.Image image, double scaleFactor)
+        {
+            double aspectRatio = image.Width / image.Height;
+
+            int resizeX;
+            int resizeY;
+
+            //compute new watermark size based on whether or not the watermark image is portrait or landscape 
+            if (image.Width > image.Height)
+            {
+                resizeY = (int)(image.Height * scaleFactor);
+                resizeX = (int)(resizeY * aspectRatio);
+            }
+            else
+            {
+                resizeX = (int)(image.Width * scaleFactor);
+                resizeY = (int)(resizeX * aspectRatio);
+            }
+
+            image.Mutate(x => x.Resize(resizeX, resizeY));
+        }
+
+        public static SixLabors.ImageSharp.Image WatermarkImage(string baseImageFilename, string watermarkImageFilename, AnchorPositionMode anchorPos = AnchorPositionMode.Bottom, int paddingScale = 10, double watermarkScale = 0.2)
         {
             var baseImage = SixLabors.ImageSharp.Image.Load(baseImageFilename);
             using (var watermarkImage = SixLabors.ImageSharp.Image.Load(watermarkImageFilename))
@@ -106,29 +127,14 @@ namespace TerminusDotNetCore.Helpers
                 baseImage.Mutate(x => x.Resize(resizeWidth, resizeHeight));
 
                 //scale the watermark so it's proportional in size to the source image
-                double watermarkAspectRatio = watermarkImage.Width / watermarkImage.Height;
-                int resizeX;
-                int resizeY;
-
-                //compute new watermark size based on whether or not the watermark image is portrait or landscape 
-                if (watermarkImage.Width > watermarkImage.Height)
-                {
-                    resizeY = (int)(baseImage.Height / (double)watermarkScale);
-                    resizeX = (int)(resizeY * watermarkAspectRatio);
-                }
-                else
-                {
-                    resizeX = (int)(baseImage.Width / (double)watermarkScale);
-                    resizeY = (int)(resizeX * watermarkAspectRatio);
-                }
-
-                watermarkImage.Mutate(x => x.Resize(resizeX, resizeY));
+                double scaleFactor = baseImage.Width / (double)watermarkImage.Width * watermarkScale;
+                watermarkImage.ResizeProportional(scaleFactor);
 
                 //compute padding
                 int paddingHorizontal = baseImage.Width / paddingScale;
                 int paddingVertical = baseImage.Height / paddingScale;
 
-                //compute the position to draw the morrowind image at (based on its top-left corner)
+                //compute the position to draw the watermark at (based on its top-left corner)
                 SixLabors.Primitives.Point position;
                 switch (anchorPos)
                 {
@@ -153,28 +159,6 @@ namespace TerminusDotNetCore.Helpers
             }
         }
 
-        public static void Scale(this SixLabors.ImageSharp.Image image, double scaleFactor)
-        {
-            double aspectRatio = image.Width / image.Height;
-
-            int resizeX;
-            int resizeY;
-
-            //compute new watermark size based on whether or not the watermark image is portrait or landscape 
-            if (image.Width > image.Height)
-            {
-                resizeY = (int)(image.Height * scaleFactor);
-                resizeX = (int)(resizeY * aspectRatio);
-            }
-            else
-            {
-                resizeX = (int)(image.Width * scaleFactor);
-                resizeY = (int)(resizeX * aspectRatio);
-            }
-
-            image.Mutate(x => x.Resize(resizeX, resizeY));
-        }
-
         public static SixLabors.ImageSharp.Image ThiccImage(string imageFilename, int thiccCount)
         {
             var image = SixLabors.ImageSharp.Image.Load(imageFilename);
@@ -185,7 +169,7 @@ namespace TerminusDotNetCore.Helpers
             return image;
         }
 
-        public static SixLabors.ImageSharp.Image MosaicImage(string baseImageFilename, string tileImageFilename, )
+        public static SixLabors.ImageSharp.Image MosaicImage(string baseImageFilename, string tileImageFilename)
         {
             var outputImage = SixLabors.ImageSharp.Image.Load(baseImageFilename);
             using (var tileImage = SixLabors.ImageSharp.Image.Load(tileImageFilename))

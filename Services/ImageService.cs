@@ -90,7 +90,7 @@ namespace TerminusDotNetCore.Services
 
         private void MorrowindImage(string imageFilename)
         {
-            using (var image = ImageHelper.WatermarkImage(imageFilename, Path.Combine("assets", "images", "morrowind.png"), AnchorPositionMode.Bottom, 10, 5))
+            using (var image = ImageHelper.WatermarkImage(imageFilename, Path.Combine("assets", "images", "morrowind.png"), AnchorPositionMode.Bottom, 10, 0.67))
             {
                 image.Save(imageFilename);
             }
@@ -98,7 +98,7 @@ namespace TerminusDotNetCore.Services
 
         private void DMCWatermarkImage(string imageFilename)
         {
-            using (var image = ImageHelper.WatermarkImage(imageFilename, Path.Combine("assets", "images", "dmc.png"), AnchorPositionMode.BottomRight, 10, 4))
+            using (var image = ImageHelper.WatermarkImage(imageFilename, Path.Combine("assets", "images", "dmc.png"), AnchorPositionMode.BottomRight, 10, 0.25))
             {
                 image.Save(imageFilename);
             }
