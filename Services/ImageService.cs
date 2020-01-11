@@ -139,61 +139,10 @@ namespace TerminusDotNetCore.Services
 
         private void MosaicImage(string filename)
         {
-            //will contain average color of each pepper-sized square of the input image 
-            List<List<System.Drawing.Color>> avgColors = new List<List<System.Drawing.Color>>();
-
-            //will contain the raw image data of the input image 
-            MemoryStream memStream = new MemoryStream();
-
-
-            using (System.Drawing.Bitmap inputImage = new Bitmap(filename))
-            using (Bitmap pepperImage = new Bitmap(Path.Combine("assets", "images", "GIMP_Pepper.png")))
+            using (var image = ImageHelper.MosaicImage(filename, Path.Combine("assets", "images", "GIMP_Pepper.png"), 0.02))
             {
-                //calculate the average RGB value of each pepper-sized cell of the input image 
-                for (int y = 0; y < inputImage.Height; y += pepperImage.Height)
-                {
-                    List<System.Drawing.Color> rowAvgColors = new List<System.Drawing.Color>();
-                    for (int x = 0; x < inputImage.Width; x += pepperImage.Width)
-                    {
-                        rowAvgColors.Add(ImageHelper.GetAverageColor(inputImage, x, y, pepperImage.Width, pepperImage.Height));
-                    }
-                    avgColors.Add(rowAvgColors);
-                }
-
-                //draw a pepper blended with the average color for each 'cell' of the source image
-                using (Graphics graphics = Graphics.FromImage(inputImage))
-                {
-                    for (int y = 0; y < avgColors.Count; y++)
-                    {
-                        for (int x = 0; x < avgColors[y].Count; x++)
-                        {
-                            using (System.Drawing.SolidBrush brush = new System.Drawing.SolidBrush(avgColors[y][x]))
-                            {
-                                using (Bitmap blendedPepperImage = new Bitmap(Path.Combine("assets", "images", "GIMP_Pepper.png")))
-                                {
-                                    ImageHelper.BlendImage(blendedPepperImage, avgColors[y][x], 0.5);
-                                    graphics.DrawImage(blendedPepperImage, x * pepperImage.Width, y * pepperImage.Height);
-                                }
-                            }
-                        }
-                    }
-                    //dump the modified image data to mem stream
-                    inputImage.Save(memStream, System.Drawing.Imaging.ImageFormat.Jpeg);
-                }
+                image.Save(filename);
             }
-
-            try
-            {
-                using (System.Drawing.Image saveImage = System.Drawing.Image.FromStream(memStream))
-                {
-                    saveImage.Save(filename);
-                }
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine(ex.ToString());
-            }
-
         }
 
         public List<string> BobRossImages(IReadOnlyCollection<Attachment> attachments, uint numTimes = 1)

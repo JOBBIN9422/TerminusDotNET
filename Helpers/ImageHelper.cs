@@ -1,18 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Numerics;
-using System.Text;
-using MathNet.Numerics.LinearAlgebra;
-using SixLabors.Primitives;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 using SixLabors.ImageSharp.Formats.Jpeg;
-using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.Fonts;
-using System.Drawing;
 using System.IO;
-using SixLabors.ImageSharp.Formats;
 
 namespace TerminusDotNetCore.Helpers
 {
@@ -169,18 +162,29 @@ namespace TerminusDotNetCore.Helpers
             return image;
         }
 
-        public static SixLabors.ImageSharp.Image MosaicImage(string baseImageFilename, string tileImageFilename)
+        public static SixLabors.ImageSharp.Image MosaicImage(string baseImageFilename, string tileImageFilename, double tileScaleFactor = 0.01)
         {
-            var outputImage = SixLabors.ImageSharp.Image.Load(baseImageFilename);
-            using (var tileImage = SixLabors.ImageSharp.Image.Load(tileImageFilename))
+            var outputImage = SixLabors.ImageSharp.Image.Load<Rgba32>(baseImageFilename);
+            using (var tileImage = SixLabors.ImageSharp.Image.Load<Rgba32>(tileImageFilename))
             {
-                //do stuff here
+                tileImage.ResizeProportional(outputImage.Width / (double)tileImage.Width * tileScaleFactor);
+
+                for (int y = 0; y < outputImage.Height; y += tileImage.Height)
+                {
+                    for (int x = 0; x < outputImage.Width; x += tileImage.Width)
+                    {
+                        SixLabors.Primitives.Point tileUpperLeftLoc = new SixLabors.Primitives.Point(x, y);
+                        Rgba32 avgColor = GetAverageColor(outputImage, x, y, tileImage.Width, tileImage.Height);
+                        outputImage.Mutate(i => i.Fill(avgColor, new SixLabors.Primitives.Rectangle(x, y, tileImage.Width, tileImage.Height)));
+                        outputImage.Mutate(i => i.DrawImage(tileImage, tileUpperLeftLoc, PixelColorBlendingMode.Normal, 0.5f));
+                    }
+                }
             }
 
             return outputImage;
         }
 
-        public static System.Drawing.Color GetAverageColor(System.Drawing.Bitmap inputImage, int startX, int startY, int width, int height)
+        public static Rgba32 GetAverageColor(SixLabors.ImageSharp.Image<Rgba32> inputImage, int startX, int startY, int width, int height)
         {
             //prevent going out of bounds during calculations
             int maxX = startX + width;
@@ -206,7 +210,7 @@ namespace TerminusDotNetCore.Helpers
             {
                 for (int x = startX; x < maxX; x++)
                 {
-                    System.Drawing.Color currColor = inputImage.GetPixel(x, y);
+                    Rgba32 currColor = inputImage[x, y];
 
                     //sum of squares for each color value
                     red += currColor.R * currColor.R;
@@ -217,24 +221,12 @@ namespace TerminusDotNetCore.Helpers
                 }
             }
 
-            System.Drawing.Color avgColor = System.Drawing.Color.FromArgb(255,
-                (int)Math.Sqrt(red / numPixels),
-                (int)Math.Sqrt(green / numPixels),
-                (int)Math.Sqrt(blue / numPixels));
+            Rgba32 avgColor = new Rgba32(
+                    (float)Math.Sqrt(red / numPixels)   / 255.0f,
+                    (float)Math.Sqrt(green / numPixels) / 255.0f,
+                    (float)Math.Sqrt(blue / numPixels)  / 255.0f,
+                1);
             return avgColor;
-        }
-
-        public static void BlendImage(Bitmap image, System.Drawing.Color blendColor, double amount)
-        {
-            //blend the argument color into each pixel of the source image 
-            for (int y = 0; y < image.Height; y++)
-            {
-                for (int x = 0; x < image.Width; x++)
-                {
-                    System.Drawing.Color blendedColor = BlendColor(image.GetPixel(x, y), blendColor, amount);
-                    image.SetPixel(x, y, blendedColor);
-                }
-            }
         }
 
         private static System.Drawing.Color BlendColor(System.Drawing.Color baseColor, System.Drawing.Color blendColor, double amount)
