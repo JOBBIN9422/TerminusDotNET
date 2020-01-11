@@ -91,7 +91,7 @@ namespace TerminusDotNetCore.Helpers
 
         public static void ResizeProportional(this SixLabors.ImageSharp.Image image, double scaleFactor)
         {
-            double aspectRatio = image.Width / image.Height;
+            double aspectRatio = image.Width / (double)image.Height;
 
             int resizeX;
             int resizeY;
