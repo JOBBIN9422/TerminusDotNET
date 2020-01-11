@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Numerics;
 using SixLabors.ImageSharp;
+using SixLabors.Primitives;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 using SixLabors.ImageSharp.Formats.Jpeg;
@@ -17,14 +18,14 @@ namespace TerminusDotNetCore.Helpers
 
     public static class ImageHelper
     {
-        public static SixLabors.ImageSharp.Image DeepfryImage(string imageFilename, uint numPasses = 1)
+        public static Image DeepfryImage(string imageFilename, uint numPasses = 1)
         {
-            using (var image = SixLabors.ImageSharp.Image.Load(imageFilename))
+            using (var image = Image.Load(imageFilename))
             using (var tempStream = new MemoryStream())
             {
                 image.SaveAsJpeg(tempStream);
 
-                var tempJpg = SixLabors.ImageSharp.Image.Load(tempStream.ToArray(), new JpegDecoder());
+                var tempJpg = Image.Load(tempStream.ToArray(), new JpegDecoder());
                 for (uint i = 0; i < numPasses; i++)
                 {
                     tempJpg.Mutate(x => x.Saturate(2.0f)
@@ -42,12 +43,12 @@ namespace TerminusDotNetCore.Helpers
             }
         }
 
-        public static SixLabors.ImageSharp.Image MemeCaptionImage(string imageFilename, string topText, string bottomText)
+        public static Image MemeCaptionImage(string imageFilename, string topText, string bottomText)
         {
-            SixLabors.ImageSharp.Image image = SixLabors.ImageSharp.Image.Load(imageFilename);
+            Image image = Image.Load(imageFilename);
             //calculate font size based on largest image dimension
             int fontSize = image.Width > image.Height ? image.Width / 12 : image.Height / 12;
-            SixLabors.Fonts.Font font = SixLabors.Fonts.SystemFonts.CreateFont("Impact", fontSize);
+            Font font = SystemFonts.CreateFont("Impact", fontSize);
 
             //compute text render size and font outline size
             SixLabors.Primitives.SizeF botTextSize = TextMeasurer.Measure(bottomText, new RendererOptions(font));
@@ -60,13 +61,13 @@ namespace TerminusDotNetCore.Helpers
             SixLabors.Primitives.PointF bottomLeftLocation = new SixLabors.Primitives.PointF(padding, image.Height - botTextSize.Height - padding * 2);
 
             //white brush for text fill and black pen for text outline
-            SixLabors.ImageSharp.Processing.SolidBrush brush = new SixLabors.ImageSharp.Processing.SolidBrush(SixLabors.ImageSharp.Color.White);
-            SixLabors.ImageSharp.Processing.Pen pen = new SixLabors.ImageSharp.Processing.Pen(SixLabors.ImageSharp.Color.Black, outlineSize);
+            SolidBrush brush = new SolidBrush(Color.White);
+            Pen pen = new Pen(Color.Black, outlineSize);
 
             TextGraphicsOptions options = new TextGraphicsOptions()
             {
                 WrapTextWidth = textMaxWidth,
-                HorizontalAlignment = SixLabors.Fonts.HorizontalAlignment.Center,
+                HorizontalAlignment = HorizontalAlignment.Center,
             };
 
             //render text and save image
@@ -82,7 +83,7 @@ namespace TerminusDotNetCore.Helpers
             return image;
         }
 
-        public static void ResizeProportional(this SixLabors.ImageSharp.Image image, double scaleFactor)
+        public static void ResizeProportional(this Image image, double scaleFactor)
         {
             double aspectRatio = image.Width / (double)image.Height;
 
@@ -104,10 +105,10 @@ namespace TerminusDotNetCore.Helpers
             image.Mutate(x => x.Resize(resizeX, resizeY));
         }
 
-        public static SixLabors.ImageSharp.Image WatermarkImage(string baseImageFilename, string watermarkImageFilename, AnchorPositionMode anchorPos = AnchorPositionMode.Bottom, int paddingScale = 10, double watermarkScale = 0.2)
+        public static Image WatermarkImage(string baseImageFilename, string watermarkImageFilename, AnchorPositionMode anchorPos = AnchorPositionMode.Bottom, int paddingScale = 10, double watermarkScale = 0.2)
         {
-            var baseImage = SixLabors.ImageSharp.Image.Load(baseImageFilename);
-            using (var watermarkImage = SixLabors.ImageSharp.Image.Load(watermarkImageFilename))
+            var baseImage = Image.Load(baseImageFilename);
+            using (var watermarkImage = Image.Load(watermarkImageFilename))
             {
                 //resize the source image if it's too small to draw the watermark on
                 int resizeWidth = baseImage.Width;
@@ -152,9 +153,9 @@ namespace TerminusDotNetCore.Helpers
             }
         }
 
-        public static SixLabors.ImageSharp.Image ThiccImage(string imageFilename, int thiccCount)
+        public static Image ThiccImage(string imageFilename, int thiccCount)
         {
-            var image = SixLabors.ImageSharp.Image.Load(imageFilename);
+            var image = Image.Load(imageFilename);
             int originalWidth = image.Width;
             int originalHeight = image.Height;
 
@@ -162,10 +163,10 @@ namespace TerminusDotNetCore.Helpers
             return image;
         }
 
-        public static SixLabors.ImageSharp.Image MosaicImage(string baseImageFilename, string tileImageFilename, double tileScaleFactor = 0.01)
+        public static Image MosaicImage(string baseImageFilename, string tileImageFilename, double tileScaleFactor = 0.01)
         {
-            var outputImage = SixLabors.ImageSharp.Image.Load<Rgba32>(baseImageFilename);
-            using (var tileImage = SixLabors.ImageSharp.Image.Load<Rgba32>(tileImageFilename))
+            var outputImage = Image.Load<Rgba32>(baseImageFilename);
+            using (var tileImage = Image.Load<Rgba32>(tileImageFilename))
             {
                 tileImage.ResizeProportional(outputImage.Width / (double)tileImage.Width * tileScaleFactor);
 
@@ -184,7 +185,7 @@ namespace TerminusDotNetCore.Helpers
             return outputImage;
         }
 
-        public static Rgba32 GetAverageColor(SixLabors.ImageSharp.Image<Rgba32> inputImage, int startX, int startY, int width, int height)
+        public static Rgba32 GetAverageColor(Image<Rgba32> inputImage, int startX, int startY, int width, int height)
         {
             //prevent going out of bounds during calculations
             int maxX = startX + width;
@@ -229,24 +230,14 @@ namespace TerminusDotNetCore.Helpers
             return avgColor;
         }
 
-        private static System.Drawing.Color BlendColor(System.Drawing.Color baseColor, System.Drawing.Color blendColor, double amount)
-        {
-            //blend the argument color into the base color by the given amount
-            byte r = (byte)((blendColor.R * amount) + baseColor.R * (1 - amount));
-            byte g = (byte)((blendColor.G * amount) + baseColor.G * (1 - amount));
-            byte b = (byte)((blendColor.B * amount) + baseColor.B * (1 - amount));
-
-            return System.Drawing.Color.FromArgb(r, g, b);
-        }
-
-        public static SixLabors.ImageSharp.Image<Rgba32> ProjectOnto(string projectImageFilename, string baseImageFilename,
+        public static Image<Rgba32> ProjectOnto(string projectImageFilename, string baseImageFilename,
             SixLabors.Primitives.Point topLeft,
             SixLabors.Primitives.Point topRight,
             SixLabors.Primitives.Point bottomLeft,
             SixLabors.Primitives.Point bottomRight)
         {
-            using (var projectImage = SixLabors.ImageSharp.Image.Load(projectImageFilename))
-            using (var baseImage = SixLabors.ImageSharp.Image.Load(baseImageFilename))
+            using (var projectImage = Image.Load(projectImageFilename))
+            using (var baseImage = Image.Load(baseImageFilename))
             {
                 //declare without using statement (need to return this so can't dispose of it)
                 var outputImage = new Image<Rgba32>(baseImage.Width, baseImage.Height);
@@ -272,13 +263,13 @@ namespace TerminusDotNetCore.Helpers
             SixLabors.Primitives.Point bottomLeft,
             SixLabors.Primitives.Point bottomRight)
         {
-            using (var baseImage = SixLabors.ImageSharp.Image.Load(baseImageFilename))
+            using (var baseImage = Image.Load(baseImageFilename))
             using (var textImage = new Image<Rgba32>(1920, 1080))
             using (var outputImage = new Image<Rgba32>(baseImage.Width, baseImage.Height))
 
             {
                 int fontSize = textImage.Width / 10;
-                SixLabors.Fonts.Font font = SixLabors.Fonts.SystemFonts.CreateFont("Impact", fontSize);
+                Font font = SystemFonts.CreateFont("Impact", fontSize);
 
                 //determine text location
                 float padding = 10f;
@@ -286,7 +277,7 @@ namespace TerminusDotNetCore.Helpers
                 SixLabors.Primitives.PointF topLeftLocation = new SixLabors.Primitives.PointF(padding, padding * 2);
 
                 //black brush for text fill
-                SixLabors.ImageSharp.Processing.SolidBrush brush = new SixLabors.ImageSharp.Processing.SolidBrush(SixLabors.ImageSharp.Color.Black);
+                SolidBrush brush = new SolidBrush(Color.Black);
 
                 //wrap and align text before drawing
                 TextGraphicsOptions options = new TextGraphicsOptions()
@@ -296,7 +287,7 @@ namespace TerminusDotNetCore.Helpers
                 };
 
                 //draw text on the text canvas
-                textImage.Mutate(x => x.BackgroundColor(SixLabors.ImageSharp.Color.White));
+                textImage.Mutate(x => x.BackgroundColor(Color.White));
                 textImage.Mutate(x => x.DrawText(options, text, font, brush, topLeftLocation));
 
                 //compute the transformation matrix based on the destination points and apply it to the text image
