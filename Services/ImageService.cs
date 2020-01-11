@@ -139,7 +139,7 @@ namespace TerminusDotNetCore.Services
 
         private void MosaicImage(string filename)
         {
-            using (var image = ImageHelper.MosaicImage(filename, Path.Combine("assets", "images", "GIMP_Pepper.png"), 0.02))
+            using (var image = ImageHelper.MosaicImage(filename, Path.Combine("assets", "images", "GIMP_Pepper.png"), 0.02, 0.5f))
             {
                 image.Save(filename);
             }

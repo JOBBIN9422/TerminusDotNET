@@ -51,14 +51,14 @@ namespace TerminusDotNetCore.Helpers
             Font font = SystemFonts.CreateFont("Impact", fontSize);
 
             //compute text render size and font outline size
-            SixLabors.Primitives.SizeF botTextSize = TextMeasurer.Measure(bottomText, new RendererOptions(font));
+            SizeF botTextSize = TextMeasurer.Measure(bottomText, new RendererOptions(font));
             float outlineSize = fontSize / 15.0f;
 
             //determine top & bottom text location
             float padding = 10f;
             float textMaxWidth = image.Width - (padding * 2);
-            SixLabors.Primitives.PointF topLeftLocation = new SixLabors.Primitives.PointF(padding, padding);
-            SixLabors.Primitives.PointF bottomLeftLocation = new SixLabors.Primitives.PointF(padding, image.Height - botTextSize.Height - padding * 2);
+            PointF topLeftLocation = new PointF(padding, padding);
+            PointF bottomLeftLocation = new PointF(padding, image.Height - botTextSize.Height - padding * 2);
 
             //white brush for text fill and black pen for text outline
             SolidBrush brush = new SolidBrush(Color.White);
@@ -129,19 +129,19 @@ namespace TerminusDotNetCore.Helpers
                 int paddingVertical = baseImage.Height / paddingScale;
 
                 //compute the position to draw the watermark at (based on its top-left corner)
-                SixLabors.Primitives.Point position;
+                Point position;
                 switch (anchorPos)
                 {
                     case AnchorPositionMode.BottomRight:
-                        position = new SixLabors.Primitives.Point(baseImage.Width - watermarkImage.Width - paddingHorizontal, baseImage.Height - watermarkImage.Height - paddingVertical);
+                        position = new Point(baseImage.Width - watermarkImage.Width - paddingHorizontal, baseImage.Height - watermarkImage.Height - paddingVertical);
                         break;
 
                     case AnchorPositionMode.Bottom:
-                        position = new SixLabors.Primitives.Point(baseImage.Width / 2 - watermarkImage.Width / 2, baseImage.Height - watermarkImage.Height - paddingVertical);
+                        position = new Point(baseImage.Width / 2 - watermarkImage.Width / 2, baseImage.Height - watermarkImage.Height - paddingVertical);
                         break;
 
                     default:
-                        position = new SixLabors.Primitives.Point(0, 0);
+                        position = new Point(0, 0);
                         break;
 
                 }
@@ -163,7 +163,7 @@ namespace TerminusDotNetCore.Helpers
             return image;
         }
 
-        public static Image MosaicImage(string baseImageFilename, string tileImageFilename, double tileScaleFactor = 0.01)
+        public static Image MosaicImage(string baseImageFilename, string tileImageFilename, double tileScaleFactor = 0.01, float opacity = 0.5f)
         {
             var outputImage = Image.Load<Rgba32>(baseImageFilename);
             using (var tileImage = Image.Load<Rgba32>(tileImageFilename))
@@ -174,10 +174,10 @@ namespace TerminusDotNetCore.Helpers
                 {
                     for (int x = 0; x < outputImage.Width; x += tileImage.Width)
                     {
-                        SixLabors.Primitives.Point tileUpperLeftLoc = new SixLabors.Primitives.Point(x, y);
+                        Point tileUpperLeftLoc = new Point(x, y);
                         Rgba32 avgColor = GetAverageColor(outputImage, x, y, tileImage.Width, tileImage.Height);
-                        outputImage.Mutate(i => i.Fill(avgColor, new SixLabors.Primitives.Rectangle(x, y, tileImage.Width, tileImage.Height)));
-                        outputImage.Mutate(i => i.DrawImage(tileImage, tileUpperLeftLoc, PixelColorBlendingMode.Normal, 0.5f));
+                        outputImage.Mutate(i => i.Fill(avgColor, new Rectangle(x, y, tileImage.Width, tileImage.Height)));
+                        outputImage.Mutate(i => i.DrawImage(tileImage, tileUpperLeftLoc, PixelColorBlendingMode.Normal, opacity));
                     }
                 }
             }
@@ -231,10 +231,10 @@ namespace TerminusDotNetCore.Helpers
         }
 
         public static Image<Rgba32> ProjectOnto(string projectImageFilename, string baseImageFilename,
-            SixLabors.Primitives.Point topLeft,
-            SixLabors.Primitives.Point topRight,
-            SixLabors.Primitives.Point bottomLeft,
-            SixLabors.Primitives.Point bottomRight)
+            Point topLeft,
+            Point topRight,
+            Point bottomLeft,
+            Point bottomRight)
         {
             using (var projectImage = Image.Load(projectImageFilename))
             using (var baseImage = Image.Load(baseImageFilename))
@@ -251,17 +251,17 @@ namespace TerminusDotNetCore.Helpers
 
                 //draw the base image on top of the projected image
                 outputImage.Mutate(x => x.DrawImage(projectImage, 1.0f));
-                outputImage.Mutate(x => x.DrawImage(baseImage, new SixLabors.Primitives.Point(0, 0), 1.0f));
+                outputImage.Mutate(x => x.DrawImage(baseImage, new Point(0, 0), 1.0f));
 
                 return outputImage;
             }
         }
 
         public static string ProjectText(string text, string baseImageFilename,
-            SixLabors.Primitives.Point topLeft,
-            SixLabors.Primitives.Point topRight,
-            SixLabors.Primitives.Point bottomLeft,
-            SixLabors.Primitives.Point bottomRight)
+            Point topLeft,
+            Point topRight,
+            Point bottomLeft,
+            Point bottomRight)
         {
             using (var baseImage = Image.Load(baseImageFilename))
             using (var textImage = new Image<Rgba32>(1920, 1080))
@@ -274,7 +274,7 @@ namespace TerminusDotNetCore.Helpers
                 //determine text location
                 float padding = 10f;
                 float textMaxWidth = textImage.Width - (padding * 2);
-                SixLabors.Primitives.PointF topLeftLocation = new SixLabors.Primitives.PointF(padding, padding * 2);
+                PointF topLeftLocation = new PointF(padding, padding * 2);
 
                 //black brush for text fill
                 SolidBrush brush = new SolidBrush(Color.Black);
@@ -295,7 +295,7 @@ namespace TerminusDotNetCore.Helpers
                 textImage.Mutate(x => x.Transform(new ProjectiveTransformBuilder().AppendMatrix(transformMat)));
 
                 //draw the projected text and the base image on the output image
-                outputImage.Mutate(x => x.DrawImage(textImage, new SixLabors.Primitives.Point(0, 0), 1.0f));
+                outputImage.Mutate(x => x.DrawImage(textImage, new Point(0, 0), 1.0f));
                 outputImage.Mutate(x => x.DrawImage(baseImage, 1.0f));
 
                 string outputFilename = $"{Guid.NewGuid().ToString("N")}.jpg";
