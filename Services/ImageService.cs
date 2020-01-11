@@ -119,12 +119,8 @@ namespace TerminusDotNetCore.Services
 
         private void ThiccImage(string filename, int thiccCount)
         {
-            using (var image = SixLabors.ImageSharp.Image.Load(filename))
+            using (var image = ImageHelper.ThiccImage(filename, thiccCount))
             {
-                int originalWidth = image.Width;
-                int originalHeight = image.Height;
-
-                image.Mutate(x => x.Resize(thiccCount * originalWidth, image.Height));
                 image.Save(filename);
             }
         }

@@ -95,7 +95,7 @@ namespace TerminusDotNetCore.Helpers
             var baseImage = SixLabors.ImageSharp.Image.Load(baseImageFilename);
             using (var watermarkImage = SixLabors.ImageSharp.Image.Load(watermarkImageFilename))
             {
-                //resize the source image if it's too small to draw the mDMC watermark on
+                //resize the source image if it's too small to draw the watermark on
                 int resizeWidth = baseImage.Width;
                 int resizeHeight = baseImage.Height;
                 while (resizeWidth < watermarkImage.Width || resizeHeight < watermarkImage.Height)
@@ -109,6 +109,8 @@ namespace TerminusDotNetCore.Helpers
                 double watermarkAspectRatio = watermarkImage.Width / watermarkImage.Height;
                 int resizeX;
                 int resizeY;
+
+                //compute new watermark size based on whether or not the watermark image is portrait or landscape 
                 if (watermarkImage.Width > watermarkImage.Height)
                 {
                     resizeY = (int)(baseImage.Height / (double)watermarkScale);
@@ -122,6 +124,7 @@ namespace TerminusDotNetCore.Helpers
 
                 watermarkImage.Mutate(x => x.Resize(resizeX, resizeY));
 
+                //compute padding
                 int paddingHorizontal = baseImage.Width / paddingScale;
                 int paddingVertical = baseImage.Height / paddingScale;
 
@@ -143,10 +146,21 @@ namespace TerminusDotNetCore.Helpers
 
                 }
 
+                //draw the watermark on the base image with 80% opacity
                 baseImage.Mutate(x => x.DrawImage(watermarkImage, position, 0.8f));
 
                 return baseImage;
             }
+        }
+
+        public static SixLabors.ImageSharp.Image ThiccImage(string imageFilename, int thiccCount)
+        {
+            var image = SixLabors.ImageSharp.Image.Load(imageFilename);
+            int originalWidth = image.Width;
+            int originalHeight = image.Height;
+
+            image.Mutate(x => x.Resize(thiccCount * originalWidth, image.Height));
+            return image;
         }
 
         public static System.Drawing.Color GetAverageColor(System.Drawing.Bitmap inputImage, int startX, int startY, int width, int height)
