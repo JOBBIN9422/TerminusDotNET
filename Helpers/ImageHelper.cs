@@ -153,6 +153,28 @@ namespace TerminusDotNetCore.Helpers
             }
         }
 
+        public static void Scale(this SixLabors.ImageSharp.Image image, double scaleFactor)
+        {
+            double aspectRatio = image.Width / image.Height;
+
+            int resizeX;
+            int resizeY;
+
+            //compute new watermark size based on whether or not the watermark image is portrait or landscape 
+            if (image.Width > image.Height)
+            {
+                resizeY = (int)(image.Height * scaleFactor);
+                resizeX = (int)(resizeY * aspectRatio);
+            }
+            else
+            {
+                resizeX = (int)(image.Width * scaleFactor);
+                resizeY = (int)(resizeX * aspectRatio);
+            }
+
+            image.Mutate(x => x.Resize(resizeX, resizeY));
+        }
+
         public static SixLabors.ImageSharp.Image ThiccImage(string imageFilename, int thiccCount)
         {
             var image = SixLabors.ImageSharp.Image.Load(imageFilename);
@@ -161,6 +183,17 @@ namespace TerminusDotNetCore.Helpers
 
             image.Mutate(x => x.Resize(thiccCount * originalWidth, image.Height));
             return image;
+        }
+
+        public static SixLabors.ImageSharp.Image MosaicImage(string baseImageFilename, string tileImageFilename, )
+        {
+            var outputImage = SixLabors.ImageSharp.Image.Load(baseImageFilename);
+            using (var tileImage = SixLabors.ImageSharp.Image.Load(tileImageFilename))
+            {
+                //do stuff here
+            }
+
+            return outputImage;
         }
 
         public static System.Drawing.Color GetAverageColor(System.Drawing.Bitmap inputImage, int startX, int startY, int width, int height)
