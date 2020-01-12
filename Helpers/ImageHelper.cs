@@ -225,9 +225,9 @@ namespace TerminusDotNetCore.Helpers
             }
 
             Rgba32 avgColor = new Rgba32(
-                    (float)Math.Sqrt(red / numPixels)   / 255.0f,
+                    (float)Math.Sqrt(red / numPixels) / 255.0f,
                     (float)Math.Sqrt(green / numPixels) / 255.0f,
-                    (float)Math.Sqrt(blue / numPixels)  / 255.0f,
+                    (float)Math.Sqrt(blue / numPixels) / 255.0f,
                 1);
             return avgColor;
         }
@@ -281,7 +281,29 @@ namespace TerminusDotNetCore.Helpers
             }
         }
 
-        public static string ProjectText(string text, string baseImageFilename,
+        public static Image<Rgba32> ProjectText(string text, string jsonPath)
+        {
+            if (!File.Exists(jsonPath))
+            {
+                throw new ArgumentException("Could not find the given JSON file.");
+            }
+
+            //load and deserialize the file contents
+            string jsonContents = File.ReadAllText(jsonPath);
+            JObject projectInfo = JsonConvert.DeserializeObject<JObject>(jsonContents);
+
+            //parse the image name and points
+            string baseImageFilename = (string)projectInfo["baseImage"];
+
+            Point topLeft = new Point((int)projectInfo["topLeft"]["x"], (int)projectInfo["topLeft"]["y"]);
+            Point topRight = new Point((int)projectInfo["topRight"]["x"], (int)projectInfo["topRight"]["y"]);
+            Point bottomLeft = new Point((int)projectInfo["bottomLeft"]["x"], (int)projectInfo["bottomLeft"]["y"]);
+            Point bottomRight = new Point((int)projectInfo["bottomRight"]["x"], (int)projectInfo["bottomRight"]["y"]);
+
+            return ProjectText(text, Path.Combine("assets", "images", baseImageFilename), topLeft, topRight, bottomLeft, bottomRight);
+        }
+
+        public static Image<Rgba32> ProjectText(string text, string baseImageFilename,
             Point topLeft,
             Point topRight,
             Point bottomLeft,
@@ -289,9 +311,9 @@ namespace TerminusDotNetCore.Helpers
         {
             using (var baseImage = Image.Load(baseImageFilename))
             using (var textImage = new Image<Rgba32>(1920, 1080))
-            using (var outputImage = new Image<Rgba32>(baseImage.Width, baseImage.Height))
-
             {
+                var outputImage = new Image<Rgba32>(baseImage.Width, baseImage.Height);
+
                 int fontSize = textImage.Width / 10;
                 Font font = SystemFonts.CreateFont("Impact", fontSize);
 
@@ -322,10 +344,11 @@ namespace TerminusDotNetCore.Helpers
                 outputImage.Mutate(x => x.DrawImage(textImage, new Point(0, 0), 1.0f));
                 outputImage.Mutate(x => x.DrawImage(baseImage, 1.0f));
 
-                string outputFilename = $"{Guid.NewGuid().ToString("N")}.jpg";
-                outputImage.Save(outputFilename);
+                return outputImage;
+                //string outputFilename = $"{Guid.NewGuid().ToString("N")}.jpg";
+                //outputImage.Save(outputFilename);
 
-                return outputFilename;
+                //return outputFilename;
             }
         }
     }

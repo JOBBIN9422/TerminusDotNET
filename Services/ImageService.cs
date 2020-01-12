@@ -170,14 +170,13 @@ namespace TerminusDotNetCore.Services
 
         public string BobRossText(string text)
         {
-            //define projection points for the corners of Bob's happy little canvas
-            SixLabors.Primitives.Point topLeft = new SixLabors.Primitives.Point(24, 72);
-            SixLabors.Primitives.Point topRight = new SixLabors.Primitives.Point(451, 91);
-            SixLabors.Primitives.Point bottomRight = new SixLabors.Primitives.Point(437, 407);
-            SixLabors.Primitives.Point bottomLeft = new SixLabors.Primitives.Point(23, 388);
+            using (var image = ImageHelper.ProjectText(text, Path.Combine("assets", "images", "bobross.json")))
+            {
+                string outputFilename = $"{Guid.NewGuid().ToString("N")}.jpg";
+                image.Save(outputFilename);
 
-            return ImageHelper.ProjectText(text, Path.Combine("assets", "images", "bobross.png"), topLeft, topRight, bottomLeft, bottomRight);
-
+                return outputFilename;
+            }
         }
 
         public List<string> PCImages(IReadOnlyCollection<Attachment> attachments, uint numTimes = 1)
@@ -205,12 +204,13 @@ namespace TerminusDotNetCore.Services
 
         public string PCText(string text)
         {
-            SixLabors.Primitives.Point topLeft = new SixLabors.Primitives.Point(69, 334);
-            SixLabors.Primitives.Point topRight = new SixLabors.Primitives.Point(335, 292);
-            SixLabors.Primitives.Point bottomRight = new SixLabors.Primitives.Point(432, 579);
-            SixLabors.Primitives.Point bottomLeft = new SixLabors.Primitives.Point(214, 726);
+            using (var image = ImageHelper.ProjectText(text, Path.Combine("assets", "images", "pc.json")))
+            {
+                string outputFilename = $"{Guid.NewGuid().ToString("N")}.jpg";
+                image.Save(outputFilename);
 
-            return ImageHelper.ProjectText(text, Path.Combine("assets", "images", "suicide.png"), topLeft, topRight, bottomLeft, bottomRight);
+                return outputFilename;
+            }
         }
 
         public List<string> TrumpImages(IReadOnlyCollection<Attachment> attachments, uint numTimes = 1)
@@ -238,12 +238,13 @@ namespace TerminusDotNetCore.Services
 
         public string TrumpText(string text)
         {
-            SixLabors.Primitives.Point topLeft = new SixLabors.Primitives.Point(218, 164);
-            SixLabors.Primitives.Point topRight = new SixLabors.Primitives.Point(366, 164);
-            SixLabors.Primitives.Point bottomRight = new SixLabors.Primitives.Point(368, 361);
-            SixLabors.Primitives.Point bottomLeft = new SixLabors.Primitives.Point(220, 365);
+            using (var image = ImageHelper.ProjectText(text, Path.Combine("assets", "images", "trump.json")))
+            {
+                string outputFilename = $"{Guid.NewGuid().ToString("N")}.jpg";
+                image.Save(outputFilename);
 
-            return ImageHelper.ProjectText(text, Path.Combine("assets", "images", "don.png"), topLeft, topRight, bottomLeft, bottomRight);
+                return outputFilename;
+            }
         }
     }
 }
