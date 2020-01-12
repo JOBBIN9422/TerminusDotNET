@@ -1,0 +1,19 @@
+{
+  "baseImage": "don.png",
+  "topLeft": {
+    "x": 218,
+    "y": 164
+  },
+  "topRight": {
+    "x": 366,
+    "y": 164
+  },
+  "bottomLeft": {
+    "x": 220,
+    "y": 365
+  },
+  "bottomRight": {
+    "x": 368,
+    "y": 361
+  }
+}

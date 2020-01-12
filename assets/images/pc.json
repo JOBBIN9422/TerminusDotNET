@@ -1,0 +1,19 @@
+{
+  "baseImage": "suicide.png",
+  "topLeft": {
+    "x": 69,
+    "y": 334
+  },
+  "topRight": {
+    "x": 335,
+    "y": 292
+  },
+  "bottomLeft": {
+    "x": 214,
+    "y": 726
+  },
+  "bottomRight": {
+    "x": 432,
+    "y": 579
+  }
+}

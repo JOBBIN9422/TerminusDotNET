@@ -7,6 +7,8 @@ using SixLabors.ImageSharp.Processing;
 using SixLabors.ImageSharp.Formats.Jpeg;
 using SixLabors.Fonts;
 using System.IO;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 
 namespace TerminusDotNetCore.Helpers
 {
@@ -228,6 +230,28 @@ namespace TerminusDotNetCore.Helpers
                     (float)Math.Sqrt(blue / numPixels)  / 255.0f,
                 1);
             return avgColor;
+        }
+
+        public static Image<Rgba32> ProjectOnto(string projectImageFilename, string jsonPath)
+        {
+            if (!File.Exists(jsonPath))
+            {
+                throw new ArgumentException("Could not find the given JSON file.");
+            }
+
+            //load and deserialize the file contents
+            string jsonContents = File.ReadAllText(jsonPath);
+            JObject projectInfo = JsonConvert.DeserializeObject<JObject>(jsonContents);
+
+            //parse the image name and points
+            string baseImageFilename = (string)projectInfo["baseImage"];
+
+            Point topLeft = new Point((int)projectInfo["topLeft"]["x"], (int)projectInfo["topLeft"]["y"]);
+            Point topRight = new Point((int)projectInfo["topRight"]["x"], (int)projectInfo["topRight"]["y"]);
+            Point bottomLeft = new Point((int)projectInfo["bottomLeft"]["x"], (int)projectInfo["bottomLeft"]["y"]);
+            Point bottomRight = new Point((int)projectInfo["bottomRight"]["x"], (int)projectInfo["bottomRight"]["y"]);
+
+            return ProjectOnto(projectImageFilename, Path.Combine("assets", "images", baseImageFilename), topLeft, topRight, bottomLeft, bottomRight);
         }
 
         public static Image<Rgba32> ProjectOnto(string projectImageFilename, string baseImageFilename,
