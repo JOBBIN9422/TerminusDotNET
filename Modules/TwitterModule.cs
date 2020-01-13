@@ -43,20 +43,31 @@ namespace TerminusDotNetCore.Modules
         public async Task Tweet([Remainder]string tweet = null)
         {
             string result = "";
-            
+
             if (string.IsNullOrEmpty(tweet))
             {
-                //check if the previous message has any text
-                var messages = await Context.Channel.GetMessagesAsync(2).FlattenAsync();
-                var priorMessage = messages.Last();
-                if (!string.IsNullOrEmpty(priorMessage.Content))
+                //check for attachments in the current message
+                if (Context.Message.Attachments.Count > 0)
                 {
-                    result = await _twitterService.TweetAsync(priorMessage.Content);
+                    result = await _twitterService.TweetAsync("", Context.Message.Attachments);
+                }
+
+                //if no attachents or text in the current message
+                else
+                {
+                    //check if the previous message has any text
+                    var messages = await Context.Channel.GetMessagesAsync(2).FlattenAsync();
+                    var priorMessage = messages.Last();
+
+                    if (!string.IsNullOrEmpty(priorMessage.Content))
+                    {
+                        result = await _twitterService.TweetAsync(priorMessage.Content, priorMessage.Attachments);
+                    }
                 }
             }
             else
             {
-                result = await _twitterService.TweetAsync(tweet);
+                result = await _twitterService.TweetAsync(tweet, Context.Message.Attachments);
             }
             await ReplyAsync(result);
         }

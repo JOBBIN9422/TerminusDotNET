@@ -2,11 +2,14 @@
 using System.Collections.Generic;
 using System.Text;
 using TerminusDotNetCore.Modules;
+using TerminusDotNetCore.Helpers;
 using LinqToTwitter;
 using Microsoft.Extensions.Configuration;
 using System.Threading.Tasks;
 using System.Linq;
 using System.Diagnostics;
+using Discord;
+using System.IO;
 
 namespace TerminusDotNetCore.Services
 {
@@ -47,23 +50,69 @@ namespace TerminusDotNetCore.Services
             _twitterContext = new TwitterContext(auth);
         }
         
-        public async Task<string> TweetAsync(string tweetContent)
+        private async Task<List<Media>> GetMediaFromAttachments(IReadOnlyCollection<IAttachment> attachments)
         {
-            if (!string.IsNullOrEmpty(tweetContent))
+            if (attachments == null || attachments.Count == 0)
             {
-                var tweet = await _twitterContext.TweetAsync(tweetContent);
-                if (tweet != null)
+                return null;
+            }
+
+            List<Media> mediaContent = new List<Media>();
+            var attachmentFiles = AttachmentHelper.DownloadAttachments(attachments);
+
+            try
+            {
+                foreach (var file in attachmentFiles)
                 {
-                    return $"Successfully tweeted status:  https://twitter.com/Yeetman04889000/status/{tweet.StatusID}";
+                    string mediaType = $"image/{Path.GetExtension(file).Replace(".", string.Empty)}";
+                    byte[] fileData = File.ReadAllBytes(file);
+                    var media = await _twitterContext.UploadMediaAsync(fileData, mediaType, "tweet_image");
+
+                    mediaContent.Add(media);
+                    File.Delete(file);
                 }
-                else
-                {
-                    return "An error occurred while attempting to post the tweet.";
-                }
+
+                return mediaContent;
+            }
+            finally
+            {
+                AttachmentHelper.DeleteFiles(attachmentFiles);
+            }
+        }
+
+        public async Task<string> TweetAsync(string tweetContent, IReadOnlyCollection<IAttachment> attachments = null)
+        {
+            Status tweet = null;
+
+            //get media from message attachments (if any)
+            List<Media> mediaContent = await GetMediaFromAttachments(attachments);
+            if (mediaContent != null)
+            {
+                var mediaIDs = mediaContent.Select(x => x.MediaID);
+                tweet = await _twitterContext.TweetAsync(tweetContent, mediaIDs);
+
+                //if (!string.IsNullOrEmpty(tweetContent))
+                //{
+                //    tweet = await _twitterContext.TweetAsync(tweetContent, mediaIDs);
+                //}
+                //else
+                //{
+                //    tweet = await _twitterContext.TweetAsync("", mediaIDs);
+                //}
             }
             else
             {
-                return "No tweet content was provided.";
+                //if no media provided, just tweet the text 
+                tweet = await _twitterContext.TweetAsync(tweetContent);
+            }
+            
+            if (tweet != null)
+            {
+                return $"Successfully tweeted status:  https://twitter.com/Yeetman04889000/status/{tweet.StatusID}";
+            }
+            else
+            {
+                return "An error occurred while attempting to post the tweet.";
             }
         }
         
