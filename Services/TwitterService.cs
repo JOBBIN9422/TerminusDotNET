@@ -108,7 +108,7 @@ namespace TerminusDotNetCore.Services
             
             if (tweet != null)
             {
-                return $"Successfully tweeted status:  https://twitter.com/Yeetman04889000/status/{tweet.StatusID}";
+                return $"<:succ:501947977435185162>essfully tweeted status:  https://twitter.com/Yeetman04889000/status/{tweet.StatusID}";
             }
             else
             {
