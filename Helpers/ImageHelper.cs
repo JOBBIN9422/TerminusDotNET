@@ -20,6 +20,12 @@ namespace TerminusDotNetCore.Helpers
 
     public static class ImageHelper
     {
+        /// <summary>
+        /// Deep-fries an image.
+        /// </summary>
+        /// <param name="imageFilename">Path to the input image.</param>
+        /// <param name="numPasses">Number of times to deep-fry.</param>
+        /// <returns>The deep-fried image.</returns>
         public static Image DeepfryImage(string imageFilename, uint numPasses = 1)
         {
             using (var image = Image.Load(imageFilename))
@@ -30,6 +36,7 @@ namespace TerminusDotNetCore.Helpers
                 var tempJpg = Image.Load(tempStream.ToArray(), new JpegDecoder());
                 for (uint i = 0; i < numPasses; i++)
                 {
+                    tempJpg = Image.Load(tempStream.ToArray(), new JpegDecoder());
                     tempJpg.Mutate(x => x.Saturate(2.0f)
                                                .Contrast(2.0f)
                                                .GaussianSharpen());
@@ -45,6 +52,13 @@ namespace TerminusDotNetCore.Helpers
             }
         }
 
+        /// <summary>
+        /// Captions an image with top text and bottom text (Impact font).
+        /// </summary>
+        /// <param name="imageFilename">Path to the input image.</param>
+        /// <param name="topText">Top text to render.</param>
+        /// <param name="bottomText">Bottom text to render.</param>
+        /// <returns>The image with the given text drawn on it.</returns>
         public static Image MemeCaptionImage(string imageFilename, string topText, string bottomText)
         {
             Image image = Image.Load(imageFilename);
@@ -72,7 +86,7 @@ namespace TerminusDotNetCore.Helpers
                 HorizontalAlignment = HorizontalAlignment.Center,
             };
 
-            //render text and save image
+            //render text
             if (!string.IsNullOrEmpty(topText))
             {
                 image.Mutate(x => x.DrawText(options, topText, font, brush, pen, topLeftLocation));
@@ -85,6 +99,11 @@ namespace TerminusDotNetCore.Helpers
             return image;
         }
 
+        /// <summary>
+        /// Scale an image by the given multiplier while maintaining its aspect ratio.
+        /// </summary>
+        /// <param name="image">Image to scale.</param>
+        /// <param name="scaleFactor">Multiplier to scale the image by.</param>
         public static void ResizeProportional(this Image image, double scaleFactor)
         {
             double aspectRatio = image.Width / (double)image.Height;
@@ -92,7 +111,7 @@ namespace TerminusDotNetCore.Helpers
             int resizeX;
             int resizeY;
 
-            //compute new watermark size based on whether or not the watermark image is portrait or landscape 
+            //compute new size based on whether or not the image is portrait or landscape 
             if (image.Width > image.Height)
             {
                 resizeY = (int)(image.Height * scaleFactor);
@@ -107,6 +126,15 @@ namespace TerminusDotNetCore.Helpers
             image.Mutate(x => x.Resize(resizeX, resizeY));
         }
 
+        /// <summary>
+        /// Draws a given image as an overlay on another image.
+        /// </summary>
+        /// <param name="baseImageFilename">Path to the base image.</param>
+        /// <param name="watermarkImageFilename">Path to the image to be drawn on the base image.</param>
+        /// <param name="anchorPos">Position to draw the watermark image at.</param>
+        /// <param name="paddingScale">How much padding to use in positioning.</param>
+        /// <param name="watermarkScale">How much to scale the watermark when drawn.</param>
+        /// <returns>The given base image with the watermark drawn on it.</returns>
         public static Image WatermarkImage(string baseImageFilename, string watermarkImageFilename, AnchorPositionMode anchorPos = AnchorPositionMode.Bottom, int paddingScale = 10, double watermarkScale = 0.2)
         {
             var baseImage = Image.Load(baseImageFilename);
@@ -148,35 +176,54 @@ namespace TerminusDotNetCore.Helpers
 
                 }
 
-                //draw the watermark on the base image with 80% opacity
+                //draw the watermark on the base image with 80% opacity (make this an argument?)
                 baseImage.Mutate(x => x.DrawImage(watermarkImage, position, 0.8f));
 
                 return baseImage;
             }
         }
-
+        
+        /// <summary>
+        /// Stretches an image by the given multiplier.
+        /// </summary>
+        /// <param name="imageFilename">Path to input image.</param>
+        /// <param name="thiccCount">Width multiplier.</param>
+        /// <returns>The given image stretched by the input amount.</returns>
         public static Image ThiccImage(string imageFilename, int thiccCount)
         {
             var image = Image.Load(imageFilename);
             int originalWidth = image.Width;
             int originalHeight = image.Height;
 
+            //scale the image's width by the given value
             image.Mutate(x => x.Resize(thiccCount * originalWidth, image.Height));
             return image;
         }
 
+        /// <summary>
+        /// Tiles a given image across a base image, creating a mosaic.
+        /// </summary>
+        /// <param name="baseImageFilename">Path to base input image.</param>
+        /// <param name="tileImageFilename">Path to image to be used as a tile.</param>
+        /// <param name="tileScaleFactor">Size of each tile.</param>
+        /// <param name="opacity">Opacity of each tile.</param>
+        /// <returns>The given base image recreated out of tiles.</returns>
         public static Image MosaicImage(string baseImageFilename, string tileImageFilename, double tileScaleFactor = 0.01, float opacity = 0.5f)
         {
             var outputImage = Image.Load<Rgba32>(baseImageFilename);
             using (var tileImage = Image.Load<Rgba32>(tileImageFilename))
             {
+                //scale the tile image to its output size
                 tileImage.ResizeProportional(outputImage.Width / (double)tileImage.Width * tileScaleFactor);
 
                 for (int y = 0; y < outputImage.Height; y += tileImage.Height)
                 {
                     for (int x = 0; x < outputImage.Width; x += tileImage.Width)
                     {
+                        //define the draw point of a new tile 
                         Point tileUpperLeftLoc = new Point(x, y);
+
+                        //compute the average color of the tile cell and draw it along with the tile
                         Rgba32 avgColor = GetAverageColor(outputImage, x, y, tileImage.Width, tileImage.Height);
                         outputImage.Mutate(i => i.Fill(avgColor, new Rectangle(x, y, tileImage.Width, tileImage.Height)));
                         outputImage.Mutate(i => i.DrawImage(tileImage, tileUpperLeftLoc, PixelColorBlendingMode.Normal, opacity));
@@ -187,6 +234,15 @@ namespace TerminusDotNetCore.Helpers
             return outputImage;
         }
 
+        /// <summary>
+        /// Gets the average RGB value of a given rectangle.
+        /// </summary>
+        /// <param name="inputImage">Path to the input image.</param>
+        /// <param name="startX">Rectangle x location.</param>
+        /// <param name="startY">Rectangle y location.</param>
+        /// <param name="width">Rectangle width.</param>
+        /// <param name="height">Rectangle height.</param>
+        /// <returns>The average color value (normalized RGBA) of the given region.</returns>
         public static Rgba32 GetAverageColor(Image<Rgba32> inputImage, int startX, int startY, int width, int height)
         {
             //prevent going out of bounds during calculations
@@ -224,6 +280,7 @@ namespace TerminusDotNetCore.Helpers
                 }
             }
 
+            //return normalized RGBA average
             Rgba32 avgColor = new Rgba32(
                     (float)Math.Sqrt(red / numPixels) / 255.0f,
                     (float)Math.Sqrt(green / numPixels) / 255.0f,
@@ -232,6 +289,12 @@ namespace TerminusDotNetCore.Helpers
             return avgColor;
         }
 
+        /// <summary>
+        /// Projects the given image onto a base image.
+        /// </summary>
+        /// <param name="projectImageFilename">Path to image to project onto base image.</param>
+        /// <param name="jsonPath">Path to JSON file containing information about the base image.</param>
+        /// <returns>An image containing the given input projected onto the base image.</returns>
         public static Image<Rgba32> ProjectOnto(string projectImageFilename, string jsonPath)
         {
             if (!File.Exists(jsonPath))
@@ -254,6 +317,16 @@ namespace TerminusDotNetCore.Helpers
             return ProjectOnto(projectImageFilename, Path.Combine("assets", "images", baseImageFilename), topLeft, topRight, bottomLeft, bottomRight);
         }
 
+        /// <summary>
+        /// Projects the given image onto a base image.
+        /// </summary>
+        /// <param name="projectImageFilename">Path to image to be projected.</param>
+        /// <param name="baseImageFilename">Path to base image.</param>
+        /// <param name="topLeft">Top-left corner of the projection region.</param>
+        /// <param name="topRight">Top-right corner of the projection region.</param>
+        /// <param name="bottomLeft">Bottom-left corner of the projection region.</param>
+        /// <param name="bottomRight">Bottom-right corner of the projection region.</param>
+        /// <returns>An image containing the given input projected onto the base image.</returns>
         public static Image<Rgba32> ProjectOnto(string projectImageFilename, string baseImageFilename,
             Point topLeft,
             Point topRight,
@@ -281,6 +354,12 @@ namespace TerminusDotNetCore.Helpers
             }
         }
 
+        /// <summary>
+        /// Projects the given text onto a base image.
+        /// </summary>
+        /// <param name="text">The text to be projected.</param>
+        /// <param name="jsonPath">Path to JSON file containing information about the base image.</param>
+        /// <returns>The base image with the given text projected onto it.</returns>
         public static Image<Rgba32> ProjectText(string text, string jsonPath)
         {
             if (!File.Exists(jsonPath))
@@ -303,6 +382,16 @@ namespace TerminusDotNetCore.Helpers
             return ProjectText(text, Path.Combine("assets", "images", baseImageFilename), topLeft, topRight, bottomLeft, bottomRight);
         }
 
+        /// <summary>
+        /// Projects the given text onto a base image.
+        /// </summary>
+        /// <param name="text">The text to be projected.</param>
+        /// <param name="baseImageFilename">Path to base image.</param>
+        /// <param name="topLeft">Top-left corner of the projection region.</param>
+        /// <param name="topRight">Top-right corner of the projection region.</param>
+        /// <param name="bottomLeft">Bottom-left corner of the projection region.</param>
+        /// <param name="bottomRight">Bottom-right corner of the projection region.</param>
+        /// <returns>The base image with the given text projected onto it.</returns>
         public static Image<Rgba32> ProjectText(string text, string baseImageFilename,
             Point topLeft,
             Point topRight,
@@ -345,10 +434,6 @@ namespace TerminusDotNetCore.Helpers
                 outputImage.Mutate(x => x.DrawImage(baseImage, 1.0f));
 
                 return outputImage;
-                //string outputFilename = $"{Guid.NewGuid().ToString("N")}.jpg";
-                //outputImage.Save(outputFilename);
-
-                //return outputFilename;
             }
         }
     }
