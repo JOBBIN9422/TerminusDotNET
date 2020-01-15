@@ -59,10 +59,7 @@ namespace TerminusDotNetCore.Modules
                     var messages = await Context.Channel.GetMessagesAsync(2).FlattenAsync();
                     var priorMessage = messages.Last();
 
-                    if (!string.IsNullOrEmpty(priorMessage.Content))
-                    {
-                        result = await _twitterService.TweetAsync(priorMessage.Content, priorMessage.Attachments);
-                    }
+                    result = await _twitterService.TweetAsync(priorMessage.Content, priorMessage.Attachments);
                 }
             }
             else
