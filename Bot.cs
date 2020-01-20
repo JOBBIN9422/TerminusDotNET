@@ -215,7 +215,7 @@ namespace TerminusDotNetCore
 
             //new custom services get added here
             serviceCollection.AddSingleton<ImageService>()
-                             .AddSingleton<WideTextService>()
+                             .AddSingleton<TextEditService>()
                              .AddSingleton<TwitterService>()
                              .AddSingleton<AudioService>()
                              .AddSingleton<MarkovService>()

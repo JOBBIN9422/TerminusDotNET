@@ -5,7 +5,7 @@ using TerminusDotNetCore.Modules;
 
 namespace TerminusDotNetCore.Services
 {
-    public class WideTextService : ICustomService
+    public class TextEditService : ICustomService
     {
         public ServiceControlModule ParentModule { get; set; }
 
@@ -25,7 +25,7 @@ namespace TerminusDotNetCore.Services
             }
         }
 
-        public WideTextService()
+        public TextEditService()
         {
             Init();
         }

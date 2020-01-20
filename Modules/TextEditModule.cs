@@ -10,14 +10,14 @@ using TerminusDotNetCore.Services;
 
 namespace TerminusDotNetCore.Modules
 {
-    public class WideTextModule : ServiceControlModule
+    public class TextEditModule : ServiceControlModule
     {
-        private WideTextService _wideTextService;
+        private TextEditService _textEditService;
 
-        public WideTextModule(WideTextService service)
+        public TextEditModule(TextEditService service)
         {
-            _wideTextService = service;
-            _wideTextService.ParentModule = this;
+            _textEditService = service;
+            _textEditService.ParentModule = this;
         }
 
         [Command("wide", RunMode = RunMode.Async)]
@@ -32,12 +32,12 @@ namespace TerminusDotNetCore.Modules
                 var priorMessage = messages.Last();
                 if (!string.IsNullOrEmpty(priorMessage.Content))
                 {
-                    wideText = _wideTextService.ConvertMessage(priorMessage.Content);
+                    wideText = _textEditService.ConvertMessage(priorMessage.Content);
                 }
             }
             else 
             {
-                wideText = _wideTextService.ConvertMessage(message);
+                wideText = _textEditService.ConvertMessage(message);
             }
             await ReplyAsync(wideText);
         }
@@ -54,12 +54,12 @@ namespace TerminusDotNetCore.Modules
                 var priorMessage = messages.Last();
                 if (!string.IsNullOrEmpty(priorMessage.Content))
                 {
-                    memeText = _wideTextService.ConvertToMemeCase(priorMessage.Content);
+                    memeText = _textEditService.ConvertToMemeCase(priorMessage.Content);
                 }
             }
             else 
             {
-                memeText = _wideTextService.ConvertToMemeCase(message);
+                memeText = _textEditService.ConvertToMemeCase(message);
             }
             await ReplyAsync(memeText);
         }
