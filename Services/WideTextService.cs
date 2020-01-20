@@ -50,5 +50,29 @@ namespace TerminusDotNetCore.Services
             }
             return message;
         }
+
+        public string ConvertToMemeCase(string message)
+        {
+            string newMsg = "";
+            for (int i = 0; i < message.Length; i++)
+            {
+                if (char.IsLetter(message[i]))
+                {
+                    if (i%2 == 1)
+                    {
+                        newMsg += char.ToUpper(message[i]);
+                    }
+                    else
+                    {
+                        newMsg += char.ToLower(message[i]);
+                    }
+                }
+                else
+                {
+                    newMsg += message[i];
+                }
+            }
+            return newMsg;
+        }
     }
 }
