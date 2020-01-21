@@ -33,6 +33,8 @@ namespace TerminusDotNetCore.Services
         public IGuild guild { get; set; }
         public DiscordSocketClient _client;
 
+        public string audioPath { get; } = "assets/";
+
         private readonly ConcurrentDictionary<ulong, Tuple<IAudioClient, IVoiceChannel>> ConnectedChannels = new ConcurrentDictionary<ulong, Tuple<IAudioClient, IVoiceChannel>>();
 
         public async void setGuildClient(IGuild g, DiscordSocketClient c)

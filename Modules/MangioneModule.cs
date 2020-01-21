@@ -86,7 +86,7 @@ namespace TerminusDotNetCore.Modules
             //check if path is valid and exists
             // TODO check if file type can be played (mp3, wav, idk what ffmpeg can play)
             bool useFile = false;
-            string path = "assets/";
+            string path = _service.audioPath;
             switch ( song )
             {
                 case "attached":
