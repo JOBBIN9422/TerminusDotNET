@@ -260,14 +260,20 @@ namespace TerminusDotNetCore
             }
             
             //look for wildcards in the current message 
-            var matches = _regexMsgParser.ParseMessage(message.Content);
+            List<Tuple<string,string>> matches = _regexMsgParser.ParseMessage(message.Content);
 
             //respond for each matching regex
             if (matches.Count > 0 && !message.Author.IsBot)
             {
                 foreach (var match in matches)
                 {
-                    await message.Channel.SendMessageAsync(match);
+                    await message.Channel.SendMessageAsync(match.Item1);
+                    if (!string.IsNullOrEmpty(match.Item2))
+                    {
+                        //play the audio file specified
+                        AudioService _audioService = _serviceProvider.GetService(typeof(AudioService)) as AudioService;
+                        _audioService.PlayRegexAudio((message.Channel as SocketGuildChannel).Guild, match.Item2);
+                    }
                 }
             }
         }
