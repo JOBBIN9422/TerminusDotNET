@@ -271,8 +271,8 @@ namespace TerminusDotNetCore
                     if (!string.IsNullOrEmpty(match.Item2))
                     {
                         //play the audio file specified
-                        AudioService _audioService = _serviceProvider.GetService(typeof(AudioService)) as AudioService;
-                        _audioService.PlayRegexAudio((message.Channel as SocketGuildChannel).Guild, match.Item2);
+                        AudioService audioService = _serviceProvider.GetService(typeof(AudioService)) as AudioService;
+                        _ = audioService.PlayRegexAudio((message.Channel as SocketGuildChannel).Guild, match.Item2);
                     }
                 }
             }

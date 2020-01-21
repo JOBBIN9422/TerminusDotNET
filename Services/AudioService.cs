@@ -293,8 +293,8 @@ namespace TerminusDotNetCore.Services
             {
                 await _client.SetGameAsync(null);
             }
-            PlayNextInQueue(guild, command);
-            ScheduleWeed(guild, channel, command);
+            _ = PlayNextInQueue(guild, command);
+            _ = ScheduleWeed(guild, channel, command);
         }
 
         public List<Embed> ListQueueContents()
