@@ -229,6 +229,31 @@ namespace TerminusDotNetCore.Services
             //AttachmentHelper.DeleteFiles(AttachmentHelper.GetTempAssets("*.mp3"));
         }
 
+        public async Task PlayRegexAudio(IGuild guild, string filename)
+        {
+            IConfiguration config = new ConfigurationBuilder()
+                                    .AddJsonFile("appsettings.json", true, true)
+                                    .Build();
+            ulong voiceID = ulong.Parse(config["AudioChannelId"]);
+            IVoiceChannel vc = await guild.GetVoiceChannelAsync(voiceID);
+            backupQueue = songQueue;
+            weedPlaying = true;
+            await StopAllAudio(guild);
+            await JoinAudio(guild, vc);
+            string path = audioPath + filename;
+            path = Path.GetFullPath(path);
+            await SendAudioAsync(guild, path, config["FfmpegCommand"]);
+            await LeaveAudio(guild);
+            weedPlaying = false;
+            songQueue = backupQueue;
+            backupQueue = new ConcurrentQueue<AudioItem>();
+            if (_client != null)
+            {
+                await _client.SetGameAsync(null);
+            }
+            await PlayNextInQueue(guild, config["FfmpegCommand"]);
+        }
+
         private Process CreateProcess(string path, string command)
         {
             return Process.Start(new ProcessStartInfo
@@ -268,8 +293,8 @@ namespace TerminusDotNetCore.Services
             {
                 await _client.SetGameAsync(null);
             }
-            PlayNextInQueue(guild, command);
-            ScheduleWeed(guild, channel, command);
+            _ = PlayNextInQueue(guild, command);
+            _ = ScheduleWeed(guild, channel, command);
         }
 
         public List<Embed> ListQueueContents()
@@ -375,5 +400,6 @@ namespace TerminusDotNetCore.Services
             AttachmentHelper.DeleteFiles(AttachmentHelper.GetTempAssets("*.mp4"));
             AttachmentHelper.DeleteFiles(AttachmentHelper.GetTempAssets("*.webm"));
         }
+
     }
 }

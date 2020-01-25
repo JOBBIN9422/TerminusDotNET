@@ -37,14 +37,14 @@ namespace TerminusDotNetCore.Helpers
                 for (uint i = 0; i < numPasses; i++)
                 {
                     tempJpg = Image.Load(tempStream.ToArray(), new JpegDecoder());
-                    tempJpg.Mutate(x => x.Saturate(2.0f)
-                                               .Contrast(2.0f)
+                    tempJpg.Mutate(x => x.Saturate(4.0f)
+                                               .Contrast(4.0f)
                                                .GaussianSharpen());
 
                     //try to compress the image based on its file-type
                     tempJpg.SaveAsJpeg(tempStream, new JpegEncoder()
                     {
-                        Quality = 10,
+                        Quality = 1,
                     });
                 }
 
