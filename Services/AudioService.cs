@@ -33,7 +33,7 @@ namespace TerminusDotNetCore.Services
         public IGuild guild { get; set; }
         public DiscordSocketClient _client;
 
-        public string audioPath { get; } = "assets/";
+        public string audioPath { get; } = "assets/audio/";
 
         private readonly ConcurrentDictionary<ulong, Tuple<IAudioClient, IVoiceChannel>> ConnectedChannels = new ConcurrentDictionary<ulong, Tuple<IAudioClient, IVoiceChannel>>();
 
@@ -278,7 +278,7 @@ namespace TerminusDotNetCore.Services
             weedPlaying = true;
             await StopAllAudio(guild);
             await JoinAudio(guild, channel);
-            string path = "assets/weedlmao.mp3";
+            string path = audioPath + "weedlmao.mp3";
             path = Path.GetFullPath(path);
             if (_client != null)
             {
