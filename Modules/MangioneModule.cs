@@ -87,23 +87,26 @@ namespace TerminusDotNetCore.Modules
             // TODO check if file type can be played (mp3, wav, idk what ffmpeg can play)
             bool useFile = false;
             string path = _service.audioPath;
-            switch ( song )
+            if ( song == "attached" )
             {
-                case "attached":
-                    useFile = true;
+                useFile = true;
+            }
+            foreach ( string line in File.ReadAllLines(_service.audioPath + "audioaliases.txt"))
+            {
+                if ( line.StartsWith("#") || String.IsNullOrEmpty(line) )
+                {
+                    continue;
+                }
+                string[] tmp = line.Split(" ");
+                if ( song.Equals(tmp[0]) )
+                {
+                    path += tmp[1];
                     break;
-                case "mangione1":
-                    path += "feels_so_good.mp3";
-                    break;
-                case "mangione2":
-                    path += "pina_colada.mp3";
-                    break;
-                case "poloski":
-                    path += "poloski.mp3";
-                    break;
-                default:
-                    path += song;
-                    break;
+                }
+            }
+            if ( path.Equals(_service.audioPath) )
+            {
+                path += song;
             }
             if ( useFile )
             {
@@ -116,6 +119,7 @@ namespace TerminusDotNetCore.Modules
                 if (!File.Exists(path))
                 {
                     await ReplyAsync("File does not exist.");
+                    Console.WriteLine(path);
                     return;
                 }
                 await _service.QueueLocalSong(Context.Guild, path, voiceID, config["FfmpegCommand"]);
@@ -187,6 +191,26 @@ namespace TerminusDotNetCore.Modules
         public async Task KillMusic()
         {
             await _service.StopAllAudio(Context.Guild);
+        }
+
+        [Command("addpersistentsong", RunMode = RunMode.Async)]
+        [Summary("Store an mp3 file to the server and give an alias for ease of use in !play commands")]
+        public async Task AddSong([Summary("alias to use when playing this song in the future")]string alias)
+        {
+            IReadOnlyCollection<Attachment> atts = await GetAttachmentsAsync();
+            _service.SaveSong(alias, atts);
+        }
+
+        [Command("availablesongs", RunMode = RunMode.Async)]
+        [Summary("Prints the list of song aliases that are available locally")]
+        public async Task PrintAvailableSongs()
+        {
+            List<Embed> aliasList = _service.ListAvailableAliases();
+
+            foreach (Embed embed in aliasList)
+            {
+                await ReplyAsync(embed: embed);
+            }
         }
 
     }
