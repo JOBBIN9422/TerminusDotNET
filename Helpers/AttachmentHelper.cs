@@ -138,6 +138,22 @@ namespace TerminusDotNetCore.Helpers
             }
         }
 
+        public static string DownloadPersistentAudioAttachment(IAttachment attachment)
+        {
+            using (var webClient = new WebClient())
+            {
+
+                var filename = attachment.Filename;
+                var url = attachment.Url;
+                var fileIdString = System.Guid.NewGuid().ToString("N");
+                    
+                var downloadFilename = Path.Combine("assets", "audio", filename);
+                webClient.DownloadFile(url, downloadFilename);
+
+                return Path.GetFileName(downloadFilename);
+            }
+        }
+
         public static List<string> GetTempAssets(string regex = "*")
         {
             DirectoryInfo d = new DirectoryInfo(@"assets/temp");//Assuming Test is your Folder

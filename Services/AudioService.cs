@@ -8,6 +8,7 @@ using Discord.Commands;
 using Discord.WebSocket;
 using TerminusDotNetCore.Modules;
 using System;
+using System.Linq;
 using System.Configuration;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Configuration.Json;
@@ -33,7 +34,7 @@ namespace TerminusDotNetCore.Services
         public IGuild guild { get; set; }
         public DiscordSocketClient _client;
 
-        public string audioPath { get; } = "assets/";
+        public string audioPath { get; } = "assets/audio/";
 
         private readonly ConcurrentDictionary<ulong, Tuple<IAudioClient, IVoiceChannel>> ConnectedChannels = new ConcurrentDictionary<ulong, Tuple<IAudioClient, IVoiceChannel>>();
 
@@ -254,6 +255,12 @@ namespace TerminusDotNetCore.Services
             await PlayNextInQueue(guild, config["FfmpegCommand"]);
         }
 
+        public void SaveSong(string alias, IReadOnlyCollection<Attachment> attachments)
+        {
+            string filename = AttachmentHelper.DownloadPersistentAudioAttachment(attachments.ElementAt(0));
+            File.AppendAllText( audioPath + "audioaliases.txt", alias + " " + filename + Environment.NewLine);
+        }
+
         private Process CreateProcess(string path, string command)
         {
             return Process.Start(new ProcessStartInfo
@@ -278,7 +285,7 @@ namespace TerminusDotNetCore.Services
             weedPlaying = true;
             await StopAllAudio(guild);
             await JoinAudio(guild, channel);
-            string path = "assets/weedlmao.mp3";
+            string path = audioPath + "weedlmao.mp3";
             path = Path.GetFullPath(path);
             if (_client != null)
             {
@@ -336,6 +343,59 @@ namespace TerminusDotNetCore.Services
                 //add the current queue item to the song list 
                 string songName = $"**{entryCount + 1}:** {Path.GetFileName(songItem.Path)}";
                 string songSource = GetAudioSourceString(songItem.AudioSource);
+                
+                embed.AddField(songName, songSource);
+            }
+            
+            //add the most recently built embed if it's not in the list yet 
+            if (songList.Count == 0 || !songList.Contains(embed.Build()))
+            {
+                songList.Add(embed.Build());
+            }
+
+            return songList;
+        }
+
+        public List<Embed> ListAvailableAliases()
+        {
+             //need a list of embeds since each embed can only have 25 fields max
+            List<Embed> songList = new List<Embed>();
+            string[] lines = File.ReadAllLines(audioPath + "audioaliases.txt");
+            int numEntries = 0;
+            List<string[]> aliases = new List<string[]>();
+            foreach ( string line in lines)
+            {
+                if ( line.StartsWith("#") || String.IsNullOrEmpty(line) )
+                {
+                    continue;
+                }
+                string[] tmp = line.Split(" ");
+                numEntries++;
+                aliases.Add(tmp);
+            }
+
+            int entryCount = 0;
+            
+            var embed = new EmbedBuilder
+            {
+                Title = $"{numEntries} Songs Available"
+            };
+            
+            //add the currently-playing song to the list, if any
+            foreach (string[] alias in aliases)
+            {
+                entryCount++;
+
+                //if we have 25 entries in an embed already, need to make a new one 
+                if (entryCount % EmbedBuilder.MaxFieldCount == 0 && entryCount > 0)
+                {
+                    songList.Add(embed.Build());
+                    embed = new EmbedBuilder();
+                }
+
+                //add the current queue item to the song list 
+                string songName = alias[0];
+                string songSource = alias[1];
                 
                 embed.AddField(songName, songSource);
             }
