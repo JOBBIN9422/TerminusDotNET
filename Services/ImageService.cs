@@ -213,6 +213,18 @@ namespace TerminusDotNetCore.Services
             }
         }
 
+        public List<string> WalterImages(IReadOnlyCollection<Attachment> attachments, uint numTimes = 1)
+        {
+            var images = AttachmentHelper.DownloadAttachments(attachments);
+
+            foreach (var image in images)
+            {
+                WalterImage(image, numTimes);
+            }
+
+            return images;
+        }
+
         public List<string> TrumpImages(IReadOnlyCollection<Attachment> attachments, uint numTimes = 1)
         {
             var images = AttachmentHelper.DownloadAttachments(attachments);
@@ -239,6 +251,28 @@ namespace TerminusDotNetCore.Services
         public string TrumpText(string text)
         {
             using (var image = ImageHelper.ProjectText(text, Path.Combine("assets", "images", "trump.json")))
+            {
+                string outputFilename = $"{Guid.NewGuid().ToString("N")}.jpg";
+                image.Save(outputFilename);
+
+                return outputFilename;
+            }
+        }
+
+        private void WalterImage(string imageFilename, uint numTimes = 1)
+        {
+            for (uint i = 0; i < numTimes; i++)
+            {
+                using (var image = ImageHelper.ProjectOnto(imageFilename, Path.Combine("assets", "images", "walter.json")))
+                {
+                    image.Save(imageFilename);
+                }
+            }
+        }
+
+        public string WalterText(string text)
+        {
+            using (var image = ImageHelper.ProjectText(text, Path.Combine("assets", "images", "walter.json")))
             {
                 string outputFilename = $"{Guid.NewGuid().ToString("N")}.jpg";
                 image.Save(outputFilename);
