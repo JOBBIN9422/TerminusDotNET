@@ -156,7 +156,7 @@ namespace TerminusDotNetCore.Helpers
 
         public static List<string> GetTempAssets(string regex = "*")
         {
-            DirectoryInfo d = new DirectoryInfo(@"assets/temp");//Assuming Test is your Folder
+            DirectoryInfo d = new DirectoryInfo(Path.Combine("assets", "temp"));//Assuming Test is your Folder
             FileInfo[] Files = d.GetFiles(regex); //Getting files based on regex params
             List<string> filePaths = new List<string>();
             foreach(FileInfo file in Files )
