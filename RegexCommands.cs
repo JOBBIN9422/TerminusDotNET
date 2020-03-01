@@ -50,7 +50,6 @@ namespace TerminusDotNetCore
                     String returnString = _regexToMsgMap[regexString].Item1;
                     for( int i = 1; match.Groups.Count >= i; i++ )
                     {
-                        Console.WriteLine(match.Groups[i].Value);
                         if( returnString.Contains("%s") )
                         {
                             returnString = returnString.Replace("%s",match.Groups[i].Value);
