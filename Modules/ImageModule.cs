@@ -10,6 +10,13 @@ using TerminusDotNetCore.Helpers;
 
 namespace TerminusDotNetCore.Modules
 {
+    public enum ParamType
+    {
+        Numeric,
+        Text,
+        None
+    }
+
     public class ImageModule : ServiceControlModule
     {
         private ImageService _imageService;
@@ -148,6 +155,26 @@ namespace TerminusDotNetCore.Modules
 
             var images = _imageService.ThiccImages(attachments, thiccCount);
             await SendImages(images);
+        }
+
+        private ParamType ParseParamType(string paramText)
+        {
+            if (!string.IsNullOrEmpty(paramText))
+            {
+                uint outVal;
+                if (uint.TryParse(paramText, out outVal))
+                {
+                    return ParamType.Numeric;
+                }
+                else
+                {
+                    return ParamType.Text;
+                }
+            }
+            else
+            {
+                return ParamType.None;
+            }
         }
 
         [Command("bobross", RunMode = RunMode.Async)]
