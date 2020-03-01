@@ -280,5 +280,27 @@ namespace TerminusDotNetCore.Services
                 return outputFilename;
             }
         }
+
+        private void HankImages(string imageFilename, uint numTimes = 1)
+        {
+            for (uint i = 0; i < numTimes; i++)
+            {
+                using (var image = ImageHelper.ProjectOnto(imageFilename, Path.Combine("assets", "images", "hank.json")))
+                {
+                    image.Save(imageFilename);
+                }
+            }
+        }
+
+        public string HankText(string text)
+        {
+            using (var image = ImageHelper.ProjectText(text, Path.Combine("assets", "images", "hank.json")))
+            {
+                string outputFilename = $"{Guid.NewGuid().ToString("N")}.jpg";
+                image.Save(outputFilename);
+
+                return outputFilename;
+            }
+        }
     }
 }

@@ -314,5 +314,44 @@ namespace TerminusDotNetCore.Modules
                 await SendImages(images);
             }
         }
+
+        [Command("hank", RunMode = RunMode.Async)]
+        [Summary("Overlays a custom image attachment onto Hank's TV.")]
+        public async Task HankImagesAsync([Remainder][Summary("Text to project onto the canvas. If a number is supplied, number of times to repeat the projection instead.")]string text = null)
+        {
+            IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
+
+            //check if an argument was provided
+            if (!string.IsNullOrEmpty(text))
+            {
+                //is the argument solely a number?
+                uint numTimes;
+                if (uint.TryParse(text, out numTimes) && attachments != null)
+                {
+                    var images = _imageService.HankImages(attachments, numTimes);
+                    await SendImages(images);
+                }
+
+                //if not, treat it as text
+                else
+                {
+                    string bobRossTextImg = _imageService.HankText(text);
+                    await SendImage(bobRossTextImg);
+                }
+            }
+
+            //if no argument was provided, try to process each image once
+            else
+            {
+                if (attachments == null)
+                {
+                    await ServiceReplyAsync("No images were found in the current message or previous messages.");
+                    return;
+                }
+
+                var images = _imageService.HankImages(attachments);
+                await SendImages(images);
+            }
+        }
     }
 }

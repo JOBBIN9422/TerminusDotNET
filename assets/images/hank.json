@@ -1,0 +1,19 @@
+{
+  "baseImage": "hank.png",
+  "topLeft": {
+    "x": 122,
+    "y": 212
+  },
+  "topRight": {
+    "x": 311,
+    "y": 212
+  },
+  "bottomLeft": {
+    "x": 122,
+    "y": 357
+  },
+  "bottomRight": {
+    "x": 311,
+    "y": 357
+  }
+}
