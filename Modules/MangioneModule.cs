@@ -119,7 +119,7 @@ namespace TerminusDotNetCore.Modules
                 if (!File.Exists(path))
                 {
                     await ReplyAsync("File does not exist.");
-                    Console.WriteLine(path);
+                    //Console.WriteLine(path);
                     return;
                 }
                 await _service.QueueLocalSong(Context.Guild, path, voiceID, config["FfmpegCommand"]);
