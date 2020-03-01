@@ -182,37 +182,31 @@ namespace TerminusDotNetCore.Modules
         public async Task BobRossImagesAsync([Remainder][Summary("Text to project onto the canvas. If a number is supplied, number of times to repeat the projection instead.")]string text = null)
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
-            
-            //check if an argument was provided
-            if (!string.IsNullOrEmpty(text))
+            ParamType paramType = ParseParamType(text);
+            List<string> images = new List<string>();
+
+            switch (paramType)
             {
-                //is the argument solely a number?
-                uint numTimes;
-                if (uint.TryParse(text, out numTimes) && attachments != null)
-                {
-                    var images = _imageService.BobRossImages(attachments, numTimes);
+                case ParamType.Numeric:
+                    images = _imageService.BobRossImages(attachments, uint.Parse(text));
                     await SendImages(images);
-                }
-                
-                //if not, treat it as text
-                else
-                {
+                    break;
+
+                case ParamType.Text:
                     string bobRossTextImg = _imageService.BobRossText(text);
                     await SendImage(bobRossTextImg);
-                }
-            }
-            
-            //if no argument was provided, try to process each image once
-            else
-            {
-                if (attachments == null)
-                {
-                    await ServiceReplyAsync("No images were found in the current message or previous messages.");
-                    return;
-                }
+                    break;
 
-                var images = _imageService.BobRossImages(attachments);
-                await SendImages(images);
+                case ParamType.None:
+                    if (attachments == null)
+                    {
+                        await ServiceReplyAsync("No images were found in the current message or previous messages.");
+                        return;
+                    }
+
+                    images = _imageService.BobRossImages(attachments);
+                    await SendImages(images);
+                    break;
             }
         }
 
