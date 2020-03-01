@@ -24,33 +24,36 @@ namespace TerminusDotNetCore.Services
     public class AudioService : ICustomService
     {
         public ServiceControlModule ParentModule { get; set; }
-        private ConcurrentQueue<AudioItem> songQueue = new ConcurrentQueue<AudioItem>();
-        private ConcurrentQueue<AudioItem> backupQueue = new ConcurrentQueue<AudioItem>();
+
+        private ConcurrentQueue<AudioItem> _songQueue = new ConcurrentQueue<AudioItem>();
+        private ConcurrentQueue<AudioItem> _backupQueue = new ConcurrentQueue<AudioItem>();
+
         private AudioItem _currentSong = null;
         private Process _ffmpeg = null;
-        private bool playing = false;
-        private bool weedStarted = false;
-        private bool weedPlaying = false;
-        public IGuild guild { get; set; }
+
+        private bool _playing = false;
+        private bool _weedStarted = false;
+        private bool _weedPlaying = false;
+        public IGuild Guild { get; set; }
         public DiscordSocketClient _client;
 
         public string audioPath { get; } = "assets/audio/";
 
         private readonly ConcurrentDictionary<ulong, Tuple<IAudioClient, IVoiceChannel>> ConnectedChannels = new ConcurrentDictionary<ulong, Tuple<IAudioClient, IVoiceChannel>>();
 
-        public async void setGuildClient(IGuild g, DiscordSocketClient c)
+        public async void SetGuildClient(IGuild g, DiscordSocketClient c)
         {
-            guild = g;
+            Guild = g;
             _client = c;
-            if (weedStarted == false)
+            if (_weedStarted == false)
             {
-                weedStarted = true;
+                _weedStarted = true;
                 IConfiguration config = new ConfigurationBuilder()
                                         .AddJsonFile("appsettings.json", true, true)
                                         .Build();
                 ulong voiceID = ulong.Parse(config["WeedChannelId"]);
-                IVoiceChannel vc = await guild.GetVoiceChannelAsync(voiceID);
-                await this.ScheduleWeed(guild, vc, config["FfmpegCommand"]);
+                IVoiceChannel vc = await Guild.GetVoiceChannelAsync(voiceID);
+                await this.ScheduleWeed(Guild, vc, config["FfmpegCommand"]);
             }
         }
 
@@ -101,27 +104,27 @@ namespace TerminusDotNetCore.Services
             if (ConnectedChannels.TryGetValue(guild.Id, out client))
             {
                 //await Log(LogSeverity.Debug, $"Starting playback of {path} in {guild.Name}");
-                playing = true;
+                _playing = true;
                 _ffmpeg = CreateProcess(path, command);
                 //using (var ffmpeg = CreateProcess(path, command))
                 using (var stream = client.Item1.CreatePCMStream(AudioApplication.Music))
                 {
                     try { await _ffmpeg.StandardOutput.BaseStream.CopyToAsync(stream); }
-                    finally { await stream.FlushAsync(); stream.Close(); _ffmpeg.Kill(true); playing = false; await PlayNextInQueue(guild, command); }
+                    finally { await stream.FlushAsync(); stream.Close(); _ffmpeg.Kill(true); _playing = false; await PlayNextInQueue(guild, command); }
                 }
             }
         }
 
         public async Task QueueLocalSong(IGuild guild, string path, ulong channelId, string command)
         {
-            if (weedPlaying)
+            if (_weedPlaying)
             {
-                backupQueue.Enqueue(new AudioItem() { Path = path, PlayChannelId = channelId, AudioSource = AudioType.Local });
+                _backupQueue.Enqueue(new AudioItem() { Path = path, PlayChannelId = channelId, AudioSource = AudioType.Local });
             }
             else
             {
-                songQueue.Enqueue(new AudioItem() { Path = path, PlayChannelId = channelId, AudioSource = AudioType.Local });
-                if (!playing)
+                _songQueue.Enqueue(new AudioItem() { Path = path, PlayChannelId = channelId, AudioSource = AudioType.Local });
+                if (!_playing)
                 {
                     //want to trigger playing next song in queue
                     await PlayNextInQueue(guild, command);
@@ -135,15 +138,15 @@ namespace TerminusDotNetCore.Services
             string tempSongFilename = await DownloadYoutubeVideoAsync(path);
 
             //queue the downloaded file as normal
-            if (weedPlaying)
+            if (_weedPlaying)
             {
-                backupQueue.Enqueue(new AudioItem() { Path = tempSongFilename, PlayChannelId = channelId, AudioSource = AudioType.YouTube });
+                _backupQueue.Enqueue(new AudioItem() { Path = tempSongFilename, PlayChannelId = channelId, AudioSource = AudioType.YouTube });
             }
             else
             {
-                songQueue.Enqueue(new AudioItem() { Path = tempSongFilename, PlayChannelId = channelId, AudioSource = AudioType.YouTube });
+                _songQueue.Enqueue(new AudioItem() { Path = tempSongFilename, PlayChannelId = channelId, AudioSource = AudioType.YouTube });
 
-                if (!playing)
+                if (!_playing)
                 {
                     //want to trigger playing next song in queue
                     await PlayNextInQueue(guild, command);
@@ -155,14 +158,14 @@ namespace TerminusDotNetCore.Services
         {
             List<string> files = AttachmentHelper.DownloadAttachments(attachments);
             string path = files[0];
-            if (weedPlaying)
+            if (_weedPlaying)
             {
-                backupQueue.Enqueue(new AudioItem() { Path = path, PlayChannelId = channelId, AudioSource = AudioType.Attachment });
+                _backupQueue.Enqueue(new AudioItem() { Path = path, PlayChannelId = channelId, AudioSource = AudioType.Attachment });
             }
             else
             {
-                songQueue.Enqueue(new AudioItem() { Path = path, PlayChannelId = channelId, AudioSource = AudioType.Attachment });
-                if (!playing)
+                _songQueue.Enqueue(new AudioItem() { Path = path, PlayChannelId = channelId, AudioSource = AudioType.Attachment });
+                if (!_playing)
                 {
                     //want to trigger playing next song in queue
                     await PlayNextInQueue(guild, command);
@@ -173,7 +176,7 @@ namespace TerminusDotNetCore.Services
         public async Task PlayNextInQueue(IGuild guild, string command)
         {
             AudioItem nextInQueue;
-            if (songQueue.TryDequeue(out nextInQueue))
+            if (_songQueue.TryDequeue(out nextInQueue))
             {
                 IVoiceChannel channel = await guild.GetVoiceChannelAsync(nextInQueue.PlayChannelId);
                 await JoinAudio(guild, channel);
@@ -215,8 +218,8 @@ namespace TerminusDotNetCore.Services
 
         public async Task StopAllAudio(IGuild guild)
         {
-            songQueue = new ConcurrentQueue<AudioItem>();
-            playing = false;
+            _songQueue = new ConcurrentQueue<AudioItem>();
+            _playing = false;
             _currentSong = null;
             await LeaveAudio(guild);
             CleanAudioFiles();
@@ -237,17 +240,17 @@ namespace TerminusDotNetCore.Services
                                     .Build();
             ulong voiceID = ulong.Parse(config["AudioChannelId"]);
             IVoiceChannel vc = await guild.GetVoiceChannelAsync(voiceID);
-            backupQueue = songQueue;
-            weedPlaying = true;
+            _backupQueue = _songQueue;
+            _weedPlaying = true;
             await StopAllAudio(guild);
             await JoinAudio(guild, vc);
             string path = audioPath + filename;
             path = Path.GetFullPath(path);
             await SendAudioAsync(guild, path, config["FfmpegCommand"]);
             await LeaveAudio(guild);
-            weedPlaying = false;
-            songQueue = backupQueue;
-            backupQueue = new ConcurrentQueue<AudioItem>();
+            _weedPlaying = false;
+            _songQueue = _backupQueue;
+            _backupQueue = new ConcurrentQueue<AudioItem>();
             if (_client != null)
             {
                 await _client.SetGameAsync(null);
@@ -281,8 +284,8 @@ namespace TerminusDotNetCore.Services
                 fourTwenty = fourTwenty.AddDays(1.0);
             }
             await Task.Delay((int)fourTwenty.Subtract(DateTime.Now).TotalMilliseconds);
-            backupQueue = songQueue;
-            weedPlaying = true;
+            _backupQueue = _songQueue;
+            _weedPlaying = true;
             await StopAllAudio(guild);
             await JoinAudio(guild, channel);
             string path = audioPath + "weedlmao.mp3";
@@ -293,9 +296,9 @@ namespace TerminusDotNetCore.Services
             }
             await SendAudioAsync(guild, path, command);
             await LeaveAudio(guild);
-            weedPlaying = false;
-            songQueue = backupQueue;
-            backupQueue = new ConcurrentQueue<AudioItem>();
+            _weedPlaying = false;
+            _songQueue = _backupQueue;
+            _backupQueue = new ConcurrentQueue<AudioItem>();
             if (_client != null)
             {
                 await _client.SetGameAsync(null);
@@ -308,7 +311,7 @@ namespace TerminusDotNetCore.Services
         {
             //need a list of embeds since each embed can only have 25 fields max
             List<Embed> songList = new List<Embed>();
-            int numSongs   = songQueue.Count;
+            int numSongs   = _songQueue.Count;
             int entryCount = 0;
 
             //count the currently-playing song if any (it's not in the queue but needs to be listed)
@@ -329,7 +332,7 @@ namespace TerminusDotNetCore.Services
                 embed.AddField($"{entryCount + 1}: {Path.GetFileName(_currentSong.Path)} **(currently playing)**", songSource);
             }
             
-            foreach (var songItem in songQueue)
+            foreach (var songItem in _songQueue)
             {
                 entryCount++;
 
