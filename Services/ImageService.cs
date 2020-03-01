@@ -237,6 +237,18 @@ namespace TerminusDotNetCore.Services
             return images;
         }
 
+        public List<string> HankImages(IReadOnlyCollection<Attachment> attachments, uint numTimes = 1)
+        {
+            var images = AttachmentHelper.DownloadAttachments(attachments);
+
+            foreach (var image in images)
+            {
+                HankImage(image, numTimes);
+            }
+
+            return images;
+        }
+
         private void TrumpImage(string imageFilename, uint numTimes = 1)
         {
             for (uint i = 0; i < numTimes; i++)
@@ -281,7 +293,7 @@ namespace TerminusDotNetCore.Services
             }
         }
 
-        public void HankImages(string imageFilename, uint numTimes = 1)
+        private void HankImage(string imageFilename, uint numTimes = 1)
         {
             for (uint i = 0; i < numTimes; i++)
             {
