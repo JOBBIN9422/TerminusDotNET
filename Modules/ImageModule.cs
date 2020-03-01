@@ -215,37 +215,31 @@ namespace TerminusDotNetCore.Modules
         public async Task PCImagesAsync([Remainder][Summary("Text to project onto the canvas. If a number is supplied, number of times to repeat the projection instead.")]string text = null)
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
-
-            //check if an argument was provided
-            if (!string.IsNullOrEmpty(text))
+            if (attachments == null)
             {
-                //is the argument solely a number?
-                uint numTimes;
-                if (uint.TryParse(text, out numTimes) && attachments != null)
-                {
-                    var images = _imageService.PCImages(attachments, numTimes);
-                    await SendImages(images);
-                }
-
-                //if not, treat it as text
-                else
-                {
-                    string bobRossTextImg = _imageService.PCText(text);
-                    await SendImage(bobRossTextImg);
-                }
+                await ServiceReplyAsync("No images were found in the current message or previous messages.");
+                return;
             }
 
-            //if no argument was provided, try to process each image once
-            else
-            {
-                if (attachments == null)
-                {
-                    await ServiceReplyAsync("No images were found in the current message or previous messages.");
-                    return;
-                }
+            ParamType paramType = ParseParamType(text);
+            List<string> images = new List<string>();
 
-                var images = _imageService.PCImages(attachments);
-                await SendImages(images);
+            switch (paramType)
+            {
+                case ParamType.Numeric:
+                    images = _imageService.PCImages(attachments, uint.Parse(text));
+                    await SendImages(images);
+                    break;
+
+                case ParamType.Text:
+                    string bobRossTextImg = _imageService.PCText(text);
+                    await SendImage(bobRossTextImg);
+                    break;
+
+                case ParamType.None:
+                    images = _imageService.PCImages(attachments);
+                    await SendImages(images);
+                    break;
             }
         }
 
