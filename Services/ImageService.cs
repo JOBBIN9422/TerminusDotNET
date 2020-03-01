@@ -281,7 +281,7 @@ namespace TerminusDotNetCore.Services
             }
         }
 
-        private void HankImages(string imageFilename, uint numTimes = 1)
+        public void HankImages(string imageFilename, uint numTimes = 1)
         {
             for (uint i = 0; i < numTimes; i++)
             {
