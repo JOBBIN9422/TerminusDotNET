@@ -15,11 +15,15 @@ namespace TerminusDotNetCore.Modules
     public class MangioneModule : ServiceControlModule
     {
         private AudioService _service;
+        private IConfiguration _config;
 
         public MangioneModule(AudioService service)
         {
             _service = service;
             _service.ParentModule = this;
+            _config = new ConfigurationBuilder()
+                          .AddJsonFile("appsettings.json", true, true)
+                          .Build();
         }
 
         private async Task<IReadOnlyCollection<Attachment>> GetAttachmentsAsync()
@@ -59,12 +63,9 @@ namespace TerminusDotNetCore.Modules
             // TODO allow this function to accept mp3 attachments and play those
             //check if channel id is valid and exists
             ulong voiceID;
-            IConfiguration config = new ConfigurationBuilder()
-                                        .AddJsonFile("appsettings.json", true, true)
-                                        .Build();
             if ( channelID.Equals("-1") )
             {
-                voiceID = ulong.Parse(config["AudioChannelId"]);
+                voiceID = ulong.Parse(_config["AudioChannelId"]);
             }
             else
             {
@@ -111,7 +112,7 @@ namespace TerminusDotNetCore.Modules
             if ( useFile )
             {
                 IReadOnlyCollection<Attachment> atts = await GetAttachmentsAsync();
-                await _service.QueueTempSong(Context.Guild, atts, voiceID, config["FfmpegCommand"]);
+                await _service.QueueTempSong(Context.Guild, atts, voiceID, _config["FfmpegCommand"]);
             }
             else
             {
@@ -122,7 +123,7 @@ namespace TerminusDotNetCore.Modules
                     //Console.WriteLine(path);
                     return;
                 }
-                await _service.QueueLocalSong(Context.Guild, path, voiceID, config["FfmpegCommand"]);
+                await _service.QueueLocalSong(Context.Guild, path, voiceID, _config["FfmpegCommand"]);
             }
         }
 
@@ -136,12 +137,9 @@ namespace TerminusDotNetCore.Modules
             
             //check if channel id is valid and exists
             ulong voiceID;
-            IConfiguration config = new ConfigurationBuilder()
-                                        .AddJsonFile("appsettings.json", true, true)
-                                        .Build();
             if (channelID.Equals("-1"))
             {
-                voiceID = ulong.Parse(config["AudioChannelId"]);
+                voiceID = ulong.Parse(_config["AudioChannelId"]);
             }
             else
             {
@@ -161,17 +159,14 @@ namespace TerminusDotNetCore.Modules
                 return;
             }
 
-            await _service.QueueStreamedSong(Context.Guild, url, voiceID, config["FfmpegCommand"]);
+            await _service.QueueStreamedSong(Context.Guild, url, voiceID, _config["FfmpegCommand"]);
         }
 
         [Command("playnext", RunMode = RunMode.Async)]
         [Summary("Play the next item in the song queue, if any.")]
         public async Task PlayNext()
         {
-            IConfiguration config = new ConfigurationBuilder()
-                                        .AddJsonFile("appsettings.json", true, true)
-                                        .Build();
-            await _service.PlayNextInQueue(Context.Guild, config["FfmpegCommand"]);
+            await _service.PlayNextInQueue(Context.Guild, _config["FfmpegCommand"]);
         }
         
         [Command("songs", RunMode = RunMode.Async)]
