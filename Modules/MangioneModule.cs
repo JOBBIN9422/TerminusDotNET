@@ -101,7 +101,7 @@ namespace TerminusDotNetCore.Modules
                 string[] tmp = line.Split(" ");
                 if ( song.Equals(tmp[0]) )
                 {
-                    path += tmp[1];
+                    path = Path.Combine(path, tmp[1]);
                     break;
                 }
             }
