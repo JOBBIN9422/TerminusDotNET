@@ -39,16 +39,16 @@ namespace TerminusDotNetCore.Services
         private bool _weedStarted = false;
         private bool _weedPlaying = false;
         public IGuild Guild { get; set; }
-        public DiscordSocketClient _client;
+        public DiscordSocketClient Client;
 
-        public string audioPath { get; } = Path.Combine("assets", "audio");
+        public string AudioPath { get; } = Path.Combine("assets", "audio");
 
         private readonly ConcurrentDictionary<ulong, Tuple<IAudioClient, IVoiceChannel>> ConnectedChannels = new ConcurrentDictionary<ulong, Tuple<IAudioClient, IVoiceChannel>>();
 
         public async void SetGuildClient(IGuild g, DiscordSocketClient c)
         {
             Guild = g;
-            _client = c;
+            Client = c;
             if (_weedStarted == false)
             {
                 _weedStarted = true;
@@ -181,18 +181,19 @@ namespace TerminusDotNetCore.Services
             {
                 IVoiceChannel channel = await guild.GetVoiceChannelAsync(nextInQueue.PlayChannelId);
                 await JoinAudio(guild, channel);
-                if (_client != null)
+                if (Client != null)
                 {
-                    string path = nextInQueue.Path;
-                    //I fucking hate windows for making me do this bullshit
-                    if (path.Contains("/temp/") || path.Contains("\\temp\\") || path.Contains("\\temp/") || path.Contains("/temp\\"))
-                    {
-                        await _client.SetGameAsync("Someone's mp3 file");
-                    }
-                    else
-                    {
-                        await _client.SetGameAsync(Path.GetFileName(nextInQueue.Path));
-                    }
+                    await Client.SetGameAsync(Path.GetFileName(nextInQueue.Path));
+
+                    ////I fucking hate windows for making me do this bullshit
+                    //if (path.Contains("/temp/") || path.Contains("\\temp\\") || path.Contains("\\temp/") || path.Contains("/temp\\"))
+                    //{
+                    //    await _client.SetGameAsync("Someone's mp3 file");
+                    //}
+                    //else
+                    //{
+                    //    await _client.SetGameAsync(Path.GetFileName(nextInQueue.Path));
+                    //}
                 }
                 
                 //update the currently-playing song and kill the audio process if it's running
@@ -207,9 +208,9 @@ namespace TerminusDotNetCore.Services
             else
             {
                 await LeaveAudio(guild);
-                if (_client != null)
+                if (Client != null)
                 {
-                    await _client.SetGameAsync(null);
+                    await Client.SetGameAsync(null);
                 }
                 // Queue is empty, delete all .mp3 files in the assets/temp folder
                 CleanAudioFiles();
@@ -225,9 +226,9 @@ namespace TerminusDotNetCore.Services
             await LeaveAudio(guild);
             CleanAudioFiles();
 
-            if (_client != null)
+            if (Client != null)
             {
-                await _client.SetGameAsync(null);
+                await Client.SetGameAsync(null);
             }
             //probably should do this, but we would have to figure out a way to wait til the ffmpeg process dies, which I don't want to do
             //the files will get wiped out eventually I bet
@@ -242,16 +243,16 @@ namespace TerminusDotNetCore.Services
             _weedPlaying = true;
             await StopAllAudio(guild);
             await JoinAudio(guild, vc);
-            string path = audioPath + filename;
+            string path = AudioPath + filename;
             path = Path.GetFullPath(path);
             await SendAudioAsync(guild, path, _config["FfmpegCommand"]);
             await LeaveAudio(guild);
             _weedPlaying = false;
             _songQueue = _backupQueue;
             _backupQueue = new ConcurrentQueue<AudioItem>();
-            if (_client != null)
+            if (Client != null)
             {
-                await _client.SetGameAsync(null);
+                await Client.SetGameAsync(null);
             }
             await PlayNextInQueue(guild, _config["FfmpegCommand"]);
         }
@@ -259,7 +260,7 @@ namespace TerminusDotNetCore.Services
         public void SaveSong(string alias, IReadOnlyCollection<Attachment> attachments)
         {
             string filename = AttachmentHelper.DownloadPersistentAudioAttachment(attachments.ElementAt(0));
-            File.AppendAllText( audioPath + "audioaliases.txt", alias + " " + filename + Environment.NewLine);
+            File.AppendAllText(Path.Combine(AudioPath, "audioaliases.txt"), alias + " " + filename + Environment.NewLine);
         }
 
         private Process CreateProcess(string path, string command)
@@ -286,20 +287,20 @@ namespace TerminusDotNetCore.Services
             _weedPlaying = true;
             await StopAllAudio(guild);
             await JoinAudio(guild, channel);
-            string path = audioPath + "weedlmao.mp3";
+            string path = Path.Combine(AudioPath, "weedlmao.mp3");
             path = Path.GetFullPath(path);
-            if (_client != null)
+            if (Client != null)
             {
-                await _client.SetGameAsync("weeeeed");
+                await Client.SetGameAsync("weeeeed");
             }
             await SendAudioAsync(guild, path, command);
             await LeaveAudio(guild);
             _weedPlaying = false;
             _songQueue = _backupQueue;
             _backupQueue = new ConcurrentQueue<AudioItem>();
-            if (_client != null)
+            if (Client != null)
             {
-                await _client.SetGameAsync(null);
+                await Client.SetGameAsync(null);
             }
             _ = PlayNextInQueue(guild, command);
             _ = ScheduleWeed(guild, channel, command);
@@ -361,7 +362,7 @@ namespace TerminusDotNetCore.Services
         {
              //need a list of embeds since each embed can only have 25 fields max
             List<Embed> songList = new List<Embed>();
-            string[] lines = File.ReadAllLines(audioPath + "audioaliases.txt");
+            string[] lines = File.ReadAllLines(Path.Combine(AudioPath, "audioaliases.txt"));
             int numEntries = 0;
             List<string[]> aliases = new List<string[]>();
             foreach ( string line in lines)
@@ -438,12 +439,12 @@ namespace TerminusDotNetCore.Services
             
             try
             {
-                //download the youtube video data (mp4 format)
+                //download the youtube video data (usually .mp4 or .webm)
                 var youtube = YouTube.Default;
                 var video = await youtube.GetVideoAsync(url);
                 var videoData = await video.GetBytesAsync();
                 
-                //write the mp4 file to the temp assets dir
+                //write the downloaded media file to the temp assets dir
                 videoDataFilename = Path.Combine(tempPath, video.FullName);
                 await File.WriteAllBytesAsync(videoDataFilename, videoData);
                 return videoDataFilename;

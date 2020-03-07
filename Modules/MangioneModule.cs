@@ -87,12 +87,12 @@ namespace TerminusDotNetCore.Modules
             //check if path is valid and exists
             // TODO check if file type can be played (mp3, wav, idk what ffmpeg can play)
             bool useFile = false;
-            string path = _service.audioPath;
+            string path = _service.AudioPath;
             if ( song == "attached" )
             {
                 useFile = true;
             }
-            foreach ( string line in File.ReadAllLines(_service.audioPath + "audioaliases.txt"))
+            foreach ( string line in File.ReadAllLines(_service.AudioPath + "audioaliases.txt"))
             {
                 if ( line.StartsWith("#") || String.IsNullOrEmpty(line) )
                 {
@@ -105,7 +105,7 @@ namespace TerminusDotNetCore.Modules
                     break;
                 }
             }
-            if ( path.Equals(_service.audioPath) )
+            if ( path.Equals(_service.AudioPath) )
             {
                 path += song;
             }
