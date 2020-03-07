@@ -92,7 +92,7 @@ namespace TerminusDotNetCore.Modules
             {
                 useFile = true;
             }
-            foreach ( string line in File.ReadAllLines(_service.AudioPath + "audioaliases.txt"))
+            foreach ( string line in File.ReadAllLines(Path.Combine(_service.AudioPath, "audioaliases.txt")))
             {
                 if ( line.StartsWith("#") || String.IsNullOrEmpty(line) )
                 {
