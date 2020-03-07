@@ -21,6 +21,8 @@ namespace TerminusDotNetCore.Modules
     {
         private ImageService _imageService;
 
+        private const string NO_ATTACHMENTS_FOUND_MESSAGE = "No images were found in the current message or previous messages.";
+
         public ImageModule(ImageService service)
         {
             _imageService = service;
@@ -67,7 +69,7 @@ namespace TerminusDotNetCore.Modules
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null)
             {
-                await ServiceReplyAsync("No images were found in the current message or previous messages.");
+                await ServiceReplyAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
                 return;
             }
 
@@ -82,7 +84,7 @@ namespace TerminusDotNetCore.Modules
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null)
             {
-                await ServiceReplyAsync("No images were found in the current message or previous messages.");
+                await ServiceReplyAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
                 return;
             }
 
@@ -97,7 +99,7 @@ namespace TerminusDotNetCore.Modules
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null)
             {
-                await ServiceReplyAsync("No images were found in the current message or previous messages.");
+                await ServiceReplyAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
                 return;
             }
 
@@ -113,7 +115,7 @@ namespace TerminusDotNetCore.Modules
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null)
             {
-                await ServiceReplyAsync("No images were found in the current message or previous messages.");
+                await ServiceReplyAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
                 return;
             }
 
@@ -128,7 +130,7 @@ namespace TerminusDotNetCore.Modules
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null)
             {
-                await ServiceReplyAsync("No images were found in the current message or previous messages.");
+                await ServiceReplyAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
                 return;
             }
 
@@ -149,7 +151,7 @@ namespace TerminusDotNetCore.Modules
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null)
             {
-                await ServiceReplyAsync("No images were found in the current message or previous messages.");
+                await ServiceReplyAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
                 return;
             }
 
@@ -184,7 +186,7 @@ namespace TerminusDotNetCore.Modules
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null)
             {
-                await ServiceReplyAsync("No images were found in the current message or previous messages.");
+                await ServiceReplyAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
                 return;
             }
 
@@ -199,8 +201,8 @@ namespace TerminusDotNetCore.Modules
                     break;
 
                 case ParamType.Text:
-                    string bobRossTextImg = _imageService.BobRossText(text);
-                    await SendImage(bobRossTextImg);
+                    string textImg = _imageService.BobRossText(text);
+                    await SendImage(textImg);
                     break;
 
                 case ParamType.None:
@@ -217,7 +219,7 @@ namespace TerminusDotNetCore.Modules
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null)
             {
-                await ServiceReplyAsync("No images were found in the current message or previous messages.");
+                await ServiceReplyAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
                 return;
             }
 
@@ -232,8 +234,8 @@ namespace TerminusDotNetCore.Modules
                     break;
 
                 case ParamType.Text:
-                    string bobRossTextImg = _imageService.PCText(text);
-                    await SendImage(bobRossTextImg);
+                    string textImg = _imageService.PCText(text);
+                    await SendImage(textImg);
                     break;
 
                 case ParamType.None:
@@ -250,7 +252,7 @@ namespace TerminusDotNetCore.Modules
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null)
             {
-                await ServiceReplyAsync("No images were found in the current message or previous messages.");
+                await ServiceReplyAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
                 return;
             }
 
@@ -265,8 +267,8 @@ namespace TerminusDotNetCore.Modules
                     break;
 
                 case ParamType.Text:
-                    string bobRossTextImg = _imageService.TrumpText(text);
-                    await SendImage(bobRossTextImg);
+                    string textImg = _imageService.TrumpText(text);
+                    await SendImage(textImg);
                     break;
 
                 case ParamType.None:
@@ -281,37 +283,31 @@ namespace TerminusDotNetCore.Modules
         public async Task WalterImagesAsync([Remainder][Summary("Text to project onto the canvas. If a number is supplied, number of times to repeat the projection instead.")]string text = null)
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
-
-            //check if an argument was provided
-            if (!string.IsNullOrEmpty(text))
+            if (attachments == null)
             {
-                //is the argument solely a number?
-                uint numTimes;
-                if (uint.TryParse(text, out numTimes) && attachments != null)
-                {
-                    var images = _imageService.WalterImages(attachments, numTimes);
-                    await SendImages(images);
-                }
-
-                //if not, treat it as text
-                else
-                {
-                    string bobRossTextImg = _imageService.WalterText(text);
-                    await SendImage(bobRossTextImg);
-                }
+                await ServiceReplyAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
+                return;
             }
 
-            //if no argument was provided, try to process each image once
-            else
-            {
-                if (attachments == null)
-                {
-                    await ServiceReplyAsync("No images were found in the current message or previous messages.");
-                    return;
-                }
+            ParamType paramType = ParseParamType(text);
+            List<string> images = new List<string>();
 
-                var images = _imageService.WalterImages(attachments);
-                await SendImages(images);
+            switch (paramType)
+            {
+                case ParamType.Numeric:
+                    images = _imageService.WalterImages(attachments, uint.Parse(text));
+                    await SendImages(images);
+                    break;
+
+                case ParamType.Text:
+                    string textImg = _imageService.WalterText(text);
+                    await SendImage(textImg);
+                    break;
+
+                case ParamType.None:
+                    images = _imageService.WalterImages(attachments);
+                    await SendImages(images);
+                    break;
             }
         }
 
@@ -320,37 +316,31 @@ namespace TerminusDotNetCore.Modules
         public async Task HankImagesAsync([Remainder][Summary("Text to project onto the canvas. If a number is supplied, number of times to repeat the projection instead.")]string text = null)
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
-
-            //check if an argument was provided
-            if (!string.IsNullOrEmpty(text))
+            if (attachments == null)
             {
-                //is the argument solely a number?
-                uint numTimes;
-                if (uint.TryParse(text, out numTimes) && attachments != null)
-                {
-                    var images = _imageService.HankImages(attachments, numTimes);
-                    await SendImages(images);
-                }
-
-                //if not, treat it as text
-                else
-                {
-                    string bobRossTextImg = _imageService.HankText(text);
-                    await SendImage(bobRossTextImg);
-                }
+                await ServiceReplyAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
+                return;
             }
 
-            //if no argument was provided, try to process each image once
-            else
-            {
-                if (attachments == null)
-                {
-                    await ServiceReplyAsync("No images were found in the current message or previous messages.");
-                    return;
-                }
+            ParamType paramType = ParseParamType(text);
+            List<string> images = new List<string>();
 
-                var images = _imageService.HankImages(attachments);
-                await SendImages(images);
+            switch (paramType)
+            {
+                case ParamType.Numeric:
+                    images = _imageService.HankImages(attachments, uint.Parse(text));
+                    await SendImages(images);
+                    break;
+
+                case ParamType.Text:
+                    string textImg = _imageService.HankText(text);
+                    await SendImage(textImg);
+                    break;
+
+                case ParamType.None:
+                    images = _imageService.HankImages(attachments);
+                    await SendImages(images);
+                    break;
             }
         }
     }
