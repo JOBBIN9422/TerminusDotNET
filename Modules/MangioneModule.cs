@@ -107,7 +107,7 @@ namespace TerminusDotNetCore.Modules
             }
             if ( path.Equals(_service.AudioPath) )
             {
-                path += song;
+                path = Path.Combine(path, song);
             }
             if ( useFile )
             {
