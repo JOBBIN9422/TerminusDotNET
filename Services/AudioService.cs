@@ -189,11 +189,22 @@ namespace TerminusDotNetCore.Services
                 //stuff
                 foreach (var item in searchListResponse.Items)
                 {
-                    Console.WriteLine($"http://www.youtube.com/watch?v={item.Snippet.ResourceId.VideoId}");
+                    string videoUrl = $"http://www.youtube.com/watch?v={item.Snippet.ResourceId.VideoId}";
+                    try
+                    {
+                        await QueueYoutubeSong(guild, videoUrl, channelId, command);
+                    }
+                    catch (ArgumentException)
+                    {
+                        continue;
+                    }
+                    //Console.WriteLine($"http://www.youtube.com/watch?v={item.Snippet.ResourceId.VideoId}");
                 }
 
                 nextPageToken = searchListResponse.NextPageToken; 
             }
+
+            await ParentModule.ServiceReplyAsync($"Queued playlist.");
         }
 
         private bool PlaylistUrlIsValid(string url)
