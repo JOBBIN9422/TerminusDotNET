@@ -182,7 +182,7 @@ namespace TerminusDotNetCore.Services
                 {
                     //string videoFilename = await DownloadYoutubeVideoAsync(url);
                     //Console.WriteLine(videoFilename);
-                    await QueueYoutubeSong(guild, url, channelId, command); ;
+                    _ = QueueYoutubeSong(guild, url, channelId, command); ;
                     Console.WriteLine("successfully queued song");
 
 
