@@ -203,8 +203,6 @@ namespace TerminusDotNetCore.Services
 
                 nextPageToken = searchListResponse.NextPageToken; 
             }
-
-            await ParentModule.ServiceReplyAsync($"Queued playlist.");
         }
 
         private bool PlaylistUrlIsValid(string url)
