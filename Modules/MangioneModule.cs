@@ -162,6 +162,41 @@ namespace TerminusDotNetCore.Modules
             await _service.QueueSearchedYoutubeSong(Context.Guild, searchTerm, voiceID, _config["FfmpegCommand"]);
         }
 
+        [Command("playlist", RunMode = RunMode.Async)]
+        public async Task AddPlaylist(string playlistUrl, string channelID = "-1")
+        {
+            if (Context != null && Context.Guild != null)
+            {
+                _service.SetGuildClient(Context.Guild, Context.Client);
+            }
+
+            //check if channel id is valid and exists
+            ulong voiceID;
+            if (channelID.Equals("-1"))
+            {
+                voiceID = ulong.Parse(_config["AudioChannelId"]);
+            }
+            else
+            {
+                try
+                {
+                    voiceID = ulong.Parse(channelID);
+                }
+                catch
+                {
+                    await ReplyAsync("Unable to parse channel ID, try letting it use the default");
+                    return;
+                }
+            }
+            if (Context.Guild.GetVoiceChannel(voiceID) == null)
+            {
+                await ReplyAsync("Invalid channel ID, try letting it use the default");
+                return;
+            }
+
+            await _service.QueueYoutubePlaylist(Context.Guild, playlistUrl, voiceID, _config["FfmpegCommand"]);
+        }
+
         [Command("yt", RunMode = RunMode.Async)]
         public async Task StreamSong(string url, string channelID = "-1")
         {
