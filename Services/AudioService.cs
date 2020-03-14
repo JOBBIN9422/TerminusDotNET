@@ -178,14 +178,12 @@ namespace TerminusDotNetCore.Services
             string nextPageToken = "";
             while (nextPageToken != null)
             {
-                Console.WriteLine("searching playlists...");
                 var playlistRequest = _ytService.PlaylistItems.List("snippet,contentDetails");
                 playlistRequest.PlaylistId = GetPlaylistIdFromUrl(playlistURL);
                 playlistRequest.MaxResults = 50;
                 playlistRequest.PageToken = nextPageToken;
 
                 var searchListResponse = await playlistRequest.ExecuteAsync();
-                Console.WriteLine(searchListResponse.Items.Count);
                 //stuff
                 foreach (var item in searchListResponse.Items)
                 {
