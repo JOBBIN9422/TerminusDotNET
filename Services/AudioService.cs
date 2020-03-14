@@ -256,7 +256,7 @@ namespace TerminusDotNetCore.Services
         {
             //download the youtube video from the URL
             string tempSongFilename = await DownloadYoutubeVideoAsync(path);
-            Console.WriteLine($"queued song {tempSongFilename}");
+
             //queue the downloaded file as normal
             if (_weedPlaying)
             {
@@ -566,6 +566,7 @@ namespace TerminusDotNetCore.Services
                 //write the downloaded media file to the temp assets dir
                 videoDataFilename = Path.Combine(tempPath, video.FullName);
                 await File.WriteAllBytesAsync(videoDataFilename, videoData);
+                Console.WriteLine($"downloaded {videoDataFilename}");
                 return videoDataFilename;
             }
             catch (Exception ex)
