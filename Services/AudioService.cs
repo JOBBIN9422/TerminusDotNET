@@ -187,7 +187,7 @@ namespace TerminusDotNetCore.Services
 
 
                     //if we successfully download and queue a song, exit this loop and return
-                    await ParentModule.ServiceReplyAsync($"Found and queued video:{Environment.NewLine}{searchResult.ToString()}");
+                    await ParentModule.ServiceReplyAsync($"Found and queued video '{searchResult.Snippet.Title}'.");
                     return;
                 }
                 catch (ArgumentException ex)
