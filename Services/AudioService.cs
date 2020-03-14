@@ -198,7 +198,14 @@ namespace TerminusDotNetCore.Services
             foreach (string url in videoUrls)
             {
                 Console.WriteLine($"queueing {url}");
-                await QueueYoutubeSong(guild, url, channelId, command);
+                try
+                {
+                    await QueueYoutubeSong(guild, url, channelId, command);
+                }
+                catch (ArgumentException)
+                {
+                    continue;
+                }
                 Console.WriteLine("done.");
             }
         }
