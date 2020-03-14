@@ -173,7 +173,7 @@ namespace TerminusDotNetCore.Services
                 await ParentModule.ServiceReplyAsync("The given URL is not a valid YouTube playlist.");
                 return;
             }
-            
+
 
             string nextPageToken = "";
             while (nextPageToken != null)
@@ -199,7 +199,7 @@ namespace TerminusDotNetCore.Services
                     //Console.WriteLine($"http://www.youtube.com/watch?v={item.Snippet.ResourceId.VideoId}");
                 }
 
-                nextPageToken = searchListResponse.NextPageToken; 
+                nextPageToken = searchListResponse.NextPageToken;
             }
         }
 
@@ -222,7 +222,7 @@ namespace TerminusDotNetCore.Services
 
             //run the search with the given term and fetch resulting video URLs
             var searchListResponse = await searchListRequest.ExecuteAsync();
-            
+
             foreach (var searchResult in searchListResponse.Items)
             {
                 string url = $"http://www.youtube.com/watch?v={searchResult.Id.VideoId}";
@@ -262,14 +262,7 @@ namespace TerminusDotNetCore.Services
                 if (!_playing)
                 {
                     //want to trigger playing next song in queue
-                    if (awaitPlayback)
-                    {
-                        await PlayNextInQueue(guild, command);
-                    }
-                    else
-                    {
-                        _ = PlayNextInQueue(guild, command);
-                    }
+                    await PlayNextInQueue(guild, command);
                 }
             }
         }
@@ -314,14 +307,14 @@ namespace TerminusDotNetCore.Services
                     //    await _client.SetGameAsync(Path.GetFileName(nextInQueue.Path));
                     //}
                 }
-                
+
                 //update the currently-playing song and kill the audio process if it's running
                 _currentSong = nextInQueue;
                 if (_ffmpeg != null && !_ffmpeg.HasExited)
                 {
                     _ffmpeg.Kill(true);
                 }
-                
+
                 await SendAudioAsync(guild, nextInQueue.Path, command);
             }
             else
@@ -429,7 +422,7 @@ namespace TerminusDotNetCore.Services
         {
             //need a list of embeds since each embed can only have 25 fields max
             List<Embed> songList = new List<Embed>();
-            int numSongs   = _songQueue.Count;
+            int numSongs = _songQueue.Count;
             int entryCount = 0;
 
             //count the currently-playing song if any (it's not in the queue but needs to be listed)
@@ -437,19 +430,19 @@ namespace TerminusDotNetCore.Services
             {
                 numSongs++;
             }
-            
+
             var embed = new EmbedBuilder
             {
                 Title = $"{numSongs} Songs"
             };
-            
+
             //add the currently-playing song to the list, if any
             if (_currentSong != null)
             {
                 string songSource = GetAudioSourceString(_currentSong.AudioSource);
                 embed.AddField($"{entryCount + 1}: {Path.GetFileName(_currentSong.Path)} **(currently playing)**", songSource);
             }
-            
+
             foreach (var songItem in _songQueue)
             {
                 entryCount++;
@@ -464,10 +457,10 @@ namespace TerminusDotNetCore.Services
                 //add the current queue item to the song list 
                 string songName = $"**{entryCount + 1}:** {Path.GetFileName(songItem.Path)}";
                 string songSource = GetAudioSourceString(songItem.AudioSource);
-                
+
                 embed.AddField(songName, songSource);
             }
-            
+
             //add the most recently built embed if it's not in the list yet 
             if (songList.Count == 0 || !songList.Contains(embed.Build()))
             {
@@ -479,14 +472,14 @@ namespace TerminusDotNetCore.Services
 
         public List<Embed> ListAvailableAliases()
         {
-             //need a list of embeds since each embed can only have 25 fields max
+            //need a list of embeds since each embed can only have 25 fields max
             List<Embed> songList = new List<Embed>();
             string[] lines = File.ReadAllLines(Path.Combine(AudioPath, "audioaliases.txt"));
             int numEntries = 0;
             List<string[]> aliases = new List<string[]>();
-            foreach ( string line in lines)
+            foreach (string line in lines)
             {
-                if ( line.StartsWith("#") || String.IsNullOrEmpty(line) )
+                if (line.StartsWith("#") || String.IsNullOrEmpty(line))
                 {
                     continue;
                 }
@@ -496,12 +489,12 @@ namespace TerminusDotNetCore.Services
             }
 
             int entryCount = 0;
-            
+
             var embed = new EmbedBuilder
             {
                 Title = $"{numEntries} Songs Available"
             };
-            
+
             //add the currently-playing song to the list, if any
             foreach (string[] alias in aliases)
             {
@@ -517,10 +510,10 @@ namespace TerminusDotNetCore.Services
                 //add the current queue item to the song list 
                 string songName = alias[0];
                 string songSource = alias[1];
-                
+
                 embed.AddField(songName, songSource);
             }
-            
+
             //add the most recently built embed if it's not in the list yet 
             if (songList.Count == 0 || !songList.Contains(embed.Build()))
             {
@@ -529,7 +522,7 @@ namespace TerminusDotNetCore.Services
 
             return songList;
         }
-        
+
         private string GetAudioSourceString(AudioType audioType)
         {
             string songSource = string.Empty;
@@ -550,19 +543,19 @@ namespace TerminusDotNetCore.Services
             }
             return songSource;
         }
-        
+
         private async Task<string> DownloadYoutubeVideoAsync(string url)
         {
             string tempPath = Path.Combine(Environment.CurrentDirectory, "assets", "temp");
             string videoDataFilename;
-            
+
             try
             {
                 //download the youtube video data (usually .mp4 or .webm)
                 var youtube = YouTube.Default;
                 var video = await youtube.GetVideoAsync(url);
                 var videoData = await video.GetBytesAsync();
-                
+
                 //write the downloaded media file to the temp assets dir
                 videoDataFilename = Path.Combine(tempPath, video.FullName);
                 await File.WriteAllBytesAsync(videoDataFilename, videoData);
