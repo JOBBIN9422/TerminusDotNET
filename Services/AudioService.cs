@@ -173,13 +173,15 @@ namespace TerminusDotNetCore.Services
 
             //run the search with the given term and fetch resulting video URLs
             var searchListResponse = await searchListRequest.ExecuteAsync();
-            List<string> videoURLs = new List<string>();
+            
             foreach (var searchResult in searchListResponse.Items)
             {
                 string url = $"http://www.youtube.com/watch?v={searchResult.Id}";
+                Console.WriteLine(url);
                 try
                 {
                     string videoFilename = await DownloadYoutubeVideoAsync(url);
+                    Console.WriteLine(videoFilename);
                     await QueueYoutubeSong(guild, videoFilename, channelId, command);
 
                     //if we successfully download and queue a song, exit this loop and return
