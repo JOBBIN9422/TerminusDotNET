@@ -13,6 +13,7 @@
     <PackageReference Include="Discord.Net" Version="2.1.1" />
     <PackageReference Include="Discord.Net.Webhook" Version="2.1.1" />
     <PackageReference Include="Discord.Net.WebSocket" Version="2.1.1" />
+    <PackageReference Include="Google.Apis.YouTube.v3" Version="1.44.1.1869" />
     <PackageReference Include="linqtotwitter" Version="5.0.0" />
     <PackageReference Include="MathNet.Numerics" Version="4.9.0" />
     <PackageReference Include="MediaToolKit.NetCore" Version="0.1.0-preview" />
@@ -114,6 +115,9 @@
     </None>
     <None Update="assets/feels_so_good.mp3">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="youtube-secrets.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="secrets.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

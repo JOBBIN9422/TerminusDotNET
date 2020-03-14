@@ -4,20 +4,21 @@ using System.IO;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Audio;
-using Discord.Commands;
 using Discord.WebSocket;
 using TerminusDotNetCore.Modules;
 using System;
 using System.Linq;
-using System.Configuration;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Configuration.Json;
-using Microsoft.Extensions.Configuration.FileExtensions;
 using System.Collections.Generic;
 using TerminusDotNetCore.Helpers;
-using MediaToolkit;
-using MediaToolkit.Model;
 using VideoLibrary;
+using Google.Apis.YouTube.v3;
+using Google.Apis.Auth.OAuth2;
+using Google.Apis.Auth.OAuth2.Flows;
+using Google.Apis.Auth.OAuth2.Responses;
+using System.Threading;
+using Google.Apis.Util.Store;
+using Google.Apis.Services;
 
 namespace TerminusDotNetCore.Services
 {
@@ -38,12 +39,43 @@ namespace TerminusDotNetCore.Services
         private bool _playing = false;
         private bool _weedStarted = false;
         private bool _weedPlaying = false;
+
+        private YouTubeService _ytService;
+
         public IGuild Guild { get; set; }
         public DiscordSocketClient Client;
+
+        public AudioService()
+        {
+            Task.Run(async () => await InitYoutubeService());
+        }
 
         public string AudioPath { get; } = Path.Combine("assets", "audio");
 
         private readonly ConcurrentDictionary<ulong, Tuple<IAudioClient, IVoiceChannel>> ConnectedChannels = new ConcurrentDictionary<ulong, Tuple<IAudioClient, IVoiceChannel>>();
+
+        public async Task InitYoutubeService()
+        {
+            UserCredential credentials;
+            using (var credStream = new FileStream("youtube-secrets.json", FileMode.Open, FileAccess.Read))
+            {
+                credentials = await GoogleWebAuthorizationBroker.AuthorizeAsync(
+                    GoogleClientSecrets.Load(credStream).Secrets,
+                    new[] { YouTubeService.Scope.Youtube },
+                    "user",
+                    CancellationToken.None,
+                    new FileDataStore(this.GetType().ToString())
+                );
+            }
+
+            _ytService = new YouTubeService(
+                new BaseClientService.Initializer()
+                {
+                    HttpClientInitializer = credentials,
+                    ApplicationName = this.GetType().ToString()
+                }
+            );
+        }
 
         public async void SetGuildClient(IGuild g, DiscordSocketClient c)
         {
@@ -133,7 +165,38 @@ namespace TerminusDotNetCore.Services
             }
         }
 
-        public async Task QueueStreamedSong(IGuild guild, string path, ulong channelId, string command)
+        public async Task QueueSearchedYoutubeSong(IGuild guild, string searchTerm, ulong channelId, string command)
+        {
+            var searchListRequest = _ytService.Search.List("snippet");
+            searchListRequest.Q = searchTerm;
+            searchListRequest.MaxResults = 10;
+
+            //run the search with the given term and fetch resulting video URLs
+            var searchListResponse = await searchListRequest.ExecuteAsync();
+            List<string> videoURLs = new List<string>();
+            foreach (var searchResult in searchListResponse.Items)
+            {
+                string url = $"http://www.youtube.com/watch?v={searchResult.Id}";
+                try
+                {
+                    string videoFilename = await DownloadYoutubeVideoAsync(url);
+                    await QueueYoutubeSong(guild, videoFilename, channelId, command);
+
+                    //if we successfully download and queue a song, exit this loop and return
+                    await ParentModule.ServiceReplyAsync($"Found and queued video:{Environment.NewLine}{searchResult.ToString()}");
+                    return;
+                }
+                catch (ArgumentException ex)
+                {
+                    //try to download the next song in the list
+                    continue;
+                }
+            }
+
+            await ParentModule.ServiceReplyAsync($"No videos were successfully downloaded for the search term '{searchTerm}'.");
+        }
+
+        public async Task QueueYoutubeSong(IGuild guild, string path, ulong channelId, string command)
         {
             //download the youtube video from the URL
             string tempSongFilename = await DownloadYoutubeVideoAsync(path);

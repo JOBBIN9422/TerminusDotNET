@@ -159,7 +159,7 @@ namespace TerminusDotNetCore.Modules
                 return;
             }
 
-            await _service.QueueStreamedSong(Context.Guild, url, voiceID, _config["FfmpegCommand"]);
+            await _service.QueueYoutubeSong(Context.Guild, url, voiceID, _config["FfmpegCommand"]);
         }
 
         [Command("playnext", RunMode = RunMode.Async)]
