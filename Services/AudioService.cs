@@ -183,6 +183,8 @@ namespace TerminusDotNetCore.Services
                     string videoFilename = await DownloadYoutubeVideoAsync(url);
                     Console.WriteLine(videoFilename);
                     await QueueYoutubeSong(guild, videoFilename, channelId, command);
+                    Console.WriteLine("successfully queued song");
+
 
                     //if we successfully download and queue a song, exit this loop and return
                     await ParentModule.ServiceReplyAsync($"Found and queued video:{Environment.NewLine}{searchResult.ToString()}");
