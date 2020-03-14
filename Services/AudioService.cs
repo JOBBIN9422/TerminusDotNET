@@ -174,7 +174,7 @@ namespace TerminusDotNetCore.Services
                 return;
             }
 
-
+            List<string> videoUrls = new List<string>();
             string nextPageToken = "";
             while (nextPageToken != null)
             {
@@ -188,18 +188,23 @@ namespace TerminusDotNetCore.Services
                 foreach (var item in searchListResponse.Items)
                 {
                     string videoUrl = $"http://www.youtube.com/watch?v={item.Snippet.ResourceId.VideoId}";
-                    try
-                    {
-                        await QueueYoutubeSong(guild, videoUrl, channelId, command, false);
-                    }
-                    catch (ArgumentException)
-                    {
-                        continue;
-                    }
-                    //Console.WriteLine($"http://www.youtube.com/watch?v={item.Snippet.ResourceId.VideoId}");
+                    videoUrls.Add(videoUrl);
                 }
 
                 nextPageToken = searchListResponse.NextPageToken;
+            }
+
+            foreach (string url in videoUrls)
+            {
+                try
+                {
+                    _ = QueueYoutubeSong(guild, url, channelId, command);
+                }
+                catch (ArgumentException)
+                {
+                    //try to download the next song in the list
+                    continue;
+                }
             }
         }
 
