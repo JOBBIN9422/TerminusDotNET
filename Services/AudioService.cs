@@ -177,20 +177,16 @@ namespace TerminusDotNetCore.Services
             foreach (var searchResult in searchListResponse.Items)
             {
                 string url = $"http://www.youtube.com/watch?v={searchResult.Id.VideoId}";
-                Console.WriteLine(url);
+
                 try
                 {
-                    //string videoFilename = await DownloadYoutubeVideoAsync(url);
-                    //Console.WriteLine(videoFilename);
                     _ = QueueYoutubeSong(guild, url, channelId, command); ;
-                    Console.WriteLine("successfully queued song");
-
 
                     //if we successfully download and queue a song, exit this loop and return
                     await ParentModule.ServiceReplyAsync($"Found and queued video '{searchResult.Snippet.Title}'.");
                     return;
                 }
-                catch (ArgumentException ex)
+                catch (ArgumentException)
                 {
                     //try to download the next song in the list
                     continue;
