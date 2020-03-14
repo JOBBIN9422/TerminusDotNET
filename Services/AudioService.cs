@@ -197,16 +197,7 @@ namespace TerminusDotNetCore.Services
 
             foreach (string url in videoUrls)
             {
-                Console.WriteLine($"queueing {url}");
-                try
-                {
-                    await QueueYoutubeSong(guild, url, channelId, command);
-                }
-                catch (ArgumentException)
-                {
-                    continue;
-                }
-                Console.WriteLine("done.");
+                //do shit here?
             }
         }
 
@@ -566,7 +557,7 @@ namespace TerminusDotNetCore.Services
                 //write the downloaded media file to the temp assets dir
                 videoDataFilename = Path.Combine(tempPath, video.FullName);
                 await File.WriteAllBytesAsync(videoDataFilename, videoData);
-                Console.WriteLine($"downloaded {videoDataFilename}");
+                //Console.WriteLine($"downloaded {videoDataFilename}");
                 return videoDataFilename;
             }
             catch (Exception ex)

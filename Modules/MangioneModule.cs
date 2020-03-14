@@ -162,7 +162,7 @@ namespace TerminusDotNetCore.Modules
             await _service.QueueSearchedYoutubeSong(Context.Guild, searchTerm, voiceID, _config["FfmpegCommand"]);
         }
 
-        [Command("playlist", RunMode = RunMode.Async)]
+        //[Command("playlist", RunMode = RunMode.Async)]
         public async Task AddPlaylist(string playlistUrl, string channelID = "-1")
         {
             if (Context != null && Context.Guild != null)
