@@ -176,7 +176,7 @@ namespace TerminusDotNetCore.Services
             
             foreach (var searchResult in searchListResponse.Items)
             {
-                string url = $"http://www.youtube.com/watch?v={searchResult.Id}";
+                string url = $"http://www.youtube.com/watch?v={searchResult.Id.VideoId}";
                 Console.WriteLine(url);
                 try
                 {
