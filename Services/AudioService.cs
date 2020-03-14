@@ -353,7 +353,7 @@ namespace TerminusDotNetCore.Services
             _weedPlaying = true;
             await StopAllAudio(guild);
             await JoinAudio(guild, vc);
-            string path = AudioPath + filename;
+            string path = Path.Combine(AudioPath, filename);
             path = Path.GetFullPath(path);
             await SendAudioAsync(guild, path, _config["FfmpegCommand"]);
             await LeaveAudio(guild);
