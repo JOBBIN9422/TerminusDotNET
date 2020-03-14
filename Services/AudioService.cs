@@ -185,7 +185,7 @@ namespace TerminusDotNetCore.Services
                 playlistRequest.PageToken = nextPageToken;
 
                 var searchListResponse = await playlistRequest.ExecuteAsync();
-
+                Console.WriteLine(searchListResponse.Items.Count);
                 //stuff
                 foreach (var item in searchListResponse.Items)
                 {
