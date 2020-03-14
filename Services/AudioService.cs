@@ -189,7 +189,7 @@ namespace TerminusDotNetCore.Services
                 //stuff
                 foreach (var item in searchListResponse.Items)
                 {
-                    Console.WriteLine(item.Id);
+                    Console.WriteLine($"http://www.youtube.com/watch?v={item.Id}");
                 }
 
                 nextPageToken = searchListResponse.NextPageToken; 
