@@ -179,8 +179,8 @@ namespace TerminusDotNetCore.Services
             while (nextPageToken != null)
             {
                 Console.WriteLine("searching playlists...");
-                var playlistRequest = _ytService.PlaylistItems.List("snippet");
-                playlistRequest.Id = GetPlaylistIdFromUrl(playlistURL);
+                var playlistRequest = _ytService.PlaylistItems.List("snippet,contentDetails");
+                playlistRequest.PlaylistId = GetPlaylistIdFromUrl(playlistURL);
                 playlistRequest.MaxResults = 50;
                 playlistRequest.PageToken = nextPageToken;
 
