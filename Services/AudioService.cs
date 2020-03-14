@@ -19,6 +19,7 @@ using Google.Apis.Auth.OAuth2.Responses;
 using System.Threading;
 using Google.Apis.Util.Store;
 using Google.Apis.Services;
+using System.Text.RegularExpressions;
 
 namespace TerminusDotNetCore.Services
 {
@@ -163,6 +164,30 @@ namespace TerminusDotNetCore.Services
                     await PlayNextInQueue(guild, command);
                 }
             }
+        }
+
+        public async Task QueueYoutubePlaylist(IGuild guild, string playlistURL, ulong channelId, string command)
+        {
+            if (!PlaylistUrlIsValid(playlistURL))
+            {
+                await ParentModule.ServiceReplyAsync("The given URL is not a valid YouTube playlist.");
+                return;
+            }
+
+            var playlistRequest = _ytService.Playlists.List("snippet");
+            playlistRequest.Id = GetPlaylistIdFromUrl(playlistURL);
+            Console.WriteLine(playlistRequest.Id);
+        }
+
+        private bool PlaylistUrlIsValid(string url)
+        {
+            return Regex.IsMatch(url, @"https:\/\/www.youtube.com\/playlist\?list=.+");
+        }
+
+        private string GetPlaylistIdFromUrl(string url)
+        {
+            string Id = Regex.Match(url, "list=.+").Value.Replace("list=", string.Empty);
+            return Id;
         }
 
         public async Task QueueSearchedYoutubeSong(IGuild guild, string searchTerm, ulong channelId, string command)
