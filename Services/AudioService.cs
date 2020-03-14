@@ -188,10 +188,18 @@ namespace TerminusDotNetCore.Services
                 foreach (var item in searchListResponse.Items)
                 {
                     string videoUrl = $"http://www.youtube.com/watch?v={item.Snippet.ResourceId.VideoId}";
+                    Console.WriteLine(videoUrl);
                     videoUrls.Add(videoUrl);
                 }
 
                 nextPageToken = searchListResponse.NextPageToken;
+            }
+
+            foreach (string url in videoUrls)
+            {
+                Console.WriteLine($"queueing {url}");
+                await QueueYoutubeSong(guild, url, channelId, command);
+                Console.WriteLine("done.");
             }
         }
 
