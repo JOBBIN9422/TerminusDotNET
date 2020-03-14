@@ -192,7 +192,7 @@ namespace TerminusDotNetCore.Services
                     string videoUrl = $"http://www.youtube.com/watch?v={item.Snippet.ResourceId.VideoId}";
                     try
                     {
-                        await QueueYoutubeSong(guild, videoUrl, channelId, command);
+                        _ = QueueYoutubeSong(guild, videoUrl, channelId, command);
                     }
                     catch (ArgumentException)
                     {
