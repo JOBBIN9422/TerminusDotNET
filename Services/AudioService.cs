@@ -192,7 +192,7 @@ namespace TerminusDotNetCore.Services
                     string videoUrl = $"http://www.youtube.com/watch?v={item.Snippet.ResourceId.VideoId}";
                     try
                     {
-                        _ = QueueYoutubeSong(guild, videoUrl, channelId, command);
+                        await QueueYoutubeSong(guild, videoUrl, channelId, command, false);
                     }
                     catch (ArgumentException)
                     {
@@ -249,7 +249,7 @@ namespace TerminusDotNetCore.Services
             await ParentModule.ServiceReplyAsync($"No videos were successfully downloaded for the search term '{searchTerm}'.");
         }
 
-        public async Task QueueYoutubeSong(IGuild guild, string path, ulong channelId, string command)
+        public async Task QueueYoutubeSong(IGuild guild, string path, ulong channelId, string command, bool awaitPlayback = true)
         {
             //download the youtube video from the URL
             string tempSongFilename = await DownloadYoutubeVideoAsync(path);
@@ -266,7 +266,14 @@ namespace TerminusDotNetCore.Services
                 if (!_playing)
                 {
                     //want to trigger playing next song in queue
-                    await PlayNextInQueue(guild, command);
+                    if (awaitPlayback)
+                    {
+                        await PlayNextInQueue(guild, command);
+                    }
+                    else
+                    {
+                        _ = PlayNextInQueue(guild, command);
+                    }
                 }
             }
         }
