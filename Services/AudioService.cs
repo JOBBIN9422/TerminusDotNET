@@ -173,10 +173,26 @@ namespace TerminusDotNetCore.Services
                 await ParentModule.ServiceReplyAsync("The given URL is not a valid YouTube playlist.");
                 return;
             }
+            
 
-            var playlistRequest = _ytService.Playlists.List("snippet");
-            playlistRequest.Id = GetPlaylistIdFromUrl(playlistURL);
-            Console.WriteLine(playlistRequest.Id);
+            string nextPageToken = "";
+            while (nextPageToken != null)
+            {
+                var playlistRequest = _ytService.PlaylistItems.List("snippet");
+                playlistRequest.Id = GetPlaylistIdFromUrl(playlistURL);
+                playlistRequest.MaxResults = 50;
+                playlistRequest.PageToken = nextPageToken;
+
+                var searchListResponse = await playlistRequest.ExecuteAsync();
+
+                //stuff
+                foreach (var item in searchListResponse.Items)
+                {
+                    Console.WriteLine(item.Id);
+                }
+
+                nextPageToken = searchListResponse.NextPageToken; 
+            }
         }
 
         private bool PlaylistUrlIsValid(string url)
