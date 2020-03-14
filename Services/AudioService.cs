@@ -227,10 +227,10 @@ namespace TerminusDotNetCore.Services
 
                 try
                 {
-                    _ = QueueYoutubeSong(guild, url, channelId, command); ;
+                    _ = QueueYoutubeSong(guild, url, channelId, command);
 
                     //if we successfully download and queue a song, exit this loop and return
-                    await ParentModule.ServiceReplyAsync($"Found and queued video '{searchResult.Snippet.Title}'.");
+                    //await ParentModule.ServiceReplyAsync($"Found and queued video '{searchResult.Snippet.Title}'.");
                     return;
                 }
                 catch (ArgumentException)
