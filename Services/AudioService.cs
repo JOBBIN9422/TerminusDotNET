@@ -193,19 +193,6 @@ namespace TerminusDotNetCore.Services
 
                 nextPageToken = searchListResponse.NextPageToken;
             }
-
-            foreach (string url in videoUrls)
-            {
-                try
-                {
-                    _ = QueueYoutubeSong(guild, url, channelId, command);
-                }
-                catch (ArgumentException)
-                {
-                    //try to download the next song in the list
-                    continue;
-                }
-            }
         }
 
         private bool PlaylistUrlIsValid(string url)
