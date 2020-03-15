@@ -140,11 +140,22 @@ namespace TerminusDotNetCore.Services
                 //await Log(LogSeverity.Debug, $"Starting playback of {path} in {guild.Name}");
                 _playing = true;
                 _ffmpeg = CreateProcess(path, command);
+
                 //using (var ffmpeg = CreateProcess(path, command))
                 using (var stream = client.Item1.CreatePCMStream(AudioApplication.Music))
                 {
-                    try { await _ffmpeg.StandardOutput.BaseStream.CopyToAsync(stream); }
-                    finally { await stream.FlushAsync(); stream.Close(); _ffmpeg.Kill(true); _playing = false; await PlayNextInQueue(guild, command); }
+                    try 
+                    { 
+                        await _ffmpeg.StandardOutput.BaseStream.CopyToAsync(stream); 
+                    }
+                    finally 
+                    { 
+                        await stream.FlushAsync(); 
+                        stream.Close(); 
+                        _ffmpeg.Kill(true); 
+                        _playing = false; 
+                        await PlayNextInQueue(guild, command); 
+                    }
                 }
             }
         }
@@ -227,10 +238,9 @@ namespace TerminusDotNetCore.Services
 
                 try
                 {
-                    _ = QueueYoutubeSong(guild, url, channelId, command);
+                    await QueueYoutubeSong(guild, url, channelId, command);
 
                     //if we successfully download and queue a song, exit this loop and return
-                    //await ParentModule.ServiceReplyAsync($"Found and queued video '{searchResult.Snippet.Title}'.");
                     return;
                 }
                 catch (ArgumentException)
@@ -294,16 +304,6 @@ namespace TerminusDotNetCore.Services
                 if (Client != null)
                 {
                     await Client.SetGameAsync(Path.GetFileName(nextInQueue.Path));
-
-                    ////I fucking hate windows for making me do this bullshit
-                    //if (path.Contains("/temp/") || path.Contains("\\temp\\") || path.Contains("\\temp/") || path.Contains("/temp\\"))
-                    //{
-                    //    await _client.SetGameAsync("Someone's mp3 file");
-                    //}
-                    //else
-                    //{
-                    //    await _client.SetGameAsync(Path.GetFileName(nextInQueue.Path));
-                    //}
                 }
 
                 //update the currently-playing song and kill the audio process if it's running
