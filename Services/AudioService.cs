@@ -208,7 +208,7 @@ namespace TerminusDotNetCore.Services
 
             foreach (string url in videoUrls)
             {
-                await QueueYoutubeSong(guild, url, channelId, command, false);
+                _ = QueueYoutubeSong(guild, url, channelId, command, false);
             }
         }
 
