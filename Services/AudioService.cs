@@ -268,13 +268,13 @@ namespace TerminusDotNetCore.Services
                 else
                 {
                     _songQueue.Enqueue(currVideo);
-
-                    if (!_playing)
-                    {
-                        //want to trigger playing next song in queue
-                        await PlayNextInQueue(guild, command);
-                    }
                 }
+            }
+
+            if (!_playing)
+            {
+                //want to trigger playing next song in queue
+                await PlayNextInQueue(guild, command);
             }
         }
 
