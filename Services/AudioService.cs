@@ -329,10 +329,19 @@ namespace TerminusDotNetCore.Services
             AudioItem nextInQueue;
             if (_songQueue.TryDequeue(out nextInQueue))
             {
+                //need to download if not already saved locally (change the URL to the path of the downloaded file)
                 if (nextInQueue.AudioSource == AudioType.YoutubeUrl)
                 {
-                    //need to download if not already saved locally (change the URL to the path of the downloaded file)
-                    nextInQueue.Path = await DownloadYoutubeVideoAsync(nextInQueue.Path);
+                    try
+                    {
+                        nextInQueue.Path = await DownloadYoutubeVideoAsync(nextInQueue.Path);
+                    }
+                    catch (ArgumentException)
+                    {
+                        //skip this item if the download fails
+                        await PlayNextInQueue(guild, command);
+                        return;
+                    }
                 }
 
                 IVoiceChannel channel = await guild.GetVoiceChannelAsync(nextInQueue.PlayChannelId);
