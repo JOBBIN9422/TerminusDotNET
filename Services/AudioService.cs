@@ -199,7 +199,7 @@ namespace TerminusDotNetCore.Services
                 foreach (var item in searchListResponse.Items)
                 {
                     string videoUrl = $"http://www.youtube.com/watch?v={item.Snippet.ResourceId.VideoId}";
-                    Console.WriteLine(videoUrl);
+                    //Console.WriteLine(videoUrl);
                     videoUrls.Add(videoUrl);
                 }
 
@@ -334,10 +334,13 @@ namespace TerminusDotNetCore.Services
                 {
                     try
                     {
+                        Console.WriteLine($"downloading local file for {nextInQueue.Path}...");
                         nextInQueue.Path = await DownloadYoutubeVideoAsync(nextInQueue.Path);
+                        Console.WriteLine($"downloaded local file {nextInQueue.Path}");
                     }
                     catch (ArgumentException)
                     {
+                        Console.WriteLine($"failed to download local file for {nextInQueue.Path}, skipping...");
                         //skip this item if the download fails
                         await PlayNextInQueue(guild, command);
                         return;
