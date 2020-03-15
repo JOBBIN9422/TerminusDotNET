@@ -208,7 +208,7 @@ namespace TerminusDotNetCore.Services
 
             foreach (string url in videoUrls)
             {
-                //do shit here?
+                await QueueYoutubeSong(guild, url, channelId, command, false);
             }
         }
 
@@ -253,19 +253,22 @@ namespace TerminusDotNetCore.Services
             await ParentModule.ServiceReplyAsync($"No videos were successfully downloaded for the search term '{searchTerm}'.");
         }
 
-        public async Task QueueYoutubeSong(IGuild guild, string path, ulong channelId, string command, bool awaitPlayback = true)
+        public async Task QueueYoutubeSong(IGuild guild, string path, ulong channelId, string command, bool preDownload = true)
         {
-            //download the youtube video from the URL
-            string tempSongFilename = await DownloadYoutubeVideoAsync(path);
+            if (preDownload)
+            {
+                //download the youtube video from the URL
+                path = await DownloadYoutubeVideoAsync(path);
+            }
 
             //queue the downloaded file as normal
             if (_weedPlaying)
             {
-                _backupQueue.Enqueue(new AudioItem() { Path = tempSongFilename, PlayChannelId = channelId, AudioSource = AudioType.YouTube });
+                _backupQueue.Enqueue(new AudioItem() { Path = path, PlayChannelId = channelId, AudioSource = AudioType.YoutubeDownloaded });
             }
             else
             {
-                _songQueue.Enqueue(new AudioItem() { Path = tempSongFilename, PlayChannelId = channelId, AudioSource = AudioType.YouTube });
+                _songQueue.Enqueue(new AudioItem() { Path = path, PlayChannelId = channelId, AudioSource = AudioType.YoutubeDownloaded });
 
                 if (!_playing)
                 {
@@ -299,8 +302,15 @@ namespace TerminusDotNetCore.Services
             AudioItem nextInQueue;
             if (_songQueue.TryDequeue(out nextInQueue))
             {
+                if (nextInQueue.AudioSource == AudioType.YoutubeUrl)
+                {
+                    //need to download if not already saved locally (change the URL to the path of the downloaded file)
+                    nextInQueue.Path = await DownloadYoutubeVideoAsync(nextInQueue.Path);
+                }
+
                 IVoiceChannel channel = await guild.GetVoiceChannelAsync(nextInQueue.PlayChannelId);
                 await JoinAudio(guild, channel);
+
                 if (Client != null)
                 {
                     await Client.SetGameAsync(Path.GetFileName(nextInQueue.Path));
@@ -529,7 +539,7 @@ namespace TerminusDotNetCore.Services
                 case AudioType.Local:
                     songSource = "Local audio file";
                     break;
-                case AudioType.YouTube:
+                case AudioType.YoutubeDownloaded:
                     songSource = "YouTube download";
                     break;
                 case AudioType.Attachment:
