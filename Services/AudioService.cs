@@ -206,7 +206,7 @@ namespace TerminusDotNetCore.Services
                 nextPageToken = searchListResponse.NextPageToken;
             }
 
-            QueueYoutubePlaylist(videoUrls, channelId);
+            await QueueYoutubePlaylist(videoUrls, guild, channelId, command);
         }
 
         private bool PlaylistUrlIsValid(string url)
@@ -250,7 +250,7 @@ namespace TerminusDotNetCore.Services
             await ParentModule.ServiceReplyAsync($"No videos were successfully downloaded for the search term '{searchTerm}'.");
         }
 
-        private void QueueYoutubePlaylist(List<string> urls, ulong channelId)
+        private async Task QueueYoutubePlaylist(List<string> urls, IGuild guild, ulong channelId, string command)
         {
             foreach (string url in urls)
             {
@@ -268,6 +268,12 @@ namespace TerminusDotNetCore.Services
                 else
                 {
                     _songQueue.Enqueue(currVideo);
+
+                    if (!_playing)
+                    {
+                        //want to trigger playing next song in queue
+                        await PlayNextInQueue(guild, command);
+                    }
                 }
             }
         }
