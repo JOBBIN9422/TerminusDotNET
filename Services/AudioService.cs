@@ -576,16 +576,19 @@ namespace TerminusDotNetCore.Services
             switch (audioType)
             {
                 case AudioType.Local:
-                    songSource = "Local audio file";
+                    songSource = "Aliased audio file";
                     break;
                 case AudioType.YoutubeDownloaded:
-                    songSource = "YouTube download";
+                    songSource = "YouTube (pre-downloaded)";
+                    break;
+                case AudioType.YoutubeUrl:
+                    songSource = "YouTube (queued URL)";
                     break;
                 case AudioType.Attachment:
                     songSource = "User-attached file";
                     break;
                 default:
-                    songSource = "Unknown";
+                    songSource = "Unknown source";
                     break;
             }
             return songSource;
