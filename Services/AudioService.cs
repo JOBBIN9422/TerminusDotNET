@@ -25,24 +25,32 @@ namespace TerminusDotNetCore.Services
 {
     public class AudioService : ICustomService
     {
+        //reference to the controlling module 
         public ServiceControlModule ParentModule { get; set; }
 
+        //primary queue and backup (used when switching voice contexts)
         private ConcurrentQueue<AudioItem> _songQueue = new ConcurrentQueue<AudioItem>();
         private ConcurrentQueue<AudioItem> _backupQueue = new ConcurrentQueue<AudioItem>();
 
+        //metadata about the currently playing song
         private AudioItem _currentSong = null;
+
+        //the currently active ffmpeg process for audio streaming
         private Process _ffmpeg = null;
 
+        //object for storing config fields (channel IDs etc)
         private IConfiguration _config = new ConfigurationBuilder()
                                         .AddJsonFile("appsettings.json", true, true)
                                         .Build();
 
+        //state flags
         private bool _playing = false;
         private bool _weedStarted = false;
         private bool _weedPlaying = false;
 
         private YouTubeService _ytService;
 
+        //Discord info objects
         public IGuild Guild { get; set; }
         public DiscordSocketClient Client;
 
@@ -51,9 +59,11 @@ namespace TerminusDotNetCore.Services
             Task.Run(async () => await InitYoutubeService());
         }
 
+        //path for local (aliased) audio files
         public string AudioPath { get; } = Path.Combine("assets", "audio");
 
-        private readonly ConcurrentDictionary<ulong, Tuple<IAudioClient, IVoiceChannel>> ConnectedChannels = new ConcurrentDictionary<ulong, Tuple<IAudioClient, IVoiceChannel>>();
+        //map clients to their current channel
+        private readonly ConcurrentDictionary<ulong, Tuple<IAudioClient, IVoiceChannel>> _connectedChannels = new ConcurrentDictionary<ulong, Tuple<IAudioClient, IVoiceChannel>>();
 
         public async Task InitYoutubeService()
         {
@@ -93,11 +103,6 @@ namespace TerminusDotNetCore.Services
 
         public async Task JoinAudio(IGuild guild, IVoiceChannel target)
         {
-            //Tuple<IAudioClient, IVoiceChannel> client;
-            //if (ConnectedChannels.TryGetValue(guild.Id, out client))
-            //{
-            //    await LeaveAudio(guild);
-            //}
             if (target.Guild.Id != guild.Id)
             {
                 return;
@@ -107,7 +112,7 @@ namespace TerminusDotNetCore.Services
             await Task.Delay(100);
             var audioClient = await target.ConnectAsync();
 
-            if (ConnectedChannels.TryAdd(guild.Id, new Tuple<IAudioClient, IVoiceChannel>(audioClient, target)))
+            if (_connectedChannels.TryAdd(guild.Id, new Tuple<IAudioClient, IVoiceChannel>(audioClient, target)))
             {
                 // If you add a method to log happenings from this service,
                 // you can uncomment these commented lines to make use of that.
@@ -124,7 +129,7 @@ namespace TerminusDotNetCore.Services
             }
 
             Tuple<IAudioClient, IVoiceChannel> client;
-            if (ConnectedChannels.TryRemove(guild.Id, out client))
+            if (_connectedChannels.TryRemove(guild.Id, out client))
             {
                 await client.Item1.StopAsync();
                 //await Log(LogSeverity.Info, $"Disconnected from voice on {guild.Name}.");
@@ -135,21 +140,23 @@ namespace TerminusDotNetCore.Services
         {
             // Your task: Get a full path to the file if the value of 'path' is only a filename.
             Tuple<IAudioClient, IVoiceChannel> client;
-            if (ConnectedChannels.TryGetValue(guild.Id, out client))
+            if (_connectedChannels.TryGetValue(guild.Id, out client))
             {
-                //await Log(LogSeverity.Debug, $"Starting playback of {path} in {guild.Name}");
+                //set playback state and spawn the stream process
                 _playing = true;
                 _ffmpeg = CreateProcess(path, command);
 
-                //using (var ffmpeg = CreateProcess(path, command))
+                //init audio stream in voice channel
                 using (var stream = client.Item1.CreatePCMStream(AudioApplication.Music))
                 {
                     try 
                     { 
+                        //copy ffmpeg output to the voice channel stream
                         await _ffmpeg.StandardOutput.BaseStream.CopyToAsync(stream); 
                     }
                     finally 
                     { 
+                        //clean up ffmpeg, index queue, and set playback state
                         await stream.FlushAsync(); 
                         stream.Close(); 
                         _ffmpeg.Kill(true); 
@@ -179,6 +186,7 @@ namespace TerminusDotNetCore.Services
 
         public async Task QueueYoutubePlaylist(IGuild guild, string playlistURL, ulong channelId, string command)
         {
+            //check if the given URL refers to a youtube playlist
             if (!PlaylistUrlIsValid(playlistURL))
             {
                 await ParentModule.ServiceReplyAsync("The given URL is not a valid YouTube playlist.");
@@ -187,26 +195,31 @@ namespace TerminusDotNetCore.Services
 
             List<string> videoUrls = new List<string>();
             string nextPageToken = "";
+
+            //iterate over paginated playlist results from youtube and extract video URLs
             while (nextPageToken != null)
             {
+                //prepare a paged playlist request for the given playlist URL
                 var playlistRequest = _ytService.PlaylistItems.List("snippet,contentDetails");
                 playlistRequest.PlaylistId = GetPlaylistIdFromUrl(playlistURL);
                 playlistRequest.MaxResults = 50;
                 playlistRequest.PageToken = nextPageToken;
 
                 var searchListResponse = await playlistRequest.ExecuteAsync();
-                //stuff
+                
+                //iterate over the results and build each video URL
                 foreach (var item in searchListResponse.Items)
                 {
                     string videoUrl = $"http://www.youtube.com/watch?v={item.Snippet.ResourceId.VideoId}";
-                    //Console.WriteLine(videoUrl);
                     videoUrls.Add(videoUrl);
                 }
 
+                //index to the next page of results
                 nextPageToken = searchListResponse.NextPageToken;
             }
 
-            await QueueYoutubePlaylist(videoUrls, guild, channelId, command);
+            //add the list of URLs to the queue for downloading during playback
+            await QueueYoutubeURLs(videoUrls, guild, channelId, command);
         }
 
         private bool PlaylistUrlIsValid(string url)
@@ -250,8 +263,9 @@ namespace TerminusDotNetCore.Services
             await ParentModule.ServiceReplyAsync($"No videos were successfully downloaded for the search term '{searchTerm}'.");
         }
 
-        private async Task QueueYoutubePlaylist(List<string> urls, IGuild guild, ulong channelId, string command)
+        private async Task QueueYoutubeURLs(List<string> urls, IGuild guild, ulong channelId, string command)
         {
+            //enqueue all of the URLs before starting playback 
             foreach (string url in urls)
             {
                 AudioItem currVideo = new AudioItem()
@@ -280,7 +294,10 @@ namespace TerminusDotNetCore.Services
 
         public async Task QueueYoutubeSong(IGuild guild, string path, ulong channelId, string command, bool preDownload = true)
         {
+            //by default, set audio source as a URL to be downloaded later
             AudioType audioType = AudioType.YoutubeUrl;
+
+            //if pre-downloading, set the file path and audioType accordingly
             if (preDownload)
             {
                 //download the youtube video from the URL
@@ -288,7 +305,7 @@ namespace TerminusDotNetCore.Services
                 audioType = AudioType.YoutubeDownloaded;
             }
 
-            //queue the downloaded file as normal
+            //queue the audio item as normal
             if (_weedPlaying)
             {
                 _backupQueue.Enqueue(new AudioItem() { Path = path, PlayChannelId = channelId, AudioSource = audioType });
@@ -424,6 +441,7 @@ namespace TerminusDotNetCore.Services
 
         private Process CreateProcess(string path, string command)
         {
+            //start an ffmpeg process with stdout redirected 
             return Process.Start(new ProcessStartInfo
             {
                 FileName = command,
@@ -596,6 +614,7 @@ namespace TerminusDotNetCore.Services
 
         private async Task<string> DownloadYoutubeVideoAsync(string url)
         {
+            //define the directory to save video files to
             string tempPath = Path.Combine(Environment.CurrentDirectory, "assets", "temp");
             string videoDataFilename;
 
@@ -609,13 +628,13 @@ namespace TerminusDotNetCore.Services
                 //write the downloaded media file to the temp assets dir
                 videoDataFilename = Path.Combine(tempPath, video.FullName);
                 await File.WriteAllBytesAsync(videoDataFilename, videoData);
-                //Console.WriteLine($"downloaded {videoDataFilename}");
+                
                 return videoDataFilename;
             }
             catch (Exception ex)
             {
                 //give a more helpful error message
-                throw new ArgumentException("Could not download a video file for the given URL.", ex);
+                throw new ArgumentException($"Could not download a video file for the given URL: '{ex.Message}'.", ex);
             }
         }
 
