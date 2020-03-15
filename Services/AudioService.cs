@@ -255,20 +255,22 @@ namespace TerminusDotNetCore.Services
 
         public async Task QueueYoutubeSong(IGuild guild, string path, ulong channelId, string command, bool preDownload = true)
         {
+            AudioType audioType = AudioType.YoutubeUrl;
             if (preDownload)
             {
                 //download the youtube video from the URL
                 path = await DownloadYoutubeVideoAsync(path);
+                audioType = AudioType.YoutubeDownloaded;
             }
 
             //queue the downloaded file as normal
             if (_weedPlaying)
             {
-                _backupQueue.Enqueue(new AudioItem() { Path = path, PlayChannelId = channelId, AudioSource = AudioType.YoutubeDownloaded });
+                _backupQueue.Enqueue(new AudioItem() { Path = path, PlayChannelId = channelId, AudioSource = audioType });
             }
             else
             {
-                _songQueue.Enqueue(new AudioItem() { Path = path, PlayChannelId = channelId, AudioSource = AudioType.YoutubeDownloaded });
+                _songQueue.Enqueue(new AudioItem() { Path = path, PlayChannelId = channelId, AudioSource = audioType });
 
                 if (!_playing)
                 {
