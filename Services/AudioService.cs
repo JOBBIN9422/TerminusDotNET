@@ -222,15 +222,43 @@ namespace TerminusDotNetCore.Services
             await QueueYoutubeURLs(videoUrls, guild, channelId, command);
         }
 
-        private bool PlaylistUrlIsValid(string url)
+        private static bool PlaylistUrlIsValid(string url)
         {
             return Regex.IsMatch(url, @"https:\/\/www.youtube.com\/playlist\?list=.+");
         }
 
-        private string GetPlaylistIdFromUrl(string url)
+        private static string GetPlaylistIdFromUrl(string url)
         {
             string Id = Regex.Match(url, "list=.+").Value.Replace("list=", string.Empty);
             return Id;
+        }
+
+        private static string GetVideoIdFromUrl(string url)
+        {
+            string Id = Regex.Match(url, "v=.[A-Za-z0-9-_]+").Value.Replace("v=", string.Empty);
+            return Id;
+        }
+
+        private async Task<string> GetVideoTitleFromUrlAsync(string url)
+        {
+            var videoRequest = _ytService.Videos.List("snippet");
+            videoRequest.Id = GetVideoIdFromUrl(url);
+
+            var searchResponse = await videoRequest.ExecuteAsync();
+
+            string title = string.Empty;
+
+            //grab the video title from the response (any should do)
+            foreach (var item in searchResponse.Items)
+            {
+                if (!string.IsNullOrEmpty(item.Snippet.Title))
+                {
+                    title = item.Snippet.Title;
+                    break;
+                }
+            }
+
+            return title;
         }
 
         public async Task QueueSearchedYoutubeSong(IGuild guild, string searchTerm, ulong channelId, string command)
