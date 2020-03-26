@@ -169,13 +169,14 @@ namespace TerminusDotNetCore.Services
 
         public async Task QueueLocalSong(IGuild guild, string path, ulong channelId, string command)
         {
+            string displayName = Path.GetFileNameWithoutExtension(path);
             if (_weedPlaying)
             {
-                _backupQueue.Enqueue(new AudioItem() { Path = path, PlayChannelId = channelId, AudioSource = AudioType.Local });
+                _backupQueue.Enqueue(new AudioItem() { Path = path, PlayChannelId = channelId, AudioSource = AudioType.Local, DisplayName = displayName });
             }
             else
             {
-                _songQueue.Enqueue(new AudioItem() { Path = path, PlayChannelId = channelId, AudioSource = AudioType.Local });
+                _songQueue.Enqueue(new AudioItem() { Path = path, PlayChannelId = channelId, AudioSource = AudioType.Local, DisplayName = displayName });
                 if (!_playing)
                 {
                     //want to trigger playing next song in queue
@@ -276,7 +277,7 @@ namespace TerminusDotNetCore.Services
 
                 try
                 {
-                    await QueueYoutubeSong(guild, url, channelId, command);
+                    await QueueYoutubeSongPreDownloaded(guild, url, channelId, command);
 
                     //if we successfully download and queue a song, exit this loop and return
                     return;
@@ -296,11 +297,13 @@ namespace TerminusDotNetCore.Services
             //enqueue all of the URLs before starting playback 
             foreach (string url in urls)
             {
+                string displayName = await GetVideoTitleFromUrlAsync(url);
                 AudioItem currVideo = new AudioItem()
                 {
                     Path = url,
                     PlayChannelId = channelId,
-                    AudioSource = AudioType.YoutubeUrl
+                    AudioSource = AudioType.YoutubeUrl,
+                    DisplayName = displayName
                 };
 
                 if (_weedPlaying)
@@ -320,27 +323,23 @@ namespace TerminusDotNetCore.Services
             }
         }
 
-        public async Task QueueYoutubeSong(IGuild guild, string path, ulong channelId, string command, bool preDownload = true)
+        public async Task QueueYoutubeSongPreDownloaded(IGuild guild, string path, ulong channelId, string command)
         {
-            //by default, set audio source as a URL to be downloaded later
-            AudioType audioType = AudioType.YoutubeUrl;
+            //set metadata for the current audio item
+            AudioType audioType = AudioType.YoutubeDownloaded;
+            string displayName = await GetVideoTitleFromUrlAsync(path);
 
-            //if pre-downloading, set the file path and audioType accordingly
-            if (preDownload)
-            {
-                //download the youtube video from the URL
-                path = await DownloadYoutubeVideoAsync(path);
-                audioType = AudioType.YoutubeDownloaded;
-            }
+            //get a local file for the current video
+            path = await DownloadYoutubeVideoAsync(path);
 
-            //queue the audio item as normal
+            //queue the audio item
             if (_weedPlaying)
             {
-                _backupQueue.Enqueue(new AudioItem() { Path = path, PlayChannelId = channelId, AudioSource = audioType });
+                _backupQueue.Enqueue(new AudioItem() { Path = path, PlayChannelId = channelId, AudioSource = audioType, DisplayName = displayName });
             }
             else
             {
-                _songQueue.Enqueue(new AudioItem() { Path = path, PlayChannelId = channelId, AudioSource = audioType });
+                _songQueue.Enqueue(new AudioItem() { Path = path, PlayChannelId = channelId, AudioSource = audioType, DisplayName = displayName });
 
                 if (!_playing)
                 {
@@ -354,13 +353,14 @@ namespace TerminusDotNetCore.Services
         {
             List<string> files = AttachmentHelper.DownloadAttachments(attachments);
             string path = files[0];
+            string displayName = Path.GetFileName(path);
             if (_weedPlaying)
             {
-                _backupQueue.Enqueue(new AudioItem() { Path = path, PlayChannelId = channelId, AudioSource = AudioType.Attachment });
+                _backupQueue.Enqueue(new AudioItem() { Path = path, PlayChannelId = channelId, AudioSource = AudioType.Attachment, DisplayName = displayName });
             }
             else
             {
-                _songQueue.Enqueue(new AudioItem() { Path = path, PlayChannelId = channelId, AudioSource = AudioType.Attachment });
+                _songQueue.Enqueue(new AudioItem() { Path = path, PlayChannelId = channelId, AudioSource = AudioType.Attachment, DisplayName = displayName });
                 if (!_playing)
                 {
                     //want to trigger playing next song in queue

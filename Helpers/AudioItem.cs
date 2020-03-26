@@ -22,6 +22,9 @@ namespace TerminusDotNetCore.Helpers
     {
         //for local files: the filename. for streamed audio: the youtube URL.
         public string Path { get; set; }
+
+        //a human-readable name (may be different from its file path)
+        public string DisplayName { get; set; }
         
         //channel ID to play this item in
         public ulong PlayChannelId { get; set; }
