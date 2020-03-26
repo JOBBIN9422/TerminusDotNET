@@ -533,7 +533,7 @@ namespace TerminusDotNetCore.Services
             if (_currentSong != null)
             {
                 string songSource = GetAudioSourceString(_currentSong.AudioSource);
-                embed.AddField($"{entryCount + 1}: {Path.GetFileName(_currentSong.Path)} **(currently playing)**", songSource);
+                embed.AddField($"{entryCount + 1}: {_currentSong.DisplayName} **(currently playing)**", songSource);
             }
 
             foreach (var songItem in _songQueue)
@@ -548,7 +548,7 @@ namespace TerminusDotNetCore.Services
                 }
 
                 //add the current queue item to the song list 
-                string songName = $"**{entryCount + 1}:** {Path.GetFileName(songItem.Path)}";
+                string songName = $"**{entryCount + 1}:** {songItem.DisplayName}";
                 string songSource = GetAudioSourceString(songItem.AudioSource);
 
                 embed.AddField(songName, songSource);
