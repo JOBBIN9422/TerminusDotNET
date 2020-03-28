@@ -25,6 +25,8 @@ namespace TerminusDotNetCore.Services
 {
     public class AudioService : ICustomService
     {
+        //shared config object - passed from parent module via DI
+        public IConfiguration Config { get; set; }
         //reference to the controlling module 
         public ServiceControlModule ParentModule { get; set; }
 
@@ -37,11 +39,6 @@ namespace TerminusDotNetCore.Services
 
         //the currently active ffmpeg process for audio streaming
         private Process _ffmpeg = null;
-
-        //object for storing config fields (channel IDs etc)
-        private IConfiguration _config = new ConfigurationBuilder()
-                                        .AddJsonFile("appsettings.json", true, false)
-                                        .Build();
 
         //state flags
         private bool _playing = false;
@@ -95,9 +92,9 @@ namespace TerminusDotNetCore.Services
             if (_weedStarted == false)
             {
                 _weedStarted = true;
-                ulong voiceID = ulong.Parse(_config["WeedChannelId"]);
+                ulong voiceID = ulong.Parse(Config["WeedChannelId"]);
                 IVoiceChannel vc = await Guild.GetVoiceChannelAsync(voiceID);
-                await this.ScheduleWeed(Guild, vc, _config["FfmpegCommand"]);
+                await this.ScheduleWeed(Guild, vc, Config["FfmpegCommand"]);
             }
         }
 
@@ -441,7 +438,7 @@ namespace TerminusDotNetCore.Services
 
         public async Task PlayRegexAudio(IGuild guild, string filename)
         {
-            ulong voiceID = ulong.Parse(_config["AudioChannelId"]);
+            ulong voiceID = ulong.Parse(Config["AudioChannelId"]);
             IVoiceChannel vc = await guild.GetVoiceChannelAsync(voiceID);
             _backupQueue = _songQueue;
             _weedPlaying = true;
@@ -449,7 +446,7 @@ namespace TerminusDotNetCore.Services
             await JoinAudio(guild, vc);
             string path = Path.Combine(AudioPath, filename);
             path = Path.GetFullPath(path);
-            await SendAudioAsync(guild, path, _config["FfmpegCommand"]);
+            await SendAudioAsync(guild, path, Config["FfmpegCommand"]);
             await LeaveAudio(guild);
             _weedPlaying = false;
             _songQueue = _backupQueue;
@@ -458,7 +455,7 @@ namespace TerminusDotNetCore.Services
             {
                 await Client.SetGameAsync(null);
             }
-            await PlayNextInQueue(guild, _config["FfmpegCommand"]);
+            await PlayNextInQueue(guild, Config["FfmpegCommand"]);
         }
 
         public void SaveSong(string alias, IReadOnlyCollection<Attachment> attachments)
