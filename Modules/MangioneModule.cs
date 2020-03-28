@@ -18,9 +18,8 @@ namespace TerminusDotNetCore.Modules
 
         public MangioneModule(IConfiguration config, IConfiguration secrets, AudioService service) : base(config, secrets)
         {
+            //do not need to set service config/secrets here - passed into audioSvc constructor via DI
             _service = service;
-            _service.Config = config;
-            _service.ClientSecrets = secrets;
             _service.ParentModule = this;
         }
 

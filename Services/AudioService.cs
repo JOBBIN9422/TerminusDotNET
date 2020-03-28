@@ -54,8 +54,10 @@ namespace TerminusDotNetCore.Services
         public IGuild Guild { get; set; }
         public DiscordSocketClient Client;
 
-        public AudioService()
+        public AudioService(IConfiguration config, IConfiguration secrets)
         {
+            Config = config;
+            ClientSecrets = secrets;
             Task.Run(async () => await InitYoutubeService());
         }
 
