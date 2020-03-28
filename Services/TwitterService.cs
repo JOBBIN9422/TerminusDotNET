@@ -16,19 +16,22 @@ namespace TerminusDotNetCore.Services
     public class TwitterService : ICustomService
     {
         public IConfiguration Config { get; set; }
+        public IConfiguration ClientSecrets { get; set; }
         public ServiceControlModule ParentModule { get; set; }
 
         private TwitterContext _twitterContext;
 
         private Random _random = new Random();
 
-        public TwitterService(IConfiguration config)
+        public TwitterService(IConfiguration config, IConfiguration secrets)
         {
             Config = config;
-            string consumerKey = Config["TwitterConsumerKey"];
-            string consumerSecret = Config["TwitterConsumerSecret"];
-            string token = Config["TwitterAccessToken"];
-            string tokenSecret = Config["TwitterAccessTokenSecret"];
+            ClientSecrets = secrets;
+
+            string consumerKey = ClientSecrets["TwitterConsumerKey"];
+            string consumerSecret = ClientSecrets["TwitterConsumerSecret"];
+            string token = ClientSecrets["TwitterAccessToken"];
+            string tokenSecret = ClientSecrets["TwitterAccessTokenSecret"];
 
             IAuthorizer auth = new SingleUserAuthorizer
             {
@@ -90,15 +93,6 @@ namespace TerminusDotNetCore.Services
             {
                 var mediaIDs = mediaContent.Select(x => x.MediaID);
                 tweet = await _twitterContext.TweetAsync(tweetContent, mediaIDs);
-
-                //if (!string.IsNullOrEmpty(tweetContent))
-                //{
-                //    tweet = await _twitterContext.TweetAsync(tweetContent, mediaIDs);
-                //}
-                //else
-                //{
-                //    tweet = await _twitterContext.TweetAsync("", mediaIDs);
-                //}
             }
             else
             {

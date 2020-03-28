@@ -27,6 +27,9 @@ namespace TerminusDotNetCore.Services
     {
         //shared config object - passed from parent module via DI
         public IConfiguration Config { get; set; }
+        //shared client secrets object - passed from parent module via DI
+        public IConfiguration ClientSecrets { get; set; }
+
         //reference to the controlling module 
         public ServiceControlModule ParentModule { get; set; }
 

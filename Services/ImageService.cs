@@ -21,6 +21,8 @@ namespace TerminusDotNetCore.Services
         public ServiceControlModule ParentModule { get; set; }
         public IConfiguration Config { get; set; }
 
+        public IConfiguration ClientSecrets { get; set; }
+
         public List<string> DeepfryImages(IReadOnlyCollection<Attachment> attachments, uint numPasses = 1)
         {
             var images = AttachmentHelper.DownloadAttachments(attachments);

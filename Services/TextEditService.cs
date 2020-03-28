@@ -9,6 +9,8 @@ namespace TerminusDotNetCore.Services
     public class TextEditService : ICustomService
     {
         public IConfiguration Config { get; set; }
+        public IConfiguration ClientSecrets { get; set; }
+
         public ServiceControlModule ParentModule { get; set; }
 
         private Dictionary<char, char> _wideTextMap = new Dictionary<char, char>();

@@ -14,6 +14,8 @@ namespace TerminusDotNetCore.Services
     public class MarkovService : ICustomService
     {
         public IConfiguration Config { get; set; }
+        public IConfiguration ClientSecrets { get; set; }
+
         public ServiceControlModule ParentModule { get; set; }
         private MarkovHelper _clickbaitMarkov = new MarkovHelper(Path.Combine("assets", "clickbait.txt"));
 

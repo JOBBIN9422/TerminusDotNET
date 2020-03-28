@@ -55,6 +55,8 @@ namespace TerminusDotNetCore.Services
         public IUser NextPlayer { get; private set; }
 
         public IConfiguration Config { get; set; }
+        public IConfiguration ClientSecrets { get; set; }
+
         public ServiceControlModule ParentModule { get; set; }
 
         public void Init(int numRows, int numCols, int winCount, IUser player1, IUser player2)
