@@ -28,6 +28,7 @@ namespace TerminusDotNetCore.Modules
         {
             _imageService = service;
             _imageService.Config = config;
+            _imageService.ClientSecrets = secrets;
             _imageService.ParentModule = this;
         }
 

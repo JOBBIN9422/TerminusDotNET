@@ -19,6 +19,7 @@ namespace TerminusDotNetCore.Modules
         {
             _markovService = service;
             _markovService.Config = config;
+            _markovService.ClientSecrets = secrets;
             _markovService.ParentModule = this;
         }
 

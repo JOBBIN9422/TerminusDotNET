@@ -19,6 +19,7 @@ namespace TerminusDotNetCore.Modules
         {
             _textEditService = service;
             _textEditService.Config = config;
+            _textEditService.ClientSecrets = secrets;
             _textEditService.ParentModule = this;
         }
 

@@ -20,6 +20,7 @@ namespace TerminusDotNetCore.Modules
         {
             _service = service;
             _service.Config = config;
+            _service.ClientSecrets = secrets;
             _service.ParentModule = this;
         }
 

@@ -19,6 +19,7 @@ namespace TerminusDotNetCore.Modules
         {
             _tttService = service;
             _tttService.Config = config;
+            _tttService.ClientSecrets = secrets;
             _tttService.ParentModule = this;
         }
 
