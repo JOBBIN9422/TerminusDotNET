@@ -218,14 +218,15 @@ namespace TerminusDotNetCore
         {
             var serviceCollection = new ServiceCollection();
 
-            //new custom services get added here
+            //new custom services (and objects passed via DI) get added here
             serviceCollection.AddSingleton<ImageService>()
                              .AddSingleton<TextEditService>()
                              .AddSingleton<TwitterService>()
                              .AddSingleton<AudioService>()
                              .AddSingleton<MarkovService>()
                              .AddSingleton<TicTacToeService>()
-                             .AddSingleton(new Random());
+                             .AddSingleton(new Random())
+                             .AddSingleton(_config);
             //serviceCollection.AddSingleton<WideTextService>();
 
             return serviceCollection.BuildServiceProvider();
