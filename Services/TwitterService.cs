@@ -16,22 +16,20 @@ namespace TerminusDotNetCore.Services
     public class TwitterService : ICustomService
     {
         public IConfiguration Config { get; set; }
-        public IConfiguration ClientSecrets { get; set; }
         public ServiceControlModule ParentModule { get; set; }
 
         private TwitterContext _twitterContext;
 
         private Random _random = new Random();
 
-        public TwitterService(IConfiguration config, IConfiguration secrets)
+        public TwitterService(IConfiguration config)
         {
             Config = config;
-            ClientSecrets = secrets;
 
-            string consumerKey = ClientSecrets["TwitterConsumerKey"];
-            string consumerSecret = ClientSecrets["TwitterConsumerSecret"];
-            string token = ClientSecrets["TwitterAccessToken"];
-            string tokenSecret = ClientSecrets["TwitterAccessTokenSecret"];
+            string consumerKey = Config["TwitterConsumerKey"];
+            string consumerSecret = Config["TwitterConsumerSecret"];
+            string token = Config["TwitterAccessToken"];
+            string tokenSecret = Config["TwitterAccessTokenSecret"];
 
             IAuthorizer auth = new SingleUserAuthorizer
             {

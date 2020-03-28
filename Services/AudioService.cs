@@ -27,8 +27,6 @@ namespace TerminusDotNetCore.Services
     {
         //shared config object - passed from parent module via DI
         public IConfiguration Config { get; set; }
-        //shared client secrets object - passed from parent module via DI
-        public IConfiguration ClientSecrets { get; set; }
 
         //reference to the controlling module 
         public ServiceControlModule ParentModule { get; set; }
@@ -54,10 +52,9 @@ namespace TerminusDotNetCore.Services
         public IGuild Guild { get; set; }
         public DiscordSocketClient Client;
 
-        public AudioService(IConfiguration config, IConfiguration secrets)
+        public AudioService(IConfiguration config)
         {
             Config = config;
-            ClientSecrets = secrets;
             Task.Run(async () => await InitYoutubeService());
         }
 
