@@ -15,15 +15,11 @@ namespace TerminusDotNetCore.Modules
     public class MangioneModule : ServiceControlModule
     {
         private AudioService _service;
-        private IConfiguration _config;
 
         public MangioneModule(IConfiguration config, AudioService service) : base(config)
         {
             _service = service;
             _service.ParentModule = this;
-            _config = new ConfigurationBuilder()
-                          .AddJsonFile("appsettings.json", true, true)
-                          .Build();
         }
 
         private async Task<IReadOnlyCollection<Attachment>> GetAttachmentsAsync()
@@ -65,7 +61,7 @@ namespace TerminusDotNetCore.Modules
             ulong voiceID;
             if ( channelID.Equals("-1") )
             {
-                voiceID = ulong.Parse(_config["AudioChannelId"]);
+                voiceID = ulong.Parse(Config["AudioChannelId"]);
             }
             else
             {
@@ -112,7 +108,7 @@ namespace TerminusDotNetCore.Modules
             if ( useFile )
             {
                 IReadOnlyCollection<Attachment> atts = await GetAttachmentsAsync();
-                await _service.QueueTempSong(Context.Guild, atts, voiceID, _config["FfmpegCommand"]);
+                await _service.QueueTempSong(Context.Guild, atts, voiceID, Config["FfmpegCommand"]);
             }
             else
             {
@@ -123,7 +119,7 @@ namespace TerminusDotNetCore.Modules
                     Console.WriteLine(path);
                     return;
                 }
-                await _service.QueueLocalSong(Context.Guild, path, voiceID, _config["FfmpegCommand"]);
+                await _service.QueueLocalSong(Context.Guild, path, voiceID, Config["FfmpegCommand"]);
             }
         }
 
@@ -139,7 +135,7 @@ namespace TerminusDotNetCore.Modules
             ulong voiceID;
             if (channelID.Equals("-1"))
             {
-                voiceID = ulong.Parse(_config["AudioChannelId"]);
+                voiceID = ulong.Parse(Config["AudioChannelId"]);
             }
             else
             {
@@ -159,7 +155,7 @@ namespace TerminusDotNetCore.Modules
                 return;
             }
 
-            await _service.QueueSearchedYoutubeSong(Context.Guild, searchTerm, voiceID, _config["FfmpegCommand"]);
+            await _service.QueueSearchedYoutubeSong(Context.Guild, searchTerm, voiceID, Config["FfmpegCommand"]);
         }
 
         [Command("playlist", RunMode = RunMode.Async)]
@@ -174,7 +170,7 @@ namespace TerminusDotNetCore.Modules
             ulong voiceID;
             if (channelID.Equals("-1"))
             {
-                voiceID = ulong.Parse(_config["AudioChannelId"]);
+                voiceID = ulong.Parse(Config["AudioChannelId"]);
             }
             else
             {
@@ -194,7 +190,7 @@ namespace TerminusDotNetCore.Modules
                 return;
             }
 
-            await _service.QueueYoutubePlaylist(Context.Guild, playlistUrl, voiceID, _config["FfmpegCommand"]);
+            await _service.QueueYoutubePlaylist(Context.Guild, playlistUrl, voiceID, Config["FfmpegCommand"]);
         }
 
         [Command("yt", RunMode = RunMode.Async)]
@@ -209,7 +205,7 @@ namespace TerminusDotNetCore.Modules
             ulong voiceID;
             if (channelID.Equals("-1"))
             {
-                voiceID = ulong.Parse(_config["AudioChannelId"]);
+                voiceID = ulong.Parse(Config["AudioChannelId"]);
             }
             else
             {
@@ -229,14 +225,14 @@ namespace TerminusDotNetCore.Modules
                 return;
             }
 
-            await _service.QueueYoutubeSongPreDownloaded(Context.Guild, url, voiceID, _config["FfmpegCommand"]);
+            await _service.QueueYoutubeSongPreDownloaded(Context.Guild, url, voiceID, Config["FfmpegCommand"]);
         }
 
         [Command("playnext", RunMode = RunMode.Async)]
         [Summary("Play the next item in the song queue, if any.")]
         public async Task PlayNext()
         {
-            await _service.PlayNextInQueue(Context.Guild, _config["FfmpegCommand"]);
+            await _service.PlayNextInQueue(Context.Guild, Config["FfmpegCommand"]);
         }
         
         [Command("songs", RunMode = RunMode.Async)]
