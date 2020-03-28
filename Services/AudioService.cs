@@ -140,10 +140,15 @@ namespace TerminusDotNetCore.Services
 
         public async Task SendAudioAsync(IGuild guild, string path)
         {
-            // Your task: Get a full path to the file if the value of 'path' is only a filename.
             Tuple<IAudioClient, IVoiceChannel> client;
             if (_connectedChannels.TryGetValue(guild.Id, out client))
             {
+                //clean up the existing process if necessary
+                if (_ffmpeg != null && !_ffmpeg.HasExited)
+                {
+                    _ffmpeg.Kill(true);
+                }
+
                 //set playback state and spawn the stream process
                 _playing = true;
                 _ffmpeg = CreateProcess(path);
@@ -404,11 +409,6 @@ namespace TerminusDotNetCore.Services
 
                 //update the currently-playing song and kill the audio process if it's running
                 _currentSong = nextInQueue;
-                if (_ffmpeg != null && !_ffmpeg.HasExited)
-                {
-                    _ffmpeg.Kill(true);
-                }
-
                 await SendAudioAsync(guild, nextInQueue.Path);
             }
             else
