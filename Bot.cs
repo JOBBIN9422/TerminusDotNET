@@ -36,8 +36,6 @@ namespace TerminusDotNetCore
 
         private IConfiguration _config = new ConfigurationBuilder()
                                         .AddJsonFile("appsettings.json", true, true)
-                                        .Build();
-        private IConfiguration _secrets = new ConfigurationBuilder()
                                         .AddJsonFile("secrets.json", true, true)
                                         .Build();
 
@@ -77,14 +75,14 @@ namespace TerminusDotNetCore
             //alert in console for each missing client secret field
             foreach (var secretEntry in requiredSecrets)
             {
-                if (_secrets[secretEntry.Key] == null)
+                if (_config[secretEntry.Key] == null)
                 {
                     await Log(new LogMessage(LogSeverity.Warning, "secrets.json", $"WARN: Missing item in secrets file :: {secretEntry.Key} --- Description :: {secretEntry.Value}"));
                 }
             }
 
             //log in & start the client
-            string token = _secrets["DiscordToken"];
+            string token = _config["DiscordToken"];
             await _client.LoginAsync(TokenType.Bot, token);
             await _client.StartAsync();
 
@@ -218,7 +216,6 @@ namespace TerminusDotNetCore
 
             //new custom services (and objects passed via DI) get added here
             serviceCollection.AddSingleton(_config)
-                             .AddSingleton(_secrets)
                              .AddSingleton<ImageService>()
                              .AddSingleton<TextEditService>()
                              .AddSingleton<TwitterService>()
