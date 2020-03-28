@@ -18,8 +18,8 @@ namespace TerminusDotNetCore.Modules
 
         public MangioneModule(IConfiguration config, AudioService service) : base(config)
         {
-            _service.Config = config;
             _service = service;
+            _service.Config = config;
             _service.ParentModule = this;
         }
 

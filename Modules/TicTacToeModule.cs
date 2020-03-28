@@ -17,8 +17,8 @@ namespace TerminusDotNetCore.Modules
 
         public TicTacToeModule(IConfiguration config, TicTacToeService service) : base(config)
         {
-            _tttService.Config = config;
             _tttService = service;
+            _tttService.Config = config;
             _tttService.ParentModule = this;
         }
 

@@ -26,8 +26,8 @@ namespace TerminusDotNetCore.Modules
 
         public ImageModule(IConfiguration config, ImageService service) : base(config)
         {
-            _imageService.Config = config;
             _imageService = service;
+            _imageService.Config = config;
             _imageService.ParentModule = this;
         }
 
