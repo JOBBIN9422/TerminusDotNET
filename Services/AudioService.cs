@@ -386,13 +386,16 @@ namespace TerminusDotNetCore.Services
                 {
                     try
                     {
-                        Console.WriteLine($"downloading local file for {nextInQueue.Path}...");
+                        await Bot.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"downloading local file for {nextInQueue.Path}..."));
+
                         nextInQueue.Path = await DownloadYoutubeVideoAsync(nextInQueue.Path);
-                        Console.WriteLine($"downloaded local file {nextInQueue.Path}");
+
+                        await Bot.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"downloaded local file {nextInQueue.Path}"));
                     }
                     catch (ArgumentException)
                     {
-                        Console.WriteLine($"failed to download local file for {nextInQueue.Path}, skipping...");
+                        await Bot.Log(new LogMessage(LogSeverity.Warning, "AudioSvc", $"failed to download local file for {nextInQueue.Path}, skipping..."));
+
                         //skip this item if the download fails
                         await PlayNextInQueue(guild);
                         return;
