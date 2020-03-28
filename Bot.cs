@@ -37,6 +37,9 @@ namespace TerminusDotNetCore
         private IConfiguration _config = new ConfigurationBuilder()
                                         .AddJsonFile("appsettings.json", true, true)
                                         .Build();
+        private IConfiguration _secrets = new ConfigurationBuilder()
+                                        .AddJsonFile("secrets.json", true, true)
+                                        .Build();
 
         public async Task Initialize()
         {
@@ -47,11 +50,6 @@ namespace TerminusDotNetCore
             _client = new DiscordSocketClient();
             _client.Log += Log;
             _client.MessageReceived += HandleCommandAsync;
-
-            //init client secrets
-            IConfiguration secrets = new ConfigurationBuilder()
-                                        .AddJsonFile("secrets.json", true, true)
-                                        .Build();
 
             //verify that each required client secret is in the secrets file
             Dictionary<string, string> requiredSecrets = new Dictionary<string, string>()
@@ -79,14 +77,14 @@ namespace TerminusDotNetCore
             //alert in console for each missing client secret field
             foreach (var secretEntry in requiredSecrets)
             {
-                if (secrets[secretEntry.Key] == null)
+                if (_secrets[secretEntry.Key] == null)
                 {
                     await Log(new LogMessage(LogSeverity.Warning, "secrets.json", $"WARN: Missing item in secrets file :: {secretEntry.Key} --- Description :: {secretEntry.Value}"));
                 }
             }
 
             //log in & start the client
-            string token = secrets["DiscordToken"];
+            string token = _secrets["DiscordToken"];
             await _client.LoginAsync(TokenType.Bot, token);
             await _client.StartAsync();
 
