@@ -24,11 +24,10 @@ namespace TerminusDotNetCore.Modules
 
         private const string NO_ATTACHMENTS_FOUND_MESSAGE = "No images were found in the current message or previous messages.";
 
-        public ImageModule(IConfiguration config, IConfiguration secrets, ImageService service) : base(config, secrets)
+        public ImageModule(IConfiguration config, ImageService service) : base(config)
         {
             _imageService = service;
             _imageService.Config = config;
-            _imageService.ClientSecrets = secrets;
             _imageService.ParentModule = this;
         }
 

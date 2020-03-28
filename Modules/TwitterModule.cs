@@ -15,9 +15,9 @@ namespace TerminusDotNetCore.Modules
     {
         private TwitterService _twitterService;
 
-        public TwitterModule(IConfiguration config, IConfiguration secrets, TwitterService service) : base(config, secrets)
+        public TwitterModule(IConfiguration config, TwitterService service) : base(config)
         {
-            //do not need to set config/secrets for service here (set in twitterSvc constructor via DI)
+            //do not need to set config for service here (set in twitterSvc constructor via DI)
             _twitterService = service;
             _twitterService.ParentModule = this;
         }

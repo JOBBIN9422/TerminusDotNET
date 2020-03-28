@@ -15,13 +15,9 @@ namespace TerminusDotNetCore.Modules
         //shared config object - passed via DI
         public IConfiguration Config { get; set; }
 
-        //shared client secrets file object - passed via DI
-        public IConfiguration ClientSecrets { get; set; }
-
-        public ServiceControlModule(IConfiguration config, IConfiguration secrets)
+        public ServiceControlModule(IConfiguration config)
         {
             Config = config;
-            ClientSecrets = secrets;
         }
 
 

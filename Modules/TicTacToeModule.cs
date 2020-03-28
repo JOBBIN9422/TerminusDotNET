@@ -15,11 +15,10 @@ namespace TerminusDotNetCore.Modules
     {
         private TicTacToeService _tttService;
 
-        public TicTacToeModule(IConfiguration config, IConfiguration secrets, TicTacToeService service) : base(config, secrets)
+        public TicTacToeModule(IConfiguration config, TicTacToeService service) : base(config)
         {
             _tttService = service;
             _tttService.Config = config;
-            _tttService.ClientSecrets = secrets;
             _tttService.ParentModule = this;
         }
 
