@@ -14,7 +14,5 @@ namespace TerminusDotNetCore.Services
         //shared config object - set in controlling module constructor (passed via DI)
         public IConfiguration Config { get; set; }
         ServiceControlModule ParentModule { get; set; }
-
-        //Task ServiceReplyAsync(string s, EmbedBuilder embedBuilder = null);
     }
 }
