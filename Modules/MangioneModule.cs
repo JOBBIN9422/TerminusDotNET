@@ -109,7 +109,7 @@ namespace TerminusDotNetCore.Modules
             if ( useFile )
             {
                 IReadOnlyCollection<Attachment> atts = await GetAttachmentsAsync();
-                await _service.QueueTempSong(Context.Guild, atts, voiceID, Config["FfmpegCommand"]);
+                await _service.QueueTempSong(Context.Guild, atts, voiceID);
             }
             else
             {
@@ -120,7 +120,7 @@ namespace TerminusDotNetCore.Modules
                     Console.WriteLine(path);
                     return;
                 }
-                await _service.QueueLocalSong(Context.Guild, path, voiceID, Config["FfmpegCommand"]);
+                await _service.QueueLocalSong(Context.Guild, path, voiceID);
             }
         }
 
@@ -156,7 +156,7 @@ namespace TerminusDotNetCore.Modules
                 return;
             }
 
-            await _service.QueueSearchedYoutubeSong(Context.Guild, searchTerm, voiceID, Config["FfmpegCommand"]);
+            await _service.QueueSearchedYoutubeSong(Context.Guild, searchTerm, voiceID);
         }
 
         [Command("playlist", RunMode = RunMode.Async)]
@@ -191,7 +191,7 @@ namespace TerminusDotNetCore.Modules
                 return;
             }
 
-            await _service.QueueYoutubePlaylist(Context.Guild, playlistUrl, voiceID, Config["FfmpegCommand"]);
+            await _service.QueueYoutubePlaylist(Context.Guild, playlistUrl, voiceID);
         }
 
         [Command("yt", RunMode = RunMode.Async)]
@@ -226,14 +226,14 @@ namespace TerminusDotNetCore.Modules
                 return;
             }
 
-            await _service.QueueYoutubeSongPreDownloaded(Context.Guild, url, voiceID, Config["FfmpegCommand"]);
+            await _service.QueueYoutubeSongPreDownloaded(Context.Guild, url, voiceID);
         }
 
         [Command("playnext", RunMode = RunMode.Async)]
         [Summary("Play the next item in the song queue, if any.")]
         public async Task PlayNext()
         {
-            await _service.PlayNextInQueue(Context.Guild, Config["FfmpegCommand"]);
+            await _service.PlayNextInQueue(Context.Guild);
         }
         
         [Command("songs", RunMode = RunMode.Async)]

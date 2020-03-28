@@ -41,6 +41,8 @@ namespace TerminusDotNetCore.Services
         //the currently active ffmpeg process for audio streaming
         private Process _ffmpeg = null;
 
+        private readonly string FFMPEG_PROCESS_NAME;
+
         //state flags
         private bool _playing = false;
         private bool _weedStarted = false;
@@ -55,6 +57,7 @@ namespace TerminusDotNetCore.Services
         public AudioService(IConfiguration config)
         {
             Config = config;
+            FFMPEG_PROCESS_NAME = Config["FfmpegCommand"];
             Task.Run(async () => await InitYoutubeService());
         }
 
@@ -96,7 +99,7 @@ namespace TerminusDotNetCore.Services
                 _weedStarted = true;
                 ulong voiceID = ulong.Parse(Config["WeedChannelId"]);
                 IVoiceChannel vc = await Guild.GetVoiceChannelAsync(voiceID);
-                await this.ScheduleWeed(Guild, vc, Config["FfmpegCommand"]);
+                await this.ScheduleWeed(Guild, vc);
             }
         }
 
@@ -135,7 +138,7 @@ namespace TerminusDotNetCore.Services
             }
         }
 
-        public async Task SendAudioAsync(IGuild guild, string path, string command)
+        public async Task SendAudioAsync(IGuild guild, string path)
         {
             // Your task: Get a full path to the file if the value of 'path' is only a filename.
             Tuple<IAudioClient, IVoiceChannel> client;
@@ -143,7 +146,7 @@ namespace TerminusDotNetCore.Services
             {
                 //set playback state and spawn the stream process
                 _playing = true;
-                _ffmpeg = CreateProcess(path, command);
+                _ffmpeg = CreateProcess(path);
 
                 //init audio stream in voice channel
                 using (var stream = client.Item1.CreatePCMStream(AudioApplication.Music))
@@ -160,13 +163,13 @@ namespace TerminusDotNetCore.Services
                         stream.Close(); 
                         _ffmpeg.Kill(true); 
                         _playing = false; 
-                        await PlayNextInQueue(guild, command); 
+                        await PlayNextInQueue(guild); 
                     }
                 }
             }
         }
 
-        public async Task QueueLocalSong(IGuild guild, string path, ulong channelId, string command)
+        public async Task QueueLocalSong(IGuild guild, string path, ulong channelId)
         {
             string displayName = Path.GetFileNameWithoutExtension(path);
             if (_weedPlaying)
@@ -179,12 +182,12 @@ namespace TerminusDotNetCore.Services
                 if (!_playing)
                 {
                     //want to trigger playing next song in queue
-                    await PlayNextInQueue(guild, command);
+                    await PlayNextInQueue(guild);
                 }
             }
         }
 
-        public async Task QueueYoutubePlaylist(IGuild guild, string playlistURL, ulong channelId, string command)
+        public async Task QueueYoutubePlaylist(IGuild guild, string playlistURL, ulong channelId)
         {
             //check if the given URL refers to a youtube playlist
             if (!PlaylistUrlIsValid(playlistURL))
@@ -219,7 +222,7 @@ namespace TerminusDotNetCore.Services
             }
 
             //add the list of URLs to the queue for downloading during playback
-            await QueueYoutubeURLs(videoUrls, guild, channelId, command);
+            await QueueYoutubeURLs(videoUrls, guild, channelId);
         }
 
         private static bool PlaylistUrlIsValid(string url)
@@ -261,7 +264,7 @@ namespace TerminusDotNetCore.Services
             return title;
         }
 
-        public async Task QueueSearchedYoutubeSong(IGuild guild, string searchTerm, ulong channelId, string command)
+        public async Task QueueSearchedYoutubeSong(IGuild guild, string searchTerm, ulong channelId)
         {
             var searchListRequest = _ytService.Search.List("snippet");
             searchListRequest.Q = searchTerm;
@@ -276,7 +279,7 @@ namespace TerminusDotNetCore.Services
 
                 try
                 {
-                    await QueueYoutubeSongPreDownloaded(guild, url, channelId, command);
+                    await QueueYoutubeSongPreDownloaded(guild, url, channelId);
 
                     //if we successfully download and queue a song, exit this loop and return
                     return;
@@ -291,7 +294,7 @@ namespace TerminusDotNetCore.Services
             await ParentModule.ServiceReplyAsync($"No videos were successfully downloaded for the search term '{searchTerm}'.");
         }
 
-        private async Task QueueYoutubeURLs(List<string> urls, IGuild guild, ulong channelId, string command)
+        private async Task QueueYoutubeURLs(List<string> urls, IGuild guild, ulong channelId)
         {
             //enqueue all of the URLs before starting playback 
             foreach (string url in urls)
@@ -318,11 +321,11 @@ namespace TerminusDotNetCore.Services
             if (!_playing)
             {
                 //want to trigger playing next song in queue
-                await PlayNextInQueue(guild, command);
+                await PlayNextInQueue(guild);
             }
         }
 
-        public async Task QueueYoutubeSongPreDownloaded(IGuild guild, string path, ulong channelId, string command)
+        public async Task QueueYoutubeSongPreDownloaded(IGuild guild, string path, ulong channelId)
         {
             //set metadata for the current audio item
             AudioType audioType = AudioType.YoutubeDownloaded;
@@ -343,12 +346,12 @@ namespace TerminusDotNetCore.Services
                 if (!_playing)
                 {
                     //want to trigger playing next song in queue
-                    await PlayNextInQueue(guild, command);
+                    await PlayNextInQueue(guild);
                 }
             }
         }
 
-        public async Task QueueTempSong(IGuild guild, IReadOnlyCollection<Attachment> attachments, ulong channelId, string command)
+        public async Task QueueTempSong(IGuild guild, IReadOnlyCollection<Attachment> attachments, ulong channelId)
         {
             List<string> files = AttachmentHelper.DownloadAttachments(attachments);
             string path = files[0];
@@ -363,12 +366,12 @@ namespace TerminusDotNetCore.Services
                 if (!_playing)
                 {
                     //want to trigger playing next song in queue
-                    await PlayNextInQueue(guild, command);
+                    await PlayNextInQueue(guild);
                 }
             }
         }
 
-        public async Task PlayNextInQueue(IGuild guild, string command)
+        public async Task PlayNextInQueue(IGuild guild)
         {
             AudioItem nextInQueue;
             if (_songQueue.TryDequeue(out nextInQueue))
@@ -386,7 +389,7 @@ namespace TerminusDotNetCore.Services
                     {
                         Console.WriteLine($"failed to download local file for {nextInQueue.Path}, skipping...");
                         //skip this item if the download fails
-                        await PlayNextInQueue(guild, command);
+                        await PlayNextInQueue(guild);
                         return;
                     }
                 }
@@ -406,7 +409,7 @@ namespace TerminusDotNetCore.Services
                     _ffmpeg.Kill(true);
                 }
 
-                await SendAudioAsync(guild, nextInQueue.Path, command);
+                await SendAudioAsync(guild, nextInQueue.Path);
             }
             else
             {
@@ -448,7 +451,7 @@ namespace TerminusDotNetCore.Services
             await JoinAudio(guild, vc);
             string path = Path.Combine(AudioPath, filename);
             path = Path.GetFullPath(path);
-            await SendAudioAsync(guild, path, Config["FfmpegCommand"]);
+            await SendAudioAsync(guild, path);
             await LeaveAudio(guild);
             _weedPlaying = false;
             _songQueue = _backupQueue;
@@ -457,7 +460,7 @@ namespace TerminusDotNetCore.Services
             {
                 await Client.SetGameAsync(null);
             }
-            await PlayNextInQueue(guild, Config["FfmpegCommand"]);
+            await PlayNextInQueue(guild);
         }
 
         public void SaveSong(string alias, IReadOnlyCollection<Attachment> attachments)
@@ -466,19 +469,19 @@ namespace TerminusDotNetCore.Services
             File.AppendAllText(Path.Combine(AudioPath, "audioaliases.txt"), alias + " " + filename + Environment.NewLine);
         }
 
-        private Process CreateProcess(string path, string command)
+        private Process CreateProcess(string path)
         {
             //start an ffmpeg process with stdout redirected 
             return Process.Start(new ProcessStartInfo
             {
-                FileName = command,
+                FileName = FFMPEG_PROCESS_NAME,
                 Arguments = $"-hide_banner -loglevel panic -i \"{path}\" -ac 2 -f s16le -ar 48000 pipe:1",
                 UseShellExecute = false,
                 RedirectStandardOutput = true
             });
         }
 
-        public async Task ScheduleWeed(IGuild guild, IVoiceChannel channel, string command)
+        public async Task ScheduleWeed(IGuild guild, IVoiceChannel channel)
         {
             DateTime now = DateTime.Now;
             DateTime fourTwenty = DateTime.Today.AddHours(16.333);
@@ -497,7 +500,7 @@ namespace TerminusDotNetCore.Services
             {
                 await Client.SetGameAsync("weeeeed");
             }
-            await SendAudioAsync(guild, path, command);
+            await SendAudioAsync(guild, path);
             await LeaveAudio(guild);
             _weedPlaying = false;
             _songQueue = _backupQueue;
@@ -506,8 +509,8 @@ namespace TerminusDotNetCore.Services
             {
                 await Client.SetGameAsync(null);
             }
-            _ = PlayNextInQueue(guild, command);
-            _ = ScheduleWeed(guild, channel, command);
+            _ = PlayNextInQueue(guild);
+            _ = ScheduleWeed(guild, channel);
         }
 
         public List<Embed> ListQueueContents()
