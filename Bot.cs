@@ -17,16 +17,24 @@ namespace TerminusDotNetCore
 {
     class Bot
     {
+        //for detecting regex matches in messages
         private RegexCommands _regexMsgParser;
+
         private DiscordSocketClient _client;
+
+        //Discord.NET command management
         private CommandService _commandService;
+
+        //command services
         private IServiceProvider _serviceProvider;
+
+        //bot state flag
         private bool _isActive = true;
+
+        //ignored channels
         private List<ulong> _blacklistChannels = new List<ulong>();
 
-        //public Bot()
-        //{
-        //}
+        private IConfiguration _config;
 
         public async Task Initialize()
         {
@@ -39,7 +47,7 @@ namespace TerminusDotNetCore
             _client.MessageReceived += HandleCommandAsync;
 
             //init config
-            IConfiguration config = new ConfigurationBuilder()
+            _config = new ConfigurationBuilder()
                                         .AddJsonFile("appsettings.json", true, true)
                                         .Build();
 
@@ -65,7 +73,7 @@ namespace TerminusDotNetCore
             //alert in console for each missing config field
             foreach (var configEntry in requiredConfigs)
             {
-                if (config[configEntry.Key] == null)
+                if (_config[configEntry.Key] == null)
                 {
                     await Log(new LogMessage(LogSeverity.Warning, "appsettings.json", $"WARN: Missing item in appsettings config file :: {configEntry.Key} --- Description :: {configEntry.Value}"));
                 }
@@ -86,7 +94,7 @@ namespace TerminusDotNetCore
             await _client.StartAsync();
 
             //load blacklisted channels
-            var blacklistSection = config.GetSection("BlacklistChannels");
+            var blacklistSection = _config.GetSection("BlacklistChannels");
             foreach (var section in blacklistSection.GetChildren())
             {
                 ulong id = ulong.Parse(section.Value);
