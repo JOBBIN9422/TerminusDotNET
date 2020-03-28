@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using TerminusDotNetCore.Services;
 using System.Linq;
+using Microsoft.Extensions.Configuration;
 
 namespace TerminusDotNetCore.Modules
 {
@@ -14,7 +15,7 @@ namespace TerminusDotNetCore.Modules
     {
         private TwitterService _twitterService;
 
-        public TwitterModule(TwitterService service)
+        public TwitterModule(IConfiguration config, TwitterService service) : base(config)
         {
             _twitterService = service;
             _twitterService.ParentModule = this;

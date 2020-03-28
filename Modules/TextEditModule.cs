@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
+using Microsoft.Extensions.Configuration;
 using TerminusDotNetCore.Services;
 
 namespace TerminusDotNetCore.Modules
@@ -14,7 +15,7 @@ namespace TerminusDotNetCore.Modules
     {
         private TextEditService _textEditService;
 
-        public TextEditModule(TextEditService service)
+        public TextEditModule(IConfiguration config, TextEditService service) : base(config)
         {
             _textEditService = service;
             _textEditService.ParentModule = this;

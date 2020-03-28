@@ -1,5 +1,6 @@
 ﻿using Discord;
 using Discord.Commands;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -14,7 +15,7 @@ namespace TerminusDotNetCore.Modules
     {
         private TicTacToeService _tttService;
 
-        public TicTacToeModule(TicTacToeService service)
+        public TicTacToeModule(IConfiguration config, TicTacToeService service) : base(config)
         {
             _tttService = service;
             _tttService.ParentModule = this;

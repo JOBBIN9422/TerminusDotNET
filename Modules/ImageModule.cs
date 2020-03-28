@@ -7,6 +7,7 @@ using Discord;
 using Discord.Commands;
 using TerminusDotNetCore.Services;
 using TerminusDotNetCore.Helpers;
+using Microsoft.Extensions.Configuration;
 
 namespace TerminusDotNetCore.Modules
 {
@@ -23,7 +24,7 @@ namespace TerminusDotNetCore.Modules
 
         private const string NO_ATTACHMENTS_FOUND_MESSAGE = "No images were found in the current message or previous messages.";
 
-        public ImageModule(ImageService service)
+        public ImageModule(IConfiguration config, ImageService service) : base(config)
         {
             _imageService = service;
             _imageService.ParentModule = this;

@@ -1,6 +1,7 @@
 ﻿using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -14,7 +15,7 @@ namespace TerminusDotNetCore.Modules
     {
         private MarkovService _markovService;
 
-        public MarkovModule(MarkovService service)
+        public MarkovModule(IConfiguration config, MarkovService service) : base(config)
         {
             _markovService = service;
             _markovService.ParentModule = this;
