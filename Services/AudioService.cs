@@ -486,11 +486,14 @@ namespace TerminusDotNetCore.Services
             }
 
             //move the temp file to the alias directory 
-            string newPath = Path.Combine(AudioPath, Path.GetFileName(_currentSong.Path).Replace(" ", string.Empty));
+            string newFileName = $"{alias}{Path.GetExtension(_currentSong.Path)}";
+            string newPath = Path.Combine(AudioPath, newFileName);
             File.Copy(_currentSong.Path, newPath);
 
             //add the song to the alias file
-            File.AppendAllText(Path.Combine(AudioPath, "audioaliases.txt"), alias + " " + Path.GetFileName(newPath) + Environment.NewLine);
+            File.AppendAllText(Path.Combine(AudioPath, "audioaliases.txt"), alias + " " + newFileName + Environment.NewLine);
+
+            await ParentModule.ServiceReplyAsync($"Successfully added aliased song '{alias}'.");
         }
 
         private Process CreateProcess(string path)
