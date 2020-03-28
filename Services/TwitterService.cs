@@ -22,8 +22,9 @@ namespace TerminusDotNetCore.Services
 
         private Random _random = new Random();
 
-        public TwitterService()
+        public TwitterService(IConfiguration config)
         {
+            Config = config;
             string consumerKey = Config["TwitterConsumerKey"];
             string consumerSecret = Config["TwitterConsumerSecret"];
             string token = Config["TwitterAccessToken"];

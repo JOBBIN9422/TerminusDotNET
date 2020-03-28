@@ -18,7 +18,7 @@ namespace TerminusDotNetCore.Modules
         public TwitterModule(IConfiguration config, TwitterService service) : base(config)
         {
             _twitterService = service;
-            _twitterService.Config = config;
+            //_twitterService.Config = config;
             _twitterService.ParentModule = this;
         }
 
