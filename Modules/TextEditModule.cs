@@ -17,6 +17,7 @@ namespace TerminusDotNetCore.Modules
 
         public TextEditModule(IConfiguration config, TextEditService service) : base(config)
         {
+            _textEditService.Config = config;
             _textEditService = service;
             _textEditService.ParentModule = this;
         }
