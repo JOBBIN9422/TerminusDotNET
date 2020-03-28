@@ -34,7 +34,9 @@ namespace TerminusDotNetCore
         //ignored channels
         private List<ulong> _blacklistChannels = new List<ulong>();
 
-        private IConfiguration _config;
+        private IConfiguration _config = new ConfigurationBuilder()
+                                        .AddJsonFile("appsettings.json", true, true)
+                                        .Build();
 
         public async Task Initialize()
         {
@@ -45,11 +47,6 @@ namespace TerminusDotNetCore
             _client = new DiscordSocketClient();
             _client.Log += Log;
             _client.MessageReceived += HandleCommandAsync;
-
-            //init config
-            _config = new ConfigurationBuilder()
-                                        .AddJsonFile("appsettings.json", true, true)
-                                        .Build();
 
             //init client secrets
             IConfiguration secrets = new ConfigurationBuilder()
