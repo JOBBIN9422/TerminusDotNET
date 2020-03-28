@@ -156,19 +156,19 @@ namespace TerminusDotNetCore.Services
                 //init audio stream in voice channel
                 using (var stream = client.Item1.CreatePCMStream(AudioApplication.Music))
                 {
-                    try 
-                    { 
+                    try
+                    {
                         //copy ffmpeg output to the voice channel stream
-                        await _ffmpeg.StandardOutput.BaseStream.CopyToAsync(stream); 
+                        await _ffmpeg.StandardOutput.BaseStream.CopyToAsync(stream);
                     }
-                    finally 
-                    { 
+                    finally
+                    {
                         //clean up ffmpeg, index queue, and set playback state
-                        await stream.FlushAsync(); 
-                        stream.Close(); 
-                        _ffmpeg.Kill(true); 
-                        _playing = false; 
-                        await PlayNextInQueue(guild); 
+                        await stream.FlushAsync();
+                        stream.Close();
+                        _ffmpeg.Kill(true);
+                        _playing = false;
+                        await PlayNextInQueue(guild);
                     }
                 }
             }
@@ -214,7 +214,7 @@ namespace TerminusDotNetCore.Services
                 playlistRequest.PageToken = nextPageToken;
 
                 var searchListResponse = await playlistRequest.ExecuteAsync();
-                
+
                 //iterate over the results and build each video URL
                 foreach (var item in searchListResponse.Items)
                 {
@@ -472,6 +472,26 @@ namespace TerminusDotNetCore.Services
             File.AppendAllText(Path.Combine(AudioPath, "audioaliases.txt"), alias + " " + filename + Environment.NewLine);
         }
 
+        public async Task SaveCurrentSong(string alias)
+        {
+            if (_currentSong == null)
+            {
+                await ParentModule.ServiceReplyAsync("No song is currently playing.");
+                return;
+            }
+            if (string.IsNullOrEmpty(alias))
+            {
+                await ParentModule.ServiceReplyAsync("Please provide a name to alias the song by.");
+                return;
+            }
+
+            //move the temp file to the alias directory
+            File.Copy(_currentSong.Path, Path.Combine(AudioPath, Path.GetFileName(_currentSong.Path)));
+
+            //add the song to the alias file
+            File.AppendAllText(Path.Combine(AudioPath, "audioaliases.txt"), alias + " " + Path.GetFileName(_currentSong.Path) + Environment.NewLine);
+        }
+
         private Process CreateProcess(string path)
         {
             //start an ffmpeg process with stdout redirected 
@@ -661,7 +681,7 @@ namespace TerminusDotNetCore.Services
                 //write the downloaded media file to the temp assets dir
                 videoDataFilename = Path.Combine(tempPath, video.FullName);
                 await File.WriteAllBytesAsync(videoDataFilename, videoData);
-                
+
                 return videoDataFilename;
             }
             catch (Exception ex)

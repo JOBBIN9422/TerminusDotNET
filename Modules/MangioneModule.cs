@@ -263,6 +263,13 @@ namespace TerminusDotNetCore.Modules
             _service.SaveSong(alias, atts);
         }
 
+        [Command("alias", RunMode = RunMode.Async)]
+        [Summary("Store the currently-playing song to the server and give an alias for ease of use in !play commands")]
+        public async Task AddCurrentSong([Summary("alias to use when playing this song in the future")]string alias)
+        {
+            await _service.SaveCurrentSong(alias);
+        }
+
         [Command("availablesongs", RunMode = RunMode.Async)]
         [Summary("Prints the list of song aliases that are available locally")]
         public async Task PrintAvailableSongs()
