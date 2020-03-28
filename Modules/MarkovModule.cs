@@ -15,7 +15,7 @@ namespace TerminusDotNetCore.Modules
     {
         private MarkovService _markovService;
 
-        public MarkovModule(IConfiguration config, MarkovService service) : base(config)
+        public MarkovModule(IConfiguration config, IConfiguration secrets, MarkovService service) : base(config, secrets)
         {
             _markovService = service;
             _markovService.Config = config;
