@@ -404,7 +404,7 @@ namespace TerminusDotNetCore.Services
 
                 if (Client != null)
                 {
-                    await Client.SetGameAsync(Path.GetFileName(nextInQueue.Path));
+                    await Client.SetGameAsync(nextInQueue.DisplayName);
                 }
 
                 //update the currently-playing song and kill the audio process if it's running
