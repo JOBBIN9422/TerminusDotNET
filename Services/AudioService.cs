@@ -485,11 +485,12 @@ namespace TerminusDotNetCore.Services
                 return;
             }
 
-            //move the temp file to the alias directory
-            File.Copy(_currentSong.Path, Path.Combine(AudioPath, Path.GetFileName(_currentSong.Path)));
+            //move the temp file to the alias directory 
+            string newPath = Path.Combine(AudioPath, Path.GetFileName(_currentSong.Path).Replace(" ", string.Empty));
+            File.Copy(_currentSong.Path, newPath);
 
             //add the song to the alias file
-            File.AppendAllText(Path.Combine(AudioPath, "audioaliases.txt"), alias + " " + Path.GetFileName(_currentSong.Path) + Environment.NewLine);
+            File.AppendAllText(Path.Combine(AudioPath, "audioaliases.txt"), alias + " " + Path.GetFileName(newPath) + Environment.NewLine);
         }
 
         private Process CreateProcess(string path)
