@@ -6,6 +6,7 @@ using Discord;
 using TerminusDotNetCore.Modules;
 using System.Threading.Tasks;
 using System.Text;
+using Microsoft.Extensions.Configuration;
 
 namespace TerminusDotNetCore.Services
 {
@@ -53,6 +54,7 @@ namespace TerminusDotNetCore.Services
         public IUser Player2 { get; private set; }
         public IUser NextPlayer { get; private set; }
 
+        public IConfiguration Config { get; set; }
         public ServiceControlModule ParentModule { get; set; }
 
         public void Init(int numRows, int numCols, int winCount, IUser player1, IUser player2)

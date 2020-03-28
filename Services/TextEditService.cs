@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Extensions.Configuration;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using TerminusDotNetCore.Modules;
@@ -7,6 +8,7 @@ namespace TerminusDotNetCore.Services
 {
     public class TextEditService : ICustomService
     {
+        public IConfiguration Config { get; set; }
         public ServiceControlModule ParentModule { get; set; }
 
         private Dictionary<char, char> _wideTextMap = new Dictionary<char, char>();

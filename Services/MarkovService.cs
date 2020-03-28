@@ -7,11 +7,13 @@ using TerminusDotNetCore.Helpers;
 using System.Threading.Tasks;
 using Discord.WebSocket;
 using Discord;
+using Microsoft.Extensions.Configuration;
 
 namespace TerminusDotNetCore.Services
 {
     public class MarkovService : ICustomService
     {
+        public IConfiguration Config { get; set; }
         public ServiceControlModule ParentModule { get; set; }
         private MarkovHelper _clickbaitMarkov = new MarkovHelper(Path.Combine("assets", "clickbait.txt"));
 

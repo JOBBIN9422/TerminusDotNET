@@ -12,12 +12,14 @@ using SixLabors.ImageSharp.Formats.Jpeg;
 using SixLabors.ImageSharp.Formats.Png;
 using System.Numerics;
 using SixLabors.Fonts;
+using Microsoft.Extensions.Configuration;
 
 namespace TerminusDotNetCore.Services
 {
     public class ImageService : ICustomService
     {
         public ServiceControlModule ParentModule { get; set; }
+        public IConfiguration Config { get; set; }
 
         public List<string> DeepfryImages(IReadOnlyCollection<Attachment> attachments, uint numPasses = 1)
         {
