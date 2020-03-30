@@ -544,6 +544,18 @@ namespace TerminusDotNetCore.Services
             _ = ScheduleWeed(guild, channel);
         }
 
+        private string GetEmbedDisplayString(AudioItem item)
+        {
+            string displayName = item.DisplayName;
+            if (item is YouTubeAudioItem)
+            {
+                YouTubeAudioItem currVideo = _currentSong as YouTubeAudioItem;
+                displayName = $"[{currVideo.VideoUrl}]({currVideo.DisplayName})";
+            }
+
+            return displayName;
+        }
+
         public List<Embed> ListQueueContents()
         {
             //need a list of embeds since each embed can only have 25 fields max
@@ -566,7 +578,9 @@ namespace TerminusDotNetCore.Services
             if (_currentSong != null)
             {
                 string songSource = GetAudioSourceString(_currentSong);
-                embed.AddField($"{entryCount + 1}: {_currentSong.DisplayName} **(currently playing)**", songSource);
+                string displayName = GetEmbedDisplayString(_currentSong);
+
+                embed.AddField($"{entryCount + 1}: {displayName} **(currently playing)**", songSource);
             }
 
             foreach (var songItem in _songQueue)
@@ -581,7 +595,8 @@ namespace TerminusDotNetCore.Services
                 }
 
                 //add the current queue item to the song list 
-                string songName = $"**{entryCount + 1}:** {songItem.DisplayName}";
+                string displayName = GetEmbedDisplayString(songItem);
+                string songName = $"**{entryCount + 1}:** {displayName}";
                 string songSource = GetAudioSourceString(songItem);
 
                 embed.AddField(songName, songSource);
