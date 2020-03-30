@@ -10,15 +10,9 @@ using System.Net;
 
 namespace TerminusDotNetCore.Helpers
 {
-    public enum AudioType
-    {
-        Local,
-        YoutubeDownloaded,
-        YoutubeUrl,
-        Attachment
-    }
     
-    public class AudioItem
+    
+    public abstract class AudioItem
     {
         //for local files: the filename. for streamed audio: the youtube URL.
         public string Path { get; set; }
@@ -28,8 +22,5 @@ namespace TerminusDotNetCore.Helpers
         
         //channel ID to play this item in
         public ulong PlayChannelId { get; set; }
-        
-        //where does the audio originate? (local file or streamed from youtube)
-        public AudioType AudioSource { get; set; }
     }
 }

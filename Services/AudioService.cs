@@ -179,11 +179,11 @@ namespace TerminusDotNetCore.Services
             string displayName = Path.GetFileNameWithoutExtension(path);
             if (_weedPlaying)
             {
-                _backupQueue.Enqueue(new AudioItem() { Path = path, PlayChannelId = channelId, AudioSource = AudioType.Local, DisplayName = displayName });
+                _backupQueue.Enqueue(new LocalAudioItem() { Path = path, PlayChannelId = channelId, AudioSource = FileAudioType.Local, DisplayName = displayName });
             }
             else
             {
-                _songQueue.Enqueue(new AudioItem() { Path = path, PlayChannelId = channelId, AudioSource = AudioType.Local, DisplayName = displayName });
+                _songQueue.Enqueue(new LocalAudioItem() { Path = path, PlayChannelId = channelId, AudioSource = FileAudioType.Local, DisplayName = displayName });
                 if (!_playing)
                 {
                     //want to trigger playing next song in queue
@@ -305,11 +305,13 @@ namespace TerminusDotNetCore.Services
             foreach (string url in urls)
             {
                 string displayName = await GetVideoTitleFromUrlAsync(url);
-                AudioItem currVideo = new AudioItem()
+
+                //create the current video item (file path cannot be set until it is downloaded when dequeued)
+                YouTubeAudioItem currVideo = new YouTubeAudioItem()
                 {
-                    Path = url,
+                    VideoUrl = url,
                     PlayChannelId = channelId,
-                    AudioSource = AudioType.YoutubeUrl,
+                    AudioSource = YouTubeAudioType.Url,
                     DisplayName = displayName
                 };
 
@@ -330,23 +332,21 @@ namespace TerminusDotNetCore.Services
             }
         }
 
-        public async Task QueueYoutubeSongPreDownloaded(IGuild guild, string path, ulong channelId)
+        public async Task QueueYoutubeSongPreDownloaded(IGuild guild, string url, ulong channelId)
         {
-            //set metadata for the current audio item
-            AudioType audioType = AudioType.YoutubeDownloaded;
-            string displayName = await GetVideoTitleFromUrlAsync(path);
+            string displayName = await GetVideoTitleFromUrlAsync(url);
 
             //get a local file for the current video
-            path = await DownloadYoutubeVideoAsync(path);
+            string filePath = await DownloadYoutubeVideoAsync(url);
 
             //queue the audio item
             if (_weedPlaying)
             {
-                _backupQueue.Enqueue(new AudioItem() { Path = path, PlayChannelId = channelId, AudioSource = audioType, DisplayName = displayName });
+                _backupQueue.Enqueue(new YouTubeAudioItem() { Path = filePath, VideoUrl = url, PlayChannelId = channelId, AudioSource = YouTubeAudioType.PreDownloaded, DisplayName = displayName });
             }
             else
             {
-                _songQueue.Enqueue(new AudioItem() { Path = path, PlayChannelId = channelId, AudioSource = audioType, DisplayName = displayName });
+                _songQueue.Enqueue(new YouTubeAudioItem() { Path = filePath, VideoUrl = url, PlayChannelId = channelId, AudioSource = YouTubeAudioType.PreDownloaded, DisplayName = displayName });
 
                 if (!_playing)
                 {
@@ -361,13 +361,14 @@ namespace TerminusDotNetCore.Services
             List<string> files = AttachmentHelper.DownloadAttachments(attachments);
             string path = files[0];
             string displayName = Path.GetFileName(path);
+
             if (_weedPlaying)
             {
-                _backupQueue.Enqueue(new AudioItem() { Path = path, PlayChannelId = channelId, AudioSource = AudioType.Attachment, DisplayName = displayName });
+                _backupQueue.Enqueue(new LocalAudioItem() { Path = path, PlayChannelId = channelId, AudioSource = FileAudioType.Attachment, DisplayName = displayName });
             }
             else
             {
-                _songQueue.Enqueue(new AudioItem() { Path = path, PlayChannelId = channelId, AudioSource = AudioType.Attachment, DisplayName = displayName });
+                _songQueue.Enqueue(new LocalAudioItem() { Path = path, PlayChannelId = channelId, AudioSource = FileAudioType.Attachment, DisplayName = displayName });
                 if (!_playing)
                 {
                     //want to trigger playing next song in queue
@@ -382,19 +383,22 @@ namespace TerminusDotNetCore.Services
             if (_songQueue.TryDequeue(out nextInQueue))
             {
                 //need to download if not already saved locally (change the URL to the path of the downloaded file)
-                if (nextInQueue.AudioSource == AudioType.YoutubeUrl)
+                if (nextInQueue is YouTubeAudioItem)
                 {
+                    YouTubeAudioItem nextVideo = nextInQueue as YouTubeAudioItem;
                     try
                     {
-                        await Bot.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"downloading local file for {nextInQueue.Path}..."));
-
-                        nextInQueue.Path = await DownloadYoutubeVideoAsync(nextInQueue.Path);
-
-                        await Bot.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"downloaded local file {nextInQueue.Path}"));
+                        //if the youtube video has not been downloaded yet
+                        if (nextVideo.AudioSource == YouTubeAudioType.Url)
+                        {
+                            await Bot.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"downloading local file for {nextVideo.DisplayName}..."));
+                            nextVideo.Path = await DownloadYoutubeVideoAsync(nextVideo.VideoUrl);
+                            await Bot.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"downloaded local file {nextVideo.Path}"));
+                        }
                     }
                     catch (ArgumentException)
                     {
-                        await Bot.Log(new LogMessage(LogSeverity.Warning, "AudioSvc", $"failed to download local file for {nextInQueue.Path}, skipping..."));
+                        await Bot.Log(new LogMessage(LogSeverity.Warning, "AudioSvc", $"failed to download local file for {nextVideo.DisplayName}, skipping..."));
 
                         //skip this item if the download fails
                         await PlayNextInQueue(guild);
@@ -561,7 +565,7 @@ namespace TerminusDotNetCore.Services
             //add the currently-playing song to the list, if any
             if (_currentSong != null)
             {
-                string songSource = GetAudioSourceString(_currentSong.AudioSource);
+                string songSource = GetAudioSourceString(_currentSong);
                 embed.AddField($"{entryCount + 1}: {_currentSong.DisplayName} **(currently playing)**", songSource);
             }
 
@@ -578,7 +582,7 @@ namespace TerminusDotNetCore.Services
 
                 //add the current queue item to the song list 
                 string songName = $"**{entryCount + 1}:** {songItem.DisplayName}";
-                string songSource = GetAudioSourceString(songItem.AudioSource);
+                string songSource = GetAudioSourceString(songItem);
 
                 embed.AddField(songName, songSource);
             }
@@ -645,26 +649,38 @@ namespace TerminusDotNetCore.Services
             return songList;
         }
 
-        private string GetAudioSourceString(AudioType audioType)
+        private string GetAudioSourceString(AudioItem audioItem)
         {
             string songSource = string.Empty;
-            switch (audioType)
+            if (audioItem is YouTubeAudioItem)
             {
-                case AudioType.Local:
-                    songSource = "Aliased audio file";
-                    break;
-                case AudioType.YoutubeDownloaded:
-                    songSource = "YouTube (pre-downloaded)";
-                    break;
-                case AudioType.YoutubeUrl:
-                    songSource = "YouTube (queued URL)";
-                    break;
-                case AudioType.Attachment:
-                    songSource = "User-attached file";
-                    break;
-                default:
-                    songSource = "Unknown source";
-                    break;
+                YouTubeAudioItem ytAudioItem = audioItem as YouTubeAudioItem;
+                switch (ytAudioItem.AudioSource)
+                {
+                    case YouTubeAudioType.PreDownloaded:
+                        songSource = "YouTube (pre-downloaded)";
+                        break;
+                    case YouTubeAudioType.Url:
+                        songSource = "YouTube (queued URL)";
+                        break;
+                }
+            }
+            else if (audioItem is LocalAudioItem)
+            {
+                LocalAudioItem localAudioItem = audioItem as LocalAudioItem;
+                switch (localAudioItem.AudioSource)
+                {
+                    case FileAudioType.Attachment:
+                        songSource = "User-attached file";
+                        break;
+                    case FileAudioType.Local:
+                        songSource = "Aliased audio file";
+                        break;
+                }
+            }
+            else
+            {
+                songSource = "Unknown source";
             }
             return songSource;
         }
