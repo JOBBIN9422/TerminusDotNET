@@ -4,6 +4,7 @@ using System.Net;
 using System.Net.NetworkInformation;
 using Discord.Commands;
 using TerminusDotNetCore.Services;
+using TerminusDotNetCore.Helpers;
 
 namespace TerminusDotNetCore.Modules
 {
@@ -13,8 +14,10 @@ namespace TerminusDotNetCore.Modules
         [Summary("Pings a server address that must be specified as an argument")]
         public async Task PingAsync([Remainder]string message = null)
         {
+            PingHelper ping_helper = new PingHelper();
+            PingReply reply;            
             IPAddress IP;
-
+            
             //Validates whether argument exists
             if (string.IsNullOrEmpty(message))
             {
@@ -27,7 +30,7 @@ namespace TerminusDotNetCore.Modules
                 //Custom ip for minecraft
                 if (message == "minecraft")
                 {
-                    ip_addr = "98.200.245.252";
+                    ip_addr = ping_helper.GetMinecraftIP();
                 }
                 else
                 {
@@ -42,7 +45,7 @@ namespace TerminusDotNetCore.Modules
                 else
                 {
                     //Ping the specified server
-                    PingReply reply;
+                    
                     reply = PingServer.PingRequest(ip_addr);
 
                     if (reply.Status == IPStatus.Success)
