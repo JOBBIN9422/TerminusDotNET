@@ -6,29 +6,20 @@ using System.Diagnostics;
 using System.Text;
 using System.Threading.Tasks;
 using TerminusDotNetCore.Services;
+using System.Linq;
+using Microsoft.Extensions.Configuration;
 
 namespace TerminusDotNetCore.Modules
 {
-    public class TwitterModule : ModuleBase<SocketCommandContext>, IServiceModule
+    public class TwitterModule : ServiceControlModule
     {
         private TwitterService _twitterService;
 
-        public TwitterModule(TwitterService service)
+        public TwitterModule(IConfiguration config, TwitterService service) : base(config)
         {
+            //do not need to set config for service here (set in twitterSvc constructor via DI)
             _twitterService = service;
             _twitterService.ParentModule = this;
-        }
-
-        public async Task ServiceReplyAsync(string s, EmbedBuilder embedBuilder = null)
-        {
-            if (embedBuilder == null)
-            {
-                await ReplyAsync(s);
-            }
-            else
-            {
-                await ReplyAsync(s, false, embedBuilder.Build());
-            }
         }
 
         [Command("twitter", RunMode = RunMode.Async)]
@@ -50,10 +41,40 @@ namespace TerminusDotNetCore.Modules
             }
         }
 
-        [Command("okboomer", RunMode = RunMode.Async)]
-        public async Task GetBoomerTweet()
+        [Command("tweet", RunMode = RunMode.Async)]
+        public async Task Tweet([Remainder]string tweet = null)
         {
-            string tweet = await _twitterService.SearchTweetRandom("\"boomer memes\" OR \"boomer meme\" OR \"boomer quotes\" OR milennial OR milennials OR genz OR \"gen z\" OR genz OR zoomer");
+            string result = "";
+
+            if (string.IsNullOrEmpty(tweet))
+            {
+                //check for attachments in the current message
+                if (Context.Message.Attachments.Count > 0)
+                {
+                    result = await _twitterService.TweetAsync("", Context.Message.Attachments);
+                }
+
+                //if no attachents or text in the current message
+                else
+                {
+                    //check if the previous message has any text
+                    var messages = await Context.Channel.GetMessagesAsync(2).FlattenAsync();
+                    var priorMessage = messages.Last();
+
+                    result = await _twitterService.TweetAsync(priorMessage.Content, priorMessage.Attachments);
+                }
+            }
+            else
+            {
+                result = await _twitterService.TweetAsync(tweet, Context.Message.Attachments);
+            }
+            await ReplyAsync(result);
+        }
+
+        [Command("notch", RunMode = RunMode.Async)]
+        public async Task GetLastNotchTweet()
+        {
+            string tweet = await _twitterService.GetLastNotchTweet();
             try
             {
                 await ReplyAsync(tweet);

@@ -12,26 +12,15 @@ using Microsoft.Extensions.Configuration.FileExtensions;
 
 namespace TerminusDotNetCore.Modules
 {
-    public class MangioneModule : ModuleBase<SocketCommandContext>, IServiceModule
+    public class MangioneModule : ServiceControlModule
     {
         private AudioService _service;
 
-        public MangioneModule(AudioService service)
+        public MangioneModule(IConfiguration config, AudioService service) : base(config)
         {
+            //do not need to set service config here - passed into audioSvc constructor via DI
             _service = service;
             _service.ParentModule = this;
-        }
-
-        public async Task ServiceReplyAsync(string s, EmbedBuilder embedBuilder = null)
-        {
-            if (embedBuilder == null)
-            {
-                await ReplyAsync(s);
-            }
-            else
-            {
-                await ReplyAsync(s, false, embedBuilder.Build());
-            }
         }
 
         private async Task<IReadOnlyCollection<Attachment>> GetAttachmentsAsync()
@@ -66,17 +55,14 @@ namespace TerminusDotNetCore.Modules
         {
             if( Context != null && Context.Guild != null)
             {
-                _service.setGuildClient(Context.Guild, Context.Client);
+                _service.SetGuildClient(Context.Guild, Context.Client);
             }
             // TODO allow this function to accept mp3 attachments and play those
             //check if channel id is valid and exists
             ulong voiceID;
-            IConfiguration config = new ConfigurationBuilder()
-                                        .AddJsonFile("appsettings.json", true, true)
-                                        .Build();
             if ( channelID.Equals("-1") )
             {
-                voiceID = ulong.Parse(config["AudioChannelId"]);
+                voiceID = ulong.Parse(Config["AudioChannelId"]);
             }
             else
             {
@@ -98,29 +84,32 @@ namespace TerminusDotNetCore.Modules
             //check if path is valid and exists
             // TODO check if file type can be played (mp3, wav, idk what ffmpeg can play)
             bool useFile = false;
-            string path = "assets/";
-            switch ( song )
+            string path = _service.AudioPath;
+            if ( song == "attached" )
             {
-                case "attached":
-                    useFile = true;
+                useFile = true;
+            }
+            foreach ( string line in File.ReadAllLines(Path.Combine(_service.AudioPath, "audioaliases.txt")))
+            {
+                if ( line.StartsWith("#") || String.IsNullOrEmpty(line) )
+                {
+                    continue;
+                }
+                string[] tmp = line.Split(" ");
+                if ( song.Equals(tmp[0]) )
+                {
+                    path = Path.Combine(path, tmp[1]);
                     break;
-                case "mangione1":
-                    path += "feels_so_good.mp3";
-                    break;
-                case "mangione2":
-                    path += "pina_colada.mp3";
-                    break;
-                case "poloski":
-                    path += "poloski.mp3";
-                    break;
-                default:
-                    path += song;
-                    break;
+                }
+            }
+            if ( path.Equals(_service.AudioPath) )
+            {
+                path = Path.Combine(path, song);
             }
             if ( useFile )
             {
                 IReadOnlyCollection<Attachment> atts = await GetAttachmentsAsync();
-                await _service.QueueTempSong(Context.Guild, atts, voiceID, config["FfmpegCommand"]);
+                await _service.QueueTempSong(Context.Guild, Context.Message.Author, atts, voiceID);
             }
             else
             {
@@ -128,28 +117,26 @@ namespace TerminusDotNetCore.Modules
                 if (!File.Exists(path))
                 {
                     await ReplyAsync("File does not exist.");
+                    Console.WriteLine(path);
                     return;
                 }
-                await _service.QueueLocalSong(Context.Guild, path, voiceID, config["FfmpegCommand"]);
+                await _service.QueueLocalSong(Context.Guild, Context.Message.Author, path, voiceID);
             }
         }
 
-        [Command("yt", RunMode = RunMode.Async)]
-        public async Task StreamSong(string url, string channelID = "-1")
+        [Command("search", RunMode = RunMode.Async)]
+        public async Task SearchSong(string searchTerm, string channelID = "-1")
         {
             if (Context != null && Context.Guild != null)
             {
-                _service.setGuildClient(Context.Guild, Context.Client);
+                _service.SetGuildClient(Context.Guild, Context.Client);
             }
-            
+
             //check if channel id is valid and exists
             ulong voiceID;
-            IConfiguration config = new ConfigurationBuilder()
-                                        .AddJsonFile("appsettings.json", true, true)
-                                        .Build();
             if (channelID.Equals("-1"))
             {
-                voiceID = ulong.Parse(config["AudioChannelId"]);
+                voiceID = ulong.Parse(Config["AudioChannelId"]);
             }
             else
             {
@@ -169,17 +156,84 @@ namespace TerminusDotNetCore.Modules
                 return;
             }
 
-            await _service.QueueStreamedSong(Context.Guild, url, voiceID, config["FfmpegCommand"]);
+            await _service.QueueSearchedYoutubeSong(Context.Guild, Context.Message.Author, searchTerm, voiceID);
+        }
+
+        [Command("playlist", RunMode = RunMode.Async)]
+        public async Task AddPlaylist(string playlistUrl, string channelID = "-1")
+        {
+            if (Context != null && Context.Guild != null)
+            {
+                _service.SetGuildClient(Context.Guild, Context.Client);
+            }
+
+            //check if channel id is valid and exists
+            ulong voiceID;
+            if (channelID.Equals("-1"))
+            {
+                voiceID = ulong.Parse(Config["AudioChannelId"]);
+            }
+            else
+            {
+                try
+                {
+                    voiceID = ulong.Parse(channelID);
+                }
+                catch
+                {
+                    await ReplyAsync("Unable to parse channel ID, try letting it use the default");
+                    return;
+                }
+            }
+            if (Context.Guild.GetVoiceChannel(voiceID) == null)
+            {
+                await ReplyAsync("Invalid channel ID, try letting it use the default");
+                return;
+            }
+
+            await _service.QueueYoutubePlaylist(Context.Guild, Context.Message.Author, playlistUrl, voiceID);
+        }
+
+        [Command("yt", RunMode = RunMode.Async)]
+        public async Task StreamSong(string url, string channelID = "-1")
+        {
+            if (Context != null && Context.Guild != null)
+            {
+                _service.SetGuildClient(Context.Guild, Context.Client);
+            }
+            
+            //check if channel id is valid and exists
+            ulong voiceID;
+            if (channelID.Equals("-1"))
+            {
+                voiceID = ulong.Parse(Config["AudioChannelId"]);
+            }
+            else
+            {
+                try
+                {
+                    voiceID = ulong.Parse(channelID);
+                }
+                catch
+                {
+                    await ReplyAsync("Unable to parse channel ID, try letting it use the default");
+                    return;
+                }
+            }
+            if (Context.Guild.GetVoiceChannel(voiceID) == null)
+            {
+                await ReplyAsync("Invalid channel ID, try letting it use the default");
+                return;
+            }
+
+            await _service.QueueYoutubeSongPreDownloaded(Context.Guild, Context.Message.Author, url, voiceID);
         }
 
         [Command("playnext", RunMode = RunMode.Async)]
         [Summary("Play the next item in the song queue, if any.")]
         public async Task PlayNext()
         {
-            IConfiguration config = new ConfigurationBuilder()
-                                        .AddJsonFile("appsettings.json", true, true)
-                                        .Build();
-            await _service.PlayNextInQueue(Context.Guild, config["FfmpegCommand"]);
+            await _service.PlayNextInQueue(Context.Guild);
         }
         
         [Command("songs", RunMode = RunMode.Async)]
@@ -199,6 +253,33 @@ namespace TerminusDotNetCore.Modules
         public async Task KillMusic()
         {
             await _service.StopAllAudio(Context.Guild);
+        }
+
+        [Command("addpersistentsong", RunMode = RunMode.Async)]
+        [Summary("Store an mp3 file to the server and give an alias for ease of use in !play commands")]
+        public async Task AddSong([Summary("alias to use when playing this song in the future")]string alias)
+        {
+            IReadOnlyCollection<Attachment> atts = await GetAttachmentsAsync();
+            _service.SaveSong(alias, atts);
+        }
+
+        [Command("alias", RunMode = RunMode.Async)]
+        [Summary("Store the currently-playing song to the server and give an alias for ease of use in !play commands")]
+        public async Task AddCurrentSong([Summary("alias to use when playing this song in the future")]string alias)
+        {
+            await _service.SaveCurrentSong(alias);
+        }
+
+        [Command("availablesongs", RunMode = RunMode.Async)]
+        [Summary("Prints the list of song aliases that are available locally")]
+        public async Task PrintAvailableSongs()
+        {
+            List<Embed> aliasList = _service.ListAvailableAliases();
+
+            foreach (Embed embed in aliasList)
+            {
+                await ReplyAsync(embed: embed);
+            }
         }
 
     }

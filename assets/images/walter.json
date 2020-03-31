@@ -1,0 +1,19 @@
+{
+  "baseImage": "walter.png",
+  "topLeft": {
+    "x": 77,
+    "y": 227
+  },
+  "topRight": {
+    "x": 540,
+    "y": 120
+  },
+  "bottomLeft": {
+    "x": 73,
+    "y": 651
+  },
+  "bottomRight": {
+    "x": 539,
+    "y": 622
+  }
+}

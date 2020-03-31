@@ -1,4 +1,5 @@
 ﻿using Discord;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,8 +11,9 @@ namespace TerminusDotNetCore.Services
 {
     public interface ICustomService
     {
-        IServiceModule ParentModule { get; set; }
+        //shared config object - set in controlling module constructor (passed via DI)
+        public IConfiguration Config { get; set; }
 
-        //Task ServiceReplyAsync(string s, EmbedBuilder embedBuilder = null);
+        ServiceControlModule ParentModule { get; set; }
     }
 }

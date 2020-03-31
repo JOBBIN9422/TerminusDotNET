@@ -5,15 +5,16 @@ using System.Threading.Tasks;
 
 namespace TerminusDotNetCore.Modules
 {
-    public class GachiModule : ModuleBase<SocketCommandContext>, ITextModule
+    public class GachiModule : TextModule
     {
+        public GachiModule(Random random) : base(random) {}
+        
         [Command("gachi")]
         [Summary("Responds with a random gachimuchi quote.")]
-        public async Task SayAsync()
+        public override async Task SayAsync()
         {
-            var random = new Random();
-            var gachiPastas = File.ReadAllLines(Path.Combine("RandomMessages", "terminus.txt"));
-            await ReplyAsync(gachiPastas[random.Next(gachiPastas.Length)]);
+            var gachiPastas = File.ReadAllLines(Path.Combine("RandomMessages", "gachi.txt"));
+            await ReplyAsync(gachiPastas[_random.Next(gachiPastas.Length)]);
         }
     }
 }

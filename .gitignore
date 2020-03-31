@@ -1,5 +1,8 @@
-appsettings.json
+secrets.json
+youtube-secrets.json
 obj
 bin
 opus.dll
 libsodium.dll
+libvideo.dll
+desktop.ini

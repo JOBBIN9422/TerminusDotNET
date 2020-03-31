@@ -1,0 +1,19 @@
+{
+  "baseImage": "bobross.png",
+  "topLeft": {
+    "x": 24,
+    "y": 72
+  },
+  "topRight": {
+    "x": 451,
+    "y": 91
+  },
+  "bottomLeft": {
+    "x": 23,
+    "y": 388
+  },
+  "bottomRight": {
+    "x": 437,
+    "y": 407
+  }
+}

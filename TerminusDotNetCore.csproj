@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp3.0</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -13,30 +13,33 @@
     <PackageReference Include="Discord.Net" Version="2.1.1" />
     <PackageReference Include="Discord.Net.Webhook" Version="2.1.1" />
     <PackageReference Include="Discord.Net.WebSocket" Version="2.1.1" />
+    <PackageReference Include="Google.Apis.YouTube.v3" Version="1.44.1.1869" />
     <PackageReference Include="linqtotwitter" Version="5.0.0" />
     <PackageReference Include="MathNet.Numerics" Version="4.9.0" />
     <PackageReference Include="MediaToolKit.NetCore" Version="0.1.0-preview" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="3.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="3.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="3.0.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
     <PackageReference Include="SixLabors.ImageSharp" Version="1.0.0-beta0007" />
     <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="1.0.0-beta0007" />
     <PackageReference Include="System.Drawing.Common" Version="4.6.0" />
     <PackageReference Include="System.Windows.Extensions" Version="4.6.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="libvideo">
-      <HintPath>libvideo.dll</HintPath>
-    </Reference>
+    <PackageReference Include="VideoLibrary" Version="3.0.0" />
   </ItemGroup>
 
   <ItemGroup>
     <None Update="appsettings.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="assets\clickbait.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="assets\images\bobross.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="assets\images\bobross.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="assets\images\bobross.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -44,13 +47,37 @@
     <None Update="assets\images\dmc.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="assets\images\don.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="assets\images\GIMP_Pepper.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="assets\images\hank.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="assets\images\hank.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="assets\images\morrowind.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="assets\images\pc.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="assets\images\suicide.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="assets\images\trump.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="assets\images\walter.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="assets\images\walter.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="assets\regex.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="bobross.jpg">
@@ -88,6 +115,12 @@
     </None>
     <None Update="assets/feels_so_good.mp3">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="youtube-secrets.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="secrets.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="suicide.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

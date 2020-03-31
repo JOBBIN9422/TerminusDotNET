@@ -28,7 +28,7 @@ namespace TerminusDotNetCore.Helpers
             ".mp3"
         };
 
-        public async static Task<IReadOnlyCollection<Attachment>> GetAttachmentsAsync(SocketCommandContext context, AttachmentFilter filter)
+        public async static Task<IReadOnlyCollection<Attachment>> GetMostRecentAttachmentsAsync(SocketCommandContext context, AttachmentFilter filter, int priorMsgCount = 20)
         {
             //choose the array containing the proper file extensions to filter by 
             string[] validExtensions = new string[] { };
@@ -51,7 +51,7 @@ namespace TerminusDotNetCore.Helpers
             if (attachments == null || attachments.Count == 0)
             {
                 //check the last 20 messages for attachments (from most recent to oldest)
-                var messages = await context.Channel.GetMessagesAsync(20).FlattenAsync();
+                var messages = await context.Channel.GetMessagesAsync(priorMsgCount).FlattenAsync();
                 foreach (var message in messages)
                 {
                     if (message.Attachments.Count > 0)
@@ -107,7 +107,17 @@ namespace TerminusDotNetCore.Helpers
             return Array.Exists(validExtensions, element => element == extension);
         }
         
-        public static List<string> DownloadAttachments(IReadOnlyCollection<Attachment> attachments)
+        public static List<string> DownloadAttachments(IMessage message)
+        {
+            if (message.Attachments.Count == 0)
+            {
+                throw new ArgumentException("The given message did not have any attachments.");
+            }
+
+            return DownloadAttachments(message.Attachments);
+        }
+
+        public static List<string> DownloadAttachments(IReadOnlyCollection<IAttachment> attachments)
         {
             using (var webClient = new WebClient())
             {
@@ -128,9 +138,25 @@ namespace TerminusDotNetCore.Helpers
             }
         }
 
+        public static string DownloadPersistentAudioAttachment(IAttachment attachment)
+        {
+            using (var webClient = new WebClient())
+            {
+
+                var filename = attachment.Filename;
+                var url = attachment.Url;
+                var fileIdString = System.Guid.NewGuid().ToString("N");
+                    
+                var downloadFilename = Path.Combine("assets", "audio", filename);
+                webClient.DownloadFile(url, downloadFilename);
+
+                return Path.GetFileName(downloadFilename);
+            }
+        }
+
         public static List<string> GetTempAssets(string regex = "*")
         {
-            DirectoryInfo d = new DirectoryInfo(@"assets/temp");//Assuming Test is your Folder
+            DirectoryInfo d = new DirectoryInfo(Path.Combine("assets", "temp"));//Assuming Test is your Folder
             FileInfo[] Files = d.GetFiles(regex); //Getting files based on regex params
             List<string> filePaths = new List<string>();
             foreach(FileInfo file in Files )

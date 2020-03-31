@@ -5,15 +5,16 @@ using System.Threading.Tasks;
 
 namespace TerminusDotNetCore.Modules
 {
-    public class TerminusModule : ModuleBase<SocketCommandContext>, ITextModule
+    public class TerminusModule : TextModule
     {
+        public TerminusModule(Random random) : base(random) {}
+    
         [Command("terminus")]
         [Summary("Have a chat with Terminus :)")]
-        public async Task SayAsync()
+        public override async Task SayAsync()
         {
-            var random = new Random();
             var terminusPastas = File.ReadAllLines(Path.Combine("RandomMessages", "terminus.txt"));
-            await ReplyAsync(terminusPastas[random.Next(terminusPastas.Length)]);
+            await ReplyAsync(terminusPastas[_random.Next(terminusPastas.Length)]);
         }
     }
 }

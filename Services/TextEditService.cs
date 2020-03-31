@@ -1,13 +1,16 @@
-﻿using System;
+﻿using Microsoft.Extensions.Configuration;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using TerminusDotNetCore.Modules;
 
 namespace TerminusDotNetCore.Services
 {
-    public class WideTextService : ICustomService
+    public class TextEditService : ICustomService
     {
-        public IServiceModule ParentModule { get; set; }
+        public IConfiguration Config { get; set; }
+
+        public ServiceControlModule ParentModule { get; set; }
 
         private Dictionary<char, char> _wideTextMap = new Dictionary<char, char>();
 
@@ -25,7 +28,7 @@ namespace TerminusDotNetCore.Services
             }
         }
 
-        public WideTextService()
+        public TextEditService()
         {
             Init();
         }
@@ -49,6 +52,30 @@ namespace TerminusDotNetCore.Services
                 }
             }
             return message;
+        }
+
+        public string ConvertToMemeCase(string message)
+        {
+            string newMsg = "";
+            for (int i = 0; i < message.Length; i++)
+            {
+                if (char.IsLetter(message[i]))
+                {
+                    if (i%2 == 1)
+                    {
+                        newMsg += char.ToUpper(message[i]);
+                    }
+                    else
+                    {
+                        newMsg += char.ToLower(message[i]);
+                    }
+                }
+                else
+                {
+                    newMsg += message[i];
+                }
+            }
+            return newMsg;
         }
     }
 }

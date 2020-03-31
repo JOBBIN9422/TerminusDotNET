@@ -10,11 +10,11 @@ namespace TerminusDotNetCore
 {
     public class RegexCommands
     {
-        private Dictionary<string, string> _regexToMsgMap;
+        private Dictionary<string, Tuple<string, string>> _regexToMsgMap;
 
         public RegexCommands()
         {
-            _regexToMsgMap = new Dictionary<string, string>();
+            _regexToMsgMap = new Dictionary<string, Tuple<string, string>>();
 
             //init regex-message map from file
             using (StreamReader reader = new StreamReader(Path.Combine("assets","regex.txt")))
@@ -23,7 +23,12 @@ namespace TerminusDotNetCore
                 while ((currLine = reader.ReadLine()) != null)
                 {
                     var currLineTokens = currLine.Split('|');
-                    _regexToMsgMap.Add(currLineTokens[0], currLineTokens[1]);
+                    string token3 = "";
+                    if (currLineTokens.Length == 3)
+                    {
+                        token3 = currLineTokens[2];
+                    }
+                    _regexToMsgMap.Add(currLineTokens[0], new Tuple<string, string>(currLineTokens[1], token3));
                 }
             }
         }
@@ -33,15 +38,24 @@ namespace TerminusDotNetCore
         /// </summary>
         /// <param name="message">The input message to parse.</param>
         /// <returns>A list containing the messages for each matched regex.</returns>
-        public List<string> ParseMessage(string message)
+        public List<Tuple<string,string>> ParseMessage(string message)
         {
-            List<string> returnMessages = new List<string>();
+            List<Tuple<string,string>> returnMessages = new List<Tuple<string,string>>();
 
             foreach (var regexString in _regexToMsgMap.Keys)
             {
-                if (Regex.IsMatch(message, regexString, RegexOptions.IgnoreCase))
+                Match match = Regex.Match(message, regexString, RegexOptions.IgnoreCase);
+                if (match.Success)
                 {
-                    returnMessages.Add(_regexToMsgMap[regexString]);
+                    String returnString = _regexToMsgMap[regexString].Item1;
+                    for( int i = 1; match.Groups.Count >= i; i++ )
+                    {
+                        if( returnString.Contains("%s") )
+                        {
+                            returnString = returnString.Replace("%s",match.Groups[i].Value);
+                        }
+                    }
+                    returnMessages.Add(new Tuple<string,string>(returnString,_regexToMsgMap[regexString].Item2));
                 }
             }
 

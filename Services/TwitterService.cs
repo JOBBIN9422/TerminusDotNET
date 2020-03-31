@@ -2,30 +2,34 @@
 using System.Collections.Generic;
 using System.Text;
 using TerminusDotNetCore.Modules;
+using TerminusDotNetCore.Helpers;
 using LinqToTwitter;
 using Microsoft.Extensions.Configuration;
 using System.Threading.Tasks;
 using System.Linq;
 using System.Diagnostics;
+using Discord;
+using System.IO;
 
 namespace TerminusDotNetCore.Services
 {
     public class TwitterService : ICustomService
     {
-        public IServiceModule ParentModule { get; set; }
+        public IConfiguration Config { get; set; }
+        public ServiceControlModule ParentModule { get; set; }
+
         private TwitterContext _twitterContext;
+
         private Random _random = new Random();
 
-        public TwitterService()
+        public TwitterService(IConfiguration config)
         {
-            IConfiguration config = new ConfigurationBuilder()
-                                        .AddJsonFile("appsettings.json", true, true)
-                                        .Build();
+            Config = config;
 
-            string consumerKey = config["TwitterConsumerKey"];
-            string consumerSecret = config["TwitterConsumerSecret"];
-            string token = config["TwitterAccessToken"];
-            string tokenSecret = config["TwitterAccessTokenSecret"];
+            string consumerKey = Config["TwitterConsumerKey"];
+            string consumerSecret = Config["TwitterConsumerSecret"];
+            string token = Config["TwitterAccessToken"];
+            string tokenSecret = Config["TwitterAccessTokenSecret"];
 
             IAuthorizer auth = new SingleUserAuthorizer
             {
@@ -46,7 +50,84 @@ namespace TerminusDotNetCore.Services
             await auth.AuthorizeAsync();
             _twitterContext = new TwitterContext(auth);
         }
+        
+        private async Task<List<Media>> GetMediaFromAttachments(IReadOnlyCollection<IAttachment> attachments)
+        {
+            if (attachments == null || attachments.Count == 0)
+            {
+                return null;
+            }
 
+            List<Media> mediaContent = new List<Media>();
+            var attachmentFiles = AttachmentHelper.DownloadAttachments(attachments);
+
+            try
+            {
+                foreach (var file in attachmentFiles)
+                {
+                    string mediaType = $"image/{Path.GetExtension(file).Replace(".", string.Empty)}";
+                    byte[] fileData = File.ReadAllBytes(file);
+                    var media = await _twitterContext.UploadMediaAsync(fileData, mediaType, "tweet_image");
+
+                    mediaContent.Add(media);
+                    File.Delete(file);
+                }
+
+                return mediaContent;
+            }
+            finally
+            {
+                AttachmentHelper.DeleteFiles(attachmentFiles);
+            }
+        }
+
+        public async Task<string> TweetAsync(string tweetContent, IReadOnlyCollection<IAttachment> attachments = null)
+        {
+            Status tweet = null;
+
+            //get media from message attachments (if any)
+            List<Media> mediaContent = await GetMediaFromAttachments(attachments);
+            if (mediaContent != null)
+            {
+                var mediaIDs = mediaContent.Select(x => x.MediaID);
+                tweet = await _twitterContext.TweetAsync(tweetContent, mediaIDs);
+            }
+            else
+            {
+                //if no media provided, just tweet the text 
+                tweet = await _twitterContext.TweetAsync(tweetContent);
+            }
+            
+            if (tweet != null)
+            {
+                return $"<:succ:501947977435185162>essfully tweeted status:  https://twitter.com/Yeetman04889000/status/{tweet.StatusID}";
+            }
+            else
+            {
+                return "An error occurred while attempting to post the tweet.";
+            }
+        }
+        
+        public async Task<string> GetLastNotchTweet()
+        {
+            var user =
+                await
+                (from tweet in _twitterContext.User
+                 where tweet.Type == UserType.Show &&
+                       tweet.ScreenName == "notch"
+                 select tweet)
+                .SingleOrDefaultAsync();
+
+            if (user != null)
+            {
+                var name = user.ScreenNameResponse;
+                var lastStatus =
+                    user.Status == null ? "No recent tweet(s) found." : user.Status.Text;
+                return lastStatus;
+            }
+            return "No user found.";
+        }
+        
         public async Task<string> SearchTweetRandom(string searchTerm)
         {
             List<Search> userQuery = new List<Search>();

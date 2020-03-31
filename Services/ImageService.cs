@@ -12,14 +12,16 @@ using SixLabors.ImageSharp.Formats.Jpeg;
 using SixLabors.ImageSharp.Formats.Png;
 using System.Numerics;
 using SixLabors.Fonts;
+using Microsoft.Extensions.Configuration;
 
 namespace TerminusDotNetCore.Services
 {
     public class ImageService : ICustomService
     {
-        public IServiceModule ParentModule { get; set; }
+        public ServiceControlModule ParentModule { get; set; }
+        public IConfiguration Config { get; set; }
 
-        public List<string> DeepfryImages(IReadOnlyCollection<Attachment> attachments, int numPasses = 1)
+        public List<string> DeepfryImages(IReadOnlyCollection<Attachment> attachments, uint numPasses = 1)
         {
             var images = AttachmentHelper.DownloadAttachments(attachments);
 
@@ -36,40 +38,11 @@ namespace TerminusDotNetCore.Services
             AttachmentHelper.DeleteFiles(images);
         }
 
-        private void DeepfryImage(string imageFilename, int numPasses = 1)
+        private void DeepfryImage(string imageFilename, uint numPasses = 1)
         {
-            for (int i = 0; i < numPasses; i++)
+            using (var image = ImageHelper.DeepfryImage(imageFilename, numPasses))
             {
-                using (var image = SixLabors.ImageSharp.Image.Load(imageFilename))
-                {
-                    image.Mutate(x => x.Saturate(2.0f)
-                                       .Contrast(2.0f)
-                                       .GaussianSharpen());
-
-                    //try to compress the image based on its file-type
-                    string extenstion = Path.GetExtension(imageFilename);
-                    switch (extenstion)
-                    {
-                        case ".jpeg":
-                        case ".jpg":
-                            image.Save(imageFilename, new JpegEncoder()
-                            {
-                                Quality = 10,
-                            });
-                            break;
-
-                        case ".png":
-                            image.Save(imageFilename, new PngEncoder()
-                            {
-                                CompressionLevel = 9
-                            });
-                            break;
-
-                        default:
-                            image.Save(imageFilename);
-                            break;
-                    }
-                }
+                image.Save(imageFilename);
             }
         }
 
@@ -111,97 +84,28 @@ namespace TerminusDotNetCore.Services
 
         private void MemeCaptionImage(string imageFilename, string topText, string bottomText)
         {
-            using (var image = SixLabors.ImageSharp.Image.Load(imageFilename))
+            using (var image = ImageHelper.MemeCaptionImage(imageFilename, topText, bottomText))
             {
-                //calculate font size based on largest image dimension
-                int fontSize = image.Width > image.Height ? image.Width / 12 : image.Height / 12;
-                SixLabors.Fonts.Font font = SixLabors.Fonts.SystemFonts.CreateFont("Impact", fontSize);
-
-                //compute text render size and font outline size
-                SixLabors.Primitives.SizeF botTextSize = TextMeasurer.Measure(bottomText, new RendererOptions(font));
-                float outlineSize = fontSize / 15.0f;
-
-                //determine top & bottom text location
-                float padding = 10f;
-                float textMaxWidth = image.Width - (padding * 2);
-                SixLabors.Primitives.PointF topLeftLocation = new SixLabors.Primitives.PointF(padding, padding);
-                SixLabors.Primitives.PointF bottomLeftLocation = new SixLabors.Primitives.PointF(padding, image.Height - botTextSize.Height - padding * 2);
-
-                //white brush for text fill and black pen for text outline
-                SixLabors.ImageSharp.Processing.SolidBrush brush = new SixLabors.ImageSharp.Processing.SolidBrush(SixLabors.ImageSharp.Color.White);
-                SixLabors.ImageSharp.Processing.Pen pen = new SixLabors.ImageSharp.Processing.Pen(SixLabors.ImageSharp.Color.Black, outlineSize);
-
-                TextGraphicsOptions options = new TextGraphicsOptions()
-                {
-                    WrapTextWidth = textMaxWidth,
-                    HorizontalAlignment = SixLabors.Fonts.HorizontalAlignment.Center,
-                };
-
-                //render text and save image
-                if (!string.IsNullOrEmpty(topText))
-                {
-                    image.Mutate(x => x.DrawText(options, topText, font, brush, pen, topLeftLocation));
-                }
-                if (!string.IsNullOrEmpty(bottomText))
-                {
-                    image.Mutate(x => x.DrawText(options, bottomText, font, brush, pen, bottomLeftLocation));
-                }
                 image.Save(imageFilename);
             }
         }
 
         private void MorrowindImage(string imageFilename)
         {
-            using (var image = SixLabors.ImageSharp.Image.Load(imageFilename))
-            using (var morrowindImage = SixLabors.ImageSharp.Image.Load(Path.Combine("assets", "images", "morrowind.png")))
+            using (var image = ImageHelper.WatermarkImage(imageFilename, Path.Combine("assets", "images", "morrowind.png"), AnchorPositionMode.Bottom, 10, 0.67))
             {
-                //resize the source image if it's too small to draw the morrowind dialogue on
-                int resizeWidth = image.Width;
-                int resizeHeight = image.Height;
-                while (resizeWidth < morrowindImage.Width || resizeHeight < morrowindImage.Height)
-                {
-                    resizeWidth *= 2;
-                    resizeHeight *= 2;
-                }
-                image.Mutate(x => x.Resize(resizeWidth, resizeHeight));
-
-                //compute the position to draw the morrowind image at (based on its top-left corner)
-                SixLabors.Primitives.Point position = new SixLabors.Primitives.Point(image.Width / 2 - morrowindImage.Width / 2, image.Height - morrowindImage.Height - image.Height / 10);
-
-                image.Mutate(x => x.DrawImage(morrowindImage, position, 1.0f));
                 image.Save(imageFilename);
             }
         }
 
         private void DMCWatermarkImage(string imageFilename)
         {
-            using (var image = SixLabors.ImageSharp.Image.Load(imageFilename))
-            using (var dmcImage = SixLabors.ImageSharp.Image.Load(Path.Combine("assets", "images", "dmc.png")))
+            using (var image = ImageHelper.WatermarkImage(imageFilename, Path.Combine("assets", "images", "dmc.png"), AnchorPositionMode.BottomRight, 10, 0.25))
             {
-                //resize the source image if it's too small to draw the mDMC watermark on
-                int resizeWidth = image.Width;
-                int resizeHeight = image.Height;
-                while (resizeWidth < dmcImage.Width || resizeHeight < dmcImage.Height)
-                {
-                    resizeWidth *= 2;
-                    resizeHeight *= 2;
-                }
-                image.Mutate(x => x.Resize(resizeWidth, resizeHeight));
-
-                //scale the DMC watermark so it's proportional in size to the source image
-                dmcImage.Mutate(x => x.Resize(image.Height / 5, image.Height / 5));
-
-                int paddingHorizontal = image.Width / 10;
-                int paddingVertical   = image.Height / 10;
-
-                //compute the position to draw the morrowind image at (based on its top-left corner)
-                SixLabors.Primitives.Point position = new SixLabors.Primitives.Point(image.Width  - dmcImage.Width - paddingHorizontal, image.Height - dmcImage.Height - paddingVertical);
-
-                image.Mutate(x => x.DrawImage(dmcImage, position, 0.8f));
                 image.Save(imageFilename);
             }
         }
-    
+
 
         public List<string> ThiccImages(IReadOnlyCollection<Attachment> attachments, int thiccCount = 2)
         {
@@ -217,12 +121,8 @@ namespace TerminusDotNetCore.Services
 
         private void ThiccImage(string filename, int thiccCount)
         {
-            using (var image = SixLabors.ImageSharp.Image.Load(filename))
+            using (var image = ImageHelper.ThiccImage(filename, thiccCount))
             {
-                int originalWidth = image.Width;
-                int originalHeight = image.Height;
-
-                image.Mutate(x => x.Resize(thiccCount * originalWidth, image.Height));
                 image.Save(filename);
             }
         }
@@ -241,64 +141,13 @@ namespace TerminusDotNetCore.Services
 
         private void MosaicImage(string filename)
         {
-            //will contain average color of each pepper-sized square of the input image 
-            List<List<System.Drawing.Color>> avgColors = new List<List<System.Drawing.Color>>();
-
-            //will contain the raw image data of the input image 
-            MemoryStream memStream = new MemoryStream();
-
-
-            using (System.Drawing.Bitmap inputImage = new Bitmap(filename))
-            using (Bitmap pepperImage = new Bitmap(Path.Combine("assets", "images", "GIMP_Pepper.png")))
+            using (var image = ImageHelper.MosaicImage(filename, Path.Combine("assets", "images", "GIMP_Pepper.png"), 0.02, 0.5f))
             {
-                //calculate the average RGB value of each pepper-sized cell of the input image 
-                for (int y = 0; y < inputImage.Height; y += pepperImage.Height)
-                {
-                    List<System.Drawing.Color> rowAvgColors = new List<System.Drawing.Color>();
-                    for (int x = 0; x < inputImage.Width; x += pepperImage.Width)
-                    {
-                        rowAvgColors.Add(GetAverageColor(inputImage, x, y, pepperImage.Width, pepperImage.Height));
-                    }
-                    avgColors.Add(rowAvgColors);
-                }
-
-                //draw a pepper blended with the average color for each 'cell' of the source image
-                using (Graphics graphics = Graphics.FromImage(inputImage))
-                {
-                    for (int y = 0; y < avgColors.Count; y++)
-                    {
-                        for (int x = 0; x < avgColors[y].Count; x++)
-                        {
-                            using (System.Drawing.SolidBrush brush = new System.Drawing.SolidBrush(avgColors[y][x]))
-                            {
-                                using (Bitmap blendedPepperImage = new Bitmap(Path.Combine("assets", "images", "GIMP_Pepper.png")))
-                                {
-                                    BlendImage(blendedPepperImage, avgColors[y][x], 0.5);
-                                    graphics.DrawImage(blendedPepperImage, x * pepperImage.Width, y * pepperImage.Height);
-                                }
-                            }
-                        }
-                    }
-                    //dump the modified image data to mem stream
-                    inputImage.Save(memStream, System.Drawing.Imaging.ImageFormat.Jpeg);
-                }
+                image.Save(filename);
             }
-
-            try
-            {
-                using (System.Drawing.Image saveImage = System.Drawing.Image.FromStream(memStream))
-                {
-                    saveImage.Save(filename);
-                }
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine(ex.ToString());
-            }
-
         }
 
-        public List<string> BobRossImages(IReadOnlyCollection<Attachment> attachments, int numTimes = 1)
+        public List<string> BobRossImages(IReadOnlyCollection<Attachment> attachments, uint numTimes = 1)
         {
             var images = AttachmentHelper.DownloadAttachments(attachments);
 
@@ -310,212 +159,161 @@ namespace TerminusDotNetCore.Services
             return images;
         }
 
-        private void BobRossImage(string imageFilename, int numTimes = 1)
+        private void BobRossImage(string imageFilename, uint numTimes = 1)
         {
-            //define projection points for the corners of Bob's happy little canvas
-            SixLabors.Primitives.Point topLeft = new SixLabors.Primitives.Point(24, 72);
-            SixLabors.Primitives.Point topRight = new SixLabors.Primitives.Point(451, 91);
-            SixLabors.Primitives.Point bottomRight = new SixLabors.Primitives.Point(437, 407);
-            SixLabors.Primitives.Point bottomLeft = new SixLabors.Primitives.Point(23, 388);
-
-            
-            for (int i = 0; i < numTimes; i++)
+            for (uint i = 0; i < numTimes; i++)
             {
-                using (var outputImage = ProjectOnto(imageFilename, Path.Combine("assets", "images", "bobross.png"), topLeft, topRight, bottomLeft, bottomRight))
+                using (var image = ImageHelper.ProjectOnto(imageFilename, Path.Combine("assets", "images", "bobross.json")))
                 {
-                    outputImage.Save(imageFilename);
+                    image.Save(imageFilename);
                 }
             }
         }
 
         public string BobRossText(string text)
         {
-            using (var bobRossImage = SixLabors.ImageSharp.Image.Load(Path.Combine("assets", "images", "bobross.png")))
-            using (var textImage = new Image<Rgba32>(1920, 1080))
-            using (var outputImage = new Image<Rgba32>(bobRossImage.Width, bobRossImage.Height))
+            using (var image = ImageHelper.ProjectText(text, Path.Combine("assets", "images", "bobross.json")))
             {
-                //define projection points for the corners of Bob's happy little canvas
-                SixLabors.Primitives.Point topLeft = new SixLabors.Primitives.Point(24, 72);
-                SixLabors.Primitives.Point topRight = new SixLabors.Primitives.Point(451, 91);
-                SixLabors.Primitives.Point bottomRight = new SixLabors.Primitives.Point(437, 407);
-                SixLabors.Primitives.Point bottomLeft = new SixLabors.Primitives.Point(23, 388);
-
-                int fontSize = textImage.Width / 10;
-                SixLabors.Fonts.Font font = SixLabors.Fonts.SystemFonts.CreateFont("Impact", fontSize);
-
-                //determine text location
-                float padding = 10f;
-                float textMaxWidth = textImage.Width - (padding * 2);
-                SixLabors.Primitives.PointF topLeftLocation = new SixLabors.Primitives.PointF(padding, padding * 2);
-
-                //black brush for text fill
-                SixLabors.ImageSharp.Processing.SolidBrush brush = new SixLabors.ImageSharp.Processing.SolidBrush(SixLabors.ImageSharp.Color.Black);
-
-                TextGraphicsOptions options = new TextGraphicsOptions()
-                {
-                    WrapTextWidth = textMaxWidth,
-                    HorizontalAlignment = HorizontalAlignment.Center,
-                };
-
-                textImage.Mutate(x => x.BackgroundColor(SixLabors.ImageSharp.Color.White));
-                textImage.Mutate(x => x.DrawText(options, text, font, brush, topLeftLocation));
-
-                //compute the transformation matrix based on the destination points and apply it to the text image
-                Matrix4x4 transformMat = TransformHelper.ComputeTransformMatrix(textImage.Width, textImage.Height, topLeft, topRight, bottomLeft, bottomRight);
-                textImage.Mutate(x => x.Transform(new ProjectiveTransformBuilder().AppendMatrix(transformMat)));
-                outputImage.Mutate(x => x.DrawImage(textImage, new SixLabors.Primitives.Point(0, 0), 1.0f));
-                outputImage.Mutate(x => x.DrawImage(bobRossImage, 1.0f));
-
                 string outputFilename = $"{Guid.NewGuid().ToString("N")}.jpg";
-                outputImage.Save(outputFilename);
+                image.Save(outputFilename);
 
                 return outputFilename;
             }
         }
 
-        public List<string> PCImages(IReadOnlyCollection<Attachment> attachments)
+        public List<string> PCImages(IReadOnlyCollection<Attachment> attachments, uint numTimes = 1)
         {
             var images = AttachmentHelper.DownloadAttachments(attachments);
 
             foreach (var image in images)
             {
-                PCImage(image);
+                PCImage(image, numTimes);
             }
 
             return images;
         }
 
-        private void PCImage(string imageFilename)
+        private void PCImage(string imageFilename, uint numTimes = 1)
         {
-            //define projection points for the corners of Bob's happy little canvas
-            SixLabors.Primitives.Point topLeft = new SixLabors.Primitives.Point(69, 334);
-            SixLabors.Primitives.Point topRight = new SixLabors.Primitives.Point(335, 292);
-            SixLabors.Primitives.Point bottomRight = new SixLabors.Primitives.Point(432, 579);
-            SixLabors.Primitives.Point bottomLeft = new SixLabors.Primitives.Point(214, 726);
-
-            using (var outputImage = ProjectOnto(imageFilename, Path.Combine("assets", "images", "suicide.png"), topLeft, topRight, bottomLeft, bottomRight))
+            for (uint i = 0; i < numTimes; i++)
             {
-                outputImage.Save(imageFilename);
+                using (var image = ImageHelper.ProjectOnto(imageFilename, Path.Combine("assets", "images", "pc.json")))
+                {
+                    image.Save(imageFilename);
+                }
             }
         }
 
-        public List<string> TrumpImages(IReadOnlyCollection<Attachment> attachments)
+        public string PCText(string text)
+        {
+            using (var image = ImageHelper.ProjectText(text, Path.Combine("assets", "images", "pc.json")))
+            {
+                string outputFilename = $"{Guid.NewGuid().ToString("N")}.jpg";
+                image.Save(outputFilename);
+
+                return outputFilename;
+            }
+        }
+
+        public List<string> WalterImages(IReadOnlyCollection<Attachment> attachments, uint numTimes = 1)
         {
             var images = AttachmentHelper.DownloadAttachments(attachments);
 
             foreach (var image in images)
             {
-                TrumpImage(image);
+                WalterImage(image, numTimes);
             }
 
             return images;
         }
 
-        private void TrumpImage(string imageFilename)
+        public List<string> TrumpImages(IReadOnlyCollection<Attachment> attachments, uint numTimes = 1)
         {
-            //defince projection points for corners of book
-            SixLabors.Primitives.Point topLeft = new SixLabors.Primitives.Point(218, 164);
-            SixLabors.Primitives.Point topRight = new SixLabors.Primitive.Point(366, 164);
-            SixLabors.Primitives.Point bottomRight = new SixLabors.Primitive.Point(368, 361);
-            SixLabors.Primitives.Point bottomLeft = new SixLabors.Primitive.Point(220, 365);
+            var images = AttachmentHelper.DownloadAttachments(attachments);
 
-            using (var outputImage = ProjectOnto(imageFilename, Path.Combine("assets", "images", "trumpalumpagus.jpg"), topLeft, topRight, bottomLeft, bottomRight))
+            foreach (var image in images)
             {
-                outputImage.Save(imageFilename);
-            }
-        }    
-
-        private System.Drawing.Color GetAverageColor(System.Drawing.Bitmap inputImage, int startX, int startY, int width, int height)
-        {
-            //prevent going out of bounds during calculations
-            int maxX = startX + width;
-            int maxY = startY + height;
-            if (startX + width > inputImage.Width)
-            {
-                maxX = inputImage.Width;
-            }
-            if (startY + height > inputImage.Height)
-            {
-                maxY = inputImage.Height;
+                TrumpImage(image, numTimes);
             }
 
-            //average RGB values
-            double red = 0;
-            double blue = 0;
-            double green = 0;
-
-            //how many pixels we've calculated
-            int numPixels = 0;
-
-            for (int y = startY; y < maxY; y++)
-            {
-                for (int x = startX; x < maxX; x++)
-                {
-                    System.Drawing.Color currColor = inputImage.GetPixel(x, y);
-
-                    //sum of squares for each color value
-                    red += currColor.R * currColor.R;
-                    blue += currColor.B * currColor.B;
-                    green += currColor.G * currColor.G;
-
-                    numPixels++;
-                }
-            }
-
-            System.Drawing.Color avgColor = System.Drawing.Color.FromArgb(255,
-                (int)Math.Sqrt(red / numPixels),
-                (int)Math.Sqrt(green / numPixels),
-                (int)Math.Sqrt(blue / numPixels));
-            return avgColor;
+            return images;
         }
 
-        private void BlendImage(Bitmap image, System.Drawing.Color blendColor, double amount)
+        public List<string> HankImages(IReadOnlyCollection<Attachment> attachments, uint numTimes = 1)
         {
-            //blend the argument color into each pixel of the source image 
-            for (int y = 0; y < image.Height; y++)
+            var images = AttachmentHelper.DownloadAttachments(attachments);
+
+            foreach (var image in images)
             {
-                for (int x = 0; x < image.Width; x++)
+                HankImage(image, numTimes);
+            }
+
+            return images;
+        }
+
+        private void TrumpImage(string imageFilename, uint numTimes = 1)
+        {
+            for (uint i = 0; i < numTimes; i++)
+            {
+                using (var image = ImageHelper.ProjectOnto(imageFilename, Path.Combine("assets", "images", "trump.json")))
                 {
-                    System.Drawing.Color blendedColor = BlendColor(image.GetPixel(x, y), blendColor, amount);
-                    image.SetPixel(x, y, blendedColor);
+                    image.Save(imageFilename);
                 }
             }
         }
 
-        private System.Drawing.Color BlendColor(System.Drawing.Color baseColor, System.Drawing.Color blendColor, double amount)
+        public string TrumpText(string text)
         {
-            //blend the argument color into the base color by the given amount
-            byte r = (byte)((blendColor.R * amount) + baseColor.R * (1 - amount));
-            byte g = (byte)((blendColor.G * amount) + baseColor.G * (1 - amount));
-            byte b = (byte)((blendColor.B * amount) + baseColor.B * (1 - amount));
+            using (var image = ImageHelper.ProjectText(text, Path.Combine("assets", "images", "trump.json")))
+            {
+                string outputFilename = $"{Guid.NewGuid().ToString("N")}.jpg";
+                image.Save(outputFilename);
 
-            return System.Drawing.Color.FromArgb(r, g, b);
+                return outputFilename;
+            }
         }
 
-        SixLabors.ImageSharp.Image<Rgba32> ProjectOnto(string projectImageFilename, string baseImageFilename,
-            SixLabors.Primitives.Point topLeft,
-            SixLabors.Primitives.Point topRight,
-            SixLabors.Primitives.Point bottomLeft,
-            SixLabors.Primitives.Point bottomRight)
+        private void WalterImage(string imageFilename, uint numTimes = 1)
         {
-            using (var projectImage = SixLabors.ImageSharp.Image.Load(projectImageFilename))
-            using (var baseImage = SixLabors.ImageSharp.Image.Load(baseImageFilename))
+            for (uint i = 0; i < numTimes; i++)
             {
-                //declare without using statement (need to return this so can't dispose of it)
-                var outputImage = new Image<Rgba32>(baseImage.Width, baseImage.Height);
+                using (var image = ImageHelper.ProjectOnto(imageFilename, Path.Combine("assets", "images", "walter.json")))
+                {
+                    image.Save(imageFilename);
+                }
+            }
+        }
 
-                //compute the transformation matrix based on the destination points and apply it to the input image
-                Matrix4x4 transformMat = TransformHelper.ComputeTransformMatrix(projectImage.Width, projectImage.Height, topLeft, topRight, bottomLeft, bottomRight);
+        public string WalterText(string text)
+        {
+            using (var image = ImageHelper.ProjectText(text, Path.Combine("assets", "images", "walter.json")))
+            {
+                string outputFilename = $"{Guid.NewGuid().ToString("N")}.jpg";
+                image.Save(outputFilename);
 
-                //project the image according to the input points (and realign it to fix any EXIF bugs)
-                projectImage.Mutate(x => x.AutoOrient());
-                projectImage.Mutate(x => x.Transform(new ProjectiveTransformBuilder().AppendMatrix(transformMat)));
+                return outputFilename;
+            }
+        }
 
-                //draw the base image on top of the projected image
-                outputImage.Mutate(x => x.DrawImage(projectImage, 1.0f));
-                outputImage.Mutate(x => x.DrawImage(baseImage, new SixLabors.Primitives.Point(0, 0), 1.0f));
+        private void HankImage(string imageFilename, uint numTimes = 1)
+        {
+            for (uint i = 0; i < numTimes; i++)
+            {
+                using (var image = ImageHelper.ProjectOnto(imageFilename, Path.Combine("assets", "images", "hank.json")))
+                {
+                    image.Save(imageFilename);
+                }
+            }
+        }
 
-                return outputImage;
+        public string HankText(string text)
+        {
+            using (var image = ImageHelper.ProjectText(text, Path.Combine("assets", "images", "hank.json")))
+            {
+                string outputFilename = $"{Guid.NewGuid().ToString("N")}.jpg";
+                image.Save(outputFilename);
+
+                return outputFilename;
             }
         }
     }
