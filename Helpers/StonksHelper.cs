@@ -18,9 +18,6 @@ namespace TerminusDotNetCore.Helpers
             var url = "http://68.201.65.4:1234/get_stock?ticker=" + stock_name;
             byte[] imageBytes = await httpClient.GetByteArrayAsync(url);
 
-            string documentsPath = System.Environment.GetFolderPath(
-                    System.Environment.SpecialFolder.Personal);
-
             string localFilename = "graph.png";
             string localPath = Path.Combine("assets", "images", localFilename);
             File.WriteAllBytes(localPath, imageBytes);

@@ -9,6 +9,7 @@ using System.Net.NetworkInformation;
 using System.Net;
 using Microsoft.Extensions.Configuration;
 using TerminusDotNetCore.Helpers;
+using System.IO;
 
 namespace TerminusDotNetCore.Modules
 {
@@ -24,22 +25,18 @@ namespace TerminusDotNetCore.Modules
         [Command("stonks")]
         public async Task StonksAsync([Summary("Stock acronym for desired company")]string stock_name = null)
         {
-            if (stock_name == null)
+            if (string.IsNullOrEmpty(stock_name))
             {
                 await ServiceReplyAsync("Please add a stock name.");
-                //await ReplyAsync("Please add a stock name.");
                 return;
             }
-            await ServiceReplyAsync("Downloading stock data for " + stock_name);
-            //await ReplyAsync("Downloading stock data for " + stock_name);
+            await ServiceReplyAsync("Downloading stock data for " + stock_name + ".");
             
             await StonksHelper.DownloadImage(stock_name);
 
-            await ServiceReplyAsync("Download Finished");
-            //await ReplyAsync("Download Finished");
+            await ServiceReplyAsync("Download finished.");
 
-            await Context.Channel.SendFileAsync("../../assets/images/graph.png");
-            //await Context.Channel.SendFileAsync("../../assets/images/graph.png");
+            await Context.Channel.SendFileAsync(Path.Combine("assets", "temp", "graph.png"));
         }
 
     }
