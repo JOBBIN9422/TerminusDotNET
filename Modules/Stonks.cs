@@ -4,15 +4,21 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Terminus.Services;
+using TerminusDotNetCore.Services;
 using System.Net.NetworkInformation;
 using System.Net;
-using Terminus.Helpers;
+using Microsoft.Extensions.Configuration;
+using TerminusDotNetCore.Helpers;
 
-namespace Terminus.Modules
+namespace TerminusDotNetCore.Modules
 {
-    public class Stonks : ModuleBase<SocketCommandContext>
+    public class Stonks : ServiceControlModule
     {
+        public Stonks(IConfiguration config) : base(config)
+        {
+
+        }
+
         public object PingSever { get; private set; }
 
         [Command("stonks")]
@@ -20,19 +26,19 @@ namespace Terminus.Modules
         {
             if (stock_name == null)
             {
-                ServiceReplyAysnc("Please add a stock name.");
+                await ServiceReplyAsync("Please add a stock name.");
                 //await ReplyAsync("Please add a stock name.");
                 return;
             }
-            ServiceReplyAysnc("Downloading stock data for " + stock_name);
+            await ServiceReplyAsync("Downloading stock data for " + stock_name);
             //await ReplyAsync("Downloading stock data for " + stock_name);
             
-            await ImageHelper.DownloadImage(stock_name);
+            await StonksHelper.DownloadImage(stock_name);
 
-            ServiceReplyAysnc("Download Finished");
+            await ServiceReplyAsync("Download Finished");
             //await ReplyAsync("Download Finished");
 
-            await SendImage("../../assets/images/graph.png");
+            await Context.Channel.SendFileAsync("../../assets/images/graph.png");
             //await Context.Channel.SendFileAsync("../../assets/images/graph.png");
         }
 

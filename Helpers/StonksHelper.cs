@@ -8,7 +8,7 @@ using System.Net;
 using System.Web;
 using System.IO;
 
-namespace Terminus.Helpers
+namespace TerminusDotNetCore.Helpers
 {
     class StonksHelper
     {
