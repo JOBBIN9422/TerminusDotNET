@@ -13,9 +13,9 @@ using System.IO;
 
 namespace TerminusDotNetCore.Modules
 {
-    public class Stonks : ServiceControlModule
+    public class StonksModule : ServiceControlModule
     {
-        public Stonks(IConfiguration config) : base(config)
+        public StonksModule(IConfiguration config) : base(config)
         {
 
         }

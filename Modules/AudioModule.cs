@@ -12,11 +12,11 @@ using Microsoft.Extensions.Configuration.FileExtensions;
 
 namespace TerminusDotNetCore.Modules
 {
-    public class MangioneModule : ServiceControlModule
+    public class AudioModule : ServiceControlModule
     {
         private AudioService _service;
 
-        public MangioneModule(IConfiguration config, AudioService service) : base(config)
+        public AudioModule(IConfiguration config, AudioService service) : base(config)
         {
             //do not need to set service config here - passed into audioSvc constructor via DI
             _service = service;
