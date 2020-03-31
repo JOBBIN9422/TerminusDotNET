@@ -174,16 +174,16 @@ namespace TerminusDotNetCore.Services
             }
         }
 
-        public async Task QueueLocalSong(IGuild guild, string path, ulong channelId)
+        public async Task QueueLocalSong(IGuild guild, SocketUser owner, string path, ulong channelId)
         {
             string displayName = Path.GetFileNameWithoutExtension(path);
             if (_weedPlaying)
             {
-                _backupQueue.Enqueue(new LocalAudioItem() { Path = path, PlayChannelId = channelId, AudioSource = FileAudioType.Local, DisplayName = displayName });
+                _backupQueue.Enqueue(new LocalAudioItem() { Path = path, PlayChannelId = channelId, AudioSource = FileAudioType.Local, DisplayName = displayName, Owner = owner });
             }
             else
             {
-                _songQueue.Enqueue(new LocalAudioItem() { Path = path, PlayChannelId = channelId, AudioSource = FileAudioType.Local, DisplayName = displayName });
+                _songQueue.Enqueue(new LocalAudioItem() { Path = path, PlayChannelId = channelId, AudioSource = FileAudioType.Local, DisplayName = displayName, Owner = owner });
                 if (!_playing)
                 {
                     //want to trigger playing next song in queue
@@ -192,7 +192,7 @@ namespace TerminusDotNetCore.Services
             }
         }
 
-        public async Task QueueYoutubePlaylist(IGuild guild, string playlistURL, ulong channelId)
+        public async Task QueueYoutubePlaylist(IGuild guild, SocketUser owner, string playlistURL, ulong channelId)
         {
             //check if the given URL refers to a youtube playlist
             if (!PlaylistUrlIsValid(playlistURL))
@@ -227,7 +227,7 @@ namespace TerminusDotNetCore.Services
             }
 
             //add the list of URLs to the queue for downloading during playback
-            await QueueYoutubeURLs(videoUrls, guild, channelId);
+            await QueueYoutubeURLs(videoUrls, guild, owner, channelId);
         }
 
         private static bool PlaylistUrlIsValid(string url)
@@ -269,7 +269,7 @@ namespace TerminusDotNetCore.Services
             return title;
         }
 
-        public async Task QueueSearchedYoutubeSong(IGuild guild, string searchTerm, ulong channelId)
+        public async Task QueueSearchedYoutubeSong(IGuild guild, SocketUser owner, string searchTerm, ulong channelId)
         {
             var searchListRequest = _ytService.Search.List("snippet");
             searchListRequest.Q = searchTerm;
@@ -284,7 +284,7 @@ namespace TerminusDotNetCore.Services
 
                 try
                 {
-                    await QueueYoutubeSongPreDownloaded(guild, url, channelId);
+                    await QueueYoutubeSongPreDownloaded(guild, owner, url, channelId);
 
                     //if we successfully download and queue a song, exit this loop and return
                     return;
@@ -299,7 +299,7 @@ namespace TerminusDotNetCore.Services
             await ParentModule.ServiceReplyAsync($"No videos were successfully downloaded for the search term '{searchTerm}'.");
         }
 
-        private async Task QueueYoutubeURLs(List<string> urls, IGuild guild, ulong channelId)
+        private async Task QueueYoutubeURLs(List<string> urls, IGuild guild, SocketUser owner, ulong channelId)
         {
             //enqueue all of the URLs before starting playback 
             foreach (string url in urls)
@@ -312,7 +312,8 @@ namespace TerminusDotNetCore.Services
                     VideoUrl = url,
                     PlayChannelId = channelId,
                     AudioSource = YouTubeAudioType.Url,
-                    DisplayName = displayName
+                    DisplayName = displayName,
+                    Owner = owner
                 };
 
                 if (_weedPlaying)
@@ -332,7 +333,7 @@ namespace TerminusDotNetCore.Services
             }
         }
 
-        public async Task QueueYoutubeSongPreDownloaded(IGuild guild, string url, ulong channelId)
+        public async Task QueueYoutubeSongPreDownloaded(IGuild guild, SocketUser owner, string url, ulong channelId)
         {
             string displayName = await GetVideoTitleFromUrlAsync(url);
 
@@ -342,11 +343,11 @@ namespace TerminusDotNetCore.Services
             //queue the audio item
             if (_weedPlaying)
             {
-                _backupQueue.Enqueue(new YouTubeAudioItem() { Path = filePath, VideoUrl = url, PlayChannelId = channelId, AudioSource = YouTubeAudioType.PreDownloaded, DisplayName = displayName });
+                _backupQueue.Enqueue(new YouTubeAudioItem() { Path = filePath, VideoUrl = url, PlayChannelId = channelId, AudioSource = YouTubeAudioType.PreDownloaded, DisplayName = displayName, Owner = owner });
             }
             else
             {
-                _songQueue.Enqueue(new YouTubeAudioItem() { Path = filePath, VideoUrl = url, PlayChannelId = channelId, AudioSource = YouTubeAudioType.PreDownloaded, DisplayName = displayName });
+                _songQueue.Enqueue(new YouTubeAudioItem() { Path = filePath, VideoUrl = url, PlayChannelId = channelId, AudioSource = YouTubeAudioType.PreDownloaded, DisplayName = displayName, Owner = owner });
 
                 if (!_playing)
                 {
@@ -356,7 +357,7 @@ namespace TerminusDotNetCore.Services
             }
         }
 
-        public async Task QueueTempSong(IGuild guild, IReadOnlyCollection<Attachment> attachments, ulong channelId)
+        public async Task QueueTempSong(IGuild guild, SocketUser owner, IReadOnlyCollection<Attachment> attachments, ulong channelId)
         {
             List<string> files = AttachmentHelper.DownloadAttachments(attachments);
             string path = files[0];
@@ -364,11 +365,11 @@ namespace TerminusDotNetCore.Services
 
             if (_weedPlaying)
             {
-                _backupQueue.Enqueue(new LocalAudioItem() { Path = path, PlayChannelId = channelId, AudioSource = FileAudioType.Attachment, DisplayName = displayName });
+                _backupQueue.Enqueue(new LocalAudioItem() { Path = path, PlayChannelId = channelId, AudioSource = FileAudioType.Attachment, DisplayName = displayName, Owner = owner });
             }
             else
             {
-                _songQueue.Enqueue(new LocalAudioItem() { Path = path, PlayChannelId = channelId, AudioSource = FileAudioType.Attachment, DisplayName = displayName });
+                _songQueue.Enqueue(new LocalAudioItem() { Path = path, PlayChannelId = channelId, AudioSource = FileAudioType.Attachment, DisplayName = displayName, Owner = owner });
                 if (!_playing)
                 {
                     //want to trigger playing next song in queue

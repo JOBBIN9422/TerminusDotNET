@@ -109,7 +109,7 @@ namespace TerminusDotNetCore.Modules
             if ( useFile )
             {
                 IReadOnlyCollection<Attachment> atts = await GetAttachmentsAsync();
-                await _service.QueueTempSong(Context.Guild, atts, voiceID);
+                await _service.QueueTempSong(Context.Guild, Context.Message.Author, atts, voiceID);
             }
             else
             {
@@ -120,7 +120,7 @@ namespace TerminusDotNetCore.Modules
                     Console.WriteLine(path);
                     return;
                 }
-                await _service.QueueLocalSong(Context.Guild, path, voiceID);
+                await _service.QueueLocalSong(Context.Guild, Context.Message.Author, path, voiceID);
             }
         }
 
@@ -156,7 +156,7 @@ namespace TerminusDotNetCore.Modules
                 return;
             }
 
-            await _service.QueueSearchedYoutubeSong(Context.Guild, searchTerm, voiceID);
+            await _service.QueueSearchedYoutubeSong(Context.Guild, Context.Message.Author, searchTerm, voiceID);
         }
 
         [Command("playlist", RunMode = RunMode.Async)]
@@ -191,7 +191,7 @@ namespace TerminusDotNetCore.Modules
                 return;
             }
 
-            await _service.QueueYoutubePlaylist(Context.Guild, playlistUrl, voiceID);
+            await _service.QueueYoutubePlaylist(Context.Guild, Context.Message.Author, playlistUrl, voiceID);
         }
 
         [Command("yt", RunMode = RunMode.Async)]
@@ -226,7 +226,7 @@ namespace TerminusDotNetCore.Modules
                 return;
             }
 
-            await _service.QueueYoutubeSongPreDownloaded(Context.Guild, url, voiceID);
+            await _service.QueueYoutubeSongPreDownloaded(Context.Guild, Context.Message.Author, url, voiceID);
         }
 
         [Command("playnext", RunMode = RunMode.Async)]

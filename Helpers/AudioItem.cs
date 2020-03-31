@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
+using Discord.WebSocket;
 
 namespace TerminusDotNetCore.Helpers
 {
@@ -14,7 +15,7 @@ namespace TerminusDotNetCore.Helpers
     
     public abstract class AudioItem
     {
-        //for local files: the filename. for streamed audio: the youtube URL.
+        //the local path to the audio file
         public string Path { get; set; }
 
         //a human-readable name (may be different from its file path)
@@ -22,5 +23,8 @@ namespace TerminusDotNetCore.Helpers
         
         //channel ID to play this item in
         public ulong PlayChannelId { get; set; }
+
+        //the person who added this item to the queue
+        public SocketUser Owner { get; set; }
     }
 }
