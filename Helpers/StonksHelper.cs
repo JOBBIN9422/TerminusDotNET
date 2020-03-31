@@ -12,7 +12,7 @@ namespace TerminusDotNetCore.Helpers
 {
     class StonksHelper
     {
-        public static async Task DownloadImage(string stock_name)
+        public static async Task<string> DownloadImage(string stock_name)
         {
             var httpClient = new HttpClient();
             var url = "http://68.201.65.4:1234/get_stock?ticker=" + stock_name;
@@ -21,6 +21,8 @@ namespace TerminusDotNetCore.Helpers
             string localFilename = "graph.png";
             string localPath = Path.Combine("assets", "images", localFilename);
             File.WriteAllBytes(localPath, imageBytes);
+
+            return localPath;
         }
     }
 }

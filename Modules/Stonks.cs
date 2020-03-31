@@ -32,11 +32,11 @@ namespace TerminusDotNetCore.Modules
             }
             await ServiceReplyAsync("Downloading stock data for " + stock_name + ".");
             
-            await StonksHelper.DownloadImage(stock_name);
+            string graphImgPath = await StonksHelper.DownloadImage(stock_name);
 
             await ServiceReplyAsync("Download finished.");
 
-            await Context.Channel.SendFileAsync(Path.Combine("assets", "temp", "graph.png"));
+            await Context.Channel.SendFileAsync(graphImgPath);
         }
 
     }
