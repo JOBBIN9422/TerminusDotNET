@@ -673,10 +673,10 @@ namespace TerminusDotNetCore.Services
                 switch (ytAudioItem.AudioSource)
                 {
                     case YouTubeAudioType.PreDownloaded:
-                        songSource = "YouTube (pre-downloaded)";
+                        songSource = $"[{ytAudioItem.VideoUrl}](YouTube (pre-downloaded))";
                         break;
                     case YouTubeAudioType.Url:
-                        songSource = "YouTube (queued URL)";
+                        songSource = $"[{ytAudioItem.VideoUrl}](YouTube (queued URL))";
                         break;
                 }
             }
