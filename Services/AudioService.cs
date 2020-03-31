@@ -683,6 +683,12 @@ namespace TerminusDotNetCore.Services
             {
                 songSource = "Unknown source";
             }
+
+            if (audioItem.Owner != null)
+            {
+                songSource = $"{songSource} // added by {audioItem.Owner.Username}";
+            }
+
             return songSource;
         }
 
