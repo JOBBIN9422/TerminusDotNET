@@ -550,7 +550,7 @@ namespace TerminusDotNetCore.Services
             if (item is YouTubeAudioItem)
             {
                 YouTubeAudioItem currVideo = _currentSong as YouTubeAudioItem;
-                displayName = $"[{currVideo.VideoUrl}]({currVideo.DisplayName})";
+                displayName = $"[{currVideo.DisplayName}]({currVideo.VideoUrl})";
             }
 
             return displayName;
@@ -673,10 +673,10 @@ namespace TerminusDotNetCore.Services
                 switch (ytAudioItem.AudioSource)
                 {
                     case YouTubeAudioType.PreDownloaded:
-                        songSource = $"[{ytAudioItem.VideoUrl}](pre-downloaded YouTube audio)";
+                        songSource = $"pre-downloaded YouTube audio";
                         break;
                     case YouTubeAudioType.Url:
-                        songSource = $"[{ytAudioItem.VideoUrl}](queued YouTube download)";
+                        songSource = $"queued YouTube download";
                         break;
                 }
             }
