@@ -237,13 +237,13 @@ namespace TerminusDotNetCore.Services
 
         private static string GetPlaylistIdFromUrl(string url)
         {
-            string Id = Regex.Match(url, "list=.+").Value.Replace("list=", string.Empty);
+            string Id = Regex.Match(url, "(?<=list=).+").Value;
             return Id;
         }
 
         private static string GetVideoIdFromUrl(string url)
         {
-            string Id = Regex.Match(url, "v=.[A-Za-z0-9-_]+").Value.Replace("v=", string.Empty);
+            string Id = Regex.Match(url, "(?<=v=)[\w-]+").Value;
             return Id;
         }
 
