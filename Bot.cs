@@ -28,9 +28,6 @@ namespace TerminusDotNetCore
         //command services
         private IServiceProvider _serviceProvider;
 
-        //bot state flag
-        private bool _isActive = true;
-
         public bool IsRegexActive { get; set; } = true;
 
         //ignored channels
@@ -64,7 +61,7 @@ namespace TerminusDotNetCore
                 {"AudioChannelId", "ID of main audio channel to play audio in"},
                 {"WeedChannelId", "ID of weed sesh audio channel"}
             };
-            
+
             //alert in console for each missing config field
             foreach (var configEntry in requiredConfigs)
             {
@@ -139,35 +136,32 @@ namespace TerminusDotNetCore
         private async Task HandleCommandAsync(SocketMessage messageParam)
         {
             var message = messageParam as SocketUserMessage;
-            
+
             //don't act in blacklisted channels
             if (message == null || _blacklistChannels.Contains(message.Channel.Id))
             {
                 return;
             }
 
-            if (_isActive)
+            //track position of command prefix char 
+            int argPos = 0;
+
+            //look for regex matches and reply if any are found
+            if (IsRegexActive)
             {
-                //track position of command prefix char 
-                int argPos = 0;
-
-                //look for regex matches and reply if any are found
-                if (IsRegexActive)
-                {
-                    await HandleRegexResponses(message);
-                }
-
-                //check if message is not command or not sent by bot
-                if (!(message.HasCharPrefix('!', ref argPos) || message.HasMentionPrefix(_client.CurrentUser, ref argPos))
-                || message.Author.IsBot)
-                {
-                    return;
-                }
-
-                //handle commands
-                var context = new SocketCommandContext(_client, message);
-                var commandResult = await _commandService.ExecuteAsync(context: context, argPos: argPos, services: _serviceProvider);
+                await HandleRegexResponses(message);
             }
+
+            //check if message is not command or not sent by bot
+            if (!(message.HasCharPrefix('!', ref argPos) || message.HasMentionPrefix(_client.CurrentUser, ref argPos))
+            || message.Author.IsBot)
+            {
+                return;
+            }
+
+            //handle commands
+            var context = new SocketCommandContext(_client, message);
+            var commandResult = await _commandService.ExecuteAsync(context: context, argPos: argPos, services: _serviceProvider);
         }
 
         private async Task OnCommandExecutedAsync(Optional<CommandInfo> command, ICommandContext context, IResult result)
@@ -180,7 +174,7 @@ namespace TerminusDotNetCore
                     await context.Channel.SendMessageAsync(result.ErrorReason);
                     await Log(new LogMessage(LogSeverity.Error, "CommandExecution", $"Error in command '{command.Value.Name}': {execResult.ErrorReason}"));
                     await Log(new LogMessage(LogSeverity.Error, "CommandExecution", $"Exception details (see errors.txt): {execResult.Exception.StackTrace}"));
-                
+
                     //dump exception details to error log
                     using (StreamWriter writer = new StreamWriter("errors.txt", true))
                     {
@@ -220,35 +214,12 @@ namespace TerminusDotNetCore
                              .AddSingleton<TicTacToeService>()
                              .AddSingleton(new Random())
                              .AddSingleton(this);
-                             
+
             //serviceCollection.AddSingleton<WideTextService>();
 
             return serviceCollection.BuildServiceProvider();
         }
 
-        public async Task DisableBot(SocketUserMessage message)
-        {
-            //disable the bot and set the status to idle
-            _isActive = false;
-            await message.Channel.SendMessageAsync("aight, I'm finna head out...");
-            await _client.SetStatusAsync(UserStatus.Idle);
-            await Log(new LogMessage(LogSeverity.Info, "HandleCommand", $"Going to sleep..."));
-        }
-        
-        public async Task EnableBot(SocketUserMessage message)
-        {
-            //only respond if we're actually asleep
-            if (!_isActive)
-            {
-                await message.Channel.SendMessageAsync("real shit?");
-            }
-               
-            //re-enable the bot and set status accordingly
-            _isActive = true;
-            await _client.SetStatusAsync(UserStatus.Online);
-            await Log(new LogMessage(LogSeverity.Info, "HandleCommand", $"Resuming..."));
-        }
-        
         //check the given message for regex matches and send responses accordingly
         private async Task HandleRegexResponses(SocketUserMessage message)
         {
@@ -258,9 +229,9 @@ namespace TerminusDotNetCore
             {
                 return;
             }
-            
+
             //look for wildcards in the current message 
-            List<Tuple<string,string>> matches = _regexMsgParser.ParseMessage(message.Content);
+            List<Tuple<string, string>> matches = _regexMsgParser.ParseMessage(message.Content);
 
             //respond for each matching regex
             if (matches.Count > 0 && !message.Author.IsBot)

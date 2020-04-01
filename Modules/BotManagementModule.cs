@@ -19,18 +19,6 @@ namespace TerminusDotNetCore.Modules
             Config = config;
         }
 
-        [Command("die")]
-        public async Task KillBot()
-        {
-            await _bot.DisableBot(Context.Message);
-        }
-
-        [Command("live")]
-        public async Task ResurrectBot()
-        {
-            await _bot.EnableBot(Context.Message);
-        }
-
         [Command("regex")]
         public async Task SetRegexState(string state = null)
         {
