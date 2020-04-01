@@ -24,7 +24,10 @@ namespace TerminusDotNetCore.Modules
         {
             if (string.IsNullOrEmpty(state))
             {
-                await ReplyAsync("Please provide a state argument (e.g. on/off).");
+                //treat the command as a query if no setting is provided
+                string regexState = _bot.IsRegexActive ? "enabled" : "disabled";
+                await ReplyAsync($"Regex responses are currently {regexState}.");
+                return;
             }
             state = state.ToLower();
 
