@@ -15,7 +15,7 @@ using Microsoft.Extensions.Configuration.FileExtensions;
 
 namespace TerminusDotNetCore
 {
-    class Bot
+    public class Bot
     {
         //for detecting regex matches in messages
         private RegexCommands _regexMsgParser;
@@ -29,7 +29,9 @@ namespace TerminusDotNetCore
         private IServiceProvider _serviceProvider;
 
         //bot state flag
-        private bool _isActive = true;
+        public bool IsActive { get; set; } = true;
+
+        public bool IsRegexActive { get; set; } = true;
 
         //ignored channels
         private List<ulong> _blacklistChannels = new List<ulong>();
@@ -153,7 +155,7 @@ namespace TerminusDotNetCore
             {
                 await EnableBot(message);
             }
-            else if (_isActive)
+            else if (IsActive)
             {
                 //track position of command prefix char 
                 int argPos = 0;
@@ -232,7 +234,7 @@ namespace TerminusDotNetCore
         private async Task DisableBot(SocketUserMessage message)
         {
             //disable the bot and set the status to idle
-            _isActive = false;
+            IsActive = false;
             await message.Channel.SendMessageAsync("aight, I'm finna head out...");
             await _client.SetStatusAsync(UserStatus.Idle);
             await Log(new LogMessage(LogSeverity.Info, "HandleCommand", $"Going to sleep..."));
@@ -241,13 +243,13 @@ namespace TerminusDotNetCore
         private async Task EnableBot(SocketUserMessage message)
         {
             //only respond if we're actually asleep
-            if (!_isActive)
+            if (!IsActive)
             {
                 await message.Channel.SendMessageAsync("real shit?");
             }
                
             //re-enable the bot and set status accordingly
-            _isActive = true;
+            IsActive = true;
             await _client.SetStatusAsync(UserStatus.Online);
             await Log(new LogMessage(LogSeverity.Info, "HandleCommand", $"Resuming..."));
         }
