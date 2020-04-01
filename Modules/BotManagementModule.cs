@@ -20,15 +20,15 @@ namespace TerminusDotNetCore.Modules
         }
 
         [Command("die")]
-        public void KillBot()
+        public async Task KillBot()
         {
-            _bot.IsActive = false;
+            await _bot.DisableBot(Context.Message);
         }
 
         [Command("live")]
-        public void ResurrectBot()
+        public async Task ResurrectBot()
         {
-            _bot.IsActive = true;
+            await _bot.EnableBot(Context.Message);
         }
 
         [Command("regex")]
@@ -43,10 +43,12 @@ namespace TerminusDotNetCore.Modules
             if (state == "off" || state == "n" || state == "no" || state == "disabled")
             {
                 _bot.IsRegexActive = false;
+                await ReplyAsync("Disabled regex responses.");
             }
             else if (state == "on" || state == "y" || state == "yes" || state == "enabled")
             {
                 _bot.IsRegexActive = true;
+                await ReplyAsync("Enabled regex responses.");
             }
             else
             {

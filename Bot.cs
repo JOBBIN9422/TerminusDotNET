@@ -29,7 +29,7 @@ namespace TerminusDotNetCore
         private IServiceProvider _serviceProvider;
 
         //bot state flag
-        public bool IsActive { get; set; } = true;
+        private bool _isActive = true;
 
         public bool IsRegexActive { get; set; } = true;
 
@@ -146,22 +146,16 @@ namespace TerminusDotNetCore
                 return;
             }
 
-            //check for bot state pseudo-commands 
-            if (message.Content == "!die")
-            {
-                await DisableBot(message);
-            }
-            else if (message.Content == "!live")
-            {
-                await EnableBot(message);
-            }
-            else if (IsActive)
+            if (_isActive)
             {
                 //track position of command prefix char 
                 int argPos = 0;
 
                 //look for regex matches and reply if any are found
-                await HandleRegexResponses(message);
+                if (IsRegexActive)
+                {
+                    await HandleRegexResponses(message);
+                }
 
                 //check if message is not command or not sent by bot
                 if (!(message.HasCharPrefix('!', ref argPos) || message.HasMentionPrefix(_client.CurrentUser, ref argPos))
@@ -231,25 +225,25 @@ namespace TerminusDotNetCore
             return serviceCollection.BuildServiceProvider();
         }
 
-        private async Task DisableBot(SocketUserMessage message)
+        public async Task DisableBot(SocketUserMessage message)
         {
             //disable the bot and set the status to idle
-            IsActive = false;
+            _isActive = false;
             await message.Channel.SendMessageAsync("aight, I'm finna head out...");
             await _client.SetStatusAsync(UserStatus.Idle);
             await Log(new LogMessage(LogSeverity.Info, "HandleCommand", $"Going to sleep..."));
         }
         
-        private async Task EnableBot(SocketUserMessage message)
+        public async Task EnableBot(SocketUserMessage message)
         {
             //only respond if we're actually asleep
-            if (!IsActive)
+            if (!_isActive)
             {
                 await message.Channel.SendMessageAsync("real shit?");
             }
                
             //re-enable the bot and set status accordingly
-            IsActive = true;
+            _isActive = true;
             await _client.SetStatusAsync(UserStatus.Online);
             await Log(new LogMessage(LogSeverity.Info, "HandleCommand", $"Resuming..."));
         }
