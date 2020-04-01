@@ -218,7 +218,8 @@ namespace TerminusDotNetCore
                              .AddSingleton<AudioService>()
                              .AddSingleton<MarkovService>()
                              .AddSingleton<TicTacToeService>()
-                             .AddSingleton(new Random());
+                             .AddSingleton(new Random())
+                             .AddSingleton(this);
                              
             //serviceCollection.AddSingleton<WideTextService>();
 
