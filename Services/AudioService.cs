@@ -49,6 +49,7 @@ namespace TerminusDotNetCore.Services
         {
             Formatting = Formatting.None,
             TypeNameHandling = TypeNameHandling.All,
+            ReferenceLoopHandling = ReferenceLoopHandling.Serialize,
             PreserveReferencesHandling = PreserveReferencesHandling.Objects
         };
 
