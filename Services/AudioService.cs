@@ -443,7 +443,7 @@ namespace TerminusDotNetCore.Services
             }
         }
 
-        public async Task LoadQueueContents()
+        public async Task LoadQueueContents(IGuild guild)
         {
             string queueFilename = Path.Combine(AudioPath, "backup", "queue-contents.json");
             if (!File.Exists(queueFilename))
@@ -464,6 +464,11 @@ namespace TerminusDotNetCore.Services
                     AudioItem currItem = JsonConvert.DeserializeObject<AudioItem>(currLine, JSON_SETTINGS);
                     _songQueue.Enqueue(currItem);
                 }
+            }
+
+            if (!_playing)
+            {
+                await PlayNextInQueue(guild);
             }
         }
 

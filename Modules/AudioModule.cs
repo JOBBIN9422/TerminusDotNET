@@ -282,5 +282,18 @@ namespace TerminusDotNetCore.Modules
             }
         }
 
+        [Command("save", RunMode = RunMode.Async)]
+        [Summary("Saves the queue contents (if any) to file.")]
+        public async Task SaveQueueContents()
+        {
+            await _service.SaveQueueContents();
+        }
+
+        [Command("load", RunMode = RunMode.Async)]
+        [Summary("Loads the queue contents (if any) from file.")]
+        public async Task LoadQueueContents()
+        {
+            await _service.LoadQueueContents(Context.Guild);
+        }
     }
 }
