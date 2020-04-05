@@ -282,7 +282,7 @@ namespace TerminusDotNetCore.Modules
             }
         }
 
-        [Command("save", RunMode = RunMode.Async)]
+        [Command("qsave", RunMode = RunMode.Async)]
         [Summary("Saves the queue contents (if any) to file.")]
         public async Task SaveQueueContents()
         {
@@ -294,7 +294,7 @@ namespace TerminusDotNetCore.Modules
             await _service.SaveQueueContents();
         }
 
-        [Command("load", RunMode = RunMode.Async)]
+        [Command("qload", RunMode = RunMode.Async)]
         [Summary("Loads the queue contents (if any) from file.")]
         public async Task LoadQueueContents()
         {
