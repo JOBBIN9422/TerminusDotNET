@@ -44,6 +44,13 @@ namespace TerminusDotNetCore.Services
 
         private readonly string FFMPEG_PROCESS_NAME;
 
+        //JSON converter settings for queue save/load
+        private static readonly JsonSerializerSettings JSON_SETTINGS = new JsonSerializerSettings()
+        {
+            Formatting = Formatting.None,
+            TypeNameHandling = TypeNameHandling.All
+        };
+
         //state flags
         private bool _playing = false;
         private bool _weedStarted = false;
@@ -433,6 +440,30 @@ namespace TerminusDotNetCore.Services
             }
         }
 
+        public async Task LoadQueueContents()
+        {
+            string queueFilename = Path.Combine(AudioPath, "backup", "queue-contents.json");
+            if (!File.Exists(queueFilename))
+            {
+                throw new FileNotFoundException("No queue backup file was found in the backup directory.");
+            }
+            using (StreamReader jsonReader = new StreamReader(queueFilename))
+            {
+                //read queue file contents into array of lines
+                string[] text = (await jsonReader.ReadToEndAsync()).Split(new[] { Environment.NewLine }, StringSplitOptions.None);
+
+                //reset the queue
+                _songQueue.Clear();
+
+                //deserialize and enqueue each saved item
+                foreach (string currLine in text)
+                {
+                    AudioItem currItem = JsonConvert.DeserializeObject<AudioItem>(currLine, JSON_SETTINGS);
+                    _songQueue.Enqueue(currItem);
+                }
+            }
+        }
+
         public async Task SaveQueueContents()
         {
             //store the queue contents to file
@@ -472,7 +503,7 @@ namespace TerminusDotNetCore.Services
                         Path = string.Empty
                     };
 
-                    await writer.WriteLineAsync(JsonConvert.SerializeObject(saveItem, Formatting.None));
+                    await writer.WriteLineAsync(JsonConvert.SerializeObject(saveItem, JSON_SETTINGS));
                 }
             }
             else if (song is LocalAudioItem)
@@ -501,12 +532,12 @@ namespace TerminusDotNetCore.Services
                         PlayChannelId = localSong.PlayChannelId
                     };
 
-                    await writer.WriteLineAsync(JsonConvert.SerializeObject(saveItem, Formatting.None));
+                    await writer.WriteLineAsync(JsonConvert.SerializeObject(saveItem, JSON_SETTINGS));
                 }
                 else
                 {
                     //no need to move any files if it's a persistent audio item
-                    await writer.WriteLineAsync(JsonConvert.SerializeObject(localSong, Formatting.None));
+                    await writer.WriteLineAsync(JsonConvert.SerializeObject(localSong, JSON_SETTINGS));
                 }
 
             }
