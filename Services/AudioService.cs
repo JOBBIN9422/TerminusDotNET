@@ -199,6 +199,10 @@ namespace TerminusDotNetCore.Services
                     //want to trigger playing next song in queue
                     await PlayNextInQueue(guild);
                 }
+                else
+                {
+                    await SaveQueueContents();
+                }
             }
         }
 
@@ -341,6 +345,10 @@ namespace TerminusDotNetCore.Services
                 //want to trigger playing next song in queue
                 await PlayNextInQueue(guild);
             }
+            else
+            {
+                await SaveQueueContents();
+            }
         }
 
         public async Task QueueYoutubeSongPreDownloaded(IGuild guild, SocketUser owner, string url, ulong channelId)
@@ -364,6 +372,10 @@ namespace TerminusDotNetCore.Services
                     //want to trigger playing next song in queue
                     await PlayNextInQueue(guild);
                 }
+                else
+                {
+                    await SaveQueueContents();
+                }
             }
         }
 
@@ -384,6 +396,10 @@ namespace TerminusDotNetCore.Services
                 {
                     //want to trigger playing next song in queue
                     await PlayNextInQueue(guild);
+                }
+                else 
+                {
+                    await SaveQueueContents();
                 }
             }
         }
