@@ -457,6 +457,13 @@ namespace TerminusDotNetCore.Services
                 string[] text = (await jsonReader.ReadToEndAsync()).Split(new[] { Environment.NewLine }, StringSplitOptions.None);
 
                 //reset the queue
+                await LeaveAudio(guild);
+                if (Client != null)
+                {
+                    await Client.SetGameAsync(null);
+                }
+                // Queue is empty, delete all .mp3 files in the assets/temp folder
+                CleanAudioFiles();
                 _songQueue.Clear();
 
                 //deserialize and enqueue each saved item
