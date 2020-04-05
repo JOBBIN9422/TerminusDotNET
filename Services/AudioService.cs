@@ -389,9 +389,6 @@ namespace TerminusDotNetCore.Services
 
         public async Task PlayNextInQueue(IGuild guild)
         {
-            //record current queue state 
-            await SaveQueueContents();
-
             AudioItem nextInQueue;
             if (_songQueue.TryDequeue(out nextInQueue))
             {
@@ -429,6 +426,11 @@ namespace TerminusDotNetCore.Services
 
                 //update the currently-playing song and kill the audio process if it's running
                 _currentSong = nextInQueue;
+
+                //record current queue state 
+                await SaveQueueContents();
+
+                //play audio on channel
                 await SendAudioAsync(guild, nextInQueue.Path);
             }
             else
