@@ -188,11 +188,11 @@ namespace TerminusDotNetCore.Services
             string displayName = Path.GetFileNameWithoutExtension(path);
             if (_weedPlaying)
             {
-                _backupQueue.Enqueue(new LocalAudioItem() { Path = path, PlayChannelId = channelId, AudioSource = FileAudioType.Local, DisplayName = displayName, Owner = owner });
+                _backupQueue.Enqueue(new LocalAudioItem() { Path = path, PlayChannelId = channelId, AudioSource = FileAudioType.Local, DisplayName = displayName, OwnerName = owner.Username });
             }
             else
             {
-                _songQueue.Enqueue(new LocalAudioItem() { Path = path, PlayChannelId = channelId, AudioSource = FileAudioType.Local, DisplayName = displayName, Owner = owner });
+                _songQueue.Enqueue(new LocalAudioItem() { Path = path, PlayChannelId = channelId, AudioSource = FileAudioType.Local, DisplayName = displayName, OwnerName = owner.Username });
                 if (!_playing)
                 {
                     //want to trigger playing next song in queue
@@ -322,7 +322,7 @@ namespace TerminusDotNetCore.Services
                     PlayChannelId = channelId,
                     AudioSource = YouTubeAudioType.Url,
                     DisplayName = displayName,
-                    Owner = owner
+                    OwnerName = owner.Username
                 };
 
                 if (_weedPlaying)
@@ -352,11 +352,11 @@ namespace TerminusDotNetCore.Services
             //queue the audio item
             if (_weedPlaying)
             {
-                _backupQueue.Enqueue(new YouTubeAudioItem() { Path = filePath, VideoUrl = url, PlayChannelId = channelId, AudioSource = YouTubeAudioType.PreDownloaded, DisplayName = displayName, Owner = owner });
+                _backupQueue.Enqueue(new YouTubeAudioItem() { Path = filePath, VideoUrl = url, PlayChannelId = channelId, AudioSource = YouTubeAudioType.PreDownloaded, DisplayName = displayName, OwnerName = owner.Username });
             }
             else
             {
-                _songQueue.Enqueue(new YouTubeAudioItem() { Path = filePath, VideoUrl = url, PlayChannelId = channelId, AudioSource = YouTubeAudioType.PreDownloaded, DisplayName = displayName, Owner = owner });
+                _songQueue.Enqueue(new YouTubeAudioItem() { Path = filePath, VideoUrl = url, PlayChannelId = channelId, AudioSource = YouTubeAudioType.PreDownloaded, DisplayName = displayName, OwnerName = owner.Username });
 
                 if (!_playing)
                 {
@@ -374,11 +374,11 @@ namespace TerminusDotNetCore.Services
 
             if (_weedPlaying)
             {
-                _backupQueue.Enqueue(new LocalAudioItem() { Path = path, PlayChannelId = channelId, AudioSource = FileAudioType.Attachment, DisplayName = displayName, Owner = owner });
+                _backupQueue.Enqueue(new LocalAudioItem() { Path = path, PlayChannelId = channelId, AudioSource = FileAudioType.Attachment, DisplayName = displayName, OwnerName = owner.Username });
             }
             else
             {
-                _songQueue.Enqueue(new LocalAudioItem() { Path = path, PlayChannelId = channelId, AudioSource = FileAudioType.Attachment, DisplayName = displayName, Owner = owner });
+                _songQueue.Enqueue(new LocalAudioItem() { Path = path, PlayChannelId = channelId, AudioSource = FileAudioType.Attachment, DisplayName = displayName, OwnerName = owner.Username });
                 if (!_playing)
                 {
                     //want to trigger playing next song in queue
@@ -505,7 +505,7 @@ namespace TerminusDotNetCore.Services
                         AudioSource = YouTubeAudioType.Url,
                         VideoUrl = ytSong.VideoUrl,
                         DisplayName = ytSong.DisplayName,
-                        Owner = ytSong.Owner,
+                        OwnerName = ytSong.OwnerName,
                         PlayChannelId = ytSong.PlayChannelId,
 
                         //set path to empty - temp file may not exist when the queue is re-loaded
@@ -537,7 +537,7 @@ namespace TerminusDotNetCore.Services
                         AudioSource = localSong.AudioSource,
                         Path = backupFilename,
                         DisplayName = localSong.DisplayName,
-                        Owner = localSong.Owner,
+                        OwnerName = localSong.OwnerName,
                         PlayChannelId = localSong.PlayChannelId
                     };
 
@@ -809,9 +809,9 @@ namespace TerminusDotNetCore.Services
                 songSource = "Unknown source";
             }
 
-            if (audioItem.Owner != null)
+            if (!string.IsNullOrEmpty(audioItem.OwnerName))
             {
-                songSource = $"{songSource} // added by {audioItem.Owner.Username}";
+                songSource = $"{songSource} // added by {audioItem.OwnerName}";
             }
 
             return songSource;

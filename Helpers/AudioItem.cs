@@ -25,6 +25,6 @@ namespace TerminusDotNetCore.Helpers
         public ulong PlayChannelId { get; set; }
 
         //the person who added this item to the queue
-        public SocketUser Owner { get; set; }
+        public string OwnerName { get; set; }
     }
 }
