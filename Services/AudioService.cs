@@ -48,7 +48,8 @@ namespace TerminusDotNetCore.Services
         private static readonly JsonSerializerSettings JSON_SETTINGS = new JsonSerializerSettings()
         {
             Formatting = Formatting.None,
-            TypeNameHandling = TypeNameHandling.All
+            TypeNameHandling = TypeNameHandling.All,
+            ReferenceLoopHandling = ReferenceLoopHandling.Serialize
         };
 
         //state flags
