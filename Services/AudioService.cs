@@ -471,8 +471,11 @@ namespace TerminusDotNetCore.Services
                 //deserialize and enqueue each saved item
                 foreach (string currLine in text)
                 {
-                    AudioItem currItem = JsonConvert.DeserializeObject<AudioItem>(currLine, JSON_SETTINGS);
-                    _songQueue.Enqueue(currItem);
+                    if (!string.IsNullOrEmpty(currLine))
+                    {
+                        AudioItem currItem = JsonConvert.DeserializeObject<AudioItem>(currLine, JSON_SETTINGS);
+                        _songQueue.Enqueue(currItem);
+                    }
                 }
             }
 
