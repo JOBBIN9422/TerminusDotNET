@@ -20,6 +20,7 @@ using System.Threading;
 using Google.Apis.Util.Store;
 using Google.Apis.Services;
 using System.Text.RegularExpressions;
+using Newtonsoft.Json;
 
 namespace TerminusDotNetCore.Services
 {
@@ -430,6 +431,90 @@ namespace TerminusDotNetCore.Services
                 CleanAudioFiles();
 
             }
+        }
+
+        public async Task SaveQueueContents()
+        {
+            //store the queue contents to file
+            using (StreamWriter jsonWriter = new StreamWriter(Path.Combine(AudioPath, "backup", "queue-contents.json"), false))
+            {
+                if (_currentSong != null)
+                {
+                    await SaveSongToFile(jsonWriter, _currentSong);
+                }
+
+                foreach (AudioItem item in _songQueue)
+                {
+                    await SaveSongToFile(jsonWriter, item);
+                }
+            }
+        }
+
+        private async Task SaveSongToFile(StreamWriter writer, AudioItem song)
+        {
+            if (song is YouTubeAudioItem)
+            {
+                YouTubeAudioItem ytSong = song as YouTubeAudioItem;
+
+                if (!string.IsNullOrEmpty(ytSong.VideoUrl))
+                {
+                    //don't want to alter the current item, so create a "copy" and save it to file
+                    YouTubeAudioItem saveItem = new YouTubeAudioItem()
+                    {
+                        //force source to youtube URL to force redownload
+                        AudioSource = YouTubeAudioType.Url,
+                        VideoUrl = ytSong.VideoUrl,
+                        DisplayName = ytSong.DisplayName,
+                        Owner = ytSong.Owner,
+                        PlayChannelId = ytSong.PlayChannelId,
+
+                        //set path to empty - temp file may not exist when the queue is re-loaded
+                        Path = string.Empty
+                    };
+
+                    await writer.WriteLineAsync(JsonConvert.SerializeObject(saveItem, Formatting.None));
+                }
+            }
+            else if (song is LocalAudioItem)
+            {
+                LocalAudioItem localSong = song as LocalAudioItem;
+                if (localSong.AudioSource == FileAudioType.Attachment)
+                {
+                    //define the destination filename for the attachment in the backup dir
+                    string attachFilename = Path.GetFileName(localSong.Path);
+                    string backupPath = Path.Combine(AudioPath, "backup");
+
+                    //copy the attached file to the backup dir if necessary
+                    string backupFilename = Path.Combine(backupPath, attachFilename);
+                    if (!File.Exists(backupFilename))
+                    {
+                        File.Copy(localSong.Path, backupFilename);
+                    }
+
+                    //save the current item to the file
+                    LocalAudioItem saveItem = new LocalAudioItem()
+                    {
+                        AudioSource = localSong.AudioSource,
+                        Path = backupFilename,
+                        DisplayName = localSong.DisplayName,
+                        Owner = localSong.Owner,
+                        PlayChannelId = localSong.PlayChannelId
+                    };
+
+                    await writer.WriteLineAsync(JsonConvert.SerializeObject(saveItem, Formatting.None));
+                }
+                else
+                {
+                    //no need to move any files if it's a persistent audio item
+                    await writer.WriteLineAsync(JsonConvert.SerializeObject(localSong, Formatting.None));
+                }
+
+            }
+            else
+            {
+                return;
+            }
+
         }
 
         public async Task StopAllAudio(IGuild guild)
