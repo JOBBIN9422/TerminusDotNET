@@ -388,6 +388,9 @@ namespace TerminusDotNetCore.Services
 
         public async Task PlayNextInQueue(IGuild guild)
         {
+            //record current queue state 
+            await SaveQueueContents();
+
             AudioItem nextInQueue;
             if (_songQueue.TryDequeue(out nextInQueue))
             {
