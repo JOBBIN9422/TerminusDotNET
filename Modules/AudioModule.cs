@@ -286,6 +286,11 @@ namespace TerminusDotNetCore.Modules
         [Summary("Saves the queue contents (if any) to file.")]
         public async Task SaveQueueContents()
         {
+            if (Context != null && Context.Guild != null)
+            {
+                _service.SetGuildClient(Context.Guild, Context.Client);
+            }
+
             await _service.SaveQueueContents();
         }
 
@@ -293,6 +298,11 @@ namespace TerminusDotNetCore.Modules
         [Summary("Loads the queue contents (if any) from file.")]
         public async Task LoadQueueContents()
         {
+            if (Context != null && Context.Guild != null)
+            {
+                _service.SetGuildClient(Context.Guild, Context.Client);
+            }
+
             await _service.LoadQueueContents(Context.Guild);
         }
     }
