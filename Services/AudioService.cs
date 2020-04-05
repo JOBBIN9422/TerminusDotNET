@@ -464,8 +464,8 @@ namespace TerminusDotNetCore.Services
                 {
                     await Client.SetGameAsync(null);
                 }
-                // Queue is empty, delete all .mp3 files in the assets/temp folder
                 CleanAudioFiles();
+
                 _songQueue.Clear();
 
                 //deserialize and enqueue each saved item
