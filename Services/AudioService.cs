@@ -134,6 +134,7 @@ namespace TerminusDotNetCore.Services
         public async Task LeaveAudio(IGuild guild)
         {
             _currentSong = null;
+            _playing = false;
             if (_ffmpeg != null && !_ffmpeg.HasExited)
             {
                 _ffmpeg.Kill(true);
@@ -459,14 +460,12 @@ namespace TerminusDotNetCore.Services
                 string[] text = (await jsonReader.ReadToEndAsync()).Split(new[] { Environment.NewLine }, StringSplitOptions.None);
 
                 //reset the queue
-                await LeaveAudio(guild);
-                if (Client != null)
-                {
-                    await Client.SetGameAsync(null);
-                }
-                CleanAudioFiles();
-
                 _songQueue.Clear();
+
+                if (_playing)
+                {
+                    await LeaveAudio(guild);
+                }
 
                 //deserialize and enqueue each saved item
                 foreach (string currLine in text)
