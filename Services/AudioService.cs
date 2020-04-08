@@ -112,7 +112,7 @@ namespace TerminusDotNetCore.Services
             }
         }
 
-        public async Task JoinAudio(IGuild guild, IVoiceChannel target)
+        public async Task JoinAudio(IGuild guild, IVoiceChannel target, int retryCount = 5)
         {
             if (target.Guild.Id != guild.Id)
             {
@@ -121,7 +121,22 @@ namespace TerminusDotNetCore.Services
 
             await LeaveAudio(guild);
             await Task.Delay(100);
-            var audioClient = await target.ConnectAsync();
+
+            IAudioClient audioClient = null;
+            try
+            {
+                audioClient = await target.ConnectAsync();
+            }
+            catch (TimeoutException)
+            {
+                if (retryCount == 0)
+                {
+                    throw new TimeoutException("Could not join the voice channel due to repeated timeouts.");
+                }
+
+                await Bot.Log(new LogMessage(LogSeverity.Error, "AudioSvc", $"failed to connect to voice channel, retrying... ({retryCount} attempts remaining)"));
+                await JoinAudio(guild, target, --retryCount);
+            }
 
             if (_connectedChannels.TryAdd(guild.Id, new Tuple<IAudioClient, IVoiceChannel>(audioClient, target)))
             {
