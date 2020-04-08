@@ -136,6 +136,7 @@ namespace TerminusDotNetCore.Services
 
                 await Bot.Log(new LogMessage(LogSeverity.Error, "AudioSvc", $"failed to connect to voice channel, retrying... ({retryCount} attempts remaining)"));
                 await JoinAudio(guild, target, --retryCount);
+                return;
             }
 
             if (_connectedChannels.TryAdd(guild.Id, new Tuple<IAudioClient, IVoiceChannel>(audioClient, target)))
