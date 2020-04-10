@@ -131,7 +131,8 @@ namespace TerminusDotNetCore.Services
             {
                 if (retryCount == 0)
                 {
-                    throw new TimeoutException("Could not join the voice channel due to repeated timeouts.");
+                    await Bot.Log(new LogMessage(LogSeverity.Error, "AudioSvc", $"failed to connect to voice channel after repeated timeouts."));
+                    return;
                 }
 
                 await Bot.Log(new LogMessage(LogSeverity.Error, "AudioSvc", $"failed to connect to voice channel, retrying... ({retryCount} attempts remaining)"));
