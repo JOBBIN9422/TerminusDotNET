@@ -24,7 +24,7 @@ namespace TerminusDotNetCore.Modules
         private string oblivion = "STOP! You have violated the law! (Check your input, too many or too few dice)";
 
         [Command("roll")]
-        public async Task StonksAsync([Summary("Dice number and size.")]string dice_roll = null)
+        public async Task RollAsync([Summary("Dice number and size.")]string dice_roll = null)
         {
             //Check for input to command
             if (string.IsNullOrEmpty(dice_roll))
@@ -41,10 +41,18 @@ namespace TerminusDotNetCore.Modules
             string[] substrings = dice_roll.Split("d");
 
             //Check input format
-            if (substrings.Length != 2)
+            if (substrings.Length <= 2)
             {
-                await ServiceReplyAsync(error_message);
-                return;
+                if (substrings.Length == 1)
+                {
+                    substrings[1] = substrings[0];
+                    substrings[0] = "1";
+                }
+                else
+                {
+                    await ServiceReplyAsync(error_message);
+                    return;
+                }
             }
 
             int roll_count = 0;
@@ -103,6 +111,18 @@ namespace TerminusDotNetCore.Modules
 
                 await ServiceReplyAsync("**Roll Sum:** " + roll_sum.ToString());
             }
+        }
+
+        [Command("initcombat")]
+        public async Task CombatAsync([Summary("Easy roll for initiative.")]string members = null)
+        {
+            Random random = new Random();
+
+            string[] substrings = members.Split(",");
+
+            string[] initiative = substrings.OrderBy(x => random.Next()).ToArray();
+
+            await ServiceReplyAsync("**Initiative:** " + string.Join(", ", initiative));
         }
     }
 }
