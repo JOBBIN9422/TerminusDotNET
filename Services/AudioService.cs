@@ -120,7 +120,7 @@ namespace TerminusDotNetCore.Services
                 return;
             }
 
-            await LeaveAudio(guild);
+            await LeaveAudio(target, guild);
             await Task.Delay(100);
 
             IAudioClient audioClient = null;
@@ -149,7 +149,7 @@ namespace TerminusDotNetCore.Services
             }
         }
 
-        public async Task LeaveAudio(IGuild guild)
+        public async Task LeaveAudio(IVoiceChannel target, IGuild guild)
         {
             _currentSong = null;
             _playing = false;
@@ -157,6 +157,8 @@ namespace TerminusDotNetCore.Services
             {
                 _ffmpeg.Kill(true);
             }
+
+            await target.DisconnectAsync();
 
             Tuple<IAudioClient, IVoiceChannel> client;
             if (_connectedChannels.TryRemove(guild.Id, out client))
@@ -709,7 +711,7 @@ namespace TerminusDotNetCore.Services
             _weedPlaying = false;
             _songQueue = _backupQueue;
             _backupQueue = new ConcurrentQueue<AudioItem>();
-
+            !
             if (Client != null)
             {
                 await Client.SetGameAsync(null);
