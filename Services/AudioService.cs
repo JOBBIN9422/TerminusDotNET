@@ -39,7 +39,7 @@ namespace TerminusDotNetCore.Services
         //metadata about the currently playing song
         private AudioItem _currentSong = null;
 
-        private IVoiceChannel _currentChannel = null;
+        public IVoiceChannel CurrentChannel { get; set; } = null;
 
         //the currently active ffmpeg process for audio streaming
         private Process _ffmpeg = null;
@@ -122,7 +122,7 @@ namespace TerminusDotNetCore.Services
             IAudioClient audioClient = null;
             try
             {
-                audioClient = await _currentChannel.ConnectAsync();
+                audioClient = await CurrentChannel.ConnectAsync();
             }
             catch (TimeoutException)
             {
@@ -137,7 +137,7 @@ namespace TerminusDotNetCore.Services
                 return;
             }
 
-            if (_connectedChannels.TryAdd(Guild.Id, new Tuple<IAudioClient, IVoiceChannel>(audioClient, _currentChannel)))
+            if (_connectedChannels.TryAdd(Guild.Id, new Tuple<IAudioClient, IVoiceChannel>(audioClient, CurrentChannel)))
             {
                 // If you add a method to log happenings from this service,
                 // you can uncomment these commented lines to make use of that.
@@ -154,9 +154,9 @@ namespace TerminusDotNetCore.Services
                 _ffmpeg.Kill(true);
             }
 
-            if (_currentChannel != null)
+            if (CurrentChannel != null)
             {
-                await _currentChannel.DisconnectAsync();
+                await CurrentChannel.DisconnectAsync();
             }
 
             Tuple<IAudioClient, IVoiceChannel> client;
@@ -438,7 +438,7 @@ namespace TerminusDotNetCore.Services
                     }
                 }
 
-                _currentChannel = await Guild.GetVoiceChannelAsync(nextInQueue.PlayChannelId);
+                CurrentChannel = await Guild.GetVoiceChannelAsync(nextInQueue.PlayChannelId);
                 await JoinAudio();
 
                 if (Client != null)
