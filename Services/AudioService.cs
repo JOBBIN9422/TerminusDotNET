@@ -78,6 +78,7 @@ namespace TerminusDotNetCore.Services
 
         public async Task InitYoutubeService()
         {
+            //attempt to read auth info from secrets file 
             UserCredential credentials;
             using (var credStream = new FileStream("youtube-secrets.json", FileMode.Open, FileAccess.Read))
             {
@@ -195,7 +196,7 @@ namespace TerminusDotNetCore.Services
                         stream.Close();
                         _ffmpeg.Kill(true);
                         _playing = false;
-                        await PlayNextInQueue(guild);
+                        //await PlayNextInQueue(guild);
                     }
                 }
             }
@@ -466,6 +467,9 @@ namespace TerminusDotNetCore.Services
 
                 //play audio on channel
                 await SendAudioAsync(guild, nextInQueue.Path);
+
+                //play next in queue (if any)
+                await PlayNextInQueue(guild);
             }
             else
             {
