@@ -246,7 +246,7 @@ namespace TerminusDotNetCore
                         audioService.Guild = (message.Channel as SocketGuildChannel).Guild;
                         audioService.CurrentChannel = await audioService.Guild.GetVoiceChannelAsync(ulong.Parse(_config["AudioChannelId"]));
 
-                        _ = audioService.PlayRegexAudio(match.Item2);
+                        await audioService.PlayRegexAudio(match.Item2);
 
                         audioService.Guild = null;
                     }
