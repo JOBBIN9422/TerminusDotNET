@@ -39,6 +39,8 @@ namespace TerminusDotNetCore.Services
         //metadata about the currently playing song
         private AudioItem _currentSong = null;
 
+        private IVoiceChannel _currentChannel = null;
+
         //the currently active ffmpeg process for audio streaming
         private Process _ffmpeg = null;
 
@@ -109,24 +111,24 @@ namespace TerminusDotNetCore.Services
                 _weedStarted = true;
                 ulong voiceID = ulong.Parse(Config["WeedChannelId"]);
                 IVoiceChannel vc = await Guild.GetVoiceChannelAsync(voiceID);
-                await this.ScheduleWeed(Guild, vc);
+                await this.ScheduleWeed(Guild);
             }
         }
 
-        public async Task JoinAudio(IGuild guild, IVoiceChannel target, int retryCount = 5)
+        public async Task JoinAudio(IGuild guild, int retryCount = 5)
         {
-            if (target.Guild.Id != guild.Id)
+            if (_currentChannel.Guild.Id != guild.Id)
             {
                 return;
             }
 
-            await LeaveAudio(target, guild);
+            await LeaveAudio(guild);
             await Task.Delay(100);
 
             IAudioClient audioClient = null;
             try
             {
-                audioClient = await target.ConnectAsync();
+                audioClient = await _currentChannel.ConnectAsync();
             }
             catch (TimeoutException)
             {
@@ -137,11 +139,11 @@ namespace TerminusDotNetCore.Services
                 }
 
                 await Bot.Log(new LogMessage(LogSeverity.Error, "AudioSvc", $"failed to connect to voice channel, retrying... ({retryCount} attempts remaining)"));
-                await JoinAudio(guild, target, --retryCount);
+                await JoinAudio(guild, --retryCount);
                 return;
             }
 
-            if (_connectedChannels.TryAdd(guild.Id, new Tuple<IAudioClient, IVoiceChannel>(audioClient, target)))
+            if (_connectedChannels.TryAdd(guild.Id, new Tuple<IAudioClient, IVoiceChannel>(audioClient, _currentChannel)))
             {
                 // If you add a method to log happenings from this service,
                 // you can uncomment these commented lines to make use of that.
@@ -149,7 +151,7 @@ namespace TerminusDotNetCore.Services
             }
         }
 
-        public async Task LeaveAudio(IVoiceChannel target, IGuild guild)
+        public async Task LeaveAudio(IGuild guild)
         {
             _currentSong = null;
             _playing = false;
@@ -158,7 +160,7 @@ namespace TerminusDotNetCore.Services
                 _ffmpeg.Kill(true);
             }
 
-            await target.DisconnectAsync();
+            await _currentChannel.DisconnectAsync();
 
             Tuple<IAudioClient, IVoiceChannel> client;
             if (_connectedChannels.TryRemove(guild.Id, out client))
@@ -439,8 +441,8 @@ namespace TerminusDotNetCore.Services
                     }
                 }
 
-                IVoiceChannel channel = await guild.GetVoiceChannelAsync(nextInQueue.PlayChannelId);
-                await JoinAudio(guild, channel);
+                _currentChannel = await guild.GetVoiceChannelAsync(nextInQueue.PlayChannelId);
+                await JoinAudio(guild);
 
                 if (Client != null)
                 {
@@ -617,7 +619,7 @@ namespace TerminusDotNetCore.Services
             _weedPlaying = true;
 
             await StopAllAudio(guild);
-            await JoinAudio(guild, vc);
+            await JoinAudio(guild);
 
             string path = Path.Combine(AudioPath, filename);
             path = Path.GetFullPath(path);
@@ -679,7 +681,7 @@ namespace TerminusDotNetCore.Services
             });
         }
 
-        public async Task ScheduleWeed(IGuild guild, IVoiceChannel channel)
+        public async Task ScheduleWeed(IGuild guild)
         {
             DateTime now = DateTime.Now;
             DateTime fourTwenty = DateTime.Today.AddHours(16.333);
@@ -695,7 +697,7 @@ namespace TerminusDotNetCore.Services
             _weedPlaying = true;
 
             await StopAllAudio(guild);
-            await JoinAudio(guild, channel);
+            await JoinAudio(guild);
 
             string path = Path.Combine(AudioPath, "weedlmao.mp3");
             path = Path.GetFullPath(path);
@@ -711,13 +713,13 @@ namespace TerminusDotNetCore.Services
             _weedPlaying = false;
             _songQueue = _backupQueue;
             _backupQueue = new ConcurrentQueue<AudioItem>();
-            !
+
             if (Client != null)
             {
                 await Client.SetGameAsync(null);
             }
             _ = PlayNextInQueue(guild);
-            _ = ScheduleWeed(guild, channel);
+            _ = ScheduleWeed(guild);
         }
 
         public List<Embed> ListQueueContents()
