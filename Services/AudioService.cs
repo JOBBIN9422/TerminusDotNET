@@ -202,25 +202,31 @@ namespace TerminusDotNetCore.Services
             }
         }
 
-        public async Task QueueLocalSong(IGuild guild, SocketUser owner, string path, ulong channelId)
+        private void EnqueueSong(AudioItem item)
         {
-            string displayName = Path.GetFileNameWithoutExtension(path);
             if (_weedPlaying)
             {
-                _backupQueue.Enqueue(new LocalAudioItem() { Path = path, PlayChannelId = channelId, AudioSource = FileAudioType.Local, DisplayName = displayName, OwnerName = owner.Username });
+                _backupQueue.Enqueue(item);
             }
             else
             {
-                _songQueue.Enqueue(new LocalAudioItem() { Path = path, PlayChannelId = channelId, AudioSource = FileAudioType.Local, DisplayName = displayName, OwnerName = owner.Username });
-                if (!_playing)
-                {
-                    //want to trigger playing next song in queue
-                    await PlayNextInQueue(guild);
-                }
-                else
-                {
-                    await SaveQueueContents();
-                }
+                _songQueue.Enqueue(item);
+            }
+        }
+
+        public async Task QueueLocalSong(IGuild guild, SocketUser owner, string path, ulong channelId)
+        {
+            string displayName = Path.GetFileNameWithoutExtension(path);
+            EnqueueSong(new LocalAudioItem() { Path = path, PlayChannelId = channelId, AudioSource = FileAudioType.Local, DisplayName = displayName, OwnerName = owner.Username });
+
+            if (!_playing)
+            {
+                //want to trigger playing next song in queue
+                await PlayNextInQueue(guild);
+            }
+            else
+            {
+                await SaveQueueContents();
             }
         }
 
@@ -348,14 +354,7 @@ namespace TerminusDotNetCore.Services
                     OwnerName = owner.Username
                 };
 
-                if (_weedPlaying)
-                {
-                    _backupQueue.Enqueue(currVideo);
-                }
-                else
-                {
-                    _songQueue.Enqueue(currVideo);
-                }
+                EnqueueSong(currVideo);
             }
 
             if (!_playing)
@@ -376,24 +375,15 @@ namespace TerminusDotNetCore.Services
             //get a local file for the current video
             string filePath = await DownloadYoutubeVideoAsync(url);
 
-            //queue the audio item
-            if (_weedPlaying)
+            EnqueueSong(new YouTubeAudioItem() { Path = filePath, VideoUrl = url, PlayChannelId = channelId, AudioSource = YouTubeAudioType.PreDownloaded, DisplayName = displayName, OwnerName = owner.Username });
+            
+            if (!_playing)
             {
-                _backupQueue.Enqueue(new YouTubeAudioItem() { Path = filePath, VideoUrl = url, PlayChannelId = channelId, AudioSource = YouTubeAudioType.PreDownloaded, DisplayName = displayName, OwnerName = owner.Username });
+                await PlayNextInQueue(guild);
             }
             else
             {
-                _songQueue.Enqueue(new YouTubeAudioItem() { Path = filePath, VideoUrl = url, PlayChannelId = channelId, AudioSource = YouTubeAudioType.PreDownloaded, DisplayName = displayName, OwnerName = owner.Username });
-
-                if (!_playing)
-                {
-                    //want to trigger playing next song in queue
-                    await PlayNextInQueue(guild);
-                }
-                else
-                {
-                    await SaveQueueContents();
-                }
+                await SaveQueueContents();
             }
         }
 
@@ -403,22 +393,16 @@ namespace TerminusDotNetCore.Services
             string path = files[0];
             string displayName = Path.GetFileName(path);
 
-            if (_weedPlaying)
+            EnqueueSong(new LocalAudioItem() { Path = path, PlayChannelId = channelId, AudioSource = FileAudioType.Attachment, DisplayName = displayName, OwnerName = owner.Username });
+
+            if (!_playing)
             {
-                _backupQueue.Enqueue(new LocalAudioItem() { Path = path, PlayChannelId = channelId, AudioSource = FileAudioType.Attachment, DisplayName = displayName, OwnerName = owner.Username });
+                //want to trigger playing next song in queue
+                await PlayNextInQueue(guild);
             }
             else
             {
-                _songQueue.Enqueue(new LocalAudioItem() { Path = path, PlayChannelId = channelId, AudioSource = FileAudioType.Attachment, DisplayName = displayName, OwnerName = owner.Username });
-                if (!_playing)
-                {
-                    //want to trigger playing next song in queue
-                    await PlayNextInQueue(guild);
-                }
-                else 
-                {
-                    await SaveQueueContents();
-                }
+                await SaveQueueContents();
             }
         }
 
@@ -437,7 +421,9 @@ namespace TerminusDotNetCore.Services
                         if (nextVideo.AudioSource == YouTubeAudioType.Url)
                         {
                             await Bot.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"downloading local file for {nextVideo.DisplayName}..."));
+
                             nextVideo.Path = await DownloadYoutubeVideoAsync(nextVideo.VideoUrl);
+
                             await Bot.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"downloaded local file {nextVideo.Path}"));
                         }
                     }
@@ -510,7 +496,7 @@ namespace TerminusDotNetCore.Services
                     if (!string.IsNullOrEmpty(currLine))
                     {
                         AudioItem currItem = JsonConvert.DeserializeObject<AudioItem>(currLine, JSON_SETTINGS);
-                        _songQueue.Enqueue(currItem);
+                        EnqueueSong(currItem);
                     }
                 }
             }
@@ -526,11 +512,13 @@ namespace TerminusDotNetCore.Services
             //store the queue contents to file
             using (StreamWriter jsonWriter = new StreamWriter(Path.Combine(AudioPath, "backup", "queue-contents.json"), false))
             {
+                //save the current song (if any)
                 if (_currentSong != null)
                 {
                     await SaveSongToFile(jsonWriter, _currentSong);
                 }
 
+                //save each item currently in the queue
                 foreach (AudioItem item in _songQueue)
                 {
                     await SaveSongToFile(jsonWriter, item);
@@ -596,7 +584,6 @@ namespace TerminusDotNetCore.Services
                     //no need to move any files if it's a persistent audio item
                     await writer.WriteLineAsync(JsonConvert.SerializeObject(localSong, JSON_SETTINGS));
                 }
-
             }
             else
             {
@@ -607,7 +594,7 @@ namespace TerminusDotNetCore.Services
 
         public async Task StopAllAudio(IGuild guild)
         {
-            _songQueue = new ConcurrentQueue<AudioItem>();
+            _songQueue.Clear();
             _playing = false;
             _currentSong = null;
             await LeaveAudio(guild);
@@ -617,30 +604,34 @@ namespace TerminusDotNetCore.Services
             {
                 await Client.SetGameAsync(null);
             }
-            //probably should do this, but we would have to figure out a way to wait til the ffmpeg process dies, which I don't want to do
-            //the files will get wiped out eventually I bet
-            //AttachmentHelper.DeleteFiles(AttachmentHelper.GetTempAssets("*.mp3"));
         }
 
         public async Task PlayRegexAudio(IGuild guild, string filename)
         {
             ulong voiceID = ulong.Parse(Config["AudioChannelId"]);
             IVoiceChannel vc = await guild.GetVoiceChannelAsync(voiceID);
+
             _backupQueue = _songQueue;
             _weedPlaying = true;
+
             await StopAllAudio(guild);
             await JoinAudio(guild, vc);
+
             string path = Path.Combine(AudioPath, filename);
             path = Path.GetFullPath(path);
+
             await SendAudioAsync(guild, path);
             await LeaveAudio(guild);
+
             _weedPlaying = false;
             _songQueue = _backupQueue;
-            _backupQueue = new ConcurrentQueue<AudioItem>();
+            _backupQueue.Clear();
+
             if (Client != null)
             {
                 await Client.SetGameAsync(null);
             }
+
             await PlayNextInQueue(guild);
         }
 
@@ -690,26 +681,35 @@ namespace TerminusDotNetCore.Services
         {
             DateTime now = DateTime.Now;
             DateTime fourTwenty = DateTime.Today.AddHours(16.333);
+
             if (now > fourTwenty)
             {
                 fourTwenty = fourTwenty.AddDays(1.0);
             }
+
             await Task.Delay((int)fourTwenty.Subtract(DateTime.Now).TotalMilliseconds);
+
             _backupQueue = _songQueue;
             _weedPlaying = true;
+
             await StopAllAudio(guild);
             await JoinAudio(guild, channel);
+
             string path = Path.Combine(AudioPath, "weedlmao.mp3");
             path = Path.GetFullPath(path);
+
             if (Client != null)
             {
                 await Client.SetGameAsync("weeeeed");
             }
+
             await SendAudioAsync(guild, path);
             await LeaveAudio(guild);
+
             _weedPlaying = false;
             _songQueue = _backupQueue;
             _backupQueue = new ConcurrentQueue<AudioItem>();
+
             if (Client != null)
             {
                 await Client.SetGameAsync(null);
