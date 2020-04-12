@@ -626,7 +626,7 @@ namespace TerminusDotNetCore.Services
 
             _weedPlaying = false;
             _songQueue = _backupQueue;
-            _backupQueue.Clear();
+            _backupQueue = new ConcurrentQueue<AudioItem>();
 
             if (Client != null)
             {
