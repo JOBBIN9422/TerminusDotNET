@@ -117,7 +117,7 @@ namespace TerminusDotNetCore.Services
 
         public async Task JoinAudio(int retryCount = 5)
         {
-            await LeaveAudio();
+            //await LeaveAudio();
             //await Task.Delay(100);
 
             IAudioClient audioClient = null;
