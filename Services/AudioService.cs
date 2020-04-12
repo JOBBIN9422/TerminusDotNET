@@ -111,18 +111,13 @@ namespace TerminusDotNetCore.Services
                 _weedStarted = true;
                 ulong voiceID = ulong.Parse(Config["WeedChannelId"]);
                 IVoiceChannel vc = await Guild.GetVoiceChannelAsync(voiceID);
-                await this.ScheduleWeed(Guild);
+                await this.ScheduleWeed();
             }
         }
 
-        public async Task JoinAudio(IGuild guild, int retryCount = 5)
+        public async Task JoinAudio(int retryCount = 5)
         {
-            if (_currentChannel.Guild.Id != guild.Id)
-            {
-                return;
-            }
-
-            await LeaveAudio(guild);
+            await LeaveAudio();
             await Task.Delay(100);
 
             IAudioClient audioClient = null;
@@ -139,11 +134,11 @@ namespace TerminusDotNetCore.Services
                 }
 
                 await Bot.Log(new LogMessage(LogSeverity.Error, "AudioSvc", $"failed to connect to voice channel, retrying... ({retryCount} attempts remaining)"));
-                await JoinAudio(guild, --retryCount);
+                await JoinAudio(--retryCount);
                 return;
             }
 
-            if (_connectedChannels.TryAdd(guild.Id, new Tuple<IAudioClient, IVoiceChannel>(audioClient, _currentChannel)))
+            if (_connectedChannels.TryAdd(Guild.Id, new Tuple<IAudioClient, IVoiceChannel>(audioClient, _currentChannel)))
             {
                 // If you add a method to log happenings from this service,
                 // you can uncomment these commented lines to make use of that.
@@ -151,7 +146,7 @@ namespace TerminusDotNetCore.Services
             }
         }
 
-        public async Task LeaveAudio(IGuild guild)
+        public async Task LeaveAudio()
         {
             _currentSong = null;
             _playing = false;
@@ -163,17 +158,17 @@ namespace TerminusDotNetCore.Services
             await _currentChannel.DisconnectAsync();
 
             Tuple<IAudioClient, IVoiceChannel> client;
-            if (_connectedChannels.TryRemove(guild.Id, out client))
+            if (_connectedChannels.TryRemove(Guild.Id, out client))
             {
                 await client.Item1.StopAsync();
                 //await Log(LogSeverity.Info, $"Disconnected from voice on {guild.Name}.");
             }
         }
 
-        public async Task SendAudioAsync(IGuild guild, string path)
+        public async Task SendAudioAsync(string path)
         {
             Tuple<IAudioClient, IVoiceChannel> client;
-            if (_connectedChannels.TryGetValue(guild.Id, out client))
+            if (_connectedChannels.TryGetValue(Guild.Id, out client))
             {
                 //clean up the existing process if necessary
                 if (_ffmpeg != null && !_ffmpeg.HasExited)
@@ -218,7 +213,7 @@ namespace TerminusDotNetCore.Services
             }
         }
 
-        public async Task QueueLocalSong(IGuild guild, SocketUser owner, string path, ulong channelId)
+        public async Task QueueLocalSong(SocketUser owner, string path, ulong channelId)
         {
             string displayName = Path.GetFileNameWithoutExtension(path);
             EnqueueSong(new LocalAudioItem() { Path = path, PlayChannelId = channelId, AudioSource = FileAudioType.Local, DisplayName = displayName, OwnerName = owner.Username });
@@ -226,7 +221,7 @@ namespace TerminusDotNetCore.Services
             if (!_playing)
             {
                 //want to trigger playing next song in queue
-                await PlayNextInQueue(guild);
+                await PlayNextInQueue();
             }
             else
             {
@@ -234,7 +229,7 @@ namespace TerminusDotNetCore.Services
             }
         }
 
-        public async Task QueueYoutubePlaylist(IGuild guild, SocketUser owner, string playlistURL, ulong channelId)
+        public async Task QueueYoutubePlaylist(SocketUser owner, string playlistURL, ulong channelId)
         {
             //check if the given URL refers to a youtube playlist
             if (!PlaylistUrlIsValid(playlistURL))
@@ -269,7 +264,7 @@ namespace TerminusDotNetCore.Services
             }
 
             //add the list of URLs to the queue for downloading during playback
-            await QueueYoutubeURLs(videoUrls, guild, owner, channelId);
+            await QueueYoutubeURLs(videoUrls, owner, channelId);
         }
 
         private static bool PlaylistUrlIsValid(string url)
@@ -311,7 +306,7 @@ namespace TerminusDotNetCore.Services
             return title;
         }
 
-        public async Task QueueSearchedYoutubeSong(IGuild guild, SocketUser owner, string searchTerm, ulong channelId)
+        public async Task QueueSearchedYoutubeSong(SocketUser owner, string searchTerm, ulong channelId)
         {
             var searchListRequest = _ytService.Search.List("snippet");
             searchListRequest.Q = searchTerm;
@@ -326,7 +321,7 @@ namespace TerminusDotNetCore.Services
 
                 try
                 {
-                    await QueueYoutubeSongPreDownloaded(guild, owner, url, channelId);
+                    await QueueYoutubeSongPreDownloaded(owner, url, channelId);
 
                     //if we successfully download and queue a song, exit this loop and return
                     return;
@@ -341,7 +336,7 @@ namespace TerminusDotNetCore.Services
             await ParentModule.ServiceReplyAsync($"No videos were successfully downloaded for the search term '{searchTerm}'.");
         }
 
-        private async Task QueueYoutubeURLs(List<string> urls, IGuild guild, SocketUser owner, ulong channelId)
+        private async Task QueueYoutubeURLs(List<string> urls, SocketUser owner, ulong channelId)
         {
             //enqueue all of the URLs before starting playback 
             foreach (string url in urls)
@@ -364,7 +359,7 @@ namespace TerminusDotNetCore.Services
             if (!_playing)
             {
                 //want to trigger playing next song in queue
-                await PlayNextInQueue(guild);
+                await PlayNextInQueue();
             }
             else
             {
@@ -372,7 +367,7 @@ namespace TerminusDotNetCore.Services
             }
         }
 
-        public async Task QueueYoutubeSongPreDownloaded(IGuild guild, SocketUser owner, string url, ulong channelId)
+        public async Task QueueYoutubeSongPreDownloaded(SocketUser owner, string url, ulong channelId)
         {
             string displayName = await GetVideoTitleFromUrlAsync(url);
 
@@ -383,7 +378,7 @@ namespace TerminusDotNetCore.Services
             
             if (!_playing)
             {
-                await PlayNextInQueue(guild);
+                await PlayNextInQueue();
             }
             else
             {
@@ -391,7 +386,7 @@ namespace TerminusDotNetCore.Services
             }
         }
 
-        public async Task QueueTempSong(IGuild guild, SocketUser owner, IReadOnlyCollection<Attachment> attachments, ulong channelId)
+        public async Task QueueTempSong(SocketUser owner, IReadOnlyCollection<Attachment> attachments, ulong channelId)
         {
             List<string> files = AttachmentHelper.DownloadAttachments(attachments);
             string path = files[0];
@@ -402,7 +397,7 @@ namespace TerminusDotNetCore.Services
             if (!_playing)
             {
                 //want to trigger playing next song in queue
-                await PlayNextInQueue(guild);
+                await PlayNextInQueue();
             }
             else
             {
@@ -410,7 +405,7 @@ namespace TerminusDotNetCore.Services
             }
         }
 
-        public async Task PlayNextInQueue(IGuild guild)
+        public async Task PlayNextInQueue()
         {
             AudioItem nextInQueue;
             if (_songQueue.TryDequeue(out nextInQueue))
@@ -436,13 +431,13 @@ namespace TerminusDotNetCore.Services
                         await Bot.Log(new LogMessage(LogSeverity.Warning, "AudioSvc", $"failed to download local file for {nextVideo.DisplayName}, skipping..."));
 
                         //skip this item if the download fails
-                        await PlayNextInQueue(guild);
+                        await PlayNextInQueue();
                         return;
                     }
                 }
 
-                _currentChannel = await guild.GetVoiceChannelAsync(nextInQueue.PlayChannelId);
-                await JoinAudio(guild);
+                _currentChannel = await Guild.GetVoiceChannelAsync(nextInQueue.PlayChannelId);
+                await JoinAudio();
 
                 if (Client != null)
                 {
@@ -456,14 +451,14 @@ namespace TerminusDotNetCore.Services
                 await SaveQueueContents();
 
                 //play audio on channel
-                await SendAudioAsync(guild, nextInQueue.Path);
+                await SendAudioAsync(nextInQueue.Path);
 
                 //play next in queue (if any)
-                await PlayNextInQueue(guild);
+                await PlayNextInQueue();
             }
             else
             {
-                await LeaveAudio(guild);
+                await LeaveAudio();
                 if (Client != null)
                 {
                     await Client.SetGameAsync(null);
@@ -474,7 +469,7 @@ namespace TerminusDotNetCore.Services
             }
         }
 
-        public async Task LoadQueueContents(IGuild guild)
+        public async Task LoadQueueContents()
         {
             string queueFilename = Path.Combine(AudioPath, "backup", "queue-contents.json");
             if (!File.Exists(queueFilename))
@@ -491,7 +486,7 @@ namespace TerminusDotNetCore.Services
 
                 if (_playing)
                 {
-                    await LeaveAudio(guild);
+                    await LeaveAudio();
                 }
 
                 //deserialize and enqueue each saved item
@@ -507,7 +502,7 @@ namespace TerminusDotNetCore.Services
 
             if (!_playing)
             {
-                await PlayNextInQueue(guild);
+                await PlayNextInQueue();
             }
         }
 
@@ -596,12 +591,12 @@ namespace TerminusDotNetCore.Services
 
         }
 
-        public async Task StopAllAudio(IGuild guild)
+        public async Task StopAllAudio()
         {
             _songQueue.Clear();
             _playing = false;
             _currentSong = null;
-            await LeaveAudio(guild);
+            await LeaveAudio();
             CleanAudioFiles();
 
             if (Client != null)
@@ -610,22 +605,22 @@ namespace TerminusDotNetCore.Services
             }
         }
 
-        public async Task PlayRegexAudio(IGuild guild, string filename)
+        public async Task PlayRegexAudio(string filename)
         {
             ulong voiceID = ulong.Parse(Config["AudioChannelId"]);
-            IVoiceChannel vc = await guild.GetVoiceChannelAsync(voiceID);
+            IVoiceChannel vc = await Guild.GetVoiceChannelAsync(voiceID);
 
             _backupQueue = _songQueue;
             _weedPlaying = true;
 
-            await StopAllAudio(guild);
-            await JoinAudio(guild);
+            await StopAllAudio();
+            await JoinAudio();
 
             string path = Path.Combine(AudioPath, filename);
             path = Path.GetFullPath(path);
 
-            await SendAudioAsync(guild, path);
-            await LeaveAudio(guild);
+            await SendAudioAsync(path);
+            await LeaveAudio();
 
             _weedPlaying = false;
             _songQueue = _backupQueue;
@@ -636,7 +631,7 @@ namespace TerminusDotNetCore.Services
                 await Client.SetGameAsync(null);
             }
 
-            await PlayNextInQueue(guild);
+            await PlayNextInQueue();
         }
 
         public void SaveSong(string alias, IReadOnlyCollection<Attachment> attachments)
@@ -681,7 +676,7 @@ namespace TerminusDotNetCore.Services
             });
         }
 
-        public async Task ScheduleWeed(IGuild guild)
+        public async Task ScheduleWeed()
         {
             DateTime now = DateTime.Now;
             DateTime fourTwenty = DateTime.Today.AddHours(16.333);
@@ -696,8 +691,8 @@ namespace TerminusDotNetCore.Services
             _backupQueue = _songQueue;
             _weedPlaying = true;
 
-            await StopAllAudio(guild);
-            await JoinAudio(guild);
+            await StopAllAudio();
+            await JoinAudio();
 
             string path = Path.Combine(AudioPath, "weedlmao.mp3");
             path = Path.GetFullPath(path);
@@ -707,8 +702,8 @@ namespace TerminusDotNetCore.Services
                 await Client.SetGameAsync("weeeeed");
             }
 
-            await SendAudioAsync(guild, path);
-            await LeaveAudio(guild);
+            await SendAudioAsync(path);
+            await LeaveAudio();
 
             _weedPlaying = false;
             _songQueue = _backupQueue;
@@ -718,8 +713,8 @@ namespace TerminusDotNetCore.Services
             {
                 await Client.SetGameAsync(null);
             }
-            _ = PlayNextInQueue(guild);
-            _ = ScheduleWeed(guild);
+            _ = PlayNextInQueue();
+            _ = ScheduleWeed();
         }
 
         public List<Embed> ListQueueContents()
