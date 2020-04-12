@@ -243,7 +243,7 @@ namespace TerminusDotNetCore
                     {
                         //play the audio file specified
                         AudioService audioService = _serviceProvider.GetService(typeof(AudioService)) as AudioService;
-                        _ = audioService.PlayRegexAudio(match.Item2);
+                        _ = audioService.PlayRegexAudio((message.Channel as SocketGuildChannel).Guild, match.Item2);
                     }
                 }
             }

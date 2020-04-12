@@ -604,10 +604,10 @@ namespace TerminusDotNetCore.Services
             }
         }
 
-        public async Task PlayRegexAudio(string filename)
+        public async Task PlayRegexAudio(IGuild guild, string filename)
         {
             ulong voiceID = ulong.Parse(Config["AudioChannelId"]);
-            IVoiceChannel vc = await Guild.GetVoiceChannelAsync(voiceID);
+            IVoiceChannel vc = await guild.GetVoiceChannelAsync(voiceID);
 
             _backupQueue = _songQueue;
             _weedPlaying = true;
