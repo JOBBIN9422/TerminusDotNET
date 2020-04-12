@@ -109,7 +109,7 @@ namespace TerminusDotNetCore.Modules
             if ( useFile )
             {
                 IReadOnlyCollection<Attachment> atts = await GetAttachmentsAsync();
-                await _service.QueueTempSong(Context.Guild, Context.Message.Author, atts, voiceID);
+                await _service.QueueTempSong(Context.Message.Author, atts, voiceID);
             }
             else
             {
@@ -120,7 +120,7 @@ namespace TerminusDotNetCore.Modules
                     Console.WriteLine(path);
                     return;
                 }
-                await _service.QueueLocalSong(Context.Guild, Context.Message.Author, path, voiceID);
+                await _service.QueueLocalSong(Context.Message.Author, path, voiceID);
             }
         }
 
@@ -156,7 +156,7 @@ namespace TerminusDotNetCore.Modules
                 return;
             }
 
-            await _service.QueueSearchedYoutubeSong(Context.Guild, Context.Message.Author, searchTerm, voiceID);
+            await _service.QueueSearchedYoutubeSong(Context.Message.Author, searchTerm, voiceID);
         }
 
         [Command("playlist", RunMode = RunMode.Async)]
@@ -191,7 +191,7 @@ namespace TerminusDotNetCore.Modules
                 return;
             }
 
-            await _service.QueueYoutubePlaylist(Context.Guild, Context.Message.Author, playlistUrl, voiceID);
+            await _service.QueueYoutubePlaylist(Context.Message.Author, playlistUrl, voiceID);
         }
 
         [Command("yt", RunMode = RunMode.Async)]
@@ -226,14 +226,14 @@ namespace TerminusDotNetCore.Modules
                 return;
             }
 
-            await _service.QueueYoutubeSongPreDownloaded(Context.Guild, Context.Message.Author, url, voiceID);
+            await _service.QueueYoutubeSongPreDownloaded(Context.Message.Author, url, voiceID);
         }
 
         [Command("playnext", RunMode = RunMode.Async)]
         [Summary("Play the next item in the song queue, if any.")]
         public async Task PlayNext()
         {
-            await _service.PlayNextInQueue(Context.Guild);
+            await _service.PlayNextInQueue();
         }
         
         [Command("songs", RunMode = RunMode.Async)]
@@ -252,7 +252,7 @@ namespace TerminusDotNetCore.Modules
         [Summary("Flush song queue and leave voice channels")]
         public async Task KillMusic()
         {
-            await _service.StopAllAudio(Context.Guild);
+            await _service.StopAllAudio();
         }
 
         [Command("addpersistentsong", RunMode = RunMode.Async)]
@@ -303,7 +303,7 @@ namespace TerminusDotNetCore.Modules
                 _service.SetGuildClient(Context.Guild, Context.Client);
             }
 
-            await _service.LoadQueueContents(Context.Guild);
+            await _service.LoadQueueContents();
         }
     }
 }
