@@ -154,7 +154,10 @@ namespace TerminusDotNetCore.Services
                 _ffmpeg.Kill(true);
             }
 
-            await _currentChannel.DisconnectAsync();
+            if (_currentChannel != null)
+            {
+                await _currentChannel.DisconnectAsync();
+            }
 
             Tuple<IAudioClient, IVoiceChannel> client;
             if (_connectedChannels.TryRemove(Guild.Id, out client))
