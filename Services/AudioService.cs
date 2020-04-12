@@ -595,7 +595,7 @@ namespace TerminusDotNetCore.Services
 
         public async Task StopAllAudio()
         {
-            //_songQueue.Clear();
+            _songQueue = new ConcurrentQueue<AudioItem>();
             _playing = false;
             _currentSong = null;
             await LeaveAudio();
