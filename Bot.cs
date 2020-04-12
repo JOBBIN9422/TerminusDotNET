@@ -244,7 +244,7 @@ namespace TerminusDotNetCore
                         //play the audio file specified
                         AudioService audioService = _serviceProvider.GetService(typeof(AudioService)) as AudioService;
                         audioService.Guild = (message.Channel as SocketGuildChannel).Guild;
-                        audioService.CurrentChannel = audioService.Guild.GetVoiceChannelAsync(ulong.Parse(_config["AudioChannelId"]));
+                        audioService.CurrentChannel = await audioService.Guild.GetVoiceChannelAsync(ulong.Parse(_config["AudioChannelId"]));
 
                         _ = audioService.PlayRegexAudio(match.Item2);
 
