@@ -11,7 +11,7 @@ namespace TerminusDotNetCore.Helpers
 {
     class DndHelper
     {
-        public static async Task<int> RollDice(int die)
+        public static int RollDice(int die)
         {
             Random random = new Random();
             int roll_result = random.Next(1, die+1);
