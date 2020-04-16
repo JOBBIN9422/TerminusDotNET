@@ -124,6 +124,7 @@ namespace TerminusDotNetCore.Modules
 
             //string[] initiative = initiative.OrderBy(x => random.Next()).ToArray();
 
+            //Shuffle incomming names
             for (int i = 0; i < num_elems - 1; i++)
             {
                 string temp_item = initiative[i];
