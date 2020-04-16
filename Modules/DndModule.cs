@@ -38,15 +38,15 @@ namespace TerminusDotNetCore.Modules
                 dice_roll = "1d" + random.Next(1000000).ToString();
             }
             
-            string[] substrings = dice_roll.Split("d");
+            string[] initiative = dice_roll.Split("d");
 
             //Check input format
-            if (substrings.Length <= 2)
+            if (initiative.Length <= 2)
             {
-                if (substrings.Length == 1)
+                if (initiative.Length == 1)
                 {
-                    substrings[1] = substrings[0];
-                    substrings[0] = "1";
+                    initiative[1] = initiative[0];
+                    initiative[0] = "1";
                 }
                 else
                 {
@@ -63,8 +63,8 @@ namespace TerminusDotNetCore.Modules
             int max_roll = 0;
 
             //Convert roll amount and dice size to integers
-            bool valid_roll_count = int.TryParse(substrings[0], out roll_count);
-            bool valid_dice_amount = int.TryParse(substrings[1], out dice_amount);
+            bool valid_roll_count = int.TryParse(initiative[0], out roll_count);
+            bool valid_dice_amount = int.TryParse(initiative[1], out dice_amount);
 
             if (valid_roll_count == false || valid_dice_amount == false)
             {
@@ -118,9 +118,22 @@ namespace TerminusDotNetCore.Modules
         {
             Random random = new Random();
 
-            string[] substrings = members.Split(",");
+            string[] initiative = members.Split(",");
 
-            string[] initiative = substrings.OrderBy(x => random.Next()).ToArray();
+            int num_elems = initiative.Length;
+
+            //string[] initiative = initiative.OrderBy(x => random.Next()).ToArray();
+
+            for (int i = 0; i < num_elems - 1; i++)
+            {
+                string temp_item = initiative[i];
+
+                int rand_index = random.Next(i, num_elems);
+
+                initiative[i] = initiative[rand_index];
+
+                initiative[rand_index] = temp_item;
+            }
 
             await ServiceReplyAsync("**Initiative:** " + string.Join(", ", initiative));
         }
