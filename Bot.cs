@@ -1,17 +1,14 @@
 ﻿using System;
 using System.IO;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Reflection;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
-using Microsoft.Extensions.DependencyInjection;
 using TerminusDotNetCore.Services;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Configuration.Json;
-using Microsoft.Extensions.Configuration.FileExtensions;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace TerminusDotNetCore
 {
