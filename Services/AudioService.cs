@@ -879,8 +879,11 @@ namespace TerminusDotNetCore.Services
                 var video = await youtube.GetVideoAsync(url);
                 var videoData = await video.GetBytesAsync();
 
+                //remove single/double quotes for command line parsing purposes
+                string vidNameEscapedQuotes = video.FullName.Replace("\"", "").Replace("'", "");
+
                 //write the downloaded media file to the temp assets dir
-                videoDataFilename = Path.Combine(tempPath, video.FullName);
+                videoDataFilename = Path.Combine(tempPath, vidNameEscapedQuotes);
                 await File.WriteAllBytesAsync(videoDataFilename, videoData);
 
                 return videoDataFilename;
