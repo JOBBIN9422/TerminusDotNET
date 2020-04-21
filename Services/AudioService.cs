@@ -194,7 +194,7 @@ namespace TerminusDotNetCore.Services
                     {
                         //clean up ffmpeg, index queue, and set playback state
                         await stream.FlushAsync();
-                        stream.Close();
+
                         _ffmpeg.Kill(true);
                         _playing = false;
                         //await PlayNextInQueue(guild);
