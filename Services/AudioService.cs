@@ -128,11 +128,11 @@ namespace TerminusDotNetCore.Services
             {
                 if (retryCount == 0)
                 {
-                    await Bot.Log(new LogMessage(LogSeverity.Error, "AudioSvc", $"failed to connect to voice channel after repeated timeouts."));
+                    await Logger.Log(new LogMessage(LogSeverity.Error, "AudioSvc", $"failed to connect to voice channel after repeated timeouts."));
                     return;
                 }
 
-                await Bot.Log(new LogMessage(LogSeverity.Error, "AudioSvc", $"failed to connect to voice channel, retrying... ({retryCount} attempts remaining)"));
+                await Logger.Log(new LogMessage(LogSeverity.Error, "AudioSvc", $"failed to connect to voice channel, retrying... ({retryCount} attempts remaining)"));
                 await JoinAudio(--retryCount);
                 return;
             }
@@ -421,16 +421,16 @@ namespace TerminusDotNetCore.Services
                         //if the youtube video has not been downloaded yet
                         if (nextVideo.AudioSource == YouTubeAudioType.Url)
                         {
-                            await Bot.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"downloading local file for {nextVideo.DisplayName}..."));
+                            await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"downloading local file for {nextVideo.DisplayName}..."));
 
                             nextVideo.Path = await DownloadYoutubeVideoAsync(nextVideo.VideoUrl);
 
-                            await Bot.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"downloaded local file {nextVideo.Path}"));
+                            await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"downloaded local file {nextVideo.Path}"));
                         }
                     }
                     catch (ArgumentException)
                     {
-                        await Bot.Log(new LogMessage(LogSeverity.Warning, "AudioSvc", $"failed to download local file for {nextVideo.DisplayName}, skipping..."));
+                        await Logger.Log(new LogMessage(LogSeverity.Warning, "AudioSvc", $"failed to download local file for {nextVideo.DisplayName}, skipping..."));
 
                         //skip this item if the download fails
                         await PlayNextInQueue();
