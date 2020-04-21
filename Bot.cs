@@ -9,6 +9,7 @@ using Discord.WebSocket;
 using TerminusDotNetCore.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using TerminusDotNetCore.Helpers;
 
 namespace TerminusDotNetCore
 {
@@ -42,7 +43,7 @@ namespace TerminusDotNetCore
 
             //instantiate client and register log event handler
             _client = new DiscordSocketClient();
-            _client.Log += Log;
+            _client.Log += Logger.Log;
             _client.MessageReceived += HandleCommandAsync;
 
             //verify that each required client secret is in the secrets file
@@ -64,7 +65,7 @@ namespace TerminusDotNetCore
             {
                 if (_config[configEntry.Key] == null)
                 {
-                    await Log(new LogMessage(LogSeverity.Warning, "appsettings.json", $"WARN: Missing item in appsettings config file :: {configEntry.Key} --- Description :: {configEntry.Value}"));
+                    await Logger.Log(new LogMessage(LogSeverity.Warning, "appsettings.json", $"WARN: Missing item in appsettings config file :: {configEntry.Key} --- Description :: {configEntry.Value}"));
                 }
             }
 
@@ -73,7 +74,7 @@ namespace TerminusDotNetCore
             {
                 if (_config[secretEntry.Key] == null)
                 {
-                    await Log(new LogMessage(LogSeverity.Warning, "secrets.json", $"WARN: Missing item in secrets file :: {secretEntry.Key} --- Description :: {secretEntry.Value}"));
+                    await Logger.Log(new LogMessage(LogSeverity.Warning, "secrets.json", $"WARN: Missing item in secrets file :: {secretEntry.Key} --- Description :: {secretEntry.Value}"));
                 }
             }
 
@@ -102,33 +103,6 @@ namespace TerminusDotNetCore
         }
 
         //log message to file
-        public static Task Log(LogMessage message)
-        {
-            //Logger.WriteMessage(message.Source + ".txt", message.ToString());
-
-            switch (message.Severity)
-            {
-                case LogSeverity.Critical:
-                case LogSeverity.Error:
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    break;
-                case LogSeverity.Debug:
-                case LogSeverity.Verbose:
-                    Console.ForegroundColor = ConsoleColor.Gray;
-                    break;
-                case LogSeverity.Warning:
-                    Console.ForegroundColor = ConsoleColor.Yellow;
-                    break;
-                case LogSeverity.Info:
-                    Console.ForegroundColor = ConsoleColor.Green;
-                    break;
-                default:
-                    break;
-            }
-            Console.WriteLine(message.ToString());
-            Console.ResetColor();
-            return Task.CompletedTask;
-        }
 
         private async Task HandleCommandAsync(SocketMessage messageParam)
         {
@@ -169,8 +143,8 @@ namespace TerminusDotNetCore
                 {
                     //alert user and print error details to console
                     await context.Channel.SendMessageAsync(result.ErrorReason);
-                    await Log(new LogMessage(LogSeverity.Error, "CommandExecution", $"Error in command '{command.Value.Name}': {execResult.ErrorReason}"));
-                    await Log(new LogMessage(LogSeverity.Error, "CommandExecution", $"Exception details (see errors.txt): {execResult.Exception.StackTrace}"));
+                    await Logger.Log(new LogMessage(LogSeverity.Error, "CommandExecution", $"Error in command '{command.Value.Name}': {execResult.ErrorReason}"));
+                    await Logger.Log(new LogMessage(LogSeverity.Error, "CommandExecution", $"Exception details (see errors.txt): {execResult.Exception.StackTrace}"));
 
                     //dump exception details to error log
                     using (StreamWriter writer = new StreamWriter("errors.txt", true))
@@ -187,13 +161,13 @@ namespace TerminusDotNetCore
                 else
                 {
                     //on successful command execution
-                    await Log(new LogMessage(LogSeverity.Info, "CommandExecution", $"Command '{command.Value.Name}' executed successfully."));
+                    await Logger.Log(new LogMessage(LogSeverity.Info, "CommandExecution", $"Command '{command.Value.Name}' executed successfully."));
                 }
             }
             catch (InvalidOperationException)
             {
                 await context.Channel.SendMessageAsync("Unknown command.");
-                await Log(new LogMessage(LogSeverity.Error, "CommandExecution", $"Unknown command."));
+                await Logger.Log(new LogMessage(LogSeverity.Error, "CommandExecution", $"Unknown command."));
             }
         }
 
