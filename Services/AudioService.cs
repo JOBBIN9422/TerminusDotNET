@@ -173,10 +173,10 @@ namespace TerminusDotNetCore.Services
             }
         }
 
-        public async Task SendAudioAsync(string path, IVoiceChannel playChannel = null)
+        public async Task SendAudioAsync(string path)
         {
             Tuple<IAudioClient, IVoiceChannel> client;
-            if (_connectedChannels.TryGetValue(Guild.Id, out client) || playChannel != null)
+            if (_connectedChannels.TryGetValue(Guild.Id, out client))
             {
                 //clean up the existing process if necessary
                 if (_ffmpeg != null && !_ffmpeg.HasExited)
@@ -188,12 +188,7 @@ namespace TerminusDotNetCore.Services
                 _playing = true;
                 _ffmpeg = CreateProcess(path);
 
-                if (playChannel != null)
-                {
-                    IAudioClient currClient = await playChannel.ConnectAsync();
-                    await StreamFfmpegAudio(currClient);
-                }
-                else if (client.Item1 != null)
+                if (client.Item1 != null)
                 {
                     await StreamFfmpegAudio(client.Item1);
                 }
