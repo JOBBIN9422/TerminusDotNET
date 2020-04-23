@@ -662,6 +662,7 @@ namespace TerminusDotNetCore.Services
             _backupQueue = _songQueue;
             _weedPlaying = true;
 
+            CurrentChannel = weedChannel;
             await StopAllAudio();
             await JoinAudio();
 
@@ -673,7 +674,7 @@ namespace TerminusDotNetCore.Services
                 await Client.SetGameAsync("weeeeed");
             }
 
-            await SendAudioAsync(path, weedChannel);
+            await SendAudioAsync(path);
             await LeaveAudio();
 
             _weedPlaying = false;
