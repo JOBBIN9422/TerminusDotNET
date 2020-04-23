@@ -64,7 +64,7 @@ namespace TerminusDotNetCore.Services
 
         //Discord info objects
         public IGuild Guild { get; set; }
-        public DiscordSocketClient Client;
+        public DiscordSocketClient Client { get; set; }
 
         //path for local (aliased) audio files
         public string AudioPath { get; } = Path.Combine("assets", "audio");
