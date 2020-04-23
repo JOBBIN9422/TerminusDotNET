@@ -26,6 +26,7 @@ namespace TerminusDotNetCore.Services
 {
     public class AudioService : ICustomService
     {
+        #region fields & properties
         //shared config object - passed from parent module via DI
         public IConfiguration Config { get; set; }
 
@@ -65,19 +66,21 @@ namespace TerminusDotNetCore.Services
         public IGuild Guild { get; set; }
         public DiscordSocketClient Client;
 
+        //path for local (aliased) audio files
+        public string AudioPath { get; } = Path.Combine("assets", "audio");
+
+        //map clients to their current channel
+        private readonly ConcurrentDictionary<ulong, Tuple<IAudioClient, IVoiceChannel>> _connectedChannels = new ConcurrentDictionary<ulong, Tuple<IAudioClient, IVoiceChannel>>();
+        #endregion
+
+        #region init
         public AudioService(IConfiguration config)
         {
             Config = config;
             FFMPEG_PROCESS_NAME = Config["FfmpegCommand"];
             Task.Run(async () => await InitYoutubeService());
         }
-
-        //path for local (aliased) audio files
-        public string AudioPath { get; } = Path.Combine("assets", "audio");
-
-        //map clients to their current channel
-        private readonly ConcurrentDictionary<ulong, Tuple<IAudioClient, IVoiceChannel>> _connectedChannels = new ConcurrentDictionary<ulong, Tuple<IAudioClient, IVoiceChannel>>();
-
+        
         public async Task InitYoutubeService()
         {
             //attempt to read auth info from secrets file 
@@ -101,17 +104,20 @@ namespace TerminusDotNetCore.Services
                 }
             );
         }
+        #endregion
 
-        public async void SetGuildClient(IGuild g, DiscordSocketClient c)
+        #region audio control methods
+        public async Task StopAllAudio()
         {
-            Guild = g;
-            Client = c;
-            if (_weedStarted == false)
+            _songQueue = new ConcurrentQueue<AudioItem>();
+            _playing = false;
+            _currentSong = null;
+            await LeaveAudio();
+            CleanAudioFiles();
+
+            if (Client != null)
             {
-                _weedStarted = true;
-                ulong voiceID = ulong.Parse(Config["WeedChannelId"]);
-                IVoiceChannel vc = await Guild.GetVoiceChannelAsync(voiceID);
-                await this.ScheduleWeed(vc);
+                await Client.SetGameAsync(null);
             }
         }
 
@@ -217,6 +223,132 @@ namespace TerminusDotNetCore.Services
                 }
             }
         }
+        public async Task PlayRegexAudio(string filename)
+        {
+            ulong voiceID = ulong.Parse(Config["AudioChannelId"]);
+            IVoiceChannel vc = await Guild.GetVoiceChannelAsync(voiceID);
+
+            _backupQueue = _songQueue;
+            _weedPlaying = true;
+
+            await StopAllAudio();
+            await JoinAudio();
+
+            string path = Path.Combine(AudioPath, filename);
+            path = Path.GetFullPath(path);
+
+            await SendAudioAsync(path);
+            await LeaveAudio();
+
+            _weedPlaying = false;
+            _songQueue = _backupQueue;
+            _backupQueue = new ConcurrentQueue<AudioItem>();
+
+            if (Client != null)
+            {
+                await Client.SetGameAsync(null);
+            }
+
+            await PlayNextInQueue();
+        }
+
+        private Process CreateProcess(string path)
+        {
+            //start an ffmpeg process with stdout redirected 
+            return Process.Start(new ProcessStartInfo
+            {
+                FileName = FFMPEG_PROCESS_NAME,
+                Arguments = $"-hide_banner -loglevel panic -i \"{path}\" -ac 2 -f s16le -ar 48000 pipe:1",
+                UseShellExecute = false,
+                RedirectStandardOutput = true
+            });
+        }
+        #endregion
+
+        #region queue control methods
+        public async Task PlayNextInQueue()
+        {
+            AudioItem nextInQueue;
+            if (_songQueue.TryDequeue(out nextInQueue))
+            {
+                //need to download if not already saved locally (change the URL to the path of the downloaded file)
+                if (nextInQueue is YouTubeAudioItem)
+                {
+                    YouTubeAudioItem nextVideo = nextInQueue as YouTubeAudioItem;
+                    try
+                    {
+                        //if the youtube video has not been downloaded yet
+                        if (nextVideo.AudioSource == YouTubeAudioType.Url)
+                        {
+                            await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"downloading local file for {nextVideo.DisplayName}..."));
+
+                            nextVideo.Path = await DownloadYoutubeVideoAsync(nextVideo.VideoUrl);
+
+                            await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"downloaded local file {nextVideo.Path}"));
+                        }
+                    }
+                    catch (ArgumentException)
+                    {
+                        await Logger.Log(new LogMessage(LogSeverity.Warning, "AudioSvc", $"failed to download local file for {nextVideo.DisplayName}, skipping..."));
+
+                        //skip this item if the download fails
+                        await PlayNextInQueue();
+                        return;
+                    }
+                }
+
+                CurrentChannel = await Guild.GetVoiceChannelAsync(nextInQueue.PlayChannelId);
+                await JoinAudio();
+
+                if (Client != null)
+                {
+                    await Client.SetGameAsync(nextInQueue.DisplayName);
+                }
+
+                //update the currently-playing song and kill the audio process if it's running
+                _currentSong = nextInQueue;
+
+                //record current queue state 
+                await SaveQueueContents();
+
+                //play audio on channel
+                await SendAudioAsync(nextInQueue.Path);
+
+                //play next in queue (if any)
+                await PlayNextInQueue();
+            }
+            else
+            {
+                await LeaveAudio();
+                if (Client != null)
+                {
+                    await Client.SetGameAsync(null);
+                }
+                // Queue is empty, delete all .mp3 files in the assets/temp folder
+                CleanAudioFiles();
+
+            }
+        }
+
+
+        public async Task QueueTempSong(SocketUser owner, IReadOnlyCollection<Attachment> attachments, ulong channelId)
+        {
+            List<string> files = AttachmentHelper.DownloadAttachments(attachments);
+            string path = files[0];
+            string displayName = Path.GetFileName(path);
+
+            EnqueueSong(new LocalAudioItem() { Path = path, PlayChannelId = channelId, AudioSource = FileAudioType.Attachment, DisplayName = displayName, OwnerName = owner.Username });
+
+            if (!_playing)
+            {
+                //want to trigger playing next song in queue
+                await PlayNextInQueue();
+            }
+            else
+            {
+                await SaveQueueContents();
+            }
+        }
 
         private void EnqueueSong(AudioItem item)
         {
@@ -282,45 +414,6 @@ namespace TerminusDotNetCore.Services
 
             //add the list of URLs to the queue for downloading during playback
             await QueueYoutubeURLs(videoUrls, owner, channelId);
-        }
-
-        private static bool PlaylistUrlIsValid(string url)
-        {
-            return Regex.IsMatch(url, @"https:\/\/www.youtube.com\/playlist\?list=.+");
-        }
-
-        private static string GetPlaylistIdFromUrl(string url)
-        {
-            string Id = Regex.Match(url, @"(?<=list=).+").Value;
-            return Id;
-        }
-
-        private static string GetVideoIdFromUrl(string url)
-        {
-            string Id = Regex.Match(url, @"(?<=v=)[\w-]+").Value;
-            return Id;
-        }
-
-        private async Task<string> GetVideoTitleFromUrlAsync(string url)
-        {
-            var videoRequest = _ytService.Videos.List("snippet");
-            videoRequest.Id = GetVideoIdFromUrl(url);
-
-            var searchResponse = await videoRequest.ExecuteAsync();
-
-            string title = string.Empty;
-
-            //grab the video title from the response (any should do)
-            foreach (var item in searchResponse.Items)
-            {
-                if (!string.IsNullOrEmpty(item.Snippet.Title))
-                {
-                    title = item.Snippet.Title;
-                    break;
-                }
-            }
-
-            return title;
         }
 
         public async Task QueueSearchedYoutubeSong(SocketUser owner, string searchTerm, ulong channelId)
@@ -392,28 +485,9 @@ namespace TerminusDotNetCore.Services
             string filePath = await DownloadYoutubeVideoAsync(url);
 
             EnqueueSong(new YouTubeAudioItem() { Path = filePath, VideoUrl = url, PlayChannelId = channelId, AudioSource = YouTubeAudioType.PreDownloaded, DisplayName = displayName, OwnerName = owner.Username });
-            
-            if (!_playing)
-            {
-                await PlayNextInQueue();
-            }
-            else
-            {
-                await SaveQueueContents();
-            }
-        }
-
-        public async Task QueueTempSong(SocketUser owner, IReadOnlyCollection<Attachment> attachments, ulong channelId)
-        {
-            List<string> files = AttachmentHelper.DownloadAttachments(attachments);
-            string path = files[0];
-            string displayName = Path.GetFileName(path);
-
-            EnqueueSong(new LocalAudioItem() { Path = path, PlayChannelId = channelId, AudioSource = FileAudioType.Attachment, DisplayName = displayName, OwnerName = owner.Username });
 
             if (!_playing)
             {
-                //want to trigger playing next song in queue
                 await PlayNextInQueue();
             }
             else
@@ -421,71 +495,9 @@ namespace TerminusDotNetCore.Services
                 await SaveQueueContents();
             }
         }
+        #endregion
 
-        public async Task PlayNextInQueue()
-        {
-            AudioItem nextInQueue;
-            if (_songQueue.TryDequeue(out nextInQueue))
-            {
-                //need to download if not already saved locally (change the URL to the path of the downloaded file)
-                if (nextInQueue is YouTubeAudioItem)
-                {
-                    YouTubeAudioItem nextVideo = nextInQueue as YouTubeAudioItem;
-                    try
-                    {
-                        //if the youtube video has not been downloaded yet
-                        if (nextVideo.AudioSource == YouTubeAudioType.Url)
-                        {
-                            await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"downloading local file for {nextVideo.DisplayName}..."));
-
-                            nextVideo.Path = await DownloadYoutubeVideoAsync(nextVideo.VideoUrl);
-
-                            await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"downloaded local file {nextVideo.Path}"));
-                        }
-                    }
-                    catch (ArgumentException)
-                    {
-                        await Logger.Log(new LogMessage(LogSeverity.Warning, "AudioSvc", $"failed to download local file for {nextVideo.DisplayName}, skipping..."));
-
-                        //skip this item if the download fails
-                        await PlayNextInQueue();
-                        return;
-                    }
-                }
-
-                CurrentChannel = await Guild.GetVoiceChannelAsync(nextInQueue.PlayChannelId);
-                await JoinAudio();
-
-                if (Client != null)
-                {
-                    await Client.SetGameAsync(nextInQueue.DisplayName);
-                }
-
-                //update the currently-playing song and kill the audio process if it's running
-                _currentSong = nextInQueue;
-
-                //record current queue state 
-                await SaveQueueContents();
-
-                //play audio on channel
-                await SendAudioAsync(nextInQueue.Path);
-
-                //play next in queue (if any)
-                await PlayNextInQueue();
-            }
-            else
-            {
-                await LeaveAudio();
-                if (Client != null)
-                {
-                    await Client.SetGameAsync(null);
-                }
-                // Queue is empty, delete all .mp3 files in the assets/temp folder
-                CleanAudioFiles();
-
-            }
-        }
-
+        #region queue/song state management methods
         public async Task LoadQueueContents()
         {
             string queueFilename = Path.Combine(AudioPath, "backup", "queue-contents.json");
@@ -608,49 +620,6 @@ namespace TerminusDotNetCore.Services
 
         }
 
-        public async Task StopAllAudio()
-        {
-            _songQueue = new ConcurrentQueue<AudioItem>();
-            _playing = false;
-            _currentSong = null;
-            await LeaveAudio();
-            CleanAudioFiles();
-
-            if (Client != null)
-            {
-                await Client.SetGameAsync(null);
-            }
-        }
-
-        public async Task PlayRegexAudio(string filename)
-        {
-            ulong voiceID = ulong.Parse(Config["AudioChannelId"]);
-            IVoiceChannel vc = await Guild.GetVoiceChannelAsync(voiceID);
-
-            _backupQueue = _songQueue;
-            _weedPlaying = true;
-
-            await StopAllAudio();
-            await JoinAudio();
-
-            string path = Path.Combine(AudioPath, filename);
-            path = Path.GetFullPath(path);
-
-            await SendAudioAsync(path);
-            await LeaveAudio();
-
-            _weedPlaying = false;
-            _songQueue = _backupQueue;
-            _backupQueue = new ConcurrentQueue<AudioItem>();
-
-            if (Client != null)
-            {
-                await Client.SetGameAsync(null);
-            }
-
-            await PlayNextInQueue();
-        }
-
         public void SaveSong(string alias, IReadOnlyCollection<Attachment> attachments)
         {
             string filename = AttachmentHelper.DownloadPersistentAudioAttachment(attachments.ElementAt(0));
@@ -680,19 +649,9 @@ namespace TerminusDotNetCore.Services
 
             await ParentModule.ServiceReplyAsync($"Successfully added aliased song '{alias}'.");
         }
+        #endregion
 
-        private Process CreateProcess(string path)
-        {
-            //start an ffmpeg process with stdout redirected 
-            return Process.Start(new ProcessStartInfo
-            {
-                FileName = FFMPEG_PROCESS_NAME,
-                Arguments = $"-hide_banner -loglevel panic -i \"{path}\" -ac 2 -f s16le -ar 48000 pipe:1",
-                UseShellExecute = false,
-                RedirectStandardOutput = true
-            });
-        }
-
+        #region weed
         public async Task ScheduleWeed(IVoiceChannel weedChannel)
         {
             DateTime now = DateTime.Now;
@@ -731,9 +690,11 @@ namespace TerminusDotNetCore.Services
                 await Client.SetGameAsync(null);
             }
             _ = PlayNextInQueue();
-            _ = ScheduleWeed();
+            _ = ScheduleWeed(weedChannel);
         }
+        #endregion
 
+        #region song display methods
         public List<Embed> ListQueueContents()
         {
             //need a list of embeds since each embed can only have 25 fields max
@@ -880,7 +841,9 @@ namespace TerminusDotNetCore.Services
 
             return songSource;
         }
+        #endregion
 
+        #region Youtube helpers
         private async Task<string> DownloadYoutubeVideoAsync(string url)
         {
             //define the directory to save video files to
@@ -910,12 +873,66 @@ namespace TerminusDotNetCore.Services
             }
         }
 
+
+        private static bool PlaylistUrlIsValid(string url)
+        {
+            return Regex.IsMatch(url, @"https:\/\/www.youtube.com\/playlist\?list=.+");
+        }
+
+        private static string GetPlaylistIdFromUrl(string url)
+        {
+            string Id = Regex.Match(url, @"(?<=list=).+").Value;
+            return Id;
+        }
+
+        private static string GetVideoIdFromUrl(string url)
+        {
+            string Id = Regex.Match(url, @"(?<=v=)[\w-]+").Value;
+            return Id;
+        }
+
+        private async Task<string> GetVideoTitleFromUrlAsync(string url)
+        {
+            var videoRequest = _ytService.Videos.List("snippet");
+            videoRequest.Id = GetVideoIdFromUrl(url);
+
+            var searchResponse = await videoRequest.ExecuteAsync();
+
+            string title = string.Empty;
+
+            //grab the video title from the response (any should do)
+            foreach (var item in searchResponse.Items)
+            {
+                if (!string.IsNullOrEmpty(item.Snippet.Title))
+                {
+                    title = item.Snippet.Title;
+                    break;
+                }
+            }
+
+            return title;
+        }
+        #endregion
+
+        #region misc. helpers
         private void CleanAudioFiles()
         {
             AttachmentHelper.DeleteFiles(AttachmentHelper.GetTempAssets("*.mp3"));
             AttachmentHelper.DeleteFiles(AttachmentHelper.GetTempAssets("*.mp4"));
             AttachmentHelper.DeleteFiles(AttachmentHelper.GetTempAssets("*.webm"));
         }
-
+        public async void SetGuildClient(IGuild g, DiscordSocketClient c)
+        {
+            Guild = g;
+            Client = c;
+            if (_weedStarted == false)
+            {
+                _weedStarted = true;
+                ulong voiceID = ulong.Parse(Config["WeedChannelId"]);
+                IVoiceChannel vc = await Guild.GetVoiceChannelAsync(voiceID);
+                await this.ScheduleWeed(vc);
+            }
+        }
+        #endregion
     }
 }
