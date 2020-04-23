@@ -111,7 +111,7 @@ namespace TerminusDotNetCore.Services
                 _weedStarted = true;
                 ulong voiceID = ulong.Parse(Config["WeedChannelId"]);
                 IVoiceChannel vc = await Guild.GetVoiceChannelAsync(voiceID);
-                await this.ScheduleWeed();
+                await this.ScheduleWeed(vc);
             }
         }
 
@@ -167,10 +167,10 @@ namespace TerminusDotNetCore.Services
             }
         }
 
-        public async Task SendAudioAsync(string path)
+        public async Task SendAudioAsync(string path, IVoiceChannel playChannel = null)
         {
             Tuple<IAudioClient, IVoiceChannel> client;
-            if (_connectedChannels.TryGetValue(Guild.Id, out client))
+            if (_connectedChannels.TryGetValue(Guild.Id, out client) || playChannel != null)
             {
                 //clean up the existing process if necessary
                 if (_ffmpeg != null && !_ffmpeg.HasExited)
@@ -182,23 +182,38 @@ namespace TerminusDotNetCore.Services
                 _playing = true;
                 _ffmpeg = CreateProcess(path);
 
-                //init audio stream in voice channel
-                using (var stream = client.Item1.CreatePCMStream(AudioApplication.Music))
+                if (playChannel != null)
                 {
-                    try
-                    {
-                        //copy ffmpeg output to the voice channel stream
-                        await _ffmpeg.StandardOutput.BaseStream.CopyToAsync(stream);
-                    }
-                    finally
-                    {
-                        //clean up ffmpeg, index queue, and set playback state
-                        await stream.FlushAsync();
+                    IAudioClient currClient = await playChannel.ConnectAsync();
+                    await StreamFfmpegAudio(currClient);
+                }
+                else if (client.Item1 != null)
+                {
+                    await StreamFfmpegAudio(client.Item1);
+                }
+                else
+                {
+                    await ParentModule.ServiceReplyAsync($"Could not find a valid audio client for playback.");
+                    return;
+                }
+            }
+        }
 
-                        _ffmpeg.Kill(true);
-                        _playing = false;
-                        //await PlayNextInQueue(guild);
-                    }
+        private async Task StreamFfmpegAudio(IAudioClient client)
+        {
+            using (var stream = client.CreatePCMStream(AudioApplication.Music))
+            {
+                try
+                {
+                    //copy ffmpeg output to the voice channel stream
+                    await _ffmpeg.StandardOutput.BaseStream.CopyToAsync(stream);
+                }
+                finally
+                {
+                    //clean up ffmpeg, index queue, and set playback state
+                    await stream.FlushAsync();
+                    _ffmpeg.Kill(true);
+                    _playing = false;
                 }
             }
         }
@@ -678,7 +693,7 @@ namespace TerminusDotNetCore.Services
             });
         }
 
-        public async Task ScheduleWeed()
+        public async Task ScheduleWeed(IVoiceChannel weedChannel)
         {
             DateTime now = DateTime.Now;
             DateTime fourTwenty = DateTime.Today.AddHours(16.333);
@@ -704,7 +719,7 @@ namespace TerminusDotNetCore.Services
                 await Client.SetGameAsync("weeeeed");
             }
 
-            await SendAudioAsync(path);
+            await SendAudioAsync(path, weedChannel);
             await LeaveAudio();
 
             _weedPlaying = false;
