@@ -236,6 +236,18 @@ namespace TerminusDotNetCore.Modules
             await _service.PlayNextInQueue();
         }
         
+        [Command("playing", RunMode = RunMode.Async)]
+        [Summary("Display info about the currently playing song, if any.")]
+        public async Task DisplayCurrentSong()
+        {
+            Embed currSongInfo = await _service.DisplayCurrentSong();
+            if (currSongInfo != null)
+            {
+                await ReplyAsync(embed: currSongInfo);
+            }
+
+        }
+
         [Command("songs", RunMode = RunMode.Async)]
         [Summary("List the contents of the song queue, if any.")]
         public async Task ListSongs()
