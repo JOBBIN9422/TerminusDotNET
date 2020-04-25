@@ -26,5 +26,8 @@ namespace TerminusDotNetCore.Helpers
 
         //the person who added this item to the queue
         public string OwnerName { get; set; }
+
+        //the time that playback of this item started
+        public DateTime StartTime { get; set; }
     }
 }
