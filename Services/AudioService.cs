@@ -705,8 +705,7 @@ namespace TerminusDotNetCore.Services
                 Title = $"Currently Playing: {_currentSong.DisplayName}"
             };
 
-            builder.AddField("Added by:", _currentSong.OwnerName);
-            builder.AddField("Audio source: ", GetAudioSourceString(_currentSong));
+            builder.AddField("Source: ", GetAudioSourceString(_currentSong));
 
             //add time info
             TimeSpan elapsedTime = DateTime.Now - _currentSong.StartTime;
