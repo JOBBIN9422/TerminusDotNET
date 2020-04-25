@@ -61,7 +61,6 @@ namespace TerminusDotNetCore.Modules
             builder.AddField("Name: ", appInfo.Name);
             builder.AddField("Created at: ", appInfo.CreatedAt);
             builder.AddField("Owner: ", appInfo.Owner);
-            builder.AddField("Bio: ", appInfo.Description);
 
             await ReplyAsync(embed: builder.Build());
         }
