@@ -15,6 +15,8 @@ namespace TerminusDotNetCore
 {
     public class Bot
     {
+        public DateTime StartTime { get; private set; }
+
         //for detecting regex matches in messages
         private RegexCommands _regexMsgParser;
 
@@ -38,6 +40,8 @@ namespace TerminusDotNetCore
 
         public async Task Initialize()
         {
+            StartTime = DateTime.Now;
+
             _regexMsgParser = new RegexCommands();
             _commandService = new CommandService();
 

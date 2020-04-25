@@ -58,9 +58,14 @@ namespace TerminusDotNetCore.Modules
                 Title = "About Me"
             };
 
+            TimeSpan uptime = DateTime.Now - _bot.StartTime;
+
             builder.AddField("Name: ", appInfo.Name);
             builder.AddField("Created at: ", appInfo.CreatedAt);
             builder.AddField("Owner: ", appInfo.Owner);
+            builder.AddField("Discord.Net Version: ", DiscordConfig.Version);
+            builder.AddField("Discord API Version: ", DiscordConfig.APIVersion);
+            builder.AddField("Uptime: ", $"{uptime.ToString("%d")} days, {uptime.ToString("%h")} hours, {uptime.ToString("%m")} minutes");
 
             await ReplyAsync(embed: builder.Build());
         }
