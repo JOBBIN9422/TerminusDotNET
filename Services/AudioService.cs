@@ -710,7 +710,7 @@ namespace TerminusDotNetCore.Services
 
             //add time info
             TimeSpan elapsedTime = DateTime.Now - _currentSong.StartTime;
-            builder.AddField("Time started: ", _currentSong.StartTime.ToString("mm\\:ss"));
+            builder.AddField("Time started: ", _currentSong.StartTime.ToString("hh\\:mm"));
             builder.AddField("Time playing: ", elapsedTime.ToString("mm\\:ss"));
 
             return builder.Build();
