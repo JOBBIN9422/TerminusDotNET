@@ -1,4 +1,6 @@
-﻿using Discord.Commands;
+﻿using Discord;
+using Discord.Commands;
+using Discord.Rest;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
@@ -45,6 +47,23 @@ namespace TerminusDotNetCore.Modules
             {
                 return;
             }
+        }
+
+        [Command("about")]
+        public async Task DisplayBotInfo()
+        {
+            RestApplication appInfo = await _bot.Client.GetApplicationInfoAsync();
+            EmbedBuilder builder = new EmbedBuilder()
+            {
+                Title = "About Me"
+            };
+
+            builder.AddField("Name: ", appInfo.Name);
+            builder.AddField("Created at: ", appInfo.CreatedAt);
+            builder.AddField("Owner: ", appInfo.Owner);
+            builder.WithImageUrl(appInfo.IconUrl);
+
+            await ReplyAsync(embed: builder.Build());
         }
     }
 }

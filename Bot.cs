@@ -18,7 +18,7 @@ namespace TerminusDotNetCore
         //for detecting regex matches in messages
         private RegexCommands _regexMsgParser;
 
-        private DiscordSocketClient _client;
+        public DiscordSocketClient Client { get; private set; }
 
         //Discord.NET command management
         private CommandService _commandService;
@@ -42,9 +42,9 @@ namespace TerminusDotNetCore
             _commandService = new CommandService();
 
             //instantiate client and register log event handler
-            _client = new DiscordSocketClient();
-            _client.Log += Logger.Log;
-            _client.MessageReceived += HandleCommandAsync;
+            Client = new DiscordSocketClient();
+            Client.Log += Logger.Log;
+            Client.MessageReceived += HandleCommandAsync;
 
             //verify that each required client secret is in the secrets file
             Dictionary<string, string> requiredSecrets = new Dictionary<string, string>()
@@ -80,8 +80,8 @@ namespace TerminusDotNetCore
 
             //log in & start the client
             string token = _config["DiscordToken"];
-            await _client.LoginAsync(TokenType.Bot, token);
-            await _client.StartAsync();
+            await Client.LoginAsync(TokenType.Bot, token);
+            await Client.StartAsync();
 
             //load blacklisted channels
             var blacklistSection = _config.GetSection("BlacklistChannels");
@@ -124,14 +124,14 @@ namespace TerminusDotNetCore
             }
 
             //check if message is not command or not sent by bot
-            if (!(message.HasCharPrefix('!', ref argPos) || message.HasMentionPrefix(_client.CurrentUser, ref argPos))
+            if (!(message.HasCharPrefix('!', ref argPos) || message.HasMentionPrefix(Client.CurrentUser, ref argPos))
             || message.Author.IsBot)
             {
                 return;
             }
 
             //handle commands
-            var context = new SocketCommandContext(_client, message);
+            var context = new SocketCommandContext(Client, message);
             var commandResult = await _commandService.ExecuteAsync(context: context, argPos: argPos, services: _serviceProvider);
         }
 
