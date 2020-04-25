@@ -306,6 +306,8 @@ namespace TerminusDotNetCore.Services
                 //record current queue state 
                 await SaveQueueContents();
 
+                _currentSong.StartTime = DateTime.Now;
+
                 //play audio on channel
                 await SendAudioAsync(nextInQueue.Path);
 
@@ -689,6 +691,30 @@ namespace TerminusDotNetCore.Services
             _ = ScheduleWeed(weedChannel);
         }
         #endregion
+
+        public async Task<Embed> DisplayCurrentSong()
+        {
+            if (_currentSong == null)
+            {
+                await ParentModule.ServiceReplyAsync($"No song is currently playing.");
+                return null;
+            }
+
+            EmbedBuilder builder = new EmbedBuilder()
+            {
+                Title = $"Currently Playing: {_currentSong.DisplayName}"
+            };
+
+            builder.AddField("Added by:", _currentSong.OwnerName);
+            builder.AddField("Audio source: ", GetAudioSourceString(_currentSong));
+
+            //add time info
+            TimeSpan elapsedTime = DateTime.Now - _currentSong.StartTime;
+            builder.AddField("Time started: ", _currentSong.StartTime.ToString("mm:ss"));
+            builder.AddField("Time playing: ", elapsedTime.ToString("mm:ss"));
+
+            return builder.Build();
+        }
 
         #region song display methods
         public List<Embed> ListQueueContents()
