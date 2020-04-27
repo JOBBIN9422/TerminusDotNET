@@ -17,4 +17,4 @@ oh my god jc a bomb|A bomb!
 ^I'm\s(.*)| Hi %s, I'm Terminus!
 .*at least.*|This guy moaned **at least** this loud|moan.mp3
 .*incandescent.*|If only **I** could be so **grossly incandescent**|incandescent.mp3
-^\w+er$|%s 'er? I hardly know 'er!
+^(\w+)er$|%s 'er? I hardly know 'er!
