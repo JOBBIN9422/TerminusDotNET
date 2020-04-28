@@ -265,8 +265,12 @@ namespace TerminusDotNetCore.Services
         {
             if (_songQueue.Count > 0)
             {
-                AudioItem nextInQueue = _songQueue.First.Value;
-                _songQueue.RemoveFirst();
+                AudioItem nextInQueue;
+                lock (_songQueue)
+                {
+                    nextInQueue = _songQueue.First.Value;
+                    _songQueue.RemoveFirst();
+                }
 
                 //need to download if not already saved locally (change the URL to the path of the downloaded file)
                 if (nextInQueue is YouTubeAudioItem)
@@ -379,24 +383,30 @@ namespace TerminusDotNetCore.Services
         {
             if (_weedPlaying)
             {
-                if (append)
+                lock (_backupQueue)
                 {
-                    _backupQueue.AddLast(item);
-                }
-                else
-                {
-                    _backupQueue.AddFirst(item);
+                    if (append)
+                    {
+                        _backupQueue.AddLast(item);
+                    }
+                    else
+                    {
+                        _backupQueue.AddFirst(item);
+                    }
                 }
             }
             else
             {
-                if (append)
+                lock (_songQueue)
                 {
-                    _songQueue.AddLast(item);
-                }
-                else
-                {
-                    _songQueue.AddFirst(item);
+                    if (append)
+                    {
+                        _songQueue.AddLast(item);
+                    }
+                    else
+                    {
+                        _songQueue.AddFirst(item);
+                    }
                 }
             }
         }
