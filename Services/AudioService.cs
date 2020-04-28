@@ -348,7 +348,7 @@ namespace TerminusDotNetCore.Services
             else
             {
                 //get the song at the requested index and remove it
-                AudioItem moveSong = _songQueue.ElementAt(index);
+                AudioItem moveSong = _songQueue.ElementAt(index - 1);
                 _songQueue.Remove(moveSong);
 
                 //insert it at the front of the queue
