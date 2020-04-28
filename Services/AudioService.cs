@@ -34,8 +34,8 @@ namespace TerminusDotNetCore.Services
         public ServiceControlModule ParentModule { get; set; }
 
         //primary queue and backup (used when switching voice contexts)
-        private ConcurrentQueue<AudioItem> _songQueue = new ConcurrentQueue<AudioItem>();
-        private ConcurrentQueue<AudioItem> _backupQueue = new ConcurrentQueue<AudioItem>();
+        private LinkedList<AudioItem> _songQueue = new LinkedList<AudioItem>();
+        private LinkedList<AudioItem> _backupQueue = new LinkedList<AudioItem>();
 
         //metadata about the currently playing song
         private AudioItem _currentSong = null;
@@ -109,7 +109,7 @@ namespace TerminusDotNetCore.Services
         #region audio control methods
         public async Task StopAllAudio()
         {
-            _songQueue = new ConcurrentQueue<AudioItem>();
+            _songQueue = new LinkedList<AudioItem>();
             _playing = false;
             _currentSong = null;
             await LeaveAudio();
@@ -237,7 +237,7 @@ namespace TerminusDotNetCore.Services
 
             _weedPlaying = false;
             _songQueue = _backupQueue;
-            _backupQueue = new ConcurrentQueue<AudioItem>();
+            _backupQueue = new LinkedList<AudioItem>();
 
             if (Client != null)
             {
@@ -263,9 +263,15 @@ namespace TerminusDotNetCore.Services
         #region queue control methods
         public async Task PlayNextInQueue()
         {
-            AudioItem nextInQueue;
-            if (_songQueue.TryDequeue(out nextInQueue))
+            if (_songQueue.Count > 0)
             {
+                AudioItem nextInQueue;
+                lock (_songQueue)
+                {
+                    nextInQueue = _songQueue.First.Value;
+                    _songQueue.RemoveFirst();
+                }
+
                 //need to download if not already saved locally (change the URL to the path of the downloaded file)
                 if (nextInQueue is YouTubeAudioItem)
                 {
@@ -333,14 +339,34 @@ namespace TerminusDotNetCore.Services
             }
         }
 
+        public async Task MoveSongToFront(int index)
+        {
+            if (_songQueue.Count == 0)
+            {
+                await ParentModule.ServiceReplyAsync("There are no songs in the queue.");
+            }
+            else if (index > _songQueue.Count + 1 || index < 2)
+            {
+                await ParentModule.ServiceReplyAsync("The requested index was out of bounds.");
+            }
+            else
+            {
+                //get the song at the requested index and remove it
+                AudioItem moveSong = _songQueue.ElementAt(index - 2);
+                _songQueue.Remove(moveSong);
 
-        public async Task QueueTempSong(SocketUser owner, IReadOnlyCollection<Attachment> attachments, ulong channelId)
+                //insert it at the front of the queue
+                EnqueueSong(moveSong, false);
+            }
+        }
+
+        public async Task QueueTempSong(SocketUser owner, IReadOnlyCollection<Attachment> attachments, ulong channelId, bool append = true)
         {
             List<string> files = AttachmentHelper.DownloadAttachments(attachments);
             string path = files[0];
             string displayName = Path.GetFileName(path);
 
-            EnqueueSong(new LocalAudioItem() { Path = path, PlayChannelId = channelId, AudioSource = FileAudioType.Attachment, DisplayName = displayName, OwnerName = owner.Username });
+            EnqueueSong(new LocalAudioItem() { Path = path, PlayChannelId = channelId, AudioSource = FileAudioType.Attachment, DisplayName = displayName, OwnerName = owner.Username }, append);
 
             if (!_playing)
             {
@@ -353,22 +379,42 @@ namespace TerminusDotNetCore.Services
             }
         }
 
-        private void EnqueueSong(AudioItem item)
+        private void EnqueueSong(AudioItem item, bool append = true)
         {
             if (_weedPlaying)
             {
-                _backupQueue.Enqueue(item);
+                lock (_backupQueue)
+                {
+                    if (append)
+                    {
+                        _backupQueue.AddLast(item);
+                    }
+                    else
+                    {
+                        _backupQueue.AddFirst(item);
+                    }
+                }
             }
             else
             {
-                _songQueue.Enqueue(item);
+                lock (_songQueue)
+                {
+                    if (append)
+                    {
+                        _songQueue.AddLast(item);
+                    }
+                    else
+                    {
+                        _songQueue.AddFirst(item);
+                    }
+                }
             }
         }
 
-        public async Task QueueLocalSong(SocketUser owner, string path, ulong channelId)
+        public async Task QueueLocalSong(SocketUser owner, string path, ulong channelId, bool append = true)
         {
             string displayName = Path.GetFileNameWithoutExtension(path);
-            EnqueueSong(new LocalAudioItem() { Path = path, PlayChannelId = channelId, AudioSource = FileAudioType.Local, DisplayName = displayName, OwnerName = owner.Username });
+            EnqueueSong(new LocalAudioItem() { Path = path, PlayChannelId = channelId, AudioSource = FileAudioType.Local, DisplayName = displayName, OwnerName = owner.Username }, append);
 
             if (!_playing)
             {
@@ -381,7 +427,7 @@ namespace TerminusDotNetCore.Services
             }
         }
 
-        public async Task QueueYoutubePlaylist(SocketUser owner, string playlistURL, ulong channelId)
+        public async Task QueueYoutubePlaylist(SocketUser owner, string playlistURL, ulong channelId, bool append = true)
         {
             //check if the given URL refers to a youtube playlist
             if (!PlaylistUrlIsValid(playlistURL))
@@ -416,7 +462,7 @@ namespace TerminusDotNetCore.Services
             }
 
             //add the list of URLs to the queue for downloading during playback
-            await QueueYoutubeURLs(videoUrls, owner, channelId);
+            await QueueYoutubeURLs(videoUrls, owner, channelId, append);
         }
 
         public async Task QueueSearchedYoutubeSong(SocketUser owner, string searchTerm, ulong channelId)
@@ -449,8 +495,9 @@ namespace TerminusDotNetCore.Services
             await ParentModule.ServiceReplyAsync($"No videos were successfully downloaded for the search term '{searchTerm}'.");
         }
 
-        private async Task QueueYoutubeURLs(List<string> urls, SocketUser owner, ulong channelId)
+        private async Task QueueYoutubeURLs(List<string> urls, SocketUser owner, ulong channelId, bool append = true)
         {
+            LinkedListNode<AudioItem> insertAtNode = null;
             //enqueue all of the URLs before starting playback 
             foreach (string url in urls)
             {
@@ -466,7 +513,25 @@ namespace TerminusDotNetCore.Services
                     OwnerName = owner.Username
                 };
 
-                EnqueueSong(currVideo);
+                if (append)
+                {
+                    EnqueueSong(currVideo);
+                }
+                else
+                {
+                    //add the item to the front of the queue (preserve order)
+                    LinkedListNode<AudioItem> insertNode = new LinkedListNode<AudioItem>(currVideo);
+                    if (insertAtNode != null)
+                    {
+                        _songQueue.AddAfter(insertAtNode, insertNode);
+                    }
+                    else 
+                    {
+                        _songQueue.AddFirst(insertNode);
+                    }
+
+                    insertAtNode = insertNode;
+                }
             }
 
             if (!_playing)
@@ -480,14 +545,14 @@ namespace TerminusDotNetCore.Services
             }
         }
 
-        public async Task QueueYoutubeSongPreDownloaded(SocketUser owner, string url, ulong channelId)
+        public async Task QueueYoutubeSongPreDownloaded(SocketUser owner, string url, ulong channelId, bool append = true)
         {
             string displayName = await GetVideoTitleFromUrlAsync(url);
 
             //get a local file for the current video
             string filePath = await DownloadYoutubeVideoAsync(url);
 
-            EnqueueSong(new YouTubeAudioItem() { Path = filePath, VideoUrl = url, PlayChannelId = channelId, AudioSource = YouTubeAudioType.PreDownloaded, DisplayName = displayName, OwnerName = owner.Username });
+            EnqueueSong(new YouTubeAudioItem() { Path = filePath, VideoUrl = url, PlayChannelId = channelId, AudioSource = YouTubeAudioType.PreDownloaded, DisplayName = displayName, OwnerName = owner.Username }, append);
 
             if (!_playing)
             {
@@ -687,7 +752,7 @@ namespace TerminusDotNetCore.Services
 
             _weedPlaying = false;
             _songQueue = _backupQueue;
-            _backupQueue = new ConcurrentQueue<AudioItem>();
+            _backupQueue = new LinkedList<AudioItem>();
 
             if (Client != null)
             {
