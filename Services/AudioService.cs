@@ -493,7 +493,7 @@ namespace TerminusDotNetCore.Services
                     LinkedListNode<AudioItem> insertNode = new LinkedListNode<AudioItem>(currVideo);
                     if (insertAtNode != null)
                     {
-                        _songQueue.AddAfter(insertAtNode, insertNode);
+                        _songQueue.AddBefore(insertAtNode, insertNode);
                     }
                     else 
                     {
