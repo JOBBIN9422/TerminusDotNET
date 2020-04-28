@@ -50,8 +50,8 @@ namespace TerminusDotNetCore.Modules
         }
 
         [Command("play", RunMode = RunMode.Async)]
-        [Summary("Play a song of your choice in an audio channel of your choice (defaults to verbal shitposting)\nAvailable song aliases are: \"mangione1\", \"mangione2\", \"poloski\"")]
-        public async Task PlaySong([Summary("name of song to play (use \"attached\" to play an attached mp3 file")]string song, [Summary("ID of channel to play in (defaults to verbal shitposting)")]string channelID = "-1")
+        [Summary("Play a song of your choice in an audio channel of your choice (defaults to verbal shitposting). List local songs with !availablesongs.")]
+        public async Task PlaySong([Summary("name of song to play (use \"attached\" to play an attached mp3 file")]string song, string qEnd = "back", [Summary("ID of channel to play in (defaults to verbal shitposting)")]string channelID = "-1")
         {
             if( Context != null && Context.Guild != null)
             {
@@ -81,8 +81,8 @@ namespace TerminusDotNetCore.Modules
                 await ReplyAsync("Invalid channel ID, try letting it use the default");
                 return;
             }
+
             //check if path is valid and exists
-            // TODO check if file type can be played (mp3, wav, idk what ffmpeg can play)
             bool useFile = false;
             string path = _service.AudioPath;
             if ( song == "attached" )
@@ -109,7 +109,7 @@ namespace TerminusDotNetCore.Modules
             if ( useFile )
             {
                 IReadOnlyCollection<Attachment> atts = await GetAttachmentsAsync();
-                await _service.QueueTempSong(Context.Message.Author, atts, voiceID);
+                await _service.QueueTempSong(Context.Message.Author, atts, voiceID, qEnd == "back");
             }
             else
             {
@@ -120,7 +120,7 @@ namespace TerminusDotNetCore.Modules
                     Console.WriteLine(path);
                     return;
                 }
-                await _service.QueueLocalSong(Context.Message.Author, path, voiceID);
+                await _service.QueueLocalSong(Context.Message.Author, path, voiceID, qEnd == "back");
             }
         }
 
@@ -195,7 +195,7 @@ namespace TerminusDotNetCore.Modules
         }
 
         [Command("yt", RunMode = RunMode.Async)]
-        public async Task StreamSong(string url, string channelID = "-1")
+        public async Task StreamSong(string url, string qEnd = "back", string channelID = "-1")
         {
             if (Context != null && Context.Guild != null)
             {
@@ -226,7 +226,7 @@ namespace TerminusDotNetCore.Modules
                 return;
             }
 
-            await _service.QueueYoutubeSongPreDownloaded(Context.Message.Author, url, voiceID);
+            await _service.QueueYoutubeSongPreDownloaded(Context.Message.Author, url, voiceID, qEnd == "back");
         }
 
         [Command("playnext", RunMode = RunMode.Async)]

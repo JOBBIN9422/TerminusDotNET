@@ -336,13 +336,13 @@ namespace TerminusDotNetCore.Services
         }
 
 
-        public async Task QueueTempSong(SocketUser owner, IReadOnlyCollection<Attachment> attachments, ulong channelId)
+        public async Task QueueTempSong(SocketUser owner, IReadOnlyCollection<Attachment> attachments, ulong channelId, bool append = true)
         {
             List<string> files = AttachmentHelper.DownloadAttachments(attachments);
             string path = files[0];
             string displayName = Path.GetFileName(path);
 
-            EnqueueSong(new LocalAudioItem() { Path = path, PlayChannelId = channelId, AudioSource = FileAudioType.Attachment, DisplayName = displayName, OwnerName = owner.Username });
+            EnqueueSong(new LocalAudioItem() { Path = path, PlayChannelId = channelId, AudioSource = FileAudioType.Attachment, DisplayName = displayName, OwnerName = owner.Username }, append);
 
             if (!_playing)
             {
@@ -381,10 +381,10 @@ namespace TerminusDotNetCore.Services
             }
         }
 
-        public async Task QueueLocalSong(SocketUser owner, string path, ulong channelId)
+        public async Task QueueLocalSong(SocketUser owner, string path, ulong channelId, bool append = true)
         {
             string displayName = Path.GetFileNameWithoutExtension(path);
-            EnqueueSong(new LocalAudioItem() { Path = path, PlayChannelId = channelId, AudioSource = FileAudioType.Local, DisplayName = displayName, OwnerName = owner.Username });
+            EnqueueSong(new LocalAudioItem() { Path = path, PlayChannelId = channelId, AudioSource = FileAudioType.Local, DisplayName = displayName, OwnerName = owner.Username }, append);
 
             if (!_playing)
             {
@@ -496,14 +496,14 @@ namespace TerminusDotNetCore.Services
             }
         }
 
-        public async Task QueueYoutubeSongPreDownloaded(SocketUser owner, string url, ulong channelId)
+        public async Task QueueYoutubeSongPreDownloaded(SocketUser owner, string url, ulong channelId, bool append = true)
         {
             string displayName = await GetVideoTitleFromUrlAsync(url);
 
             //get a local file for the current video
             string filePath = await DownloadYoutubeVideoAsync(url);
 
-            EnqueueSong(new YouTubeAudioItem() { Path = filePath, VideoUrl = url, PlayChannelId = channelId, AudioSource = YouTubeAudioType.PreDownloaded, DisplayName = displayName, OwnerName = owner.Username });
+            EnqueueSong(new YouTubeAudioItem() { Path = filePath, VideoUrl = url, PlayChannelId = channelId, AudioSource = YouTubeAudioType.PreDownloaded, DisplayName = displayName, OwnerName = owner.Username }, append);
 
             if (!_playing)
             {
