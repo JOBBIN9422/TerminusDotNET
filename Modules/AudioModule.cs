@@ -160,7 +160,7 @@ namespace TerminusDotNetCore.Modules
         }
 
         [Command("playlist", RunMode = RunMode.Async)]
-        public async Task AddPlaylist(string playlistUrl, string channelID = "-1")
+        public async Task AddPlaylist(string playlistUrl, string qEnd = "back", string channelID = "-1")
         {
             if (Context != null && Context.Guild != null)
             {
@@ -191,7 +191,7 @@ namespace TerminusDotNetCore.Modules
                 return;
             }
 
-            await _service.QueueYoutubePlaylist(Context.Message.Author, playlistUrl, voiceID);
+            await _service.QueueYoutubePlaylist(Context.Message.Author, playlistUrl, voiceID, qEnd != "front");
         }
 
         [Command("yt", RunMode = RunMode.Async)]

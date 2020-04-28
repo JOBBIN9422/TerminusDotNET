@@ -397,7 +397,7 @@ namespace TerminusDotNetCore.Services
             }
         }
 
-        public async Task QueueYoutubePlaylist(SocketUser owner, string playlistURL, ulong channelId)
+        public async Task QueueYoutubePlaylist(SocketUser owner, string playlistURL, ulong channelId, bool append = true)
         {
             //check if the given URL refers to a youtube playlist
             if (!PlaylistUrlIsValid(playlistURL))
@@ -432,7 +432,7 @@ namespace TerminusDotNetCore.Services
             }
 
             //add the list of URLs to the queue for downloading during playback
-            await QueueYoutubeURLs(videoUrls, owner, channelId);
+            await QueueYoutubeURLs(videoUrls, owner, channelId, append);
         }
 
         public async Task QueueSearchedYoutubeSong(SocketUser owner, string searchTerm, ulong channelId)
@@ -465,8 +465,9 @@ namespace TerminusDotNetCore.Services
             await ParentModule.ServiceReplyAsync($"No videos were successfully downloaded for the search term '{searchTerm}'.");
         }
 
-        private async Task QueueYoutubeURLs(List<string> urls, SocketUser owner, ulong channelId)
+        private async Task QueueYoutubeURLs(List<string> urls, SocketUser owner, ulong channelId, bool append = true)
         {
+            LinkedListNode<AudioItem> insertAtNode = _songQueue.First;
             //enqueue all of the URLs before starting playback 
             foreach (string url in urls)
             {
@@ -482,7 +483,25 @@ namespace TerminusDotNetCore.Services
                     OwnerName = owner.Username
                 };
 
-                EnqueueSong(currVideo);
+                if (append)
+                {
+                    EnqueueSong(currVideo);
+                }
+                else
+                {
+                    //add the item to the front of the queue (preserve order)
+                    LinkedListNode<AudioItem> insertNode = new LinkedListNode<AudioItem>(currVideo);
+                    if (insertAtNode != null)
+                    {
+                        _songQueue.AddAfter(insertAtNode, insertNode);
+                    }
+                    else 
+                    {
+                        _songQueue.AddFirst(insertNode);
+                    }
+
+                    insertAtNode = insertNode;
+                }
             }
 
             if (!_playing)
