@@ -361,22 +361,22 @@ namespace TerminusDotNetCore.Services
             {
                 if (append)
                 {
-                    _backupQueue.Append(item);
+                    _backupQueue.AddLast(item);
                 }
                 else
                 {
-                    _backupQueue.Prepend(item);
+                    _backupQueue.AddFirst(item);
                 }
             }
             else
             {
                 if (append)
                 {
-                    _songQueue.Append(item);
+                    _songQueue.AddLast(item);
                 }
                 else
                 {
-                    _songQueue.Prepend(item);
+                    _songQueue.AddFirst(item);
                 }
             }
         }
