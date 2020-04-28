@@ -341,7 +341,7 @@ namespace TerminusDotNetCore.Services
             {
                 await ParentModule.ServiceReplyAsync("There are no songs in the queue.");
             }
-            else if (index > _songQueue.Count || index < 0)
+            else if (index > _songQueue.Count || index < 1)
             {
                 await ParentModule.ServiceReplyAsync("The requested index was out of bounds.");
             }
