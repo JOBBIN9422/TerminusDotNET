@@ -51,7 +51,9 @@ namespace TerminusDotNetCore.Modules
 
         [Command("play", RunMode = RunMode.Async)]
         [Summary("Play a song of your choice in an audio channel of your choice (defaults to verbal shitposting). List local songs with !availablesongs.")]
-        public async Task PlaySong([Summary("name of song to play (use \"attached\" to play an attached mp3 file")]string song, string qEnd = "back", [Summary("ID of channel to play in (defaults to verbal shitposting)")]string channelID = "-1")
+        public async Task PlaySong([Summary("name of song to play (use \"attached\" to play an attached mp3 file")]string song, 
+            [Summary("Which end of the queue to insert the song at (appended to the back by default.")]string qEnd = "back", 
+            [Summary("ID of channel to play in (defaults to verbal shitposting)")]string channelID = "-1")
         {
             if( Context != null && Context.Guild != null)
             {
@@ -160,7 +162,9 @@ namespace TerminusDotNetCore.Modules
         }
 
         [Command("playlist", RunMode = RunMode.Async)]
-        public async Task AddPlaylist(string playlistUrl, string qEnd = "back", string channelID = "-1")
+        public async Task AddPlaylist([Summary("The URL of the YouTube playlist to add.")]string playlistUrl, 
+            [Summary("Which end of the queue to insert the song at(appended to the back by default.")]string qEnd = "back", 
+            [Summary("Channel ID to play the song in.")]string channelID = "-1")
         {
             if (Context != null && Context.Guild != null)
             {
@@ -195,7 +199,9 @@ namespace TerminusDotNetCore.Modules
         }
 
         [Command("yt", RunMode = RunMode.Async)]
-        public async Task StreamSong(string url, string qEnd = "back", string channelID = "-1")
+        public async Task StreamSong([Summary("URL of the YouTube video to add.")]string url, 
+            [Summary("Which end of the queue to insert the song at(appended to the back by default.")]string qEnd = "back",
+            [Summary("Channel ID to play the song in.")]string channelID = "-1")
         {
             if (Context != null && Context.Guild != null)
             {
@@ -238,7 +244,7 @@ namespace TerminusDotNetCore.Modules
 
         [Command("qfront", RunMode = RunMode.Async)]
         [Summary("Move the item at the given index to the front of the queue.")]
-        public async Task MoveSongToFront(int index = -1)
+        public async Task MoveSongToFront([Summary("the index of the song to move to the front (1-indexed based on the !songs list).")]int index = -1)
         {
             if (index == -1)
             {
