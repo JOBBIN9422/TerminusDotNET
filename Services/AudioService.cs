@@ -335,6 +335,21 @@ namespace TerminusDotNetCore.Services
             }
         }
 
+        public async Task MoveSongToFront(int index)
+        {
+            if (_songQueue.Count == 0)
+            {
+                await ParentModule.ServiceReplyAsync("There are no songs in the queue.");
+                return;
+            }
+
+            //get the song at the requested index and remove it
+            AudioItem moveSong = _songQueue.ElementAt(index);
+            _songQueue.Remove(moveSong);
+
+            //insert it at the front of the queue
+            EnqueueSong(moveSong, false);
+        }
 
         public async Task QueueTempSong(SocketUser owner, IReadOnlyCollection<Attachment> attachments, ulong channelId, bool append = true)
         {
