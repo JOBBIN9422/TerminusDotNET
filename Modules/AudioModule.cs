@@ -109,7 +109,7 @@ namespace TerminusDotNetCore.Modules
             if ( useFile )
             {
                 IReadOnlyCollection<Attachment> atts = await GetAttachmentsAsync();
-                await _service.QueueTempSong(Context.Message.Author, atts, voiceID, qEnd == "back");
+                await _service.QueueTempSong(Context.Message.Author, atts, voiceID, qEnd != "front");
             }
             else
             {
@@ -120,7 +120,7 @@ namespace TerminusDotNetCore.Modules
                     Console.WriteLine(path);
                     return;
                 }
-                await _service.QueueLocalSong(Context.Message.Author, path, voiceID, qEnd == "back");
+                await _service.QueueLocalSong(Context.Message.Author, path, voiceID, qEnd != "front");
             }
         }
 
@@ -226,7 +226,7 @@ namespace TerminusDotNetCore.Modules
                 return;
             }
 
-            await _service.QueueYoutubeSongPreDownloaded(Context.Message.Author, url, voiceID, qEnd == "back");
+            await _service.QueueYoutubeSongPreDownloaded(Context.Message.Author, url, voiceID, qEnd != "front");
         }
 
         [Command("playnext", RunMode = RunMode.Async)]
