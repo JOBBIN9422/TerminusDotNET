@@ -467,7 +467,7 @@ namespace TerminusDotNetCore.Services
 
         private async Task QueueYoutubeURLs(List<string> urls, SocketUser owner, ulong channelId, bool append = true)
         {
-            LinkedListNode<AudioItem> insertAtNode = _songQueue.First;
+            LinkedListNode<AudioItem> insertAtNode = null;
             //enqueue all of the URLs before starting playback 
             foreach (string url in urls)
             {
@@ -493,7 +493,7 @@ namespace TerminusDotNetCore.Services
                     LinkedListNode<AudioItem> insertNode = new LinkedListNode<AudioItem>(currVideo);
                     if (insertAtNode != null)
                     {
-                        _songQueue.AddBefore(insertAtNode, insertNode);
+                        _songQueue.AddAfter(insertAtNode, insertNode);
                     }
                     else 
                     {
