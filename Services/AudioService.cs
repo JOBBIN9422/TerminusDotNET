@@ -341,14 +341,14 @@ namespace TerminusDotNetCore.Services
             {
                 await ParentModule.ServiceReplyAsync("There are no songs in the queue.");
             }
-            else if (index > _songQueue.Count || index < 1)
+            else if (index > _songQueue.Count - 2 || index < 2)
             {
                 await ParentModule.ServiceReplyAsync("The requested index was out of bounds.");
             }
             else
             {
                 //get the song at the requested index and remove it
-                AudioItem moveSong = _songQueue.ElementAt(index - 1);
+                AudioItem moveSong = _songQueue.ElementAt(index - 2);
                 _songQueue.Remove(moveSong);
 
                 //insert it at the front of the queue
