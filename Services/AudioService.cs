@@ -34,8 +34,8 @@ namespace TerminusDotNetCore.Services
         public ServiceControlModule ParentModule { get; set; }
 
         //primary queue and backup (used when switching voice contexts)
-        private ConcurrentQueue<AudioItem> _songQueue = new ConcurrentQueue<AudioItem>();
-        private ConcurrentQueue<AudioItem> _backupQueue = new ConcurrentQueue<AudioItem>();
+        private LinkedList<AudioItem> _songQueue = new LinkedList<AudioItem>();
+        private LinkedList<AudioItem> _backupQueue = new LinkedList<AudioItem>();
 
         //metadata about the currently playing song
         private AudioItem _currentSong = null;
@@ -109,7 +109,7 @@ namespace TerminusDotNetCore.Services
         #region audio control methods
         public async Task StopAllAudio()
         {
-            _songQueue = new ConcurrentQueue<AudioItem>();
+            _songQueue = new LinkedList<AudioItem>();
             _playing = false;
             _currentSong = null;
             await LeaveAudio();
@@ -237,7 +237,7 @@ namespace TerminusDotNetCore.Services
 
             _weedPlaying = false;
             _songQueue = _backupQueue;
-            _backupQueue = new ConcurrentQueue<AudioItem>();
+            _backupQueue = new LinkedList<AudioItem>();
 
             if (Client != null)
             {
@@ -263,9 +263,11 @@ namespace TerminusDotNetCore.Services
         #region queue control methods
         public async Task PlayNextInQueue()
         {
-            AudioItem nextInQueue;
-            if (_songQueue.TryDequeue(out nextInQueue))
+            if (_songQueue.Count > 0)
             {
+                AudioItem nextInQueue = _songQueue.First.Value;
+                _songQueue.RemoveFirst();
+
                 //need to download if not already saved locally (change the URL to the path of the downloaded file)
                 if (nextInQueue is YouTubeAudioItem)
                 {
@@ -353,15 +355,29 @@ namespace TerminusDotNetCore.Services
             }
         }
 
-        private void EnqueueSong(AudioItem item)
+        private void EnqueueSong(AudioItem item, bool append = true)
         {
             if (_weedPlaying)
             {
-                _backupQueue.Enqueue(item);
+                if (append)
+                {
+                    _backupQueue.Append(item);
+                }
+                else
+                {
+                    _backupQueue.Prepend(item);
+                }
             }
             else
             {
-                _songQueue.Enqueue(item);
+                if (append)
+                {
+                    _songQueue.Append(item);
+                }
+                else
+                {
+                    _songQueue.Prepend(item);
+                }
             }
         }
 
@@ -687,7 +703,7 @@ namespace TerminusDotNetCore.Services
 
             _weedPlaying = false;
             _songQueue = _backupQueue;
-            _backupQueue = new ConcurrentQueue<AudioItem>();
+            _backupQueue = new LinkedList<AudioItem>();
 
             if (Client != null)
             {
