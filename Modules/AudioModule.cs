@@ -52,7 +52,7 @@ namespace TerminusDotNetCore.Modules
         [Command("play", RunMode = RunMode.Async)]
         [Summary("Play a song of your choice in an audio channel of your choice (defaults to verbal shitposting). List local songs with !availablesongs.")]
         public async Task PlaySong([Summary("name of song to play (use \"attached\" to play an attached mp3 file")]string song, 
-            [Summary("Which end of the queue to insert the song at (appended to the back by default.")]string qEnd = "back", 
+            [Summary("Which end of the queue to insert the song at (appended to the back by default.)")]string qEnd = "back", 
             [Summary("ID of channel to play in (defaults to verbal shitposting)")]string channelID = "-1")
         {
             if( Context != null && Context.Guild != null)
@@ -127,7 +127,9 @@ namespace TerminusDotNetCore.Modules
         }
 
         [Command("search", RunMode = RunMode.Async)]
-        public async Task SearchSong(string searchTerm, string channelID = "-1")
+        [Summary("Search for a YouTube video and add the result to the queue.")]
+        public async Task SearchSong([Summary("YouTube search term (enclose in quotes if it contains spaces).")]string searchTerm, 
+            [Summary("Channel ID to play the song in.")]string channelID = "-1")
         {
             if (Context != null && Context.Guild != null)
             {
@@ -162,8 +164,9 @@ namespace TerminusDotNetCore.Modules
         }
 
         [Command("playlist", RunMode = RunMode.Async)]
+        [Summary("Add all of the songs in the playlist to the queue in the order they appear in the playlist.")]
         public async Task AddPlaylist([Summary("The URL of the YouTube playlist to add.")]string playlistUrl, 
-            [Summary("Which end of the queue to insert the song at(appended to the back by default.")]string qEnd = "back", 
+            [Summary("Which end of the queue to insert the song at (appended to the back by default.)")]string qEnd = "back", 
             [Summary("Channel ID to play the song in.")]string channelID = "-1")
         {
             if (Context != null && Context.Guild != null)
@@ -199,8 +202,9 @@ namespace TerminusDotNetCore.Modules
         }
 
         [Command("yt", RunMode = RunMode.Async)]
+        [Summary("Add the given YouTube video to the queue.")]
         public async Task StreamSong([Summary("URL of the YouTube video to add.")]string url, 
-            [Summary("Which end of the queue to insert the song at(appended to the back by default.")]string qEnd = "back",
+            [Summary("Which end of the queue to insert the song at (appended to the back by default.)")]string qEnd = "back",
             [Summary("Channel ID to play the song in.")]string channelID = "-1")
         {
             if (Context != null && Context.Guild != null)
@@ -244,7 +248,7 @@ namespace TerminusDotNetCore.Modules
 
         [Command("qfront", RunMode = RunMode.Async)]
         [Summary("Move the item at the given index to the front of the queue.")]
-        public async Task MoveSongToFront([Summary("the index of the song to move to the front (1-indexed based on the !songs list).")]int index = -1)
+        public async Task MoveSongToFront([Summary("the index of the song to move to the front (1-indexed based on the items in the `!songs` list).")]int index = -1)
         {
             if (index == -1)
             {
@@ -287,7 +291,7 @@ namespace TerminusDotNetCore.Modules
         }
 
         [Command("addpersistentsong", RunMode = RunMode.Async)]
-        [Summary("Store an mp3 file to the server and give an alias for ease of use in !play commands")]
+        [Summary("Store an audio file on the server and give an alias for use in !play commands.")]
         public async Task AddSong([Summary("alias to use when playing this song in the future")]string alias)
         {
             IReadOnlyCollection<Attachment> atts = await GetAttachmentsAsync();
@@ -295,14 +299,14 @@ namespace TerminusDotNetCore.Modules
         }
 
         [Command("alias", RunMode = RunMode.Async)]
-        [Summary("Store the currently-playing song to the server and give an alias for ease of use in !play commands")]
+        [Summary("Store the currently-playing song to the server and give an alias for use in !play commands.")]
         public async Task AddCurrentSong([Summary("alias to use when playing this song in the future")]string alias)
         {
             await _service.SaveCurrentSong(alias);
         }
 
         [Command("availablesongs", RunMode = RunMode.Async)]
-        [Summary("Prints the list of song aliases that are available locally")]
+        [Summary("Prints the list of song aliases that are available locally.")]
         public async Task PrintAvailableSongs()
         {
             List<Embed> aliasList = _service.ListAvailableAliases();
