@@ -340,15 +340,20 @@ namespace TerminusDotNetCore.Services
             if (_songQueue.Count == 0)
             {
                 await ParentModule.ServiceReplyAsync("There are no songs in the queue.");
-                return;
             }
+            else if (index > _songQueue.Count || index < 0)
+            {
+                await ParentModule.ServiceReplyAsync("The requested index was out of bounds.");
+            }
+            else
+            {
+                //get the song at the requested index and remove it
+                AudioItem moveSong = _songQueue.ElementAt(index);
+                _songQueue.Remove(moveSong);
 
-            //get the song at the requested index and remove it
-            AudioItem moveSong = _songQueue.ElementAt(index);
-            _songQueue.Remove(moveSong);
-
-            //insert it at the front of the queue
-            EnqueueSong(moveSong, false);
+                //insert it at the front of the queue
+                EnqueueSong(moveSong, false);
+            }
         }
 
         public async Task QueueTempSong(SocketUser owner, IReadOnlyCollection<Attachment> attachments, ulong channelId, bool append = true)

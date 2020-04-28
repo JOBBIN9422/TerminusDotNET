@@ -235,7 +235,20 @@ namespace TerminusDotNetCore.Modules
         {
             await _service.PlayNextInQueue();
         }
-        
+
+        [Command("qfront", RunMode = RunMode.Async)]
+        [Summary("Move the item at the given index to the front of the queue.")]
+        public async Task MoveSongToFront(int index = -1)
+        {
+            if (index == -1)
+            {
+                await ReplyAsync("Please provide the index of a song in the queue (!songs).");
+                return;
+            }
+
+            await _service.MoveSongToFront(index);
+        }
+
         [Command("playing", RunMode = RunMode.Async)]
         [Summary("Display info about the currently playing song, if any.")]
         public async Task DisplayCurrentSong()
