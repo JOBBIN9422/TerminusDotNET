@@ -295,6 +295,12 @@ namespace TerminusDotNetCore.Services
                 CurrentChannel = await Guild.GetVoiceChannelAsync(nextInQueue.PlayChannelId);
                 await JoinAudio();
 
+                //set the display name to file name if it's empty
+                if (string.IsNullOrEmpty(nextInQueue.DisplayName))
+                {
+                    nextInQueue.DisplayName = Path.GetFileNameWithoutExtension(nextInQueue.Path);
+                }
+
                 if (Client != null)
                 {
                     await Client.SetGameAsync(nextInQueue.DisplayName);
@@ -692,6 +698,7 @@ namespace TerminusDotNetCore.Services
         }
         #endregion
 
+        #region song display methods
         public async Task<Embed> DisplayCurrentSong()
         {
             if (_currentSong == null)
@@ -715,7 +722,7 @@ namespace TerminusDotNetCore.Services
             return builder.Build();
         }
 
-        #region song display methods
+        
         public List<Embed> ListQueueContents()
         {
             //need a list of embeds since each embed can only have 25 fields max
@@ -737,8 +744,13 @@ namespace TerminusDotNetCore.Services
             //add the currently-playing song to the list, if any
             if (_currentSong != null)
             {
+                string displayName = _currentSong.DisplayName;
+                if (string.IsNullOrEmpty(displayName))
+                {
+                    displayName = Path.GetFileNameWithoutExtension(_currentSong.Path);
+                }
                 string songSource = GetAudioSourceString(_currentSong);
-                embed.AddField($"{entryCount + 1}: {_currentSong.DisplayName} **(currently playing)**", songSource);
+                embed.AddField($"{entryCount + 1}: {displayName} **(currently playing)**", songSource);
             }
 
             foreach (var songItem in _songQueue)
@@ -752,8 +764,14 @@ namespace TerminusDotNetCore.Services
                     embed = new EmbedBuilder();
                 }
 
+                string displayName = songItem.DisplayName;
+                if (string.IsNullOrEmpty(displayName))
+                {
+                    displayName = Path.GetFileNameWithoutExtension(songItem.Path);
+                }
+
                 //add the current queue item to the song list 
-                string songName = $"**{entryCount + 1}:** {songItem.DisplayName}";
+                string songName = $"**{entryCount + 1}:** {displayName}";
                 string songSource = GetAudioSourceString(songItem);
 
                 embed.AddField(songName, songSource);
