@@ -17,10 +17,16 @@ namespace TerminusDotNetCore.Services
 
         public ServiceControlModule ParentModule { get; set; }
         private MarkovHelper _clickbaitMarkov = new MarkovHelper(Path.Combine("assets", "clickbait.txt"));
+        private MarkovHelper _oblivionMarkov = new MarkovHelper(Path.Combine("assets", "oblivion.txt"));
 
         public string GenerateClickbaitSentence()
         {
             return _clickbaitMarkov.GenerateSentence();
+        }
+
+        public string GenerateOblivionSentence()
+        {
+            return _oblivionMarkov.GenerateSentence();
         }
 
         public async Task<string> GenerateUserSentence(IUser user, ISocketMessageChannel channel)
@@ -34,7 +40,6 @@ namespace TerminusDotNetCore.Services
                 if (message.Author == user && !Regex.IsMatch(message.Content, @"\!\w"))
                 {
                     //strip emotes
-                    //string messageNoEmotes = Regex.Replace(message.Content, @"\<:\w+:\d+\>", "");
                     userMessagesContent.Add(message.Content);
                 }
             }

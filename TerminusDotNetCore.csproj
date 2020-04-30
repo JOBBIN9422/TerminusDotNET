@@ -78,6 +78,9 @@
     <None Update="assets\images\walter.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="assets\oblivion.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="assets\regex.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

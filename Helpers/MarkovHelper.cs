@@ -107,12 +107,6 @@ namespace TerminusDotNetCore.Helpers
             string startWord = "";
 
             //pick a valid starting word at random
-            //List<string> keyList = _markovCorpus.Keys.ToList();
-            //do
-            //{
-            //    int i = _random.Next(keyList.Count);
-            //    startWord = keyList[i];
-            //} while (startWord == "*END*");
             List<string> possibleStartWords = _markovCorpus["*START*"].Keys.ToList();
             startWord = possibleStartWords[_random.Next(possibleStartWords.Count)];
 
