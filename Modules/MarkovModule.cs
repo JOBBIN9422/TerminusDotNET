@@ -30,6 +30,14 @@ namespace TerminusDotNetCore.Modules
 	        await ServiceReplyAsync(clickbaitTitle);
         }
 
+        [Command("oblivion", RunMode = RunMode.Async)]
+        [Summary("Generate a random Oblivion NPC dialogue.")]
+        public async Task GenerateOblivionSentence()
+        {
+            string npcDialogue = _markovService.GenerateOblivionSentence();
+            await ServiceReplyAsync(npcDialogue);
+        }
+
         [Command("usersim", RunMode = RunMode.Async)]
         [Summary("Generate a sentence based on a user's messages in a given channel.")]
         public async Task GenerateUserSentence([Summary("@user to generate the sentence for.")]IUser user, [Summary("#channel to pull user messages from.")]ISocketMessageChannel channel)
