@@ -160,7 +160,10 @@ namespace TerminusDotNetCore.Modules
                 return;
             }
 
-            await _service.QueueSearchedYoutubeSong(Context.Message.Author, searchTerm, voiceID);
+            using (Context.Channel.EnterTypingState())
+            {
+                await _service.QueueSearchedYoutubeSong(Context.Message.Author, searchTerm, voiceID);
+            }
         }
 
         [Command("playlist", RunMode = RunMode.Async)]
@@ -198,7 +201,10 @@ namespace TerminusDotNetCore.Modules
                 return;
             }
 
-            await _service.QueueYoutubePlaylist(Context.Message.Author, playlistUrl, voiceID, qEnd != "front");
+            using (Context.Channel.EnterTypingState())
+            {
+                await _service.QueueYoutubePlaylist(Context.Message.Author, playlistUrl, voiceID, qEnd != "front");
+            }
         }
 
         [Command("yt", RunMode = RunMode.Async)]
@@ -236,7 +242,10 @@ namespace TerminusDotNetCore.Modules
                 return;
             }
 
-            await _service.QueueYoutubeSongPreDownloaded(Context.Message.Author, url, voiceID, qEnd != "front");
+            using (Context.Channel.EnterTypingState())
+            {
+                await _service.QueueYoutubeSongPreDownloaded(Context.Message.Author, url, voiceID, qEnd != "front");
+            }
         }
 
         [Command("playnext", RunMode = RunMode.Async)]
@@ -256,7 +265,10 @@ namespace TerminusDotNetCore.Modules
                 return;
             }
 
-            await _service.MoveSongToFront(index);
+            using (Context.Channel.EnterTypingState())
+            {
+                await _service.MoveSongToFront(index);
+            }
         }
 
         [Command("playing", RunMode = RunMode.Async)]
@@ -277,9 +289,12 @@ namespace TerminusDotNetCore.Modules
         {
             List<Embed> songsList = _service.ListQueueContents();
 
-            foreach (Embed embed in songsList)
+            using (Context.Channel.EnterTypingState())
             {
-                await ReplyAsync(embed: embed);
+                foreach (Embed embed in songsList)
+                {
+                    await ReplyAsync(embed: embed);
+                }
             }
         }
 
@@ -311,9 +326,12 @@ namespace TerminusDotNetCore.Modules
         {
             List<Embed> aliasList = _service.ListAvailableAliases();
 
-            foreach (Embed embed in aliasList)
+            using (Context.Channel.EnterTypingState())
             {
-                await ReplyAsync(embed: embed);
+                foreach (Embed embed in aliasList)
+                {
+                    await ReplyAsync(embed: embed);
+                }
             }
         }
 
