@@ -165,7 +165,6 @@ namespace TerminusDotNetCore.Services
         {
             if (_currAudioClient != null)
             {
-                await _currAudioClient.StopAsync();
                 //clean up the existing process if necessary
                 if (_ffmpeg != null && !_ffmpeg.HasExited)
                 {
@@ -283,10 +282,11 @@ namespace TerminusDotNetCore.Services
                 }
 
                 CurrentChannel = await Guild.GetVoiceChannelAsync(nextInQueue.PlayChannelId);
-                if (_currAudioClient == null)
+                if (_currAudioClient != null)
                 {
-                    await JoinAudio();
+                    await _currAudioClient.StopAsync();
                 }
+                await JoinAudio();
 
                 //set the display name to file name if it's empty
                 if (string.IsNullOrEmpty(nextInQueue.DisplayName))
