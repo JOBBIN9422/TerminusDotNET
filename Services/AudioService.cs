@@ -122,7 +122,7 @@ namespace TerminusDotNetCore.Services
 
         public async Task JoinAudio(int retryCount = 5)
         {
-            await LeaveAudio();
+            //await LeaveAudio();
 
             try
             {
@@ -282,7 +282,10 @@ namespace TerminusDotNetCore.Services
                 }
 
                 CurrentChannel = await Guild.GetVoiceChannelAsync(nextInQueue.PlayChannelId);
-                await JoinAudio();
+                if (_currAudioClient == null)
+                {
+                    await JoinAudio();
+                }
 
                 //set the display name to file name if it's empty
                 if (string.IsNullOrEmpty(nextInQueue.DisplayName))
