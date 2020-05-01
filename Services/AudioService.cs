@@ -80,7 +80,7 @@ namespace TerminusDotNetCore.Services
             FFMPEG_PROCESS_NAME = Config["FfmpegCommand"];
             Task.Run(async () => await InitYoutubeService());
         }
-
+        
         public async Task InitYoutubeService()
         {
             //attempt to read auth info from secrets file 
@@ -351,15 +351,12 @@ namespace TerminusDotNetCore.Services
             }
             else
             {
-                using (ParentModule.Context.Channel.EnterTypingState())
-                {
-                    //get the song at the requested index and remove it
-                    AudioItem moveSong = _songQueue.ElementAt(index - 2);
-                    _songQueue.Remove(moveSong);
+                //get the song at the requested index and remove it
+                AudioItem moveSong = _songQueue.ElementAt(index - 2);
+                _songQueue.Remove(moveSong);
 
-                    //insert it at the front of the queue
-                    EnqueueSong(moveSong, false);
-                }
+                //insert it at the front of the queue
+                EnqueueSong(moveSong, false);
             }
         }
 
@@ -442,30 +439,26 @@ namespace TerminusDotNetCore.Services
             List<string> videoUrls = new List<string>();
             string nextPageToken = "";
 
-            //alert the user that we're busy
-            using (ParentModule.Context.Channel.EnterTypingState())
+            //iterate over paginated playlist results from youtube and extract video URLs
+            while (nextPageToken != null)
             {
-                //iterate over paginated playlist results from youtube and extract video URLs
-                while (nextPageToken != null)
+                //prepare a paged playlist request for the given playlist URL
+                var playlistRequest = _ytService.PlaylistItems.List("snippet,contentDetails");
+                playlistRequest.PlaylistId = GetPlaylistIdFromUrl(playlistURL);
+                playlistRequest.MaxResults = 50;
+                playlistRequest.PageToken = nextPageToken;
+
+                var searchListResponse = await playlistRequest.ExecuteAsync();
+
+                //iterate over the results and build each video URL
+                foreach (var item in searchListResponse.Items)
                 {
-                    //prepare a paged playlist request for the given playlist URL
-                    var playlistRequest = _ytService.PlaylistItems.List("snippet,contentDetails");
-                    playlistRequest.PlaylistId = GetPlaylistIdFromUrl(playlistURL);
-                    playlistRequest.MaxResults = 50;
-                    playlistRequest.PageToken = nextPageToken;
-
-                    var searchListResponse = await playlistRequest.ExecuteAsync();
-
-                    //iterate over the results and build each video URL
-                    foreach (var item in searchListResponse.Items)
-                    {
-                        string videoUrl = $"http://www.youtube.com/watch?v={item.Snippet.ResourceId.VideoId}";
-                        videoUrls.Add(videoUrl);
-                    }
-
-                    //index to the next page of results
-                    nextPageToken = searchListResponse.NextPageToken;
+                    string videoUrl = $"http://www.youtube.com/watch?v={item.Snippet.ResourceId.VideoId}";
+                    videoUrls.Add(videoUrl);
                 }
+
+                //index to the next page of results
+                nextPageToken = searchListResponse.NextPageToken;
             }
 
             //add the list of URLs to the queue for downloading during playback
@@ -478,28 +471,24 @@ namespace TerminusDotNetCore.Services
             searchListRequest.Q = searchTerm;
             searchListRequest.MaxResults = 10;
 
-            //alert the user that we're busy
-            using (ParentModule.Context.Channel.EnterTypingState())
+            //run the search with the given term and fetch resulting video URLs
+            var searchListResponse = await searchListRequest.ExecuteAsync();
+
+            foreach (var searchResult in searchListResponse.Items)
             {
-                //run the search with the given term and fetch resulting video URLs
-                var searchListResponse = await searchListRequest.ExecuteAsync();
+                string url = $"http://www.youtube.com/watch?v={searchResult.Id.VideoId}";
 
-                foreach (var searchResult in searchListResponse.Items)
+                try
                 {
-                    string url = $"http://www.youtube.com/watch?v={searchResult.Id.VideoId}";
+                    await QueueYoutubeSongPreDownloaded(owner, url, channelId);
 
-                    try
-                    {
-                        await QueueYoutubeSongPreDownloaded(owner, url, channelId);
-
-                        //if we successfully download and queue a song, exit this loop and return
-                        return;
-                    }
-                    catch (ArgumentException)
-                    {
-                        //try to download the next song in the list
-                        continue;
-                    }
+                    //if we successfully download and queue a song, exit this loop and return
+                    return;
+                }
+                catch (ArgumentException)
+                {
+                    //try to download the next song in the list
+                    continue;
                 }
             }
 
@@ -509,44 +498,39 @@ namespace TerminusDotNetCore.Services
         private async Task QueueYoutubeURLs(List<string> urls, SocketUser owner, ulong channelId, bool append = true)
         {
             LinkedListNode<AudioItem> insertAtNode = null;
-
-            //alert the user that we're busy
-            using (ParentModule.Context.Channel.EnterTypingState())
+            //enqueue all of the URLs before starting playback 
+            foreach (string url in urls)
             {
-                //enqueue all of the URLs before starting playback 
-                foreach (string url in urls)
+                string displayName = await GetVideoTitleFromUrlAsync(url);
+
+                //create the current video item (file path cannot be set until it is downloaded when dequeued)
+                YouTubeAudioItem currVideo = new YouTubeAudioItem()
                 {
-                    string displayName = await GetVideoTitleFromUrlAsync(url);
+                    VideoUrl = url,
+                    PlayChannelId = channelId,
+                    AudioSource = YouTubeAudioType.Url,
+                    DisplayName = displayName,
+                    OwnerName = owner.Username
+                };
 
-                    //create the current video item (file path cannot be set until it is downloaded when dequeued)
-                    YouTubeAudioItem currVideo = new YouTubeAudioItem()
+                if (append)
+                {
+                    EnqueueSong(currVideo);
+                }
+                else
+                {
+                    //add the item to the front of the queue (preserve order)
+                    LinkedListNode<AudioItem> insertNode = new LinkedListNode<AudioItem>(currVideo);
+                    if (insertAtNode != null)
                     {
-                        VideoUrl = url,
-                        PlayChannelId = channelId,
-                        AudioSource = YouTubeAudioType.Url,
-                        DisplayName = displayName,
-                        OwnerName = owner.Username
-                    };
-
-                    if (append)
-                    {
-                        EnqueueSong(currVideo);
+                        _songQueue.AddAfter(insertAtNode, insertNode);
                     }
-                    else
+                    else 
                     {
-                        //add the item to the front of the queue (preserve order)
-                        LinkedListNode<AudioItem> insertNode = new LinkedListNode<AudioItem>(currVideo);
-                        if (insertAtNode != null)
-                        {
-                            _songQueue.AddAfter(insertAtNode, insertNode);
-                        }
-                        else
-                        {
-                            _songQueue.AddFirst(insertNode);
-                        }
-
-                        insertAtNode = insertNode;
+                        _songQueue.AddFirst(insertNode);
                     }
+
+                    insertAtNode = insertNode;
                 }
             }
 
@@ -563,16 +547,12 @@ namespace TerminusDotNetCore.Services
 
         public async Task QueueYoutubeSongPreDownloaded(SocketUser owner, string url, ulong channelId, bool append = true)
         {
-            //alert the user that we're busy
-            using (ParentModule.Context.Channel.EnterTypingState())
-            {
-                string displayName = await GetVideoTitleFromUrlAsync(url);
+            string displayName = await GetVideoTitleFromUrlAsync(url);
 
-                //get a local file for the current video
-                string filePath = await DownloadYoutubeVideoAsync(url);
+            //get a local file for the current video
+            string filePath = await DownloadYoutubeVideoAsync(url);
 
-                EnqueueSong(new YouTubeAudioItem() { Path = filePath, VideoUrl = url, PlayChannelId = channelId, AudioSource = YouTubeAudioType.PreDownloaded, DisplayName = displayName, OwnerName = owner.Username }, append);
-            }
+            EnqueueSong(new YouTubeAudioItem() { Path = filePath, VideoUrl = url, PlayChannelId = channelId, AudioSource = YouTubeAudioType.PreDownloaded, DisplayName = displayName, OwnerName = owner.Username }, append);
 
             if (!_playing)
             {
@@ -807,7 +787,7 @@ namespace TerminusDotNetCore.Services
             return builder.Build();
         }
 
-
+        
         public List<Embed> ListQueueContents()
         {
             //need a list of embeds since each embed can only have 25 fields max

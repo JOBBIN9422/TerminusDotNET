@@ -277,12 +277,9 @@ namespace TerminusDotNetCore.Modules
         {
             List<Embed> songsList = _service.ListQueueContents();
 
-            using (Context.Channel.EnterTypingState())
+            foreach (Embed embed in songsList)
             {
-                foreach (Embed embed in songsList)
-                {
-                    await ReplyAsync(embed: embed);
-                }
+                await ReplyAsync(embed: embed);
             }
         }
 
@@ -314,12 +311,9 @@ namespace TerminusDotNetCore.Modules
         {
             List<Embed> aliasList = _service.ListAvailableAliases();
 
-            using (Context.Channel.EnterTypingState())
+            foreach (Embed embed in aliasList)
             {
-                foreach (Embed embed in aliasList)
-                {
-                    await ReplyAsync(embed: embed);
-                }
+                await ReplyAsync(embed: embed);
             }
         }
 
