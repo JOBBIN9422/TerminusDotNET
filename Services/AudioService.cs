@@ -155,7 +155,10 @@ namespace TerminusDotNetCore.Services
             {
                 await CurrentChannel.DisconnectAsync();
             }
-            await _currAudioClient.StopAsync();
+            if (_currAudioClient != null)
+            {
+                await _currAudioClient.StopAsync();
+            }
         }
 
         public async Task SendAudioAsync(string path)
