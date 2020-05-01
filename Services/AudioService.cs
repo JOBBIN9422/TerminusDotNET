@@ -197,15 +197,16 @@ namespace TerminusDotNetCore.Services
                     //copy ffmpeg output to the voice channel stream
                     await output.CopyToAsync(stream, killTokenSrc.Token);
                 }
-                catch (OperationCanceledException ex)
+
+                //don't allow cancellation exceptions to be sent in channel
+                catch (OperationCanceledException)
                 {
-                    await Logger.Log(new LogMessage(LogSeverity.Error, "AudioSvc", $"user {ParentModule.Context.Message.Author.Username} requested a playnext."));
+                    
+                    await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"user {ParentModule.Context.Message.Author.Username} requested a playnext."));
                 }
                 finally
                 {
-                    //ffmpeg.Kill(true);
-                    //clean up ffmpeg, index queue, and set playback state
-                    //await stream.FlushAsync();
+                    await stream.FlushAsync();
                     _playing = false;
                 }
             }
