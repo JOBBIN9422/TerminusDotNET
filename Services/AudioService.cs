@@ -146,10 +146,6 @@ namespace TerminusDotNetCore.Services
         {
             _currentSong = null;
             _playing = false;
-            if (_ffmpeg != null && !_ffmpeg.HasExited)
-            {
-                _ffmpeg.Kill(true);
-            }
 
             if (CurrentChannel != null)
             {
@@ -165,15 +161,8 @@ namespace TerminusDotNetCore.Services
         {
             if (_currAudioClient != null)
             {
-                //clean up the existing process if necessary
-                if (_ffmpeg != null && !_ffmpeg.HasExited)
-                {
-                    _ffmpeg.Kill(true);
-                }
-
                 //set playback state and spawn the stream process
                 _playing = true;
-                _ffmpeg = CreateProcess(path);
                 await StreamFfmpegAudio(_currAudioClient);
             }
             else
@@ -185,18 +174,18 @@ namespace TerminusDotNetCore.Services
 
         private async Task StreamFfmpegAudio(IAudioClient client)
         {
+            using (var ffmpeg = CreateProcess(_currentSong.Path))
             using (var stream = client.CreatePCMStream(AudioApplication.Music))
             {
                 try
                 {
                     //copy ffmpeg output to the voice channel stream
-                    await _ffmpeg.StandardOutput.BaseStream.CopyToAsync(stream);
+                    await ffmpeg.StandardOutput.BaseStream.CopyToAsync(stream);
                 }
                 finally
                 {
                     //clean up ffmpeg, index queue, and set playback state
-                    stream.Clear();
-                    _ffmpeg.Kill(true);
+                    await stream.FlushAsync();
                     _playing = false;
                 }
             }
