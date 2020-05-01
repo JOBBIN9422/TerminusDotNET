@@ -165,6 +165,7 @@ namespace TerminusDotNetCore.Services
         {
             if (_currAudioClient != null)
             {
+                await _currAudioClient.StopAsync();
                 //clean up the existing process if necessary
                 if (_ffmpeg != null && !_ffmpeg.HasExited)
                 {
