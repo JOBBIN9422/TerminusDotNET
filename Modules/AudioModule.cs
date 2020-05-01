@@ -275,11 +275,14 @@ namespace TerminusDotNetCore.Modules
         [Summary("List the contents of the song queue, if any.")]
         public async Task ListSongs()
         {
-            List<Embed> songsList = _service.ListQueueContents();
-
-            foreach (Embed embed in songsList)
+            using (Context.Channel.EnterTypingState())
             {
-                await ReplyAsync(embed: embed);
+                List<Embed> songsList = _service.ListQueueContents();
+
+                foreach (Embed embed in songsList)
+                {
+                    await ReplyAsync(embed: embed);
+                }
             }
         }
 
@@ -309,11 +312,14 @@ namespace TerminusDotNetCore.Modules
         [Summary("Prints the list of song aliases that are available locally.")]
         public async Task PrintAvailableSongs()
         {
-            List<Embed> aliasList = _service.ListAvailableAliases();
-
-            foreach (Embed embed in aliasList)
+            using (Context.Channel.EnterTypingState())
             {
-                await ReplyAsync(embed: embed);
+                List<Embed> aliasList = _service.ListAvailableAliases();
+
+                foreach (Embed embed in aliasList)
+                {
+                    await ReplyAsync(embed: embed);
+                }
             }
         }
 
