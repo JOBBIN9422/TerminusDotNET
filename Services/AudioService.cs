@@ -45,7 +45,7 @@ namespace TerminusDotNetCore.Services
         private IAudioClient _currAudioClient = null;
 
         //the currently active ffmpeg process for audio streaming
-        private Process _ffmpeg = null;
+        private List<CancellationTokenSource> _audioTaskTokens = new List<CancellationTokenSource>();
 
         private readonly string FFMPEG_PROCESS_NAME;
 
@@ -108,6 +108,8 @@ namespace TerminusDotNetCore.Services
         #region audio control methods
         public async Task StopAllAudio()
         {
+            CancelFfmpegTasks();
+
             _songQueue = new LinkedList<AudioItem>();
             _playing = false;
             _currentSong = null;
@@ -117,6 +119,14 @@ namespace TerminusDotNetCore.Services
             if (Client != null)
             {
                 await Client.SetGameAsync(null);
+            }
+        }
+
+        private void CancelFfmpegTasks()
+        {
+            foreach (var tokenSrc in _audioTaskTokens)
+            {
+                tokenSrc.Cancel();
             }
         }
 
@@ -180,12 +190,16 @@ namespace TerminusDotNetCore.Services
             {
                 try
                 {
+                    //need a token in case we want to kill playback before finishing
+                    CancellationTokenSource killTokenSrc = new CancellationTokenSource();
+                    _audioTaskTokens.Add(killTokenSrc);
+
                     //copy ffmpeg output to the voice channel stream
-                    await output.CopyToAsync(stream);
+                    await output.CopyToAsync(stream, killTokenSrc.Token);
                 }
                 finally
                 {
-                    ffmpeg.Kill(true);
+                    //ffmpeg.Kill(true);
                     //clean up ffmpeg, index queue, and set playback state
                     //await stream.FlushAsync();
                     _playing = false;
@@ -239,6 +253,9 @@ namespace TerminusDotNetCore.Services
         {
             if (_songQueue.Count > 0)
             {
+                //stop any currently active streams
+                CancelFfmpegTasks();
+
                 AudioItem nextInQueue;
                 lock (_songQueue)
                 {
