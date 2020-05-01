@@ -206,7 +206,7 @@ namespace TerminusDotNetCore.Services
                 }
                 finally
                 {
-                    //await stream.FlushAsync();
+                    await stream.FlushAsync();
                     _playing = false;
                 }
             }
