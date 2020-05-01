@@ -294,7 +294,7 @@ namespace TerminusDotNetCore.Services
                 }
 
                 CurrentChannel = await Guild.GetVoiceChannelAsync(nextInQueue.PlayChannelId);
-                if (_currAudioClient == null)
+                if (_currAudioClient == null || _currAudioClient.ConnectionState != ConnectionState.Connected)
                 {
                     await JoinAudio();
                 }
