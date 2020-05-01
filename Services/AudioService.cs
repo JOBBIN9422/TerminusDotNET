@@ -42,6 +42,8 @@ namespace TerminusDotNetCore.Services
 
         public IVoiceChannel CurrentChannel { get; set; } = null;
 
+        private IAudioClient _currAudioClient = null;
+
         //the currently active ffmpeg process for audio streaming
         private Process _ffmpeg = null;
 
@@ -68,9 +70,6 @@ namespace TerminusDotNetCore.Services
 
         //path for local (aliased) audio files
         public string AudioPath { get; } = Path.Combine("assets", "audio");
-
-        //map clients to their current channel
-        private readonly ConcurrentDictionary<ulong, Tuple<IAudioClient, IVoiceChannel>> _connectedChannels = new ConcurrentDictionary<ulong, Tuple<IAudioClient, IVoiceChannel>>();
         #endregion
 
         #region init
@@ -125,10 +124,9 @@ namespace TerminusDotNetCore.Services
         {
             await LeaveAudio();
 
-            IAudioClient audioClient = null;
             try
             {
-                audioClient = await CurrentChannel.ConnectAsync();
+                _currAudioClient = await CurrentChannel.ConnectAsync();
             }
             catch (TimeoutException)
             {
@@ -141,13 +139,6 @@ namespace TerminusDotNetCore.Services
                 await Logger.Log(new LogMessage(LogSeverity.Error, "AudioSvc", $"failed to connect to voice channel, retrying... ({retryCount} attempts remaining)"));
                 await JoinAudio(--retryCount);
                 return;
-            }
-
-            if (_connectedChannels.TryAdd(Guild.Id, new Tuple<IAudioClient, IVoiceChannel>(audioClient, CurrentChannel)))
-            {
-                // If you add a method to log happenings from this service,
-                // you can uncomment these commented lines to make use of that.
-                //await Log(LogSeverity.Info, $"Connected to voice on {guild.Name}.");
             }
         }
 
@@ -164,19 +155,12 @@ namespace TerminusDotNetCore.Services
             {
                 await CurrentChannel.DisconnectAsync();
             }
-
-            Tuple<IAudioClient, IVoiceChannel> client;
-            if (_connectedChannels.TryRemove(Guild.Id, out client))
-            {
-                await client.Item1.StopAsync();
-                //await Log(LogSeverity.Info, $"Disconnected from voice on {guild.Name}.");
-            }
+            await _currAudioClient.StopAsync();
         }
 
         public async Task SendAudioAsync(string path)
         {
-            Tuple<IAudioClient, IVoiceChannel> client;
-            if (_connectedChannels.TryGetValue(Guild.Id, out client))
+            if (_currAudioClient != null)
             {
                 //clean up the existing process if necessary
                 if (_ffmpeg != null && !_ffmpeg.HasExited)
@@ -187,16 +171,12 @@ namespace TerminusDotNetCore.Services
                 //set playback state and spawn the stream process
                 _playing = true;
                 _ffmpeg = CreateProcess(path);
-
-                if (client.Item1 != null)
-                {
-                    await StreamFfmpegAudio(client.Item1);
-                }
-                else
-                {
-                    await ParentModule.ServiceReplyAsync($"Could not find a valid audio client for playback.");
-                    return;
-                }
+                await StreamFfmpegAudio(_currAudioClient);
+            }
+            else
+            {
+                await ParentModule.ServiceReplyAsync($"Could not find a valid audio client for playback.");
+                return;
             }
         }
 
