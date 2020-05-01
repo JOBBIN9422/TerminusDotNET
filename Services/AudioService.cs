@@ -175,18 +175,17 @@ namespace TerminusDotNetCore.Services
         private async Task StreamFfmpegAudio(IAudioClient client)
         {
             using (var ffmpeg = CreateProcess(_currentSong.Path))
+            using (var output = ffmpeg.StandardOutput.BaseStream)
             using (var stream = client.CreatePCMStream(AudioApplication.Music))
             {
                 try
                 {
                     //copy ffmpeg output to the voice channel stream
-                    await ffmpeg.StandardOutput.BaseStream.CopyToAsync(stream);
+                    await output.CopyToAsync(stream);
                 }
                 finally
                 {
                     //clean up ffmpeg, index queue, and set playback state
-                    ffmpeg.StandardOutput.BaseStream.Clear();
-                    ffmpeg.Kill(true);
                     stream.Clear();
                     //await stream.FlushAsync();
                     _playing = false;
