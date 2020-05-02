@@ -45,7 +45,7 @@ namespace TerminusDotNetCore.Services
         private IAudioClient _currAudioClient = null;
 
         //the currently active ffmpeg process for audio streaming
-        private List<CancellationTokenSource> _audioTaskTokens = new List<CancellationTokenSource>();
+        private ConcurrentBag<CancellationTokenSource> _audioTaskTokens = new ConcurrentBag<CancellationTokenSource>();
 
         private readonly string FFMPEG_PROCESS_NAME;
 
@@ -79,7 +79,7 @@ namespace TerminusDotNetCore.Services
             FFMPEG_PROCESS_NAME = Config["FfmpegCommand"];
             Task.Run(async () => await InitYoutubeService());
         }
-        
+
         public async Task InitYoutubeService()
         {
             //attempt to read auth info from secrets file 
@@ -124,15 +124,12 @@ namespace TerminusDotNetCore.Services
 
         private void CancelFfmpegTasks()
         {
-            lock (_audioTaskTokens)
+            foreach (var tokenSrc in _audioTaskTokens)
             {
-                foreach (var tokenSrc in _audioTaskTokens)
-                {
-                    tokenSrc.Cancel();
-                }
-
-                _audioTaskTokens.Clear();
+                tokenSrc.Cancel();
             }
+
+            _audioTaskTokens.Clear();
         }
 
         public async Task JoinAudio(int retryCount = 5)
@@ -206,7 +203,7 @@ namespace TerminusDotNetCore.Services
                 //don't allow cancellation exceptions to be sent in channel
                 catch (OperationCanceledException)
                 {
-                    
+
                     await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"user {ParentModule.Context.Message.Author.Username} requested a playnext."));
                 }
                 finally
@@ -528,7 +525,7 @@ namespace TerminusDotNetCore.Services
                     {
                         _songQueue.AddAfter(insertAtNode, insertNode);
                     }
-                    else 
+                    else
                     {
                         _songQueue.AddFirst(insertNode);
                     }
@@ -790,7 +787,7 @@ namespace TerminusDotNetCore.Services
             return builder.Build();
         }
 
-        
+
         public List<Embed> ListQueueContents()
         {
             //need a list of embeds since each embed can only have 25 fields max
