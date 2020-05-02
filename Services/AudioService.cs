@@ -208,6 +208,7 @@ namespace TerminusDotNetCore.Services
                 }
                 finally
                 {
+                    ffmpeg.Kill(true);
                     _playing = false;
                 }
             }
