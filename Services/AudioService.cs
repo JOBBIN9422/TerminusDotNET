@@ -206,7 +206,9 @@ namespace TerminusDotNetCore.Services
                 }
                 finally
                 {
-                    //ffmpeg.Kill(true);
+                    output.Dispose();
+                    stream.Clear();
+                    ffmpeg.Kill(true);
                     _playing = false;
                 }
             }
