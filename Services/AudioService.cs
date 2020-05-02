@@ -120,6 +120,18 @@ namespace TerminusDotNetCore.Services
             }
         }
 
+        public void StopFfmpeg()
+        {
+            //stop any currently active streams
+            if (_ffmpegCancelTokenSrc != null)
+            {
+                lock (_ffmpegCancelTokenSrc)
+                {
+                    _ffmpegCancelTokenSrc.Cancel();
+                }
+            }
+        }
+
         public async Task JoinAudio(int retryCount = 5)
         {
             //await LeaveAudio();
@@ -244,15 +256,6 @@ namespace TerminusDotNetCore.Services
         {
             if (_songQueue.Count > 0)
             {
-                //stop any currently active streams
-                if (_ffmpegCancelTokenSrc != null)
-                {
-                    lock (_ffmpegCancelTokenSrc)
-                    {
-                        _ffmpegCancelTokenSrc.Cancel();
-                    }
-                }
-
                 AudioItem nextInQueue;
                 lock (_songQueue)
                 {

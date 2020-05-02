@@ -243,6 +243,7 @@ namespace TerminusDotNetCore.Modules
         [Summary("Play the next item in the song queue, if any.")]
         public async Task PlayNext()
         {
+            _service.StopFfmpeg();
             await _service.PlayNextInQueue();
         }
 
