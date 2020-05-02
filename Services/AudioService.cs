@@ -128,6 +128,8 @@ namespace TerminusDotNetCore.Services
             {
                 tokenSrc.Cancel();
             }
+
+            _audioTaskTokens.Clear();
         }
 
         public async Task JoinAudio(int retryCount = 5)
