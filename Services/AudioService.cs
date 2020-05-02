@@ -124,12 +124,15 @@ namespace TerminusDotNetCore.Services
 
         private void CancelFfmpegTasks()
         {
-            foreach (var tokenSrc in _audioTaskTokens)
+            lock (_audioTaskTokens)
             {
-                tokenSrc.Cancel();
-            }
+                foreach (var tokenSrc in _audioTaskTokens)
+                {
+                    tokenSrc.Cancel();
+                }
 
-            _audioTaskTokens.Clear();
+                _audioTaskTokens.Clear();
+            }
         }
 
         public async Task JoinAudio(int retryCount = 5)
