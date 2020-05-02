@@ -40,14 +40,17 @@ namespace TerminusDotNetCore.Services
         //metadata about the currently playing song
         private AudioItem _currentSong = null;
 
+        //currently-connected channel (needs to be set from outside the service occasionally)
         public IVoiceChannel CurrentChannel { get; set; } = null;
 
+        //used for streaming audio in the currently-connected channel
         private IAudioClient _currAudioClient = null;
 
         //the currently active ffmpeg process for audio streaming
         private CancellationTokenSource _ffmpegCancelTokenSrc = new CancellationTokenSource();
 
-        private readonly string FFMPEG_PROCESS_NAME;
+        //command name (.exe extension for Windows use)
+        private static string FFMPEG_PROCESS_NAME;
 
         //JSON converter settings for queue save/load
         private static readonly JsonSerializerSettings JSON_SETTINGS = new JsonSerializerSettings()
@@ -127,6 +130,7 @@ namespace TerminusDotNetCore.Services
             {
                 lock (_ffmpegCancelTokenSrc)
                 {
+                    //cancel and re-init the cancellation source
                     _ffmpegCancelTokenSrc.Cancel();
                     _ffmpegCancelTokenSrc.Dispose();
                     _ffmpegCancelTokenSrc = new CancellationTokenSource();
@@ -134,14 +138,13 @@ namespace TerminusDotNetCore.Services
             }
         }
 
-        public async Task JoinAudio(int retryCount = 5)
+        public async Task JoinAudio(int retryCount = 3)
         {
-            //await LeaveAudio();
-
             try
             {
                 _currAudioClient = await CurrentChannel.ConnectAsync();
             }
+            //attempt to rejoin on timeout
             catch (TimeoutException)
             {
                 if (retryCount == 0)
@@ -158,9 +161,11 @@ namespace TerminusDotNetCore.Services
 
         public async Task LeaveAudio()
         {
+            //update playing & song states
             _currentSong = null;
             _playing = false;
 
+            //disconnect and stop the audio client if needed
             if (CurrentChannel != null)
             {
                 await CurrentChannel.DisconnectAsync();
@@ -188,24 +193,25 @@ namespace TerminusDotNetCore.Services
 
         private async Task StreamFfmpegAudio(string path)
         {
+            //init ffmpeg and audio streams
             using (var ffmpeg = CreateProcess(path))
             using (var output = ffmpeg.StandardOutput.BaseStream)
             using (var stream = _currAudioClient.CreatePCMStream(AudioApplication.Music))
             {
                 try
                 {
-                    //copy ffmpeg output to the voice channel stream
+                    //stream audio with cancellation token for skipping
                     await output.CopyToAsync(stream, _ffmpegCancelTokenSrc.Token);
                 }
 
-                //don't allow cancellation exceptions to be sent in channel
+                //don't allow cancellation exceptions to propogate
                 catch (OperationCanceledException)
                 {
-
                     await Logger.Log(new LogMessage(LogSeverity.Warning, "AudioSvc", $"user {ParentModule.Context.Message.Author.Username} requested a playnext."));
                 }
                 finally
                 {
+                    //clean up
                     output.Dispose();
                     stream.Clear();
                     ffmpeg.Kill(true);
@@ -244,7 +250,7 @@ namespace TerminusDotNetCore.Services
 
         private Process CreateProcess(string path)
         {
-            //start an ffmpeg process with stdout redirected 
+            //start an ffmpeg process for the given song file
             return Process.Start(new ProcessStartInfo
             {
                 FileName = FFMPEG_PROCESS_NAME,
@@ -260,6 +266,7 @@ namespace TerminusDotNetCore.Services
         {
             if (_songQueue.Count > 0)
             {
+                //fetch the next song in queue
                 AudioItem nextInQueue;
                 lock (_songQueue)
                 {
@@ -293,6 +300,7 @@ namespace TerminusDotNetCore.Services
                     }
                 }
 
+                //set the current channel for the next song and join channel
                 CurrentChannel = await Guild.GetVoiceChannelAsync(nextInQueue.PlayChannelId);
                 if (_currAudioClient == null || _currAudioClient.ConnectionState != ConnectionState.Connected)
                 {
@@ -304,13 +312,14 @@ namespace TerminusDotNetCore.Services
                 {
                     nextInQueue.DisplayName = Path.GetFileNameWithoutExtension(nextInQueue.Path);
                 }
-
+                
+                //set bot client's status to the song name
                 if (Client != null)
                 {
                     await Client.SetGameAsync(nextInQueue.DisplayName);
                 }
 
-                //update the currently-playing song and kill the audio process if it's running
+                //update the currently-playing song
                 _currentSong = nextInQueue;
 
                 //record current queue state 
@@ -318,7 +327,7 @@ namespace TerminusDotNetCore.Services
 
                 _currentSong.StartTime = DateTime.Now;
 
-                //play audio on channel
+                //begin playback
                 await SendAudioAsync(nextInQueue.Path);
 
                 //play next in queue (if any)
@@ -326,14 +335,14 @@ namespace TerminusDotNetCore.Services
             }
             else
             {
+                //out of songs, leave channel and clean up
                 await LeaveAudio();
                 if (Client != null)
                 {
                     await Client.SetGameAsync(null);
                 }
-                // Queue is empty, delete all .mp3 files in the assets/temp folder
-                CleanAudioFiles();
 
+                CleanAudioFiles();
             }
         }
 
@@ -343,6 +352,7 @@ namespace TerminusDotNetCore.Services
             {
                 await ParentModule.ServiceReplyAsync("There are no songs in the queue.");
             }
+            //need an offset of 2 because item 2 in song list is actually first item of queue
             else if (index > _songQueue.Count + 1 || index < 2)
             {
                 await ParentModule.ServiceReplyAsync("The requested index was out of bounds.");
@@ -379,6 +389,7 @@ namespace TerminusDotNetCore.Services
 
         private void EnqueueSong(AudioItem item, bool append = true)
         {
+            //put the item in the backup queue if weed is ongoing
             if (_weedPlaying)
             {
                 lock (_backupQueue)
@@ -416,7 +427,6 @@ namespace TerminusDotNetCore.Services
 
             if (!_playing)
             {
-                //want to trigger playing next song in queue
                 await PlayNextInQueue();
             }
             else
@@ -511,6 +521,7 @@ namespace TerminusDotNetCore.Services
                     OwnerName = owner.Username
                 };
 
+                //add the item to the front or back of the queue
                 if (append)
                 {
                     EnqueueSong(currVideo);
@@ -566,14 +577,16 @@ namespace TerminusDotNetCore.Services
         #region queue/song state management methods
         public async Task LoadQueueContents()
         {
+            //try to load the queue state file
             string queueFilename = Path.Combine(AudioPath, "backup", "queue-contents.json");
             if (!File.Exists(queueFilename))
             {
                 throw new FileNotFoundException("No queue backup file was found in the backup directory.");
             }
+
             using (StreamReader jsonReader = new StreamReader(queueFilename))
             {
-                //read queue file contents into array of lines
+                //read queue file contents
                 string[] text = (await jsonReader.ReadToEndAsync()).Split(new[] { Environment.NewLine }, StringSplitOptions.None);
 
                 //reset the queue
@@ -683,7 +696,6 @@ namespace TerminusDotNetCore.Services
             {
                 return;
             }
-
         }
 
         public void SaveSong(string alias, IReadOnlyCollection<Attachment> attachments)
@@ -770,6 +782,7 @@ namespace TerminusDotNetCore.Services
                 return null;
             }
 
+            //create an embed with info about the currently playing song
             EmbedBuilder builder = new EmbedBuilder()
             {
                 Title = $"Currently Playing: {_currentSong.DisplayName}"
@@ -974,7 +987,6 @@ namespace TerminusDotNetCore.Services
                 throw new ArgumentException($"Could not download a video file for the given URL: '{ex.Message}'.", ex);
             }
         }
-
 
         private static bool PlaylistUrlIsValid(string url)
         {
