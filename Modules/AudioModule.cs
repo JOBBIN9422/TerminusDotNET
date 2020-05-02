@@ -241,10 +241,11 @@ namespace TerminusDotNetCore.Modules
 
         [Command("playnext", RunMode = RunMode.Async)]
         [Summary("Play the next item in the song queue, if any.")]
-        public async Task PlayNext()
+        public Task PlayNext()
         {
+            //don't need to call playnext since it recursively calls itself after playback
             _service.StopFfmpeg();
-            //await _service.PlayNextInQueue();
+            return Task.CompletedTask;
         }
 
         [Command("qfront", RunMode = RunMode.Async)]

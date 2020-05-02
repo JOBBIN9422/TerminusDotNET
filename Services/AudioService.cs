@@ -202,11 +202,11 @@ namespace TerminusDotNetCore.Services
                 catch (OperationCanceledException)
                 {
 
-                    await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"user {ParentModule.Context.Message.Author.Username} requested a playnext."));
+                    await Logger.Log(new LogMessage(LogSeverity.Warning, "AudioSvc", $"user {ParentModule.Context.Message.Author.Username} requested a playnext."));
                 }
                 finally
                 {
-                    ffmpeg.Kill(true);
+                    //ffmpeg.Kill(true);
                     _playing = false;
                 }
             }
