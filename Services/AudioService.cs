@@ -45,7 +45,7 @@ namespace TerminusDotNetCore.Services
         private IAudioClient _currAudioClient = null;
 
         //the currently active ffmpeg process for audio streaming
-        private CancellationTokenSource _ffmpegCancelTokenSrc = new CancellationTokenSource();
+        private CancellationTokenSource _ffmpegCancelTokenSrc = null;
 
         private readonly string FFMPEG_PROCESS_NAME;
 
@@ -163,7 +163,7 @@ namespace TerminusDotNetCore.Services
             {
                 //set playback state and spawn the stream process
                 _playing = true;
-                await StreamFfmpegAudio(_currAudioClient);
+                await StreamFfmpegAudio(path);
             }
             else
             {
@@ -172,16 +172,19 @@ namespace TerminusDotNetCore.Services
             }
         }
 
-        private async Task StreamFfmpegAudio(IAudioClient client)
+        private async Task StreamFfmpegAudio(string path)
         {
-            using (var ffmpeg = CreateProcess(_currentSong.Path))
+            using (var ffmpeg = CreateProcess(path))
             using (var output = ffmpeg.StandardOutput.BaseStream)
-            using (var stream = client.CreatePCMStream(AudioApplication.Music))
+            using (var stream = _currAudioClient.CreatePCMStream(AudioApplication.Music))
             {
                 try
                 {
                     //need a token in case we want to kill playback before finishing
-                    _ffmpegCancelTokenSrc = new CancellationTokenSource();
+                    lock (_ffmpegCancelTokenSrc)
+                    {
+                        _ffmpegCancelTokenSrc = new CancellationTokenSource();
+                    }
 
                     //copy ffmpeg output to the voice channel stream
                     await output.CopyToAsync(stream, _ffmpegCancelTokenSrc.Token);
@@ -248,7 +251,13 @@ namespace TerminusDotNetCore.Services
             if (_songQueue.Count > 0)
             {
                 //stop any currently active streams
-                _ffmpegCancelTokenSrc.Cancel();
+                if (_ffmpegCancelTokenSrc != null)
+                {
+                    lock (_ffmpegCancelTokenSrc)
+                    {
+                        _ffmpegCancelTokenSrc.Cancel();
+                    }
+                }
 
                 AudioItem nextInQueue;
                 lock (_songQueue)
