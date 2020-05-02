@@ -45,7 +45,7 @@ namespace TerminusDotNetCore.Services
         private IAudioClient _currAudioClient = null;
 
         //the currently active ffmpeg process for audio streaming
-        private CancellationTokenSource _ffmpegCancelTokenSrc = null;
+        private CancellationTokenSource _ffmpegCancelTokenSrc = new CancellationTokenSource();
 
         private readonly string FFMPEG_PROCESS_NAME;
 
@@ -180,12 +180,6 @@ namespace TerminusDotNetCore.Services
             {
                 try
                 {
-                    //need a token in case we want to kill playback before finishing
-                    lock (_ffmpegCancelTokenSrc)
-                    {
-                        _ffmpegCancelTokenSrc = new CancellationTokenSource();
-                    }
-
                     //copy ffmpeg output to the voice channel stream
                     await output.CopyToAsync(stream, _ffmpegCancelTokenSrc.Token);
                 }
