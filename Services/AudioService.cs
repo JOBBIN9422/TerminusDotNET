@@ -256,6 +256,12 @@ namespace TerminusDotNetCore.Services
         {
             if (_songQueue.Count > 0)
             {
+                if (_ffmpegCancelTokenSrc.IsCancellationRequested)
+                {
+                    _ffmpegCancelTokenSrc.Dispose();
+                    _ffmpegCancelTokenSrc = new CancellationTokenSource();
+                }
+
                 AudioItem nextInQueue;
                 lock (_songQueue)
                 {
