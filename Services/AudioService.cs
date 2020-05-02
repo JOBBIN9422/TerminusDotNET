@@ -108,8 +108,6 @@ namespace TerminusDotNetCore.Services
         #region audio control methods
         public async Task StopAllAudio()
         {
-            CancelFfmpegTasks();
-
             _songQueue = new LinkedList<AudioItem>();
             _playing = false;
             _currentSong = null;
