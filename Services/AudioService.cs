@@ -132,8 +132,8 @@ namespace TerminusDotNetCore.Services
                 {
                     //cancel and re-init the cancellation source
                     _ffmpegCancelTokenSrc.Cancel();
-                    _ffmpegCancelTokenSrc.Dispose();
-                    _ffmpegCancelTokenSrc = new CancellationTokenSource();
+                    //_ffmpegCancelTokenSrc.Dispose();
+                    //_ffmpegCancelTokenSrc = new CancellationTokenSource();
                 }
             }
         }
@@ -214,6 +214,7 @@ namespace TerminusDotNetCore.Services
                         if (_ffmpegCancelTokenSrc.IsCancellationRequested)
                         {
                             //reset the cancel state to prevent skipping multiple songs
+                            _ffmpegCancelTokenSrc.Dispose();
                             _ffmpegCancelTokenSrc = new CancellationTokenSource();
                         }
                     }
