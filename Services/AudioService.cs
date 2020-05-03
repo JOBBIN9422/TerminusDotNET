@@ -764,8 +764,17 @@ namespace TerminusDotNetCore.Services
             _weedPlaying = true;
 
             CurrentChannel = weedChannel;
-            await StopAllAudio();
-            await JoinAudio();
+
+            //stop any currently active streams
+            if (_playing)
+            {
+                StopFfmpeg();
+            }
+
+            if (_currAudioClient == null || _currAudioClient.ConnectionState != ConnectionState.Connected)
+            {
+                await JoinAudio();
+            }
 
             string path = Path.Combine(AudioPath, "weedlmao.mp3");
             path = Path.GetFullPath(path);
@@ -776,7 +785,6 @@ namespace TerminusDotNetCore.Services
             }
 
             await SendAudioAsync(path);
-            await LeaveAudio();
 
             _weedPlaying = false;
             _songQueue = _backupQueue;
@@ -786,8 +794,13 @@ namespace TerminusDotNetCore.Services
             {
                 await Client.SetGameAsync(null);
             }
-            _ = PlayNextInQueue();
+
             _ = ScheduleWeed(weedChannel);
+
+            if (_songQueue.Count == 0)
+            {
+                await LeaveAudio();
+            }
         }
         #endregion
 
