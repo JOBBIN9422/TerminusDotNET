@@ -208,6 +208,15 @@ namespace TerminusDotNetCore.Services
                 catch (OperationCanceledException)
                 {
                     await Logger.Log(new LogMessage(LogSeverity.Warning, "AudioSvc", $"user {ParentModule.Context.Message.Author.Username} requested a playnext."));
+
+                    lock (_ffmpegCancelTokenSrc)
+                    {
+                        if (_ffmpegCancelTokenSrc.IsCancellationRequested)
+                        {
+                            //reset the cancel state to prevent skipping multiple songs
+                            _ffmpegCancelTokenSrc = new CancellationTokenSource();
+                        }
+                    }
                 }
                 finally
                 {
