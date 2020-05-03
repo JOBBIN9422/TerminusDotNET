@@ -231,20 +231,25 @@ namespace TerminusDotNetCore.Services
         }
         public async Task PlayRegexAudio(string filename)
         {
-            ulong voiceID = ulong.Parse(Config["AudioChannelId"]);
-            IVoiceChannel vc = await Guild.GetVoiceChannelAsync(voiceID);
-
+            //copy the queue and set the playing state
             _backupQueue = _songQueue;
             _weedPlaying = true;
 
-            await StopAllAudio();
-            await JoinAudio();
+            //stop any currently active streams
+            if (_playing)
+            {
+                StopFfmpeg();
+            }
+
+            if (_currAudioClient == null || _currAudioClient.ConnectionState != ConnectionState.Connected)
+            {
+                await JoinAudio();
+            }
 
             string path = Path.Combine(AudioPath, filename);
             path = Path.GetFullPath(path);
 
             await SendAudioAsync(path);
-            await LeaveAudio();
 
             _weedPlaying = false;
             _songQueue = _backupQueue;
@@ -255,7 +260,10 @@ namespace TerminusDotNetCore.Services
                 await Client.SetGameAsync(null);
             }
 
-            await PlayNextInQueue();
+            if (_songQueue.Count == 0)
+            {
+                await LeaveAudio();
+            }
         }
 
         private Process CreateProcess(string path)
