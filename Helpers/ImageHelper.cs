@@ -183,6 +183,34 @@ namespace TerminusDotNetCore.Helpers
             }
         }
         
+        public static Image MirrorImage(string imageFilename, FlipMode flipMode)
+        {
+            var image = Image.Load(imageFilename);
+            Rectangle cropRect;
+
+            //mirror the image based on the given flip mode
+            using (var mirrorHalf = image.Clone(x => x.Flip(flipMode)))
+            {
+                //define crop region based on given flip mode
+                if (flipMode == FlipMode.Horizontal)
+                {
+                    cropRect = new Rectangle(image.Width / 2, 0, image.Width / 2, image.Height);
+                }
+                else
+                {
+                    cropRect = new Rectangle(0, image.Height / 2, image.Width, image.Height / 2);
+                }
+
+                //crop the flipped image and draw it on the base image
+                mirrorHalf.Mutate(x => x.Crop(cropRect));
+
+                var drawPoint = new Point(image.Width / 2, 0);
+                image.Mutate(x => x.DrawImage(mirrorHalf, drawPoint, 1.0f));
+            }
+
+            return image;
+        }
+
         /// <summary>
         /// Stretches an image by the given multiplier.
         /// </summary>
