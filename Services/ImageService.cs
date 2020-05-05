@@ -159,6 +159,26 @@ namespace TerminusDotNetCore.Services
             return images;
         }
 
+        public List<string> MirrorImages(IReadOnlyCollection<Attachment> attachments, FlipMode flipMode = FlipMode.Horizontal)
+        {
+            var images = AttachmentHelper.DownloadAttachments(attachments);
+
+            foreach (var image in images)
+            {
+                MirrorImage(image, flipMode);
+            }
+
+            return images;
+        }
+
+        private void MirrorImage(string imageFilename, FlipMode flipMode)
+        {
+            using (var image = ImageHelper.MirrorImage(imageFilename, flipMode))
+            {
+                image.Save(imageFilename);
+            }
+        }
+
         private void BobRossImage(string imageFilename, uint numTimes = 1)
         {
             for (uint i = 0; i < numTimes; i++)
