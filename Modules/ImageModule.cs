@@ -64,6 +64,21 @@ namespace TerminusDotNetCore.Modules
             System.IO.File.Delete(image);
         }
 
+        [Command("mirror", RunMode = RunMode.Async)]
+        [Summary("mirrors an attached image, or the image in the previous message (if any).")]
+        public async Task DeepFryImageAsync([Summary("axis to mirror the image on")]string flipMode = "horizontal")
+        {
+            IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
+            if (attachments == null)
+            {
+                await ServiceReplyAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
+                return;
+            }
+
+            var images = _imageService.MirrorImages(attachments, flipMode);
+            await SendImages(images);
+        }
+
         [Command("deepfry", RunMode = RunMode.Async)]
         [Summary("Deep-fries an attached image, or the image in the previous message (if any).")]
         public async Task DeepFryImageAsync([Summary("how many times to fry the image")]uint numPasses = 1)

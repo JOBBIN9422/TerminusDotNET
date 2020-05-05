@@ -159,9 +159,15 @@ namespace TerminusDotNetCore.Services
             return images;
         }
 
-        public List<string> MirrorImages(IReadOnlyCollection<Attachment> attachments, FlipMode flipMode = FlipMode.Horizontal)
+        public List<string> MirrorImages(IReadOnlyCollection<Attachment> attachments, string flipModeStr)
         {
             var images = AttachmentHelper.DownloadAttachments(attachments);
+
+            FlipMode flipMode = FlipMode.Horizontal;
+            if (flipModeStr == "vertical" || flipModeStr == "vert")
+            {
+                flipMode = FlipMode.Vertical;
+            }
 
             foreach (var image in images)
             {
