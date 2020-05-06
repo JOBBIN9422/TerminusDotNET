@@ -161,7 +161,9 @@ namespace TerminusDotNetCore.Services
 
         public List<string> MirrorImages(IReadOnlyCollection<Attachment> attachments, string flipModeStr)
         {
-            var images = AttachmentHelper.DownloadAttachments(attachments);
+            var returnImgs = new List<string>();
+            var imagesFirstHalf = AttachmentHelper.DownloadAttachments(attachments);
+            returnImgs.AddRange(imagesFirstHalf);
 
             FlipMode flipMode = FlipMode.Horizontal;
             if (flipModeStr == "vertical" || flipModeStr == "vert")
@@ -169,17 +171,27 @@ namespace TerminusDotNetCore.Services
                 flipMode = FlipMode.Vertical;
             }
 
-            foreach (var image in images)
+            //mirror the images one way
+            foreach (var image in imagesFirstHalf)
             {
                 MirrorImage(image, flipMode);
             }
 
-            return images;
+            var imagesSecondHalf = AttachmentHelper.DownloadAttachments(attachments);
+            returnImgs.AddRange(imagesSecondHalf);
+
+            //and mirror the images the other way
+            foreach(var image in imagesSecondHalf)
+            {
+                MirrorImage(image, flipMode, false);
+            }
+
+            return returnImgs;
         }
 
-        private void MirrorImage(string imageFilename, FlipMode flipMode)
+        private void MirrorImage(string imageFilename, FlipMode flipMode, bool topAndOrLeftHalf = true)
         {
-            using (var image = ImageHelper.MirrorImage(imageFilename, flipMode))
+            using (var image = ImageHelper.MirrorImage(imageFilename, flipMode, topAndOrLeftHalf))
             {
                 image.Save(imageFilename);
             }

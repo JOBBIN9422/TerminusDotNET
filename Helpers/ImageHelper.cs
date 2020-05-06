@@ -183,7 +183,7 @@ namespace TerminusDotNetCore.Helpers
             }
         }
         
-        public static Image MirrorImage(string imageFilename, FlipMode flipMode)
+        public static Image MirrorImage(string imageFilename, FlipMode flipMode, bool topAndOrLeftHalf = true)
         {
             var image = Image.Load(imageFilename);
             Rectangle cropRect;
@@ -195,13 +195,29 @@ namespace TerminusDotNetCore.Helpers
                 //define crop region and draw location based on given flip mode
                 if (flipMode == FlipMode.Horizontal)
                 {
-                    cropRect = new Rectangle(image.Width / 2, 0, image.Width / 2, image.Height);
-                    drawPoint = new Point(image.Width / 2, 0);
+                    if (topAndOrLeftHalf)
+                    {
+                        cropRect = new Rectangle(image.Width / 2, 0, image.Width / 2, image.Height);
+                        drawPoint = new Point(image.Width / 2, 0);
+                    }
+                    else
+                    {
+                        cropRect = new Rectangle(0, 0, image.Width / 2, image.Height);
+                        drawPoint = new Point(0, 0);
+                    }
                 }
                 else
                 {
-                    cropRect = new Rectangle(0, image.Height / 2, image.Width, image.Height / 2);
-                    drawPoint = new Point(0, image.Height / 2);
+                    if (topAndOrLeftHalf)
+                    {
+                        cropRect = new Rectangle(0, image.Height / 2, image.Width, image.Height / 2);
+                        drawPoint = new Point(0, image.Height / 2);
+                    }
+                    else
+                    {
+                        cropRect = new Rectangle(0, 0, image.Width, image.Height / 2);
+                        drawPoint = new Point(0, 0);
+                    }
                 }
 
                 //crop the flipped image and draw it on the base image

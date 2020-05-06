@@ -66,7 +66,7 @@ namespace TerminusDotNetCore.Modules
 
         [Command("mirror", RunMode = RunMode.Async)]
         [Summary("mirrors an attached image, or the image in the previous message (if any).")]
-        public async Task DeepFryImageAsync([Summary("axis to mirror the image on")]string flipMode = "horizontal")
+        public async Task MirrorImagesAsync([Summary("axis to mirror the image on")]string flipMode = "horizontal")
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null)
