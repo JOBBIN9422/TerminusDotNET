@@ -186,6 +186,8 @@ namespace TerminusDotNetCore.Helpers
         public static Image MirrorImage(string imageFilename, FlipMode flipMode, bool topAndOrLeftHalf = true)
         {
             var image = Image.Load(imageFilename);
+            image.Mutate(x => x.AutoOrient());
+
             Rectangle cropRect;
             Point drawPoint;
 
