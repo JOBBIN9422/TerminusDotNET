@@ -4,6 +4,8 @@ using Discord.Rest;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -68,6 +70,15 @@ namespace TerminusDotNetCore.Modules
             builder.AddField("Uptime: ", $"{uptime.ToString("%d")} days, {uptime.ToString("%h")} hours, {uptime.ToString("%m")} minutes");
 
             await ReplyAsync(embed: builder.Build());
+        }
+
+        public async Task DownloadMostRecentLog()
+        {
+            //get most recent log file
+            string mostRecentFilename = new DirectoryInfo(Bot.LogDir).GetFiles().OrderByDescending(f => f.CreationTime).First().FullName;
+
+            //send log file
+            await Context.Channel.SendFileAsync(mostRecentFilename);
         }
     }
 }
