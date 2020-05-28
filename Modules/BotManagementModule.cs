@@ -72,6 +72,7 @@ namespace TerminusDotNetCore.Modules
             await ReplyAsync(embed: builder.Build());
         }
 
+        [Command("log")]
         public async Task DownloadMostRecentLog()
         {
             //get most recent log file
