@@ -75,11 +75,18 @@ namespace TerminusDotNetCore.Modules
         [Command("log")]
         public async Task DownloadMostRecentLog()
         {
-            //get most recent log file
-            string mostRecentFilename = new DirectoryInfo(Bot.LogDir).GetFiles().OrderByDescending(f => f.CreationTime).First().FullName;
+            try
+            {
+                //get most recent log file
+                string mostRecentFilename = new DirectoryInfo(Bot.LogDir).GetFiles().OrderByDescending(f => f.CreationTime).First().FullName;
 
-            //send log file
-            await Context.Channel.SendFileAsync(mostRecentFilename);
+                //send log file
+                await Context.Channel.SendFileAsync(mostRecentFilename);
+            }
+            catch (InvalidOperationException)
+            {
+                await ReplyAsync("No log files currently exist.");
+            }
         }
     }
 }
