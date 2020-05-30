@@ -73,20 +73,35 @@ namespace TerminusDotNetCore.Modules
             await ReplyAsync(embed: builder.Build());
         }
 
-        [Command("log")]
-        public async Task DownloadMostRecentLog()
+        [Group("log")]
+        public class LogModule : ModuleBase<SocketCommandContext>
         {
-            try
+            private async Task DownloadMostRecentLog(string dirName)
             {
-                //get most recent log file
-                string mostRecentFilename = new DirectoryInfo(Logger.ConsoleLogDir).GetFiles().OrderByDescending(f => f.CreationTime).First().FullName;
+                try
+                {
+                    //get most recent log file
+                    string mostRecentFilename = new DirectoryInfo(dirName).GetFiles().OrderByDescending(f => f.CreationTime).First().FullName;
 
-                //send log file
-                await Context.Channel.SendFileAsync(mostRecentFilename);
+                    //send log file
+                    await Context.Channel.SendFileAsync(mostRecentFilename);
+                }
+                catch (InvalidOperationException)
+                {
+                    await ReplyAsync("No log files currently exist.");
+                }
             }
-            catch (InvalidOperationException)
+
+            [Command("console")]
+            public async Task DownloadMostRecentConsoleLog()
             {
-                await ReplyAsync("No log files currently exist.");
+                await DownloadMostRecentLog(Logger.ConsoleLogDir);
+            }
+
+            [Command("errors")]
+            public async Task DownloadMostRecentErrorLog()
+            {
+                await DownloadMostRecentLog(Logger.ErrorLogDir);
             }
         }
     }
