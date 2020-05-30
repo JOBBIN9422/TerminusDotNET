@@ -1,11 +1,17 @@
 ﻿using Discord;
 using System;
+using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace TerminusDotNetCore.Helpers
 {
     public class Logger
     {
+        public static string LogDir { get; private set; } = "logs";
+
+        private static ReaderWriterLockSlim _readWriteLock = new ReaderWriterLockSlim();
+
         public static Task Log(LogMessage message)
         {
             //Logger.WriteMessage(message.Source + ".txt", message.ToString());
@@ -31,7 +37,26 @@ namespace TerminusDotNetCore.Helpers
             }
             Console.WriteLine(message.ToString());
             Console.ResetColor();
+            LogToFile(message);
             return Task.CompletedTask;
+        }
+
+        private static void LogToFile(LogMessage message)
+        {
+            _readWriteLock.EnterWriteLock();
+
+            try
+            {
+                string currLogFilename = $"log_{DateTime.Today.ToString("MM-dd-yyyy")}.txt";
+                using (StreamWriter writer = new StreamWriter(Path.Combine(Logger.LogDir, currLogFilename), true))
+                {
+                    writer.WriteLine(message.ToString());
+                }
+            }
+            finally
+            {
+                _readWriteLock.ExitWriteLock();
+            }
         }
     }
 }
