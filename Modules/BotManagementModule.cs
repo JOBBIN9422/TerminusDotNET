@@ -132,7 +132,39 @@ namespace TerminusDotNetCore.Modules
                     totalSize += file.Length;
                 }
 
-                await ReplyAsync($"{fileCount} logs totaling {totalSize / 1024.0:0.##} KB.");
+                await ReplyAsync($"{fileCount} log files totaling {totalSize / 1024.0:0.##} KB.");
+            }
+
+            [Command("clean")]
+            public async Task CleanLogFiles(string logType = "all")
+            {
+                DirectoryInfo logDirInfo = null;
+                switch (logType)
+                {
+                    case "console":
+                        logDirInfo = new DirectoryInfo(Logger.ConsoleLogDir);
+                        break;
+
+                    case "errors":
+                        logDirInfo = new DirectoryInfo(Logger.ErrorLogDir);
+                        break;
+
+                    case "all":
+                    default:
+                        logDirInfo = new DirectoryInfo(Logger.RootLogDir);
+                        break;
+                }
+
+                int fileCount = 0;
+                long totalSize = 0;
+                foreach (var file in logDirInfo.GetFiles("*.txt", SearchOption.AllDirectories))
+                {
+                    fileCount++;
+                    totalSize += file.Length;
+                    file.Delete();
+                }
+
+                await ReplyAsync($"Deleted {fileCount} log files totaling {totalSize / 1024.0:0.##} KB.");
             }
         }
     }
