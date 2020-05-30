@@ -132,7 +132,7 @@ namespace TerminusDotNetCore.Modules
                     totalSize += file.Length;
                 }
 
-                await ReplyAsync($"{fileCount} logs totaling {totalSize / 1024.0} KB.");
+                await ReplyAsync($"{fileCount} logs totaling {totalSize / 1024.0:0.##} KB.");
             }
         }
     }
