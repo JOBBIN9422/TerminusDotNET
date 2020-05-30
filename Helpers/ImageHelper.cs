@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Numerics;
 using SixLabors.ImageSharp;
-using SixLabors.Primitives;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 using SixLabors.ImageSharp.Formats.Jpeg;
@@ -9,6 +8,7 @@ using SixLabors.Fonts;
 using System.IO;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
+using SixLabors.ImageSharp.Drawing.Processing;
 
 namespace TerminusDotNetCore.Helpers
 {
@@ -82,8 +82,11 @@ namespace TerminusDotNetCore.Helpers
 
             TextGraphicsOptions options = new TextGraphicsOptions()
             {
-                WrapTextWidth = textMaxWidth,
-                HorizontalAlignment = HorizontalAlignment.Center,
+                TextOptions = new TextOptions()
+                {
+                    WrapTextWidth = textMaxWidth,
+                    HorizontalAlignment = HorizontalAlignment.Center
+                }
             };
 
             //render text
@@ -465,8 +468,11 @@ namespace TerminusDotNetCore.Helpers
                 //wrap and align text before drawing
                 TextGraphicsOptions options = new TextGraphicsOptions()
                 {
-                    WrapTextWidth = textMaxWidth,
-                    HorizontalAlignment = HorizontalAlignment.Center,
+                    TextOptions = new TextOptions()
+                    {
+                        WrapTextWidth = textMaxWidth,
+                        HorizontalAlignment = HorizontalAlignment.Center
+                    }
                 };
 
                 //draw text on the text canvas
