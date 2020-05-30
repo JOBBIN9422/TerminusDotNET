@@ -19,7 +19,7 @@ namespace TerminusDotNetCore.Modules
 
         [Command("help", RunMode = RunMode.Async)]
         [Summary("List information about a given command (if it exists).")]
-        public async Task Help([Summary("the name of the command to search for")]string commandName = null)
+        public async Task Help([Summary("the name of the command to search for")][Remainder]string commandName = null)
         {
             //if no command name was given, print help for all commands
             if (string.IsNullOrEmpty(commandName))
