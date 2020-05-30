@@ -95,11 +95,11 @@ namespace TerminusDotNetCore.Modules
             {
                 if (param.Summary != null)
                 {
-                    commandText += $"\n- {param.Name} ({param.Type.Name}, optional = {param.IsOptional}): {param.Summary}";
+                    commandText += $"\n- `{param.Name}` ({param.Type.Name}, optional = {param.IsOptional}): {param.Summary}";
                 }
             }
 
-            embedBuilder.AddField(command.Aliases.First(), commandText);
+            embedBuilder.AddField($"`{command.Aliases.First()}`", commandText);
         }
     }
 }
