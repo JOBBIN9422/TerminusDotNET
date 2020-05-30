@@ -79,7 +79,7 @@ namespace TerminusDotNetCore.Modules
             try
             {
                 //get most recent log file
-                string mostRecentFilename = new DirectoryInfo(Logger.LogDir).GetFiles().OrderByDescending(f => f.CreationTime).First().FullName;
+                string mostRecentFilename = new DirectoryInfo(Logger.ConsoleLogDir).GetFiles().OrderByDescending(f => f.CreationTime).First().FullName;
 
                 //send log file
                 await Context.Channel.SendFileAsync(mostRecentFilename);

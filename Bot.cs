@@ -152,7 +152,7 @@ namespace TerminusDotNetCore
 
                     //dump exception details to error log
                     string currLogFilename = $"errors_{DateTime.Today.ToString("MM-dd-yyyy")}.txt";
-                    using (StreamWriter writer = new StreamWriter(Path.Combine(Logger.LogDir,currLogFilename), true))
+                    using (StreamWriter writer = new StreamWriter(Path.Combine(Logger.ErrorLogDir,currLogFilename), true))
                     {
                         writer.WriteLine("----- BEGIN ENTRY -----");
                         writer.WriteLine($"ERROR DATETIME: {DateTime.Now.ToString()}");

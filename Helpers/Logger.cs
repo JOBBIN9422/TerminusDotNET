@@ -8,7 +8,9 @@ namespace TerminusDotNetCore.Helpers
 {
     public class Logger
     {
-        public static string LogDir { get; private set; } = "logs";
+        public static readonly string ConsoleLogDir = Path.Combine("logs", "console");
+
+        public static readonly string ErrorLogDir = Path.Combine("logs", "errors");
 
         private static ReaderWriterLockSlim _readWriteLock = new ReaderWriterLockSlim();
 
@@ -48,7 +50,7 @@ namespace TerminusDotNetCore.Helpers
             try
             {
                 string currLogFilename = $"log_{DateTime.Today.ToString("MM-dd-yyyy")}.txt";
-                using (StreamWriter writer = new StreamWriter(Path.Combine(Logger.LogDir, currLogFilename), true))
+                using (StreamWriter writer = new StreamWriter(Path.Combine(ConsoleLogDir, currLogFilename), true))
                 {
                     writer.WriteLine(message.ToString());
                 }
