@@ -40,11 +40,11 @@ namespace TerminusDotNetCore.Modules
 
         [Command("usersim", RunMode = RunMode.Async)]
         [Summary("Generate a sentence based on a user's messages in a given channel.")]
-        public async Task GenerateUserSentence([Summary("@user to generate the sentence for.")]IUser user, [Summary("#channel to pull user messages from.")]ISocketMessageChannel channel)
+        public async Task GenerateUserSentence([Summary("`@user` to generate the sentence for.")]IUser user, [Summary("`#channel` to pull user messages from.")]ISocketMessageChannel channel)
         {
             if (user == null || channel == null)
             {
-                await ServiceReplyAsync("Please provide both a @user and a #channel.");
+                await ServiceReplyAsync("Please provide both a `@user` and a `#channel`.");
                 return;
             }
 
@@ -54,11 +54,11 @@ namespace TerminusDotNetCore.Modules
 
         [Command("channelsim", RunMode = RunMode.Async)]
         [Summary("Generate a sentence based on a given channel.")]
-        public async Task GenerateChannelSentence([Summary("#channel to pull user messages from.")]ISocketMessageChannel channel)
+        public async Task GenerateChannelSentence([Summary("`#channel` to pull user messages from.")]ISocketMessageChannel channel)
         {
             if (channel == null)
             {
-                await ServiceReplyAsync("Please provide a #channel.");
+                await ServiceReplyAsync("Please provide a `#channel`.");
                 return;
             }
 

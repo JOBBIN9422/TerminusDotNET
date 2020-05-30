@@ -24,7 +24,8 @@ namespace TerminusDotNetCore.Modules
         private string oblivion = "STOP! You have violated the law! (Check your input, too many or too few dice)";
 
         [Command("roll")]
-        public async Task RollAsync([Summary("Dice number and size.")]string dice_roll = null)
+        [Summary("Performs dice roll(s) with the given parameters.")]
+        public async Task RollAsync([Summary("Dice number and size. Input format: `XdY` where X is number of rolls and Y is the die type (e.g. `1d20`)")]string dice_roll = null)
         {
             //Check for input to command
             if (string.IsNullOrEmpty(dice_roll))

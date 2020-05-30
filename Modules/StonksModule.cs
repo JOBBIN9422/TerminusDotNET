@@ -23,6 +23,7 @@ namespace TerminusDotNetCore.Modules
         public object PingSever { get; private set; }
 
         [Command("stonks")]
+        [Summary("Get a stock chart for the given company.")]
         public async Task StonksAsync([Summary("Stock acronym for desired company")]string stock_name = null)
         {
             if (string.IsNullOrEmpty(stock_name))

@@ -25,7 +25,8 @@ namespace TerminusDotNetCore.Modules
         }
 
         [Command("regex")]
-        public async Task SetRegexState(string state = null)
+        [Summary("Set the regex response behavior of the bot.")]
+        public async Task SetRegexState([Summary("Set the regex response behavior. Possible values: `on/off`, `yes/no`, `y/n`, `enabled/disabled`")]string state = null)
         {
             if (string.IsNullOrEmpty(state))
             {
@@ -53,6 +54,7 @@ namespace TerminusDotNetCore.Modules
         }
 
         [Command("about")]
+        [Summary("Display information about the bot.")]
         public async Task DisplayBotInfo()
         {
             RestApplication appInfo = await _bot.Client.GetApplicationInfoAsync();
@@ -93,19 +95,22 @@ namespace TerminusDotNetCore.Modules
             }
 
             [Command("console")]
+            [Summary("Download the most recent stdout log file, if any exist.")]
             public async Task DownloadMostRecentConsoleLog()
             {
                 await DownloadMostRecentLog(Logger.ConsoleLogDir);
             }
 
             [Command("errors")]
+            [Summary("Download the most recent command error log file, if any exist.")]
             public async Task DownloadMostRecentErrorLog()
             {
                 await DownloadMostRecentLog(Logger.ErrorLogDir);
             }
 
             [Command("stats")]
-            public async Task GetLogStats(string logType = "all")
+            [Summary("Get information about the total count and size (KB) of log files currently stored on the server.")]
+            public async Task GetLogStats([Summary("The type of logs to filter on. Possible values: `console, errors, all (default value)`")]string logType = "all")
             {
                 DirectoryInfo logDirInfo = null;
                 switch (logType)
@@ -136,7 +141,8 @@ namespace TerminusDotNetCore.Modules
             }
 
             [Command("clean")]
-            public async Task CleanLogFiles(string logType = "all")
+            [Summary("Delete log files for the given log type.")]
+            public async Task CleanLogFiles([Summary("The type of logs to delete. Possible values: `console, errors, all (default value)`")]string logType = "all")
             {
                 DirectoryInfo logDirInfo = null;
                 switch (logType)

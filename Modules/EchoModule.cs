@@ -9,8 +9,8 @@ namespace TerminusDotNetCore.Modules
     public class EchoModule : ModuleBase<SocketCommandContext>
     {
         [Command("echo")]
-
-        public async Task Echo([Remainder] string text)
+        [Summary("Responds with the given text.")]
+        public async Task Echo([Summary("The text to be echoed.")][Remainder] string text)
         {
             await ReplyAsync(text);
         }

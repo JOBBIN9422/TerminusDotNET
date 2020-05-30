@@ -42,6 +42,7 @@ namespace TerminusDotNetCore.Modules
         }
 
         [Command("tweet", RunMode = RunMode.Async)]
+        [Summary("Tweet the contents (text or image(s)) of the current or previous message.")]
         public async Task Tweet([Remainder]string tweet = null)
         {
             string result = "";
@@ -72,6 +73,7 @@ namespace TerminusDotNetCore.Modules
         }
 
         [Command("notch", RunMode = RunMode.Async)]
+        [Summary("Get the most recent tweet from pro gamer `@Notch`.")]
         public async Task GetLastNotchTweet()
         {
             string tweet = await _twitterService.GetLastNotchTweet();
