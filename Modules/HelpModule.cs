@@ -2,6 +2,7 @@
 using Discord.Commands;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -44,7 +45,7 @@ namespace TerminusDotNetCore.Modules
 
                 foreach (var helpEmbed in helpTexts)
                 {
-                    await ReplyAsync("Available commands: ", false, helpEmbed);
+                    await ReplyAsync(embed: helpEmbed);
                 }
             }
             else
@@ -98,7 +99,7 @@ namespace TerminusDotNetCore.Modules
                 }
             }
 
-            embedBuilder.AddField(command.Name, commandText);
+            embedBuilder.AddField(command.Aliases.First(), commandText);
         }
     }
 }
