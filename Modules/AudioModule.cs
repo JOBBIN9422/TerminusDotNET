@@ -5,10 +5,7 @@ using System.Threading.Tasks;
 using Discord;
 using TerminusDotNetCore.Services;
 using System.Collections.Generic;
-using System.Configuration;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Configuration.Json;
-using Microsoft.Extensions.Configuration.FileExtensions;
 
 namespace TerminusDotNetCore.Modules
 {

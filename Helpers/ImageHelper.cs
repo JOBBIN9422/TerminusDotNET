@@ -67,7 +67,7 @@ namespace TerminusDotNetCore.Helpers
             Font font = SystemFonts.CreateFont("Impact", fontSize);
 
             //compute text render size and font outline size
-            SizeF botTextSize = TextMeasurer.Measure(bottomText, new RendererOptions(font));
+            FontRectangle botTextSize = TextMeasurer.Measure(bottomText, new RendererOptions(font));
             float outlineSize = fontSize / 15.0f;
 
             //determine top & bottom text location
