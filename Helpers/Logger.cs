@@ -8,8 +8,8 @@ namespace TerminusDotNetCore.Helpers
 {
     public class Logger
     {
+        public static readonly string RootLogDir = "logs";
         public static readonly string ConsoleLogDir = Path.Combine("logs", "console");
-
         public static readonly string ErrorLogDir = Path.Combine("logs", "errors");
 
         private static ReaderWriterLockSlim _readWriteLock = new ReaderWriterLockSlim();
