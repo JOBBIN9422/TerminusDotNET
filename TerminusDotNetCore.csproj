@@ -14,6 +14,8 @@
     <PackageReference Include="Discord.Net.Webhook" Version="2.3.0-dev-20200525.6" />
     <PackageReference Include="Discord.Net.WebSocket" Version="2.3.0-dev-20200525.6" />
     <PackageReference Include="Google.Apis.YouTube.v3" Version="1.45.0.1929" />
+    <PackageReference Include="IronPython" Version="2.7.10" />
+    <PackageReference Include="IronPython.StdLib" Version="2.7.10" />
     <PackageReference Include="linqtotwitter" Version="5.1.2" />
     <PackageReference Include="MathNet.Numerics" Version="4.11.0" />
     <PackageReference Include="MediaToolKit.NetCore" Version="0.2.1-preview" />
