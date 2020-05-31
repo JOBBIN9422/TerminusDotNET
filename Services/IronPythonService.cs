@@ -39,12 +39,6 @@ namespace TerminusDotNetCore.Services
                     outputPages.Add(output.Substring(i, Math.Min(pageLength, output.Length - i)));
                 }
 
-                //add any remaining output to the page list
-                if (output.Length > 0)
-                {
-                    outputPages.Add(output);
-                }
-
                 return outputPages;
             }
         }
