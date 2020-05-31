@@ -30,7 +30,7 @@ namespace TerminusDotNetCore.Services
                 _pythonEngine.Runtime.IO.SetOutput(Console.OpenStandardOutput(), Encoding.UTF8);
 
                 List<string> outputPages = new List<string>();
-                while (output.Length > maxPageLength)
+                do
                 {
                     string outputPage = output.Substring(0, maxPageLength);
                     outputPages.Add(outputPage);
@@ -39,7 +39,7 @@ namespace TerminusDotNetCore.Services
                     {
                         output = output.Substring(maxPageLength);
                     }
-                }
+                } while (output.Length > maxPageLength);
 
                 return outputPages;
             }
