@@ -21,9 +21,12 @@ namespace TerminusDotNetCore.Modules
         [Command("python", RunMode = RunMode.Async)]
         public async Task ExecutePythonString([Remainder]string pythonStr)
         {
-            string pythonOut = _pythonService.ExecutePythonString(pythonStr);
+            List<string> pythonOut = _pythonService.ExecutePythonString(pythonStr);
 
-            await ReplyAsync($"```\n{pythonOut}\n```");
+            foreach (string outPage in pythonOut)
+            {
+                await ReplyAsync($"```\n{outPage}\n```");
+            }
         }
     }
 }
