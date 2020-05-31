@@ -14,28 +14,20 @@ namespace TerminusDotNetCore.Services
         public IConfiguration Config { get; set; }
         public ServiceControlModule ParentModule { get; set; }
 
-        private ScriptEngine _pythonEngine;
-
-        private MemoryStream _outputBinStream;
-        private StreamWriter _outputTextStream;
-
-        public IronPythonService(IConfiguration config)
-        {
-            Config = config;
-
-            //init python eng and set output
-            _outputBinStream = new MemoryStream();
-            _outputTextStream = new StreamWriter(_outputBinStream);
-            _pythonEngine = Python.CreateEngine();
-            _pythonEngine.Runtime.IO.SetOutput(_outputBinStream, _outputTextStream);
-        }
+        private ScriptEngine _pythonEngine = Python.CreateEngine();
 
         public string ExecutePythonString(string pythonStr)
         {
             ScriptSource script = _pythonEngine.CreateScriptSourceFromString(pythonStr);
             script.Execute();
-            string output = Encoding.ASCII.GetString(_outputBinStream.ToArray());
-            return output;
+
+            using (MemoryStream outputStream = new MemoryStream())
+            using (StreamWriter outputWriter = new StreamWriter(outputStream))
+            {
+                _pythonEngine.Runtime.IO.SetOutput(outputStream, outputWriter);
+                string output = Encoding.ASCII.GetString(outputStream.ToArray());
+                return output;
+            }
         }
     }
 }
