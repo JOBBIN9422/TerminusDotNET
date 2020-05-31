@@ -32,12 +32,15 @@ namespace TerminusDotNetCore.Services
                 List<string> outputPages = new List<string>();
                 do
                 {
-                    string outputPage = output.Substring(0, maxPageLength);
-                    outputPages.Add(outputPage);
-
                     if (output.Length > maxPageLength)
                     {
+                        string outputPage = output.Substring(0, maxPageLength);
+                        outputPages.Add(outputPage);
                         output = output.Substring(maxPageLength);
+                    }
+                    else
+                    {
+                        outputPages.Add(output);
                     }
                 } while (output.Length > maxPageLength);
 
