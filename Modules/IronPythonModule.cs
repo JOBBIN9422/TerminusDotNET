@@ -18,6 +18,7 @@ namespace TerminusDotNetCore.Modules
             _pythonService.ParentModule = this;
         }
 
+        [Command("python", RunMode = RunMode.Async)]
         public async Task ExecutePythonString([Remainder]string pythonStr)
         {
             string pythonOut = _pythonService.ExecutePythonString(pythonStr);
