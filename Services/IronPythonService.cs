@@ -16,7 +16,7 @@ namespace TerminusDotNetCore.Services
 
         private ScriptEngine _pythonEngine = Python.CreateEngine();
 
-        public List<string> ExecutePythonString(string pythonStr, int maxPageLength = 1990)
+        public List<string> ExecutePythonString(string pythonStr, int pageLength = 1990)
         {
             using (MemoryStream outputStream = new MemoryStream())
             using (StreamWriter outputWriter = new StreamWriter(outputStream))
@@ -34,19 +34,10 @@ namespace TerminusDotNetCore.Services
 
                 //split output string into list of pages if it's too long
                 List<string> outputPages = new List<string>();
-                do
+                for (int i = 0; i < output.Length; i += pageLength)
                 {
-                    if (output.Length > maxPageLength)
-                    {
-                        string outputPage = output.Substring(0, maxPageLength);
-                        outputPages.Add(outputPage);
-                        output = output.Substring(maxPageLength);
-                    }
-                    else
-                    {
-                        outputPages.Add(output);
-                    }
-                } while (output.Length > maxPageLength);
+                    outputPages.Add(output.Substring(i, Math.Min(pageLength, output.Length - i)));
+                }
 
                 //add any remaining output to the page list
                 if (output.Length > 0)
