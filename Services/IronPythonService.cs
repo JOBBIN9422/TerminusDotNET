@@ -16,7 +16,7 @@ namespace TerminusDotNetCore.Services
 
         private ScriptEngine _pythonEngine = Python.CreateEngine();
 
-        public string ExecutePythonString(string pythonStr)
+        public List<string> ExecutePythonString(string pythonStr)
         {
             using (MemoryStream outputStream = new MemoryStream())
             using (StreamWriter outputWriter = new StreamWriter(outputStream))
@@ -29,7 +29,19 @@ namespace TerminusDotNetCore.Services
                 string output = Encoding.ASCII.GetString(outputStream.ToArray());
                 _pythonEngine.Runtime.IO.SetOutput(Console.OpenStandardOutput(), Encoding.UTF8);
 
-                return output;
+                List<string> outputPages = new List<string>();
+                while (output.Length > 2000)
+                {
+                    string outputPage = output.Substring(0, 2000);
+                    outputPages.Add(outputPage);
+
+                    if (output.Length > 2000)
+                    {
+                        output = output.Substring(2000);
+                    }
+                }
+
+                return outputPages;
             }
         }
     }
