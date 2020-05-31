@@ -18,13 +18,14 @@ namespace TerminusDotNetCore.Services
 
         public string ExecutePythonString(string pythonStr)
         {
-            ScriptSource script = _pythonEngine.CreateScriptSourceFromString(pythonStr);
-            script.Execute();
-
             using (MemoryStream outputStream = new MemoryStream())
             using (StreamWriter outputWriter = new StreamWriter(outputStream))
             {
                 _pythonEngine.Runtime.IO.SetOutput(outputStream, outputWriter);
+
+                ScriptSource script = _pythonEngine.CreateScriptSourceFromString(pythonStr);
+                script.Execute();
+
                 string output = Encoding.ASCII.GetString(outputStream.ToArray());
                 _pythonEngine.Runtime.IO.SetOutput(Console.OpenStandardOutput(), Encoding.UTF8);
 
