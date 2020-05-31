@@ -26,6 +26,8 @@ namespace TerminusDotNetCore.Services
             {
                 _pythonEngine.Runtime.IO.SetOutput(outputStream, outputWriter);
                 string output = Encoding.ASCII.GetString(outputStream.ToArray());
+                _pythonEngine.Runtime.IO.SetOutput(Console.OpenStandardOutput(), Encoding.UTF8);
+
                 return output;
             }
         }
