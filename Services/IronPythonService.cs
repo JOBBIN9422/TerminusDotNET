@@ -34,7 +34,7 @@ namespace TerminusDotNetCore.Services
         {
             ScriptSource script = _pythonEngine.CreateScriptSourceFromString(pythonStr);
             script.Execute();
-            string output = _outputTextStream.ToString();
+            string output = Encoding.ASCII.GetString(_outputBinStream.ToArray());
             return output;
         }
     }
