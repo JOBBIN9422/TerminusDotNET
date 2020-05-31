@@ -16,7 +16,7 @@ namespace TerminusDotNetCore.Services
 
         private ScriptEngine _pythonEngine = Python.CreateEngine();
 
-        public List<string> ExecutePythonString(string pythonStr)
+        public List<string> ExecutePythonString(string pythonStr, int maxPageLength = 1990)
         {
             using (MemoryStream outputStream = new MemoryStream())
             using (StreamWriter outputWriter = new StreamWriter(outputStream))
@@ -30,14 +30,14 @@ namespace TerminusDotNetCore.Services
                 _pythonEngine.Runtime.IO.SetOutput(Console.OpenStandardOutput(), Encoding.UTF8);
 
                 List<string> outputPages = new List<string>();
-                while (output.Length > 2000)
+                while (output.Length > maxPageLength)
                 {
-                    string outputPage = output.Substring(0, 2000);
+                    string outputPage = output.Substring(0, maxPageLength);
                     outputPages.Add(outputPage);
 
-                    if (output.Length > 2000)
+                    if (output.Length > maxPageLength)
                     {
-                        output = output.Substring(2000);
+                        output = output.Substring(maxPageLength);
                     }
                 }
 
