@@ -13,8 +13,8 @@ namespace TerminusDotNetCore.Modules
         private IronPythonService _pythonService;
         public IronPythonModule(IConfiguration config, IronPythonService pythonService) : base(config)
         {
+            //no need to set config (set in constructor via DI)
             _pythonService = pythonService;
-            _pythonService.Config = config;
             _pythonService.ParentModule = this;
         }
 
