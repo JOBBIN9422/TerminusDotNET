@@ -188,10 +188,9 @@ namespace TerminusDotNetCore
                              .AddSingleton<AudioService>()
                              .AddSingleton<MarkovService>()
                              .AddSingleton<TicTacToeService>()
+                             .AddSingleton<IronPythonService>()
                              .AddSingleton(new Random())
                              .AddSingleton(this);
-
-            //serviceCollection.AddSingleton<WideTextService>();
 
             return serviceCollection.BuildServiceProvider();
         }
