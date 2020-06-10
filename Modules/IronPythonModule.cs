@@ -20,12 +20,13 @@ namespace TerminusDotNetCore.Modules
         }
 
         [Command("python", RunMode = RunMode.Async)]
-        public async Task ExecutePythonString([Remainder]string pythonStr)
+        public async Task ExecutePythonString([Remainder]string pythonStr = null)
         {
             List<string> pythonOut = new List<string>();
 
             //check for python files in the current message
-            if (Context.Message.Attachments != null &&
+            if (pythonStr == null &&
+                Context.Message.Attachments != null &&
                 Context.Message.Attachments.Count > 0 &&
                 AttachmentHelper.AttachmentsAreValid(Context.Message.Attachments, AttachmentFilter.Plaintext))
             {
