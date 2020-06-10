@@ -53,9 +53,16 @@ namespace TerminusDotNetCore.Services
             //execute each python script and add its output to the return list
             foreach (string pythonFile in pythonFiles)
             {
-                string scriptContents = File.ReadAllText(pythonFile);
-                List<string> scriptOutput = ExecutePythonString(scriptContents);
-                allScriptOutput.AddRange(scriptOutput);
+                try
+                {
+                    string scriptContents = File.ReadAllText(pythonFile);
+                    List<string> scriptOutput = ExecutePythonString(scriptContents);
+                    allScriptOutput.AddRange(scriptOutput);
+                }
+                finally
+                {
+                    File.Delete(pythonFile);
+                }
             }
 
             return allScriptOutput;
