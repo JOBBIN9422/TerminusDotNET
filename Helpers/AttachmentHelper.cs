@@ -135,6 +135,7 @@ namespace TerminusDotNetCore.Helpers
 
         private static bool FileIsValid(string filename, string[] validExtensions)
         {
+            //check if the file's extension is in the extension filter array
             string extension = Path.GetExtension(filename).ToLower();
             return Array.Exists(validExtensions, element => element == extension);
         }
@@ -155,12 +156,16 @@ namespace TerminusDotNetCore.Helpers
             {
                 var attachmentFiles = new List<string>();
 
+                //download each attachment file to the temp dir via webclient
                 foreach (var attachment in attachments)
                 {
                     var filename = attachment.Filename;
                     var url = attachment.Url;
-                    var fileIdString = System.Guid.NewGuid().ToString("N");
-                    
+
+                    //give each file a unique name to prevent overwriting 
+                    var fileIdString = Guid.NewGuid().ToString("N");
+
+                    //preserve file's extension in the full name
                     var downloadFilename = Path.Combine("assets", "temp", $"{fileIdString}{Path.GetExtension(filename)}");
                     webClient.DownloadFile(url, downloadFilename);
 
