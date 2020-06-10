@@ -11,7 +11,8 @@ namespace TerminusDotNetCore.Helpers
     public enum AttachmentFilter
     {
         Images,
-        Audio
+        Audio,
+        Plaintext
     }
     
     public static class AttachmentHelper
@@ -28,26 +29,25 @@ namespace TerminusDotNetCore.Helpers
             ".mp3"
         };
 
+        private static readonly string[] _validPlaintextExtensions = {
+            ".txt",
+            ".py",
+            ".cpp",
+            ".hpp",
+            ".h",
+            ".c",
+            ".java",
+            ".cs"
+        };
+
         public async static Task<IReadOnlyCollection<Attachment>> GetMostRecentAttachmentsAsync(SocketCommandContext context, AttachmentFilter filter, int priorMsgCount = 20)
         {
             //choose the array containing the proper file extensions to filter by 
-            string[] validExtensions = new string[] { };
-            switch (filter)
-            {
-                case AttachmentFilter.Audio:
-                    validExtensions = _validAudioExtensions;
-                    break;
-
-                case AttachmentFilter.Images:
-                    validExtensions = _validImageExtensions;
-                    break;
-
-                default:
-                    validExtensions = _validImageExtensions;
-                    break;
-            }
+            string[] validExtensions = GetValidExtensions(filter);
 
             var attachments = context.Message.Attachments;
+
+            //if there are no attachments in the current message
             if (attachments == null || attachments.Count == 0)
             {
                 //check the last 20 messages for attachments (from most recent to oldest)
@@ -71,21 +71,53 @@ namespace TerminusDotNetCore.Helpers
                 }
 
                 //if none of the previous messages had any attachments
-                //throw new NullReferenceException("No attachments were found in the current or previous messages.");
                 return null;
             }
             else
             {
+                //if there are valid attachments in the current message
                 if (AttachmentsAreValid(attachments, validExtensions))
                 {
                     return attachments;
                 }
                 else
                 {
-                    //throw new NullReferenceException("No attachments were found in the current or previous messages.");
                     return null;
                 }
             }
+        }
+
+        private static string[] GetValidExtensions(AttachmentFilter filter)
+        {
+            string[] validExtensions;
+
+            switch (filter)
+            {
+                case AttachmentFilter.Audio:
+                    validExtensions = _validAudioExtensions;
+                    break;
+
+                case AttachmentFilter.Images:
+                    validExtensions = _validImageExtensions;
+                    break;
+
+                case AttachmentFilter.Plaintext:
+                    validExtensions = _validPlaintextExtensions;
+                    break;
+
+                default:
+                    validExtensions = new string[] { };
+                    break;
+            }
+
+            return validExtensions;
+        }
+
+        //for use outside the class 
+        public static bool AttachmentsAreValid(IReadOnlyCollection<IAttachment> attachments, AttachmentFilter filter)
+        {
+            string[] validExtensions = GetValidExtensions(filter);
+            return AttachmentsAreValid(attachments, validExtensions);
         }
 
         private static bool AttachmentsAreValid(IReadOnlyCollection<IAttachment> attachments, string[] validExtensions)
@@ -103,6 +135,7 @@ namespace TerminusDotNetCore.Helpers
 
         private static bool FileIsValid(string filename, string[] validExtensions)
         {
+            //check if the file's extension is in the extension filter array
             string extension = Path.GetExtension(filename).ToLower();
             return Array.Exists(validExtensions, element => element == extension);
         }
@@ -121,20 +154,24 @@ namespace TerminusDotNetCore.Helpers
         {
             using (var webClient = new WebClient())
             {
-                var returnImgs = new List<string>();
+                var attachmentFiles = new List<string>();
 
+                //download each attachment file to the temp dir via webclient
                 foreach (var attachment in attachments)
                 {
                     var filename = attachment.Filename;
                     var url = attachment.Url;
-                    var fileIdString = System.Guid.NewGuid().ToString("N");
-                    
+
+                    //give each file a unique name to prevent overwriting 
+                    var fileIdString = Guid.NewGuid().ToString("N");
+
+                    //preserve file's extension in the full name
                     var downloadFilename = Path.Combine("assets", "temp", $"{fileIdString}{Path.GetExtension(filename)}");
                     webClient.DownloadFile(url, downloadFilename);
 
-                    returnImgs.Add(downloadFilename);
+                    attachmentFiles.Add(downloadFilename);
                 }
-                return returnImgs;
+                return attachmentFiles;
             }
         }
 
@@ -156,13 +193,17 @@ namespace TerminusDotNetCore.Helpers
 
         public static List<string> GetTempAssets(string regex = "*")
         {
-            DirectoryInfo d = new DirectoryInfo(Path.Combine("assets", "temp"));//Assuming Test is your Folder
-            FileInfo[] Files = d.GetFiles(regex); //Getting files based on regex params
+            DirectoryInfo d = new DirectoryInfo(Path.Combine("assets", "temp"));
+
+            //Filter files by regex
+            FileInfo[] Files = d.GetFiles(regex);
+
             List<string> filePaths = new List<string>();
             foreach(FileInfo file in Files )
             {
               filePaths.Add(file.FullName);
             }
+
             return filePaths;
         }
 
