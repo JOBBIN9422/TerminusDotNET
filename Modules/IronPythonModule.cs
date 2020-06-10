@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using TerminusDotNetCore.Services;
+using TerminusDotNetCore.Helpers;
 
 namespace TerminusDotNetCore.Modules
 {
@@ -21,8 +22,23 @@ namespace TerminusDotNetCore.Modules
         [Command("python", RunMode = RunMode.Async)]
         public async Task ExecutePythonString([Remainder]string pythonStr)
         {
-            List<string> pythonOut = _pythonService.ExecutePythonString(pythonStr);
+            List<string> pythonOut = new List<string>();
 
+            //check for python files in the current message
+            if (Context.Message.Attachments != null &&
+                Context.Message.Attachments.Count > 0 &&
+                AttachmentHelper.AttachmentsAreValid(Context.Message.Attachments, AttachmentFilter.Plaintext))
+            {
+                pythonOut = _pythonService.ExecutePythonFiles(Context.Message.Attachments);
+            }
+
+            //otherwise, use the given text
+            else
+            {
+                pythonOut = _pythonService.ExecutePythonString(pythonStr);
+            }
+
+            //sent output as monospaced text
             foreach (string outPage in pythonOut)
             {
                 await ReplyAsync($"```\n{outPage}\n```");

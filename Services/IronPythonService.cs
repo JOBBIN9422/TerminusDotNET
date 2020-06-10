@@ -6,6 +6,8 @@ using TerminusDotNetCore.Modules;
 using IronPython.Hosting;
 using Microsoft.Scripting.Hosting;
 using System.IO;
+using Discord;
+using TerminusDotNetCore.Helpers;
 
 namespace TerminusDotNetCore.Services
 {
@@ -41,6 +43,22 @@ namespace TerminusDotNetCore.Services
 
                 return outputPages;
             }
+        }
+
+        public List<string> ExecutePythonFiles(IReadOnlyCollection<Attachment> attachments)
+        {
+            List<string> pythonFiles = AttachmentHelper.DownloadAttachments(attachments);
+            List<string> allScriptOutput = new List<string>();
+
+            //execute each python script and add its output to the return list
+            foreach (string pythonFile in pythonFiles)
+            {
+                string scriptContents = File.ReadAllText(pythonFile);
+                List<string> scriptOutput = ExecutePythonString(scriptContents);
+                allScriptOutput.AddRange(scriptOutput);
+            }
+
+            return allScriptOutput;
         }
     }
 }
