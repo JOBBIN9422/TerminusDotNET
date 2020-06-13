@@ -476,6 +476,7 @@ namespace TerminusDotNetCore.Services
             if (!PlaylistUrlIsValid(playlistURL))
             {
                 await ParentModule.ServiceReplyAsync("The given URL is not a valid YouTube playlist.");
+                await Logger.Log(new LogMessage(LogSeverity.Warning, "AudioSvc", $"URL '{playlistURL}' is not a valid youtube playlist URL."));
                 return;
             }
 
@@ -503,6 +504,8 @@ namespace TerminusDotNetCore.Services
                 //index to the next page of results
                 nextPageToken = searchListResponse.NextPageToken;
             }
+
+            await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"Fetched all video URLs for playlist URL '{playlistURL}'."));
 
             //add the list of URLs to the queue for downloading during playback
             await QueueYoutubeURLs(videoUrls, owner, channelId, append);
