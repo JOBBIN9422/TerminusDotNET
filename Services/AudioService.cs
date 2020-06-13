@@ -577,6 +577,8 @@ namespace TerminusDotNetCore.Services
                         _songQueue.AddFirst(insertNode);
                     }
 
+                    await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"Added song '{currVideo.DisplayName}' to front of main queue."));
+
                     insertAtNode = insertNode;
                 }
             }
