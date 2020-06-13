@@ -449,7 +449,7 @@ namespace TerminusDotNetCore.Services
                 }
             }
 
-            string queueName = _weedPlaying == true ? "main" : "weed";
+            string queueName = _weedPlaying == true ? "weed" : "main";
             string queueEnd = append == true ? "back" : "front";
 
             await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"Added song '{item.DisplayName}' to {queueEnd} of {queueName} queue."));
