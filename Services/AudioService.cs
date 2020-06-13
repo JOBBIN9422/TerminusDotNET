@@ -642,7 +642,7 @@ namespace TerminusDotNetCore.Services
                     }
                 }
 
-                await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"Loaded queue contents ({text.Length} songs)."));
+                await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"Loaded queue contents ({text.Length - 1} songs)."));
             }
 
             if (!_playing)
