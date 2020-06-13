@@ -6,6 +6,7 @@ using Discord;
 using TerminusDotNetCore.Services;
 using System.Collections.Generic;
 using Microsoft.Extensions.Configuration;
+using TerminusDotNetCore.Helpers;
 
 namespace TerminusDotNetCore.Modules
 {
@@ -238,11 +239,12 @@ namespace TerminusDotNetCore.Modules
 
         [Command("playnext", RunMode = RunMode.Async)]
         [Summary("Play the next item in the song queue, if any.")]
-        public Task PlayNext()
+        public async Task PlayNext()
         {
             //don't need to call playnext since it recursively calls itself after playback
+
+            await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"User '{Context.Message.Author.Username}' requested a playnext."));
             _service.StopFfmpeg();
-            return Task.CompletedTask;
         }
 
         [Command("qfront", RunMode = RunMode.Async)]

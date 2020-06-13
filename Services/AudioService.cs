@@ -105,12 +105,16 @@ namespace TerminusDotNetCore.Services
                     ApplicationName = this.GetType().ToString()
                 }
             );
+
+            await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", "Initialized youtube service."));
         }
         #endregion
 
         #region audio control methods
         public async Task StopAllAudio()
         {
+            await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", "Stopping all audio..."));
+
             _songQueue = new LinkedList<AudioItem>();
             _playing = false;
             _currentSong = null;
@@ -121,6 +125,7 @@ namespace TerminusDotNetCore.Services
             {
                 await Client.SetGameAsync(null);
             }
+            await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", "Stopped audio and deleted temp audio files."));
         }
 
         public void StopFfmpeg()
@@ -132,8 +137,6 @@ namespace TerminusDotNetCore.Services
                 {
                     //cancel and re-init the cancellation source
                     _ffmpegCancelTokenSrc.Cancel();
-                    //_ffmpegCancelTokenSrc.Dispose();
-                    //_ffmpegCancelTokenSrc = new CancellationTokenSource();
                 }
             }
         }
@@ -143,7 +146,9 @@ namespace TerminusDotNetCore.Services
             try
             {
                 _currAudioClient = await CurrentChannel.ConnectAsync();
+                await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"Joined audio on channel '{CurrentChannel.Name}'."));
             }
+
             //attempt to rejoin on timeout
             catch (TimeoutException)
             {
@@ -169,6 +174,7 @@ namespace TerminusDotNetCore.Services
             if (CurrentChannel != null)
             {
                 await CurrentChannel.DisconnectAsync();
+                await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"Disconnected from channel '{CurrentChannel.Name}'."));
             }
             if (_currAudioClient != null)
             {
@@ -200,14 +206,18 @@ namespace TerminusDotNetCore.Services
             {
                 try
                 {
+                    await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"Started playback for file '{path}'."));
+
                     //stream audio with cancellation token for skipping
                     await output.CopyToAsync(stream, _ffmpegCancelTokenSrc.Token);
+
+                    await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"Finished playback for file '{path}'."));
                 }
 
                 //don't allow cancellation exceptions to propogate
                 catch (OperationCanceledException)
                 {
-                    await Logger.Log(new LogMessage(LogSeverity.Warning, "AudioSvc", $"user {ParentModule.Context.Message.Author.Username} requested a playnext."));
+                    await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"Playback cancelled for file '{path}'."));
 
                     lock (_ffmpegCancelTokenSrc)
                     {
@@ -301,11 +311,7 @@ namespace TerminusDotNetCore.Services
                         //if the youtube video has not been downloaded yet
                         if (nextVideo.AudioSource == YouTubeAudioType.Url)
                         {
-                            await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"downloading local file for {nextVideo.DisplayName}..."));
-
                             nextVideo.Path = await DownloadYoutubeVideoAsync(nextVideo.VideoUrl);
-
-                            await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"downloaded local file {nextVideo.Path}"));
                         }
                     }
                     catch (ArgumentException)
@@ -369,11 +375,13 @@ namespace TerminusDotNetCore.Services
             if (_songQueue.Count == 0)
             {
                 await ParentModule.ServiceReplyAsync("There are no songs in the queue.");
+                await Logger.Log(new LogMessage(LogSeverity.Warning, "AudioSvc", $"Cannot move song to front of queue (queue empty)."));
             }
             //need an offset of 2 because item 2 in song list is actually first item of queue
             else if (index > _songQueue.Count + 1 || index < 2)
             {
                 await ParentModule.ServiceReplyAsync("The requested index was out of bounds.");
+                await Logger.Log(new LogMessage(LogSeverity.Warning, "AudioSvc", $"Cannot move song to front of queue (index out of bounds)."));
             }
             else
             {
@@ -382,7 +390,9 @@ namespace TerminusDotNetCore.Services
                 _songQueue.Remove(moveSong);
 
                 //insert it at the front of the queue
-                EnqueueSong(moveSong, false);
+                await EnqueueSong(moveSong, false);
+
+                await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"Song '{moveSong.DisplayName}' moved to front of queue."));
             }
         }
 
@@ -392,7 +402,9 @@ namespace TerminusDotNetCore.Services
             string path = files[0];
             string displayName = Path.GetFileName(path);
 
-            EnqueueSong(new LocalAudioItem() { Path = path, PlayChannelId = channelId, AudioSource = FileAudioType.Attachment, DisplayName = displayName, OwnerName = owner.Username }, append);
+            await EnqueueSong(new LocalAudioItem() { Path = path, PlayChannelId = channelId, AudioSource = FileAudioType.Attachment, DisplayName = displayName, OwnerName = owner.Username }, append);
+
+            await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"Queued temp song '{displayName}'."));
 
             if (!_playing)
             {
@@ -405,7 +417,7 @@ namespace TerminusDotNetCore.Services
             }
         }
 
-        private void EnqueueSong(AudioItem item, bool append = true)
+        private async Task EnqueueSong(AudioItem item, bool append = true)
         {
             //put the item in the backup queue if weed is ongoing
             if (_weedPlaying)
@@ -436,12 +448,17 @@ namespace TerminusDotNetCore.Services
                     }
                 }
             }
+
+            string queueName = _weedPlaying == true ? "main" : "weed";
+            string queueEnd = append == true ? "back" : "front";
+
+            await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"Added song '{item.DisplayName}' to {queueEnd} of {queueName} queue."));
         }
 
         public async Task QueueLocalSong(SocketUser owner, string path, ulong channelId, bool append = true)
         {
             string displayName = Path.GetFileNameWithoutExtension(path);
-            EnqueueSong(new LocalAudioItem() { Path = path, PlayChannelId = channelId, AudioSource = FileAudioType.Local, DisplayName = displayName, OwnerName = owner.Username }, append);
+            await EnqueueSong(new LocalAudioItem() { Path = path, PlayChannelId = channelId, AudioSource = FileAudioType.Local, DisplayName = displayName, OwnerName = owner.Username }, append);
 
             if (!_playing)
             {
@@ -542,7 +559,7 @@ namespace TerminusDotNetCore.Services
                 //add the item to the front or back of the queue
                 if (append)
                 {
-                    EnqueueSong(currVideo);
+                    await EnqueueSong(currVideo);
                 }
                 else
                 {
@@ -579,7 +596,7 @@ namespace TerminusDotNetCore.Services
             //get a local file for the current video
             string filePath = await DownloadYoutubeVideoAsync(url);
 
-            EnqueueSong(new YouTubeAudioItem() { Path = filePath, VideoUrl = url, PlayChannelId = channelId, AudioSource = YouTubeAudioType.PreDownloaded, DisplayName = displayName, OwnerName = owner.Username }, append);
+            await EnqueueSong(new YouTubeAudioItem() { Path = filePath, VideoUrl = url, PlayChannelId = channelId, AudioSource = YouTubeAudioType.PreDownloaded, DisplayName = displayName, OwnerName = owner.Username }, append);
 
             if (!_playing)
             {
@@ -621,9 +638,11 @@ namespace TerminusDotNetCore.Services
                     if (!string.IsNullOrEmpty(currLine))
                     {
                         AudioItem currItem = JsonConvert.DeserializeObject<AudioItem>(currLine, JSON_SETTINGS);
-                        EnqueueSong(currItem);
+                        await EnqueueSong(currItem);
                     }
                 }
+
+                await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"Loaded queue contents ({text.Length} songs)."));
             }
 
             if (!_playing)
@@ -1002,6 +1021,8 @@ namespace TerminusDotNetCore.Services
                 var youtube = YouTube.Default;
                 var video = await youtube.GetVideoAsync(url);
                 var videoData = await video.GetBytesAsync();
+
+                await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"Downloaded youtube video '{video.FullName}'."));
 
                 //remove single/double quotes for command line parsing purposes
                 string vidNameEscapedQuotes = video.FullName.Replace("\"", "").Replace("'", "");
