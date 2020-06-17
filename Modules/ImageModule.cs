@@ -201,7 +201,7 @@ namespace TerminusDotNetCore.Modules
         public async Task BobRossImagesAsync([Remainder][Summary("Text to project onto the canvas. If a number is supplied, number of times to repeat the projection instead.")]string text = null)
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
-            if (attachments == null)
+            if (attachments == null && text == null)
             {
                 await ServiceReplyAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
                 return;
@@ -234,7 +234,7 @@ namespace TerminusDotNetCore.Modules
         public async Task PCImagesAsync([Remainder][Summary("Text to project onto the canvas. If a number is supplied, number of times to repeat the projection instead.")]string text = null)
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
-            if (attachments == null)
+            if (attachments == null && text == null)
             {
                 await ServiceReplyAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
                 return;
@@ -267,7 +267,7 @@ namespace TerminusDotNetCore.Modules
         public async Task TrumpImagesAsync([Remainder][Summary("Text to project onto the canvas. If a number is supplied, number of times to repeat the projection instead.")]string text = null)
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
-            if (attachments == null)
+            if (attachments == null && text == null)
             {
                 await ServiceReplyAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
                 return;
@@ -300,7 +300,7 @@ namespace TerminusDotNetCore.Modules
         public async Task WalterImagesAsync([Remainder][Summary("Text to project onto the canvas. If a number is supplied, number of times to repeat the projection instead.")]string text = null)
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
-            if (attachments == null)
+            if (attachments == null && text == null)
             {
                 await ServiceReplyAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
                 return;
@@ -333,7 +333,7 @@ namespace TerminusDotNetCore.Modules
         public async Task HankImagesAsync([Remainder][Summary("Text to project onto the canvas. If a number is supplied, number of times to repeat the projection instead.")]string text = null)
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
-            if (attachments == null)
+            if (attachments == null && text == null)
             {
                 await ServiceReplyAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
                 return;
