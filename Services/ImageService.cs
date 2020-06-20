@@ -70,6 +70,30 @@ namespace TerminusDotNetCore.Services
             return images;
         }
 
+        public List<string> BebopWatermarkImages(IReadOnlyCollection<Attachment> attachments)
+        {
+            var images = AttachmentHelper.DownloadAttachments(attachments);
+
+            foreach (var image in images)
+            {
+                BebopWatermarkImage(image);
+            }
+
+            return images;
+        }
+
+        public List<string> NintendoWatermarkImages(IReadOnlyCollection<Attachment> attachments)
+        {
+            var images = AttachmentHelper.DownloadAttachments(attachments);
+
+            foreach (var image in images)
+            {
+                NintendoWatermarkImage(image);
+            }
+
+            return images;
+        }
+
         public List<string> MemeCaptionImages(IReadOnlyCollection<Attachment> attachments, string topText, string bottomText)
         {
             var images = AttachmentHelper.DownloadAttachments(attachments);
@@ -106,6 +130,21 @@ namespace TerminusDotNetCore.Services
             }
         }
 
+        private void BebopWatermarkImage(string imageFilename)
+        {
+            using (var image = ImageHelper.WatermarkImage(imageFilename, Path.Combine("assets", "images", "bebop.png"), AnchorPositionMode.BottomRight, 10, 0.25))
+            {
+                image.Save(imageFilename);
+            }
+        }
+
+        private void NintendoWatermarkImage(string imageFilename)
+        {
+            using (var image = ImageHelper.WatermarkImage(imageFilename, Path.Combine("assets", "images", "nintendo.png"), AnchorPositionMode.BottomRight, 10, 0.25))
+            {
+                image.Save(imageFilename);
+            }
+        }
 
         public List<string> ThiccImages(IReadOnlyCollection<Attachment> attachments, int thiccCount = 2)
         {

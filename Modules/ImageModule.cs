@@ -124,6 +124,36 @@ namespace TerminusDotNetCore.Modules
             await SendImages(images);
         }
 
+        [Command("bebop", RunMode = RunMode.Async)]
+        [Summary("Places a *See you space cowboy...* watermark on the attached image, or the image in the previous message (if any).")]
+        public async Task BebopWatermarkImagesAsync()
+        {
+            IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
+            if (attachments == null)
+            {
+                await ServiceReplyAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
+                return;
+            }
+
+            var images = _imageService.BebopWatermarkImages(attachments);
+            await SendImages(images);
+        }
+
+        [Command("nintendo", RunMode = RunMode.Async)]
+        [Summary("Places a Nintendo seal of approval watermark on the attached image, or the image in the previous message (if any).")]
+        public async Task NintendoWatermarkImagesAsync()
+        {
+            IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
+            if (attachments == null)
+            {
+                await ServiceReplyAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
+                return;
+            }
+
+            var images = _imageService.NintendoWatermarkImages(attachments);
+            await SendImages(images);
+        }
+
         [Command("gimp", RunMode = RunMode.Async)]
         [Summary("Converts the attached image (or the image in the previous message) into a GIMP pepper mosaic.")]
 
