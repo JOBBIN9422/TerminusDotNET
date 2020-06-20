@@ -132,7 +132,7 @@ namespace TerminusDotNetCore.Services
 
         private void BebopWatermarkImage(string imageFilename)
         {
-            using (var image = ImageHelper.WatermarkImage(imageFilename, Path.Combine("assets", "images", "bebop.png"), AnchorPositionMode.BottomRight, 5, 1.0))
+            using (var image = ImageHelper.WatermarkImage(imageFilename, Path.Combine("assets", "images", "bebop.png"), AnchorPositionMode.BottomRight, 10, 0.5))
             {
                 image.Save(imageFilename);
             }
