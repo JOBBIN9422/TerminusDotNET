@@ -138,7 +138,7 @@ namespace TerminusDotNetCore.Helpers
         /// <param name="paddingScale">How much padding to use in positioning.</param>
         /// <param name="watermarkScale">How much to scale the watermark when drawn.</param>
         /// <returns>The given base image with the watermark drawn on it.</returns>
-        public static Image WatermarkImage(string baseImageFilename, string watermarkImageFilename, AnchorPositionMode anchorPos = AnchorPositionMode.Bottom, int paddingScale = 10, double watermarkScale = 0.2)
+        public static Image WatermarkImage(string baseImageFilename, string watermarkImageFilename, AnchorPositionMode anchorPos = AnchorPositionMode.Bottom, int paddingScale = 10, double watermarkScale = 0.2, float opacity = 0.8f)
         {
             var baseImage = Image.Load(baseImageFilename);
             using (var watermarkImage = Image.Load(watermarkImageFilename))
@@ -184,7 +184,7 @@ namespace TerminusDotNetCore.Helpers
                 }
 
                 //draw the watermark on the base image with 80% opacity (make this an argument?)
-                baseImage.Mutate(x => x.DrawImage(watermarkImage, position, 0.8f));
+                baseImage.Mutate(x => x.DrawImage(watermarkImage, position, opacity));
 
                 return baseImage;
             }
