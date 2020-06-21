@@ -116,7 +116,7 @@ namespace TerminusDotNetCore.Services
 
         private void MorrowindImage(string imageFilename)
         {
-            using (var image = ImageHelper.WatermarkImage(imageFilename, Path.Combine("assets", "images", "morrowind.png"), AnchorPositionMode.Bottom, 10, 0.67))
+            using (var image = ImageHelper.WatermarkImage(imageFilename, Path.Combine("assets", "images", "morrowind.png"), AnchorPositionMode.Bottom, 0.1, 0.67))
             {
                 image.Save(imageFilename);
             }
@@ -124,7 +124,7 @@ namespace TerminusDotNetCore.Services
 
         private void DMCWatermarkImage(string imageFilename)
         {
-            using (var image = ImageHelper.WatermarkImage(imageFilename, Path.Combine("assets", "images", "dmc.png"), AnchorPositionMode.BottomLeft, 10, 0.25))
+            using (var image = ImageHelper.WatermarkImage(imageFilename, Path.Combine("assets", "images", "dmc.png"), AnchorPositionMode.BottomLeft, 0.1, 0.25))
             {
                 image.Save(imageFilename);
             }
@@ -132,7 +132,7 @@ namespace TerminusDotNetCore.Services
 
         private void BebopWatermarkImage(string imageFilename)
         {
-            using (var image = ImageHelper.WatermarkImage(imageFilename, Path.Combine("assets", "images", "bebop.png"), AnchorPositionMode.BottomRight, 20, 0.6, 1.0f))
+            using (var image = ImageHelper.WatermarkImage(imageFilename, Path.Combine("assets", "images", "bebop.png"), AnchorPositionMode.BottomRight, 0.05, 0.6, 1.0f))
             {
                 image.Save(imageFilename);
             }
@@ -140,7 +140,7 @@ namespace TerminusDotNetCore.Services
 
         private void NintendoWatermarkImage(string imageFilename)
         {
-            using (var image = ImageHelper.WatermarkImage(imageFilename, Path.Combine("assets", "images", "nintendo.png"), AnchorPositionMode.BottomRight, 10, 0.25))
+            using (var image = ImageHelper.WatermarkImage(imageFilename, Path.Combine("assets", "images", "nintendo.png"), AnchorPositionMode.BottomRight, 0.1, 0.25))
             {
                 image.Save(imageFilename);
             }
