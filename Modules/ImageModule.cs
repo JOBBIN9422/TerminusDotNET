@@ -253,7 +253,7 @@ namespace TerminusDotNetCore.Modules
 
         [Command("contrast", RunMode = RunMode.Async)]
         [Summary("Pixelate the attached image, or the image in the previous message (if any).")]
-        public async Task PixelateImageAsync([Summary("Contrast amount")]float amount = 1.0f)
+        public async Task PixelateImageAsync([Summary("Contrast amount")]float amount = 2.0f)
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null)
