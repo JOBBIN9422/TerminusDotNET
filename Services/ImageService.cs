@@ -57,6 +57,26 @@ namespace TerminusDotNetCore.Services
             return images;
         }
 
+        public List<string> InvertImages(IReadOnlyCollection<Attachment> attachments)
+        {
+            var images = AttachmentHelper.DownloadAttachments(attachments);
+
+            foreach (var image in images)
+            {
+                InvertImage(image);
+            }
+
+            return images;
+        }
+
+        private void InvertImage(string imageFilename)
+        {
+            using (var image = ImageHelper.InvertImage(imageFilename))
+            {
+                image.Save(imageFilename);
+            }
+        }
+
         public List<string> PixelateImages(IReadOnlyCollection<Attachment> attachments, int size)
         {
             var images = AttachmentHelper.DownloadAttachments(attachments);

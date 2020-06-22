@@ -124,6 +124,21 @@ namespace TerminusDotNetCore.Modules
             await SendImages(images);
         }
 
+        [Command("invert", RunMode = RunMode.Async)]
+        [Summary("Inverts to the attached image, or the image in the previous message (if any).")]
+        public async Task InvertImageAsync()
+        {
+            IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
+            if (attachments == null)
+            {
+                await ServiceReplyAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
+                return;
+            }
+
+            var images = _imageService.InvertImages(attachments);
+            await SendImages(images);
+        }
+
         [Command("morrowind", RunMode = RunMode.Async)]
         [Summary("Places a Morrowind prompt on the attached image, or the image in the previous message (if any).")]
         public async Task MorrowindImageAsync()

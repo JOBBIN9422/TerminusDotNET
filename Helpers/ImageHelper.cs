@@ -92,6 +92,13 @@ namespace TerminusDotNetCore.Helpers
             return image;
         }
 
+        public static Image InvertImage(string imageFilename)
+        {
+            Image image = Image.Load(imageFilename);
+            image.Mutate(x => x.Invert());
+            return image;
+        }
+
         /// <summary>
         /// Captions an image with top text and bottom text (Impact font).
         /// </summary>
