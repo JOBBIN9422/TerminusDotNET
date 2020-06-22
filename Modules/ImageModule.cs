@@ -252,8 +252,8 @@ namespace TerminusDotNetCore.Modules
         }
 
         [Command("contrast", RunMode = RunMode.Async)]
-        [Summary("Pixelate the attached image, or the image in the previous message (if any).")]
-        public async Task PixelateImageAsync([Summary("Contrast amount")]float amount = 2.0f)
+        [Summary("Change the contrast of the attached image, or the image in the previous message (if any).")]
+        public async Task ContrastImageAsync([Summary("Contrast amount")]float amount = 2.0f)
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null)
@@ -263,6 +263,21 @@ namespace TerminusDotNetCore.Modules
             }
 
             var images = _imageService.ContrastImages(attachments, amount);
+            await SendImages(images);
+        }
+
+        [Command("saturate", RunMode = RunMode.Async)]
+        [Summary("Change the saturation of the attached image, or the image in the previous message (if any).")]
+        public async Task SaturateImageAsync([Summary("Contrast amount")]float amount = 2.0f)
+        {
+            IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
+            if (attachments == null)
+            {
+                await ServiceReplyAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
+                return;
+            }
+
+            var images = _imageService.SaturateImages(attachments, amount);
             await SendImages(images);
         }
 
