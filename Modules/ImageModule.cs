@@ -124,6 +124,21 @@ namespace TerminusDotNetCore.Modules
             await SendImages(images);
         }
 
+        [Command("kodak", RunMode = RunMode.Async)]
+        [Summary("Applies a Kodachrome filter to the attached image, or the image in the previous message (if any).")]
+        public async Task KodakImageAsync()
+        {
+            IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
+            if (attachments == null)
+            {
+                await ServiceReplyAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
+                return;
+            }
+
+            var images = _imageService.KodakImages(attachments);
+            await SendImages(images);
+        }
+
         [Command("invert", RunMode = RunMode.Async)]
         [Summary("Inverts to the attached image, or the image in the previous message (if any).")]
         public async Task InvertImageAsync()

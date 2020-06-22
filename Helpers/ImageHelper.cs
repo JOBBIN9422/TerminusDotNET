@@ -99,6 +99,13 @@ namespace TerminusDotNetCore.Helpers
             return image;
         }
 
+        public static Image KodakImage(string imageFilename)
+        {
+            Image image = Image.Load(imageFilename);
+            image.Mutate(x => x.Kodachrome());
+            return image;
+        }
+
         /// <summary>
         /// Captions an image with top text and bottom text (Impact font).
         /// </summary>

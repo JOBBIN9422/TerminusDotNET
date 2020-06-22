@@ -69,6 +69,26 @@ namespace TerminusDotNetCore.Services
             return images;
         }
 
+        public List<string> KodakImages(IReadOnlyCollection<Attachment> attachments)
+        {
+            var images = AttachmentHelper.DownloadAttachments(attachments);
+
+            foreach (var image in images)
+            {
+                KodakImage(image);
+            }
+
+            return images;
+        }
+
+        private void KodakImage(string imageFilename)
+        {
+            using (var image = ImageHelper.KodakImage(imageFilename))
+            {
+                image.Save(imageFilename);
+            }
+        }
+
         private void InvertImage(string imageFilename)
         {
             using (var image = ImageHelper.InvertImage(imageFilename))
