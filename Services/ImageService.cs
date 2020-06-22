@@ -33,6 +33,146 @@ namespace TerminusDotNetCore.Services
             return images;
         }
 
+        public List<string> GrayscaleImages(IReadOnlyCollection<Attachment> attachments)
+        {
+            var images = AttachmentHelper.DownloadAttachments(attachments);
+
+            foreach (var image in images)
+            {
+                GrayscaleImage(image);
+            }
+
+            return images;
+        }
+
+        public List<string> PolaroidImages(IReadOnlyCollection<Attachment> attachments)
+        {
+            var images = AttachmentHelper.DownloadAttachments(attachments);
+
+            foreach (var image in images)
+            {
+                PolaroidImage(image);
+            }
+
+            return images;
+        }
+
+        public List<string> InvertImages(IReadOnlyCollection<Attachment> attachments)
+        {
+            var images = AttachmentHelper.DownloadAttachments(attachments);
+
+            foreach (var image in images)
+            {
+                InvertImage(image);
+            }
+
+            return images;
+        }
+
+        public List<string> KodakImages(IReadOnlyCollection<Attachment> attachments)
+        {
+            var images = AttachmentHelper.DownloadAttachments(attachments);
+
+            foreach (var image in images)
+            {
+                KodakImage(image);
+            }
+
+            return images;
+        }
+
+        private void KodakImage(string imageFilename)
+        {
+            using (var image = ImageHelper.KodakImage(imageFilename))
+            {
+                image.Save(imageFilename);
+            }
+        }
+
+        private void InvertImage(string imageFilename)
+        {
+            using (var image = ImageHelper.InvertImage(imageFilename))
+            {
+                image.Save(imageFilename);
+            }
+        }
+
+        public List<string> PixelateImages(IReadOnlyCollection<Attachment> attachments, int size)
+        {
+            var images = AttachmentHelper.DownloadAttachments(attachments);
+
+            foreach (var image in images)
+            {
+                PixelateImage(image, size);
+            }
+
+            return images;
+        }
+
+        public List<string> ContrastImages(IReadOnlyCollection<Attachment> attachments, float amount)
+        {
+            var images = AttachmentHelper.DownloadAttachments(attachments);
+
+            foreach (var image in images)
+            {
+                ContrastImage(image, amount);
+            }
+
+            return images;
+        }
+
+        public List<string> SaturateImages(IReadOnlyCollection<Attachment> attachments, float amount)
+        {
+            var images = AttachmentHelper.DownloadAttachments(attachments);
+
+            foreach (var image in images)
+            {
+                SaturateImage(image, amount);
+            }
+
+            return images;
+        }
+
+        private void SaturateImage(string imageFilename, float amount)
+        {
+            using (var image = ImageHelper.SaturateImage(imageFilename, amount))
+            {
+                image.Save(imageFilename);
+            }
+        }
+
+        private void ContrastImage(string imageFilename, float amount)
+        {
+            using (var image = ImageHelper.ContrastImage(imageFilename, amount))
+            {
+                image.Save(imageFilename);
+            }
+        }
+
+        private void PixelateImage(string imageFilename, int size)
+        {
+            using (var image = ImageHelper.PixelateImage(imageFilename, size))
+            {
+                image.Save(imageFilename);
+            }
+        }
+
+        private void PolaroidImage(string imageFilename)
+        {
+            using (var image = ImageHelper.PolaroidImage(imageFilename))
+            {
+                image.Save(imageFilename);
+            }
+        }
+
+        private void GrayscaleImage(string imageFilename)
+        {
+            using (var image = ImageHelper.GrayscaleImage(imageFilename))
+            {
+                image.Save(imageFilename);
+            }
+        }
+
         public void DeleteImages(List<string> images)
         {
             AttachmentHelper.DeleteFiles(images);
@@ -116,7 +256,7 @@ namespace TerminusDotNetCore.Services
 
         private void MorrowindImage(string imageFilename)
         {
-            using (var image = ImageHelper.WatermarkImage(imageFilename, Path.Combine("assets", "images", "morrowind.png"), AnchorPositionMode.Bottom, 10, 0.67))
+            using (var image = ImageHelper.WatermarkImage(imageFilename, Path.Combine("assets", "images", "morrowind.png"), AnchorPositionMode.Bottom, 0.1, 0.1, 0.67))
             {
                 image.Save(imageFilename);
             }
@@ -124,7 +264,7 @@ namespace TerminusDotNetCore.Services
 
         private void DMCWatermarkImage(string imageFilename)
         {
-            using (var image = ImageHelper.WatermarkImage(imageFilename, Path.Combine("assets", "images", "dmc.png"), AnchorPositionMode.BottomLeft, 10, 0.25))
+            using (var image = ImageHelper.WatermarkImage(imageFilename, Path.Combine("assets", "images", "dmc.png"), AnchorPositionMode.BottomLeft, 0.1, 0.1, 0.25))
             {
                 image.Save(imageFilename);
             }
@@ -132,7 +272,7 @@ namespace TerminusDotNetCore.Services
 
         private void BebopWatermarkImage(string imageFilename)
         {
-            using (var image = ImageHelper.WatermarkImage(imageFilename, Path.Combine("assets", "images", "bebop.png"), AnchorPositionMode.BottomRight, 20, 0.6, 1.0f))
+            using (var image = ImageHelper.WatermarkImage(imageFilename, Path.Combine("assets", "images", "bebop.png"), AnchorPositionMode.BottomRight, 0.05, 0.05, 0.6, 1.0f))
             {
                 image.Save(imageFilename);
             }
@@ -140,7 +280,7 @@ namespace TerminusDotNetCore.Services
 
         private void NintendoWatermarkImage(string imageFilename)
         {
-            using (var image = ImageHelper.WatermarkImage(imageFilename, Path.Combine("assets", "images", "nintendo.png"), AnchorPositionMode.BottomRight, 10, 0.25))
+            using (var image = ImageHelper.WatermarkImage(imageFilename, Path.Combine("assets", "images", "nintendo.png"), AnchorPositionMode.BottomRight, 0.1, 0.1, 0.25))
             {
                 image.Save(imageFilename);
             }

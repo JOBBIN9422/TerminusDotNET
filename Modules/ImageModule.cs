@@ -94,6 +94,66 @@ namespace TerminusDotNetCore.Modules
             await SendImages(images);
         }
 
+        [Command("grayscale", RunMode = RunMode.Async)]
+        [Summary("Converts an attached image to grayscale, or the image in the previous message (if any).")]
+        public async Task GrayscaleImageAsync()
+        {
+            IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
+            if (attachments == null)
+            {
+                await ServiceReplyAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
+                return;
+            }
+
+            var images = _imageService.GrayscaleImages(attachments);
+            await SendImages(images);
+        }
+
+        [Command("polaroid", RunMode = RunMode.Async)]
+        [Summary("Applies a Polaroid filter to the attached image, or the image in the previous message (if any).")]
+        public async Task PolaroidImageAsync()
+        {
+            IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
+            if (attachments == null)
+            {
+                await ServiceReplyAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
+                return;
+            }
+
+            var images = _imageService.PolaroidImages(attachments);
+            await SendImages(images);
+        }
+
+        [Command("kodak", RunMode = RunMode.Async)]
+        [Summary("Applies a Kodachrome filter to the attached image, or the image in the previous message (if any).")]
+        public async Task KodakImageAsync()
+        {
+            IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
+            if (attachments == null)
+            {
+                await ServiceReplyAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
+                return;
+            }
+
+            var images = _imageService.KodakImages(attachments);
+            await SendImages(images);
+        }
+
+        [Command("invert", RunMode = RunMode.Async)]
+        [Summary("Inverts to the attached image, or the image in the previous message (if any).")]
+        public async Task InvertImageAsync()
+        {
+            IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
+            if (attachments == null)
+            {
+                await ServiceReplyAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
+                return;
+            }
+
+            var images = _imageService.InvertImages(attachments);
+            await SendImages(images);
+        }
+
         [Command("morrowind", RunMode = RunMode.Async)]
         [Summary("Places a Morrowind prompt on the attached image, or the image in the previous message (if any).")]
         public async Task MorrowindImageAsync()
@@ -203,6 +263,51 @@ namespace TerminusDotNetCore.Modules
             }
 
             var images = _imageService.ThiccImages(attachments, thiccCount);
+            await SendImages(images);
+        }
+
+        [Command("pixelate", RunMode = RunMode.Async)]
+        [Summary("Pixelate the attached image, or the image in the previous message (if any).")]
+        public async Task PixelateImageAsync([Summary("Pixel size")]int pixelSize = 0)
+        {
+            IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
+            if (attachments == null)
+            {
+                await ServiceReplyAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
+                return;
+            }
+
+            var images = _imageService.PixelateImages(attachments, pixelSize);
+            await SendImages(images);
+        }
+
+        [Command("contrast", RunMode = RunMode.Async)]
+        [Summary("Change the contrast of the attached image, or the image in the previous message (if any).")]
+        public async Task ContrastImageAsync([Summary("Contrast amount")]float amount = 2.0f)
+        {
+            IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
+            if (attachments == null)
+            {
+                await ServiceReplyAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
+                return;
+            }
+
+            var images = _imageService.ContrastImages(attachments, amount);
+            await SendImages(images);
+        }
+
+        [Command("saturate", RunMode = RunMode.Async)]
+        [Summary("Change the saturation of the attached image, or the image in the previous message (if any).")]
+        public async Task SaturateImageAsync([Summary("Contrast amount")]float amount = 2.0f)
+        {
+            IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
+            if (attachments == null)
+            {
+                await ServiceReplyAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
+                return;
+            }
+
+            var images = _imageService.SaturateImages(attachments, amount);
             await SendImages(images);
         }
 

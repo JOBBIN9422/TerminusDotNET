@@ -52,6 +52,60 @@ namespace TerminusDotNetCore.Helpers
             }
         }
 
+        public static Image GrayscaleImage(string imageFilename)
+        {
+            Image image = Image.Load(imageFilename);
+            image.Mutate(x => x.Grayscale());
+            return image;
+        }
+
+        public static Image PolaroidImage(string imageFilename)
+        {
+            Image image = Image.Load(imageFilename);
+            image.Mutate(x => x.Polaroid());
+            return image;
+        }
+
+        public static Image PixelateImage(string imageFilename, int size = 0)
+        {
+            Image image = Image.Load(imageFilename);
+            if (size == 0)
+            {
+                size = image.Width / 100;
+            }
+
+            image.Mutate(x => x.Pixelate(size));
+            return image;
+        }
+
+        public static Image ContrastImage(string imageFilename, float amount = 2.0f)
+        {
+            Image image = Image.Load(imageFilename);
+            image.Mutate(x => x.Contrast(amount));
+            return image;
+        }
+
+        public static Image SaturateImage(string imageFilename, float amount = 2.0f)
+        {
+            Image image = Image.Load(imageFilename);
+            image.Mutate(x => x.Saturate(amount));
+            return image;
+        }
+
+        public static Image InvertImage(string imageFilename)
+        {
+            Image image = Image.Load(imageFilename);
+            image.Mutate(x => x.Invert());
+            return image;
+        }
+
+        public static Image KodakImage(string imageFilename)
+        {
+            Image image = Image.Load(imageFilename);
+            image.Mutate(x => x.Kodachrome());
+            return image;
+        }
+
         /// <summary>
         /// Captions an image with top text and bottom text (Impact font).
         /// </summary>
@@ -138,7 +192,13 @@ namespace TerminusDotNetCore.Helpers
         /// <param name="paddingScale">How much padding to use in positioning.</param>
         /// <param name="watermarkScale">How much to scale the watermark when drawn.</param>
         /// <returns>The given base image with the watermark drawn on it.</returns>
-        public static Image WatermarkImage(string baseImageFilename, string watermarkImageFilename, AnchorPositionMode anchorPos = AnchorPositionMode.Bottom, int paddingScale = 10, double watermarkScale = 0.2, float opacity = 0.8f)
+        public static Image WatermarkImage(string baseImageFilename, 
+            string watermarkImageFilename, 
+            AnchorPositionMode anchorPos = AnchorPositionMode.Bottom, 
+            double paddingPercentageHorizontal = 0.10, 
+            double paddingPercentageVertical = 0.1, 
+            double watermarkScale = 0.2, 
+            float opacity = 0.8f)
         {
             var baseImage = Image.Load(baseImageFilename);
             using (var watermarkImage = Image.Load(watermarkImageFilename))
@@ -158,8 +218,8 @@ namespace TerminusDotNetCore.Helpers
                 watermarkImage.ResizeProportional(scaleFactor);
 
                 //compute padding
-                int paddingHorizontal = baseImage.Width / paddingScale;
-                int paddingVertical = baseImage.Height / paddingScale;
+                int paddingHorizontal = (int)(baseImage.Width * paddingPercentageHorizontal);
+                int paddingVertical = (int)(baseImage.Height * paddingPercentageVertical);
 
                 //compute the position to draw the watermark at (based on its top-left corner)
                 Point position;
@@ -180,7 +240,6 @@ namespace TerminusDotNetCore.Helpers
                     default:
                         position = new Point(0, 0);
                         break;
-
                 }
 
                 //draw the watermark on the base image with 80% opacity (make this an argument?)
