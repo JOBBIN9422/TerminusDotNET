@@ -69,6 +69,26 @@ namespace TerminusDotNetCore.Services
             return images;
         }
 
+        public List<string> ContrastImages(IReadOnlyCollection<Attachment> attachments, float amount)
+        {
+            var images = AttachmentHelper.DownloadAttachments(attachments);
+
+            foreach (var image in images)
+            {
+                ContrastImage(image, amount);
+            }
+
+            return images;
+        }
+
+        private void ContrastImage(string imageFilename, float amount)
+        {
+            using (var image = ImageHelper.ContrastImage(imageFilename, amount))
+            {
+                image.Save(imageFilename);
+            }
+        }
+
         private void PixelateImage(string imageFilename, int size)
         {
             using (var image = ImageHelper.PixelateImage(imageFilename, size))

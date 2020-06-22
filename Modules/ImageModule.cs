@@ -251,6 +251,21 @@ namespace TerminusDotNetCore.Modules
             await SendImages(images);
         }
 
+        [Command("contrast", RunMode = RunMode.Async)]
+        [Summary("Pixelate the attached image, or the image in the previous message (if any).")]
+        public async Task PixelateImageAsync([Summary("Contrast amount")]float amount = 1.0f)
+        {
+            IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
+            if (attachments == null)
+            {
+                await ServiceReplyAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
+                return;
+            }
+
+            var images = _imageService.ContrastImages(attachments, amount);
+            await SendImages(images);
+        }
+
         private ParamType ParseParamType(string paramText)
         {
             if (!string.IsNullOrEmpty(paramText))
