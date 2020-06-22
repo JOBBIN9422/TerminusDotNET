@@ -45,6 +45,26 @@ namespace TerminusDotNetCore.Services
             return images;
         }
 
+        public List<string> PolaroidImages(IReadOnlyCollection<Attachment> attachments)
+        {
+            var images = AttachmentHelper.DownloadAttachments(attachments);
+
+            foreach (var image in images)
+            {
+                PolaroidImage(image);
+            }
+
+            return images;
+        }
+
+        private void PolaroidImage(string imageFilename)
+        {
+            using (var image = ImageHelper.PolaroidImage(imageFilename))
+            {
+                image.Save(imageFilename);
+            }
+        }
+
         private void GrayscaleImage(string imageFilename)
         {
             using (var image = ImageHelper.GrayscaleImage(imageFilename))
