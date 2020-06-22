@@ -52,6 +52,13 @@ namespace TerminusDotNetCore.Helpers
             }
         }
 
+        public static Image GrayscaleImage(string imageFilename)
+        {
+            Image image = Image.Load(imageFilename);
+            image.Mutate(x => x.Grayscale());
+            return image;
+        }
+
         /// <summary>
         /// Captions an image with top text and bottom text (Impact font).
         /// </summary>

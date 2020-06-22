@@ -33,6 +33,26 @@ namespace TerminusDotNetCore.Services
             return images;
         }
 
+        public List<string> GrayscaleImages(IReadOnlyCollection<Attachment> attachments)
+        {
+            var images = AttachmentHelper.DownloadAttachments(attachments);
+
+            foreach (var image in images)
+            {
+                GrayscaleImage(image);
+            }
+
+            return images;
+        }
+
+        private void GrayscaleImage(string imageFilename)
+        {
+            using (var image = ImageHelper.GrayscaleImage(imageFilename))
+            {
+                image.Save(imageFilename);
+            }
+        }
+
         public void DeleteImages(List<string> images)
         {
             AttachmentHelper.DeleteFiles(images);
