@@ -57,6 +57,26 @@ namespace TerminusDotNetCore.Services
             return images;
         }
 
+        public List<string> PixelateImages(IReadOnlyCollection<Attachment> attachments, int size)
+        {
+            var images = AttachmentHelper.DownloadAttachments(attachments);
+
+            foreach (var image in images)
+            {
+                PixelateImage(image, size);
+            }
+
+            return images;
+        }
+
+        private void PixelateImage(string imageFilename, int size)
+        {
+            using (var image = ImageHelper.PixelateImage(imageFilename, size))
+            {
+                image.Save(imageFilename);
+            }
+        }
+
         private void PolaroidImage(string imageFilename)
         {
             using (var image = ImageHelper.PolaroidImage(imageFilename))

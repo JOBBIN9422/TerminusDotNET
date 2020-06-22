@@ -236,6 +236,21 @@ namespace TerminusDotNetCore.Modules
             await SendImages(images);
         }
 
+        [Command("pixelate", RunMode = RunMode.Async)]
+        [Summary("Pixelate the attached image, or the image in the previous message (if any).")]
+        public async Task PixelateImageAsync([Summary("Pixel size")]int pixelSize = 0)
+        {
+            IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
+            if (attachments == null)
+            {
+                await ServiceReplyAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
+                return;
+            }
+
+            var images = _imageService.PixelateImages(attachments, pixelSize);
+            await SendImages(images);
+        }
+
         private ParamType ParseParamType(string paramText)
         {
             if (!string.IsNullOrEmpty(paramText))

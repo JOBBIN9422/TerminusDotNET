@@ -66,6 +66,18 @@ namespace TerminusDotNetCore.Helpers
             return image;
         }
 
+        public static Image PixelateImage(string imageFilename, int size = 0)
+        {
+            Image image = Image.Load(imageFilename);
+            if (size == 0)
+            {
+                size = image.Width / 100;
+            }
+
+            image.Mutate(x => x.Pixelate(size));
+            return image;
+        }
+
         /// <summary>
         /// Captions an image with top text and bottom text (Impact font).
         /// </summary>
