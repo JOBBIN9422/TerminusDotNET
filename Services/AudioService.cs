@@ -1031,7 +1031,7 @@ namespace TerminusDotNetCore.Services
 
                 //give the video file a unique name to prevent collisions
                 //  **if libvideo fails to fetch the video's title, it names the file 'YouTube.mp4'**
-                string videoDataFilename = Guid.NewGuid().ToString("N");
+                string videoDataFilename = $"{Guid.NewGuid().ToString("N")}{Path.GetExtension(video.FullName)}";
 
                 //write the downloaded media file to the temp assets dir
                 videoDataFullPath = Path.Combine(tempPath, videoDataFilename);
