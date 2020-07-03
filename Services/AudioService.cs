@@ -1018,7 +1018,7 @@ namespace TerminusDotNetCore.Services
         {
             //define the directory to save video files to
             string tempPath = Path.Combine(Environment.CurrentDirectory, "assets", "temp");
-            string videoDataFilename;
+            string videoDataFullPath;
 
             try
             {
@@ -1029,14 +1029,15 @@ namespace TerminusDotNetCore.Services
 
                 await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"Downloaded youtube video '{video.FullName}'."));
 
-                //remove single/double quotes for command line parsing purposes
-                string vidNameEscapedQuotes = video.FullName.Replace("\"", "").Replace("'", "");
+                //give the video file a unique name to prevent collisions
+                //  **if libvideo fails to fetch the video's title, it names the file 'YouTube.mp4'**
+                string videoDataFilename = Guid.NewGuid().ToString("N");
 
                 //write the downloaded media file to the temp assets dir
-                videoDataFilename = Path.Combine(tempPath, vidNameEscapedQuotes);
-                await File.WriteAllBytesAsync(videoDataFilename, videoData);
+                videoDataFullPath = Path.Combine(tempPath, videoDataFilename);
+                await File.WriteAllBytesAsync(videoDataFullPath, videoData);
 
-                return videoDataFilename;
+                return videoDataFullPath;
             }
             catch (Exception ex)
             {
