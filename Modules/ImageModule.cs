@@ -311,6 +311,21 @@ namespace TerminusDotNetCore.Modules
             await SendImages(images);
         }
 
+        [Command("portraitai", RunMode = RunMode.Async)]
+        [Summary("Generate an AI portrait for the given image.")]
+        public async Task GenerateAiPortraitAsync()
+        {
+            IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
+            if (attachments == null)
+            {
+                await ServiceReplyAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
+                return;
+            }
+
+            var images = await _imageService.GenerateAiPortaitAsync(attachments);
+            await SendImages(images);
+        }
+
         private ParamType ParseParamType(string paramText)
         {
             if (!string.IsNullOrEmpty(paramText))

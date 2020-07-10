@@ -13,6 +13,7 @@ using SixLabors.ImageSharp.Formats.Png;
 using System.Numerics;
 using SixLabors.Fonts;
 using Microsoft.Extensions.Configuration;
+using System.Threading.Tasks;
 
 namespace TerminusDotNetCore.Services
 {
@@ -441,6 +442,16 @@ namespace TerminusDotNetCore.Services
                 WalterImage(image, numTimes);
             }
 
+            return images;
+        }
+
+        public async Task<List<string>> GenerateAiPortaitAsync(IReadOnlyCollection<Attachment> attachments)
+        {
+            var images = AttachmentHelper.DownloadAttachments(attachments);
+            foreach (var image in images)
+            {
+                await PortraitAiClient.PostImage(image);
+            }
             return images;
         }
 
