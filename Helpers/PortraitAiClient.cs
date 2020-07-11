@@ -46,6 +46,9 @@ namespace TerminusDotNetCore.Helpers
             //send the crop hash to get the portrait from the site
             HttpResponseMessage getPortraitResponse = await _client.GetAsync(GET_PORTRAIT_IMAGE_ADDRESS.Replace(HASH_SUBSTITUTE_PLACEHOLDER, cropHash));
 
+            //overwrite the given image with the data from the response
+            byte[] portraitImageData = await getPortraitResponse.Content.ReadAsByteArrayAsync();
+            await File.WriteAllBytesAsync(imageFilename, portraitImageData);
         }
     }
 }
