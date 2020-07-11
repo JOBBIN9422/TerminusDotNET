@@ -69,9 +69,10 @@ namespace TerminusDotNetCore.Helpers
                 Thread.Sleep(500);
             } while (stylesTable.Count == 0);
 
+            List<int> styleNums = new List<int>();
             foreach (var styleNum in stylesTable)
             {
-                Console.WriteLine(styleNum.Key + " " + styleNum.Value);
+                styleNums.Add(styleNum.Value.ToObject<int>());
             }
 
             ////send the crop hash to get the portrait from the site
