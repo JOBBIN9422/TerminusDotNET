@@ -11,7 +11,7 @@ namespace TerminusDotNetCore.Helpers
 {
     public class PortraitAiClient
     {
-        private static readonly string PORTRAITAI_BASE_ADDRESS = "https://portraitai.com/";
+        private static readonly string PORTRAITAI_BASE_ADDRESS = "https://a7.portrait-ai.com/";
         private static readonly string POST_IMAGE_ADDRESS = $"{PORTRAITAI_BASE_ADDRESS}v1/c/submit-user-image.php";
 
         private static HttpClient _client = new HttpClient();
