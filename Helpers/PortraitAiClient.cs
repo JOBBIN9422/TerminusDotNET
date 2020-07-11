@@ -63,7 +63,7 @@ namespace TerminusDotNetCore.Helpers
             
             do
             {
-                HttpResponseMessage stylesReadyResponse = await _client.GetAsync(STYLES_READY_ADDRESS);
+                HttpResponseMessage stylesReadyResponse = await _client.GetAsync(STYLES_READY_ADDRESS.Replace(HASH_SUBSTITUTE_PLACEHOLDER, cropHash));
                 Console.WriteLine(stylesReadyResponse.ToString());
                 stylesTable = JsonConvert.DeserializeObject<JArray>(await stylesReadyResponse.Content.ReadAsStringAsync());
                 Thread.Sleep(500);
