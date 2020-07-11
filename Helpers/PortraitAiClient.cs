@@ -36,8 +36,9 @@ namespace TerminusDotNetCore.Helpers
             imageDataContent.Headers.ContentType = MediaTypeHeaderValue.Parse(mimeType);
             imageContent.Add(imageDataContent, "image", Path.GetFileName(imageFilename));
 
-            HttpResponseMessage httpResponse = await _client.PostAsync(POST_IMAGE_ADDRESS, imageContent);
-            string cropHash = JsonConvert.DeserializeObject<JObject>(await httpResponse.Content.ReadAsStringAsync())["crop_hash"].ToString();
+            HttpResponseMessage postImageResponse = await _client.PostAsync(POST_IMAGE_ADDRESS, imageContent);
+            JObject postImageResponseContent = JsonConvert.DeserializeObject<JObject>(await postImageResponse.Content.ReadAsStringAsync());
+            string cropHash = postImageResponseContent["crop_hash"][0].ToString();
         }
     }
 }
