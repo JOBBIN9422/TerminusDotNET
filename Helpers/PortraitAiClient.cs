@@ -55,6 +55,7 @@ namespace TerminusDotNetCore.Helpers
 
             //send the make-styles request
             HttpResponseMessage makeStylesResponse = await _client.PostAsync(MAKE_STYLES_ADDRESS, makeStylesContent);
+            JObject stylesTable = JsonConvert.DeserializeObject<JObject>(await makeStylesResponse.Content.ReadAsStringAsync());
 
             ////send the crop hash to get the portrait from the site
             //HttpResponseMessage getPortraitResponse = await _client.GetAsync(GET_PORTRAIT_IMAGE_ADDRESS.Replace(HASH_SUBSTITUTE_PLACEHOLDER, cropHash));
