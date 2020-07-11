@@ -59,7 +59,7 @@ namespace TerminusDotNetCore.Helpers
 
             //get styles which are ready for download
             HttpResponseMessage stylesReadyResponse = await _client.GetAsync(STYLES_READY_ADDRESS);
-            JObject stylesTable = JsonConvert.DeserializeObject<JObject>(await stylesReadyResponse.Content.ReadAsStringAsync());
+            JArray stylesTable = JsonConvert.DeserializeObject<JArray>(await stylesReadyResponse.Content.ReadAsStringAsync());
 
             ////send the crop hash to get the portrait from the site
             //HttpResponseMessage getPortraitResponse = await _client.GetAsync(GET_PORTRAIT_IMAGE_ADDRESS.Replace(HASH_SUBSTITUTE_PLACEHOLDER, cropHash));
