@@ -38,7 +38,7 @@ namespace TerminusDotNetCore.Helpers
 
             HttpResponseMessage postImageResponse = await _client.PostAsync(POST_IMAGE_ADDRESS, imageContent);
             JObject postImageResponseContent = JsonConvert.DeserializeObject<JObject>(await postImageResponse.Content.ReadAsStringAsync());
-            string cropHash = postImageResponseContent["crop_hash"][0].ToString();
+            string cropHash = postImageResponseContent["crop_hashes"][0].ToString();
         }
     }
 }
