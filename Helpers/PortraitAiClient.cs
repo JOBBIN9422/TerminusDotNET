@@ -64,6 +64,7 @@ namespace TerminusDotNetCore.Helpers
             do
             {
                 HttpResponseMessage stylesReadyResponse = await _client.GetAsync(STYLES_READY_ADDRESS);
+                Console.WriteLine(stylesReadyResponse.ToString());
                 stylesTable = JsonConvert.DeserializeObject<JArray>(await stylesReadyResponse.Content.ReadAsStringAsync());
                 Thread.Sleep(500);
             } while (stylesTable.Count == 0);
