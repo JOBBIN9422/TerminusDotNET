@@ -6,6 +6,8 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace TerminusDotNetCore.Helpers
 {
@@ -35,7 +37,7 @@ namespace TerminusDotNetCore.Helpers
             imageContent.Add(imageDataContent, "image", Path.GetFileName(imageFilename));
 
             HttpResponseMessage httpResponse = await _client.PostAsync(POST_IMAGE_ADDRESS, imageContent);
-            IEnumerable<string> cropHashes = httpResponse.Content.Headers.GetValues("crop_hashes");
+            string cropHash = JsonConvert.DeserializeObject<JObject>(await httpResponse.Content.ReadAsStringAsync())["crop_hash"].ToString();
         }
     }
 }
