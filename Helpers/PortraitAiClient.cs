@@ -33,7 +33,7 @@ namespace TerminusDotNetCore.Helpers
             imageContent.Add(imageDataContent, "image", Path.GetFileName(imageFilename));
 
             HttpResponseMessage httpResponse = await _client.PostAsync(POST_IMAGE_ADDRESS, imageContent);
-            Console.WriteLine(httpResponse.ToString());
+            Console.WriteLine(await httpResponse.Content.ReadAsStringAsync());
         }
     }
 }
