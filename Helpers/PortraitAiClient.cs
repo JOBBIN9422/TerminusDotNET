@@ -17,6 +17,7 @@ namespace TerminusDotNetCore.Helpers
         private static readonly string POST_IMAGE_ADDRESS = $"{PORTRAITAI_BASE_ADDRESS}v1/c/submit-user-image.php";
         private static readonly string MAKE_STYLES_ADDRESS = $"{PORTRAITAI_BASE_ADDRESS}v1/c/make-styles.php";
         private static readonly string HASH_SUBSTITUTE_PLACEHOLDER = "HASH";
+        private static readonly string STYLES_READY_ADDRESS = $"{PORTRAITAI_BASE_ADDRESS}v1/c/styles-ready.php?hex={HASH_SUBSTITUTE_PLACEHOLDER}";
         private static readonly string GET_PORTRAIT_IMAGE_ADDRESS = $"{PORTRAITAI_BASE_ADDRESS}v1/cropped/{HASH_SUBSTITUTE_PLACEHOLDER}/original.jpg";
 
         private static HttpClient _client = new HttpClient();
@@ -55,7 +56,10 @@ namespace TerminusDotNetCore.Helpers
 
             //send the make-styles request
             HttpResponseMessage makeStylesResponse = await _client.PostAsync(MAKE_STYLES_ADDRESS, makeStylesContent);
-            JObject stylesTable = JsonConvert.DeserializeObject<JObject>(await makeStylesResponse.Content.ReadAsStringAsync());
+
+            //get styles which are ready for download
+            HttpResponseMessage stylesReadyResponse = await _client.GetAsync(STYLES_READY_ADDRESS);
+            JObject stylesTable = JsonConvert.DeserializeObject<JObject>(await stylesReadyResponse.Content.ReadAsStringAsync());
 
             ////send the crop hash to get the portrait from the site
             //HttpResponseMessage getPortraitResponse = await _client.GetAsync(GET_PORTRAIT_IMAGE_ADDRESS.Replace(HASH_SUBSTITUTE_PLACEHOLDER, cropHash));
