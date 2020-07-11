@@ -50,7 +50,7 @@ namespace TerminusDotNetCore.Helpers
             hexContent.Headers.Add("Content-Disposition", "form-data; name=\"hex\"");
             makeStylesContent.Add(hexContent);
             StringContent stylesContent = new StringContent("[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19]");
-            hexContent.Headers.Add("Content-Disposition", "form-data; name=\"styles\"");
+            stylesContent.Headers.Add("Content-Disposition", "form-data; name=\"styles\"");
             makeStylesContent.Add(stylesContent);
 
             //send the make-styles request
