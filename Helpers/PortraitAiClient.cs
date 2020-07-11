@@ -59,13 +59,13 @@ namespace TerminusDotNetCore.Helpers
             HttpResponseMessage makeStylesResponse = await _client.PostAsync(MAKE_STYLES_ADDRESS, makeStylesContent);
 
             //get styles which are ready for download
-            JArray stylesTable = new JArray();
+            JObject stylesTable = new JObject();
             
             do
             {
                 HttpResponseMessage stylesReadyResponse = await _client.GetAsync(STYLES_READY_ADDRESS.Replace(HASH_SUBSTITUTE_PLACEHOLDER, cropHash));
                 Console.WriteLine(stylesReadyResponse.ToString());
-                stylesTable = JsonConvert.DeserializeObject<JArray>(await stylesReadyResponse.Content.ReadAsStringAsync());
+                stylesTable = JsonConvert.DeserializeObject<JObject>(await stylesReadyResponse.Content.ReadAsStringAsync());
                 Thread.Sleep(500);
             } while (stylesTable.Count == 0);
 
