@@ -18,22 +18,24 @@ namespace TerminusDotNetCore.Helpers
 
         public static async Task PostImage(string imageFilename)
         {
+            //determine type of the image to be sent
             string mimeType;
-
             if (!new FileExtensionContentTypeProvider().TryGetContentType(Path.GetFileName(imageFilename), out mimeType))
             {
                 mimeType = "application/octet-stream";
             }
 
+            //create multi-part form content w/ boundary
             string boundary = $"----------{Guid.NewGuid().ToString("N")}";
             MultipartFormDataContent imageContent = new MultipartFormDataContent(boundary);
 
+            //add the image data to the form
             ByteArrayContent imageDataContent = new ByteArrayContent(File.ReadAllBytes(imageFilename));
             imageDataContent.Headers.ContentType = MediaTypeHeaderValue.Parse(mimeType);
             imageContent.Add(imageDataContent, "image", Path.GetFileName(imageFilename));
 
             HttpResponseMessage httpResponse = await _client.PostAsync(POST_IMAGE_ADDRESS, imageContent);
-            Console.WriteLine(await httpResponse.Content.ReadAsStringAsync());
+            IEnumerable<string> cropHashes = httpResponse.Content.Headers.GetValues("crop_hashes");
         }
     }
 }
