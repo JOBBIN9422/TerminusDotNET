@@ -15,6 +15,8 @@ namespace TerminusDotNetCore.Helpers
     {
         private static readonly string PORTRAITAI_BASE_ADDRESS = "https://a7.portrait-ai.com/";
         private static readonly string POST_IMAGE_ADDRESS = $"{PORTRAITAI_BASE_ADDRESS}v1/c/submit-user-image.php";
+        private static readonly string HASH_SUBSTITUTE_PLACEHOLDER = "HASH";
+        private static readonly string GET_PORTRAIT_IMAGE_ADDRESS = $"{PORTRAITAI_BASE_ADDRESS}v1/cropped/{HASH_SUBSTITUTE_PLACEHOLDER}/original.jpg";
 
         private static HttpClient _client = new HttpClient();
 
@@ -36,9 +38,14 @@ namespace TerminusDotNetCore.Helpers
             imageDataContent.Headers.ContentType = MediaTypeHeaderValue.Parse(mimeType);
             imageContent.Add(imageDataContent, "image", Path.GetFileName(imageFilename));
 
+            //extract the crop hash from the response
             HttpResponseMessage postImageResponse = await _client.PostAsync(POST_IMAGE_ADDRESS, imageContent);
             JObject postImageResponseContent = JsonConvert.DeserializeObject<JObject>(await postImageResponse.Content.ReadAsStringAsync());
             string cropHash = postImageResponseContent["crop_hashes"][0].ToString();
+
+            //send the crop hash to get the portrait from the site
+            HttpResponseMessage getPortraitResponse = await _client.GetAsync(GET_PORTRAIT_IMAGE_ADDRESS.Replace(HASH_SUBSTITUTE_PLACEHOLDER, cropHash));
+
         }
     }
 }
