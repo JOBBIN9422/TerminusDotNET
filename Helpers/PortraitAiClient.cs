@@ -71,7 +71,7 @@ namespace TerminusDotNetCore.Helpers
 
             foreach (var styleNum in stylesTable)
             {
-                Console.Write(styleNum.Key + " " + styleNum.Value);
+                Console.WriteLine(styleNum.Key + " " + styleNum.Value);
             }
 
             ////send the crop hash to get the portrait from the site
