@@ -69,6 +69,11 @@ namespace TerminusDotNetCore.Helpers
                 Thread.Sleep(500);
             } while (stylesTable.Count == 0);
 
+            foreach (var styleNum in stylesTable)
+            {
+                Console.Write(styleNum.Key + " " + styleNum.Value);
+            }
+
             ////send the crop hash to get the portrait from the site
             //HttpResponseMessage getPortraitResponse = await _client.GetAsync(GET_PORTRAIT_IMAGE_ADDRESS.Replace(HASH_SUBSTITUTE_PLACEHOLDER, cropHash));
 
