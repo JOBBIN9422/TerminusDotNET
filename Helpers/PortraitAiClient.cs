@@ -18,10 +18,12 @@ namespace TerminusDotNetCore.Helpers
         private static readonly string POST_IMAGE_ADDRESS = $"{PORTRAITAI_BASE_ADDRESS}v1/c/submit-user-image.php";
         private static readonly string MAKE_STYLES_ADDRESS = $"{PORTRAITAI_BASE_ADDRESS}v1/c/make-styles.php";
         private static readonly string HASH_SUBSTITUTE_PLACEHOLDER = "HASH";
+        private static readonly string STYLE_INDEX_PLACEHOLDER = "STYLE";
         private static readonly string STYLES_READY_ADDRESS = $"{PORTRAITAI_BASE_ADDRESS}v1/c/styles-ready.php?hex={HASH_SUBSTITUTE_PLACEHOLDER}";
-        private static readonly string GET_PORTRAIT_IMAGE_ADDRESS = $"{PORTRAITAI_BASE_ADDRESS}v1/cropped/{HASH_SUBSTITUTE_PLACEHOLDER}/original.jpg";
+        private static readonly string GET_PORTRAIT_IMAGE_ADDRESS = $"{PORTRAITAI_BASE_ADDRESS}v1/cropped/{HASH_SUBSTITUTE_PLACEHOLDER}/portraitai.com-{STYLE_INDEX_PLACEHOLDER}.jpg";
 
         private static HttpClient _client = new HttpClient();
+        private static Random _random = new Random();
 
         public static async Task PostImage(string imageFilename)
         {
@@ -69,11 +71,10 @@ namespace TerminusDotNetCore.Helpers
                 Thread.Sleep(500);
             } while (stylesTable.Count == 0);
 
-            List<int> styleNums = new List<int>();
-            foreach (var styleNum in stylesTable)
-            {
-                styleNums.Add(styleNum.Value.ToObject<int>());
-            }
+            int styleNum = stylesTable[_random.Next(0, stylesTable.Count)].ToObject<int>();
+            HttpResponseMessage getPortraitResponse = await _client.GetAsync(GET_PORTRAIT_IMAGE_ADDRESS
+                .Replace(HASH_SUBSTITUTE_PLACEHOLDER, cropHash)
+                .Replace(STYLE_INDEX_PLACEHOLDER, styleNum.ToString()));
 
             ////send the crop hash to get the portrait from the site
             //HttpResponseMessage getPortraitResponse = await _client.GetAsync(GET_PORTRAIT_IMAGE_ADDRESS.Replace(HASH_SUBSTITUTE_PLACEHOLDER, cropHash));
