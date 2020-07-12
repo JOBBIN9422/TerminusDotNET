@@ -94,13 +94,17 @@ namespace TerminusDotNetCore.Helpers
                 stylesTable = JsonConvert.DeserializeObject<JObject>(responseContent);
             } while (stylesTable.Count == 0 && requestCount < MAX_RETRY_COUNT);
 
-            //build a list of style numbers and choose one at random
-            List<int> styleNums = new List<int>();
-            foreach (var entry in stylesTable)
+            int styleNum = 1;
+            if (stylesTable.Count > 0)
             {
-                styleNums.Add(entry.Value.ToObject<int>());
+                //build a list of style numbers and choose one at random
+                List<int> styleNums = new List<int>();
+                foreach (var entry in stylesTable)
+                {
+                    styleNums.Add(entry.Value.ToObject<int>());
+                }
+                styleNum = styleNums[_random.Next(0, stylesTable.Count)];
             }
-            int styleNum = styleNums[_random.Next(0, stylesTable.Count)];
 
             //get the portrait generated for the currently chosen style number
             HttpResponseMessage getPortraitResponse = await _client.GetAsync(GET_PORTRAIT_IMAGE_ADDRESS
