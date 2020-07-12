@@ -61,14 +61,18 @@ namespace TerminusDotNetCore.Helpers
             HttpResponseMessage makeStylesResponse = await _client.PostAsync(MAKE_STYLES_ADDRESS, makeStylesContent);
 
             //get styles which are ready for download
-            List<KeyValuePair<string, int>> stylesTable = new List<KeyValuePair<string, int>>();
+            JObject stylesTable = new JObject();
             
             //query which portrait styles are available for download
             do
             {
                 HttpResponseMessage stylesReadyResponse = await _client.GetAsync(STYLES_READY_ADDRESS.Replace(HASH_SUBSTITUTE_PLACEHOLDER, cropHash));
-                Console.WriteLine(await stylesReadyResponse.Content.ReadAsStringAsync());
-                stylesTable = JsonConvert.DeserializeObject<List<KeyValuePair<string, int>>>(await stylesReadyResponse.Content.ReadAsStringAsync());
+                string responseContent = await stylesReadyResponse.Content.ReadAsStringAsync();
+                if (responseContent.StartsWith('['))
+                {
+                    continue;
+                }
+                stylesTable = JsonConvert.DeserializeObject<JObject>(responseContent);
                 Thread.Sleep(500);
             } while (stylesTable.Count == 0);
 
@@ -76,7 +80,7 @@ namespace TerminusDotNetCore.Helpers
             List<int> styleNums = new List<int>();
             foreach (var entry in stylesTable)
             {
-                styleNums.Add(entry.Value);
+                styleNums.Add(entry.Value.ToObject<int>());
             }
             int styleNum = styleNums[_random.Next(0, stylesTable.Count)];
 
