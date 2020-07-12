@@ -61,16 +61,20 @@ namespace TerminusDotNetCore.Helpers
             HttpResponseMessage makeStylesResponse = await _client.PostAsync(MAKE_STYLES_ADDRESS, makeStylesContent);
 
             //get styles which are ready for download
-            JObject stylesTable = new JObject();
+            JToken stylesTable;
             
             //query which portrait styles are available for download
             do
             {
                 HttpResponseMessage stylesReadyResponse = await _client.GetAsync(STYLES_READY_ADDRESS.Replace(HASH_SUBSTITUTE_PLACEHOLDER, cropHash));
                 Console.WriteLine(await stylesReadyResponse.Content.ReadAsStringAsync());
-                stylesTable = JsonConvert.DeserializeObject<JObject>(await stylesReadyResponse.Content.ReadAsStringAsync());
+                stylesTable = JsonConvert.DeserializeObject<JToken>(await stylesReadyResponse.Content.ReadAsStringAsync());
+                if (stylesTable is JArray)
+                {
+                    continue;
+                }
                 Thread.Sleep(500);
-            } while (stylesTable.Count == 0);
+            } while (((JObject)stylesTable).Count == 0);
 
             //build a list of style numbers and choose one at random
             List<int> styleNums = new List<int>();
