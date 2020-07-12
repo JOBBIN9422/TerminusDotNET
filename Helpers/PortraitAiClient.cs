@@ -78,11 +78,11 @@ namespace TerminusDotNetCore.Helpers
 
             //build a list of style numbers and choose one at random
             List<int> styleNums = new List<int>();
-            foreach (var entry in stylesTable)
+            foreach (var entry in (JObject)stylesTable)
             {
                 styleNums.Add(entry.Value.ToObject<int>());
             }
-            int styleNum = styleNums[_random.Next(0, stylesTable.Count)];
+            int styleNum = styleNums[_random.Next(0, ((JObject)stylesTable).Count)];
 
             //get the portrait generated for the currently chosen style number
             HttpResponseMessage getPortraitResponse = await _client.GetAsync(GET_PORTRAIT_IMAGE_ADDRESS
