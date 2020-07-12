@@ -14,7 +14,12 @@ namespace TerminusDotNetCore.Helpers
 {
     public class PortraitAiClient
     {
-        private static readonly string PORTRAITAI_BASE_ADDRESS = "https://a4.portrait-ai.com/";
+        private static HttpClient _client = new HttpClient();
+        private static Random _random = new Random();
+
+        private static readonly int MAX_RETRY_COUNT = 20;
+
+        private static readonly string PORTRAITAI_BASE_ADDRESS = $"https://a{_random.Next(1, 16)}.portrait-ai.com/";
         private static readonly string POST_IMAGE_ADDRESS = $"{PORTRAITAI_BASE_ADDRESS}v1/c/submit-user-image.php";
         private static readonly string MAKE_STYLES_ADDRESS = $"{PORTRAITAI_BASE_ADDRESS}v1/c/make-styles.php";
         private static readonly string HASH_SUBSTITUTE_PLACEHOLDER = "HASH";
@@ -22,8 +27,7 @@ namespace TerminusDotNetCore.Helpers
         private static readonly string STYLES_READY_ADDRESS = $"{PORTRAITAI_BASE_ADDRESS}v1/c/styles-ready.php?hex={HASH_SUBSTITUTE_PLACEHOLDER}";
         private static readonly string GET_PORTRAIT_IMAGE_ADDRESS = $"{PORTRAITAI_BASE_ADDRESS}v1/cropped/{HASH_SUBSTITUTE_PLACEHOLDER}/portraitai.com-{STYLE_INDEX_PLACEHOLDER}.jpg";
 
-        private static HttpClient _client = new HttpClient();
-        private static Random _random = new Random();
+
 
         public static async Task PostImage(string imageFilename)
         {
@@ -62,20 +66,22 @@ namespace TerminusDotNetCore.Helpers
 
             //get styles which are ready for download
             JObject stylesTable = new JObject();
+            int requestCount = 0;
             
             //query which portrait styles are available for download
             do
             {
                 HttpResponseMessage stylesReadyResponse = await _client.GetAsync(STYLES_READY_ADDRESS.Replace(HASH_SUBSTITUTE_PLACEHOLDER, cropHash));
+                requestCount++;
                 string responseContent = await stylesReadyResponse.Content.ReadAsStringAsync();
                 Console.WriteLine(responseContent);
+                Thread.Sleep(500);
                 if (responseContent.StartsWith('['))
                 {
                     continue;
                 }
                 stylesTable = JsonConvert.DeserializeObject<JObject>(responseContent);
-                Thread.Sleep(500);
-            } while (stylesTable.Count == 0);
+            } while (stylesTable.Count == 0 || requestCount < MAX_RETRY_COUNT);
 
             //build a list of style numbers and choose one at random
             List<int> styleNums = new List<int>();
