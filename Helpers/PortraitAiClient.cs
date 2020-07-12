@@ -71,7 +71,14 @@ namespace TerminusDotNetCore.Helpers
                 Thread.Sleep(500);
             } while (stylesTable.Count == 0);
 
-            int styleNum = stylesTable[_random.Next(0, stylesTable.Count)].ToObject<int>();
+            List<int> styleNums = new List<int>();
+            foreach (var entry in stylesTable)
+            {
+                styleNums.Add(entry.Value.ToObject<int>());
+            }
+
+            int styleNum = styleNums[_random.Next(0, stylesTable.Count)];
+
             HttpResponseMessage getPortraitResponse = await _client.GetAsync(GET_PORTRAIT_IMAGE_ADDRESS
                 .Replace(HASH_SUBSTITUTE_PLACEHOLDER, cropHash)
                 .Replace(STYLE_INDEX_PLACEHOLDER, styleNum.ToString()));
