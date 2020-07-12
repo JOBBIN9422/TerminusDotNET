@@ -81,7 +81,7 @@ namespace TerminusDotNetCore.Helpers
                     continue;
                 }
                 stylesTable = JsonConvert.DeserializeObject<JObject>(responseContent);
-            } while (stylesTable.Count == 0 || requestCount < MAX_RETRY_COUNT);
+            } while (stylesTable.Count == 0 && requestCount < MAX_RETRY_COUNT);
 
             //build a list of style numbers and choose one at random
             List<int> styleNums = new List<int>();
