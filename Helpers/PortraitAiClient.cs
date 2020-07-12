@@ -68,6 +68,7 @@ namespace TerminusDotNetCore.Helpers
             {
                 HttpResponseMessage stylesReadyResponse = await _client.GetAsync(STYLES_READY_ADDRESS.Replace(HASH_SUBSTITUTE_PLACEHOLDER, cropHash));
                 string responseContent = await stylesReadyResponse.Content.ReadAsStringAsync();
+                Console.WriteLine(responseContent);
                 if (responseContent.StartsWith('['))
                 {
                     continue;
