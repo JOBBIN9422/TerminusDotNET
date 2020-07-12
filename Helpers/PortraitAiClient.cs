@@ -63,6 +63,7 @@ namespace TerminusDotNetCore.Helpers
             //get styles which are ready for download
             JObject stylesTable = new JObject();
             
+            //query which portrait styles are available for download
             do
             {
                 HttpResponseMessage stylesReadyResponse = await _client.GetAsync(STYLES_READY_ADDRESS.Replace(HASH_SUBSTITUTE_PLACEHOLDER, cropHash));
@@ -71,24 +72,22 @@ namespace TerminusDotNetCore.Helpers
                 Thread.Sleep(500);
             } while (stylesTable.Count == 0);
 
+            //build a list of style numbers and choose one at random
             List<int> styleNums = new List<int>();
             foreach (var entry in stylesTable)
             {
                 styleNums.Add(entry.Value.ToObject<int>());
             }
-
             int styleNum = styleNums[_random.Next(0, stylesTable.Count)];
 
+            //get the portrait generated for the currently chosen style number
             HttpResponseMessage getPortraitResponse = await _client.GetAsync(GET_PORTRAIT_IMAGE_ADDRESS
                 .Replace(HASH_SUBSTITUTE_PLACEHOLDER, cropHash)
                 .Replace(STYLE_INDEX_PLACEHOLDER, styleNum.ToString()));
 
-            ////send the crop hash to get the portrait from the site
-            //HttpResponseMessage getPortraitResponse = await _client.GetAsync(GET_PORTRAIT_IMAGE_ADDRESS.Replace(HASH_SUBSTITUTE_PLACEHOLDER, cropHash));
-
-            ////overwrite the given image with the data from the response
-            //byte[] portraitImageData = await getPortraitResponse.Content.ReadAsByteArrayAsync();
-            //await File.WriteAllBytesAsync(imageFilename, portraitImageData);
+            //overwrite the given image with the data from the response
+            byte[] portraitImageData = await getPortraitResponse.Content.ReadAsByteArrayAsync();
+            await File.WriteAllBytesAsync(imageFilename, portraitImageData);
         }
     }
 }
