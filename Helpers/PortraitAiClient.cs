@@ -19,18 +19,29 @@ namespace TerminusDotNetCore.Helpers
 
         private static readonly int MAX_RETRY_COUNT = 20;
 
-        private static readonly string PORTRAITAI_BASE_ADDRESS = $"https://a{_random.Next(1, 16)}.portrait-ai.com/";
-        private static readonly string POST_IMAGE_ADDRESS = $"{PORTRAITAI_BASE_ADDRESS}v1/c/submit-user-image.php";
-        private static readonly string MAKE_STYLES_ADDRESS = $"{PORTRAITAI_BASE_ADDRESS}v1/c/make-styles.php";
-        private static readonly string HASH_SUBSTITUTE_PLACEHOLDER = "HASH";
-        private static readonly string STYLE_INDEX_PLACEHOLDER = "STYLE";
-        private static readonly string STYLES_READY_ADDRESS = $"{PORTRAITAI_BASE_ADDRESS}v1/c/styles-ready.php?hex={HASH_SUBSTITUTE_PLACEHOLDER}";
-        private static readonly string GET_PORTRAIT_IMAGE_ADDRESS = $"{PORTRAITAI_BASE_ADDRESS}v1/cropped/{HASH_SUBSTITUTE_PLACEHOLDER}/portraitai.com-{STYLE_INDEX_PLACEHOLDER}.jpg";
+        private static string HASH_SUBSTITUTE_PLACEHOLDER = "HASH";
+        private static string STYLE_INDEX_PLACEHOLDER = "STYLE";
+        private static string PORTRAITAI_BASE_ADDRESS = $"https://a{_random.Next(1, 16)}.portrait-ai.com/";
+        private static string POST_IMAGE_ADDRESS = $"{PORTRAITAI_BASE_ADDRESS}v1/c/submit-user-image.php";
+        private static string MAKE_STYLES_ADDRESS = $"{PORTRAITAI_BASE_ADDRESS}v1/c/make-styles.php";
 
+        private static string STYLES_READY_ADDRESS = $"{PORTRAITAI_BASE_ADDRESS}v1/c/styles-ready.php?hex={HASH_SUBSTITUTE_PLACEHOLDER}";
+        private static string GET_PORTRAIT_IMAGE_ADDRESS = $"{PORTRAITAI_BASE_ADDRESS}v1/cropped/{HASH_SUBSTITUTE_PLACEHOLDER}/portraitai.com-{STYLE_INDEX_PLACEHOLDER}.jpg";
 
+        private static void ReseedUrls()
+        {
+            PORTRAITAI_BASE_ADDRESS = $"https://a{_random.Next(1, 16)}.portrait-ai.com/";
+            POST_IMAGE_ADDRESS = $"{PORTRAITAI_BASE_ADDRESS}v1/c/submit-user-image.php";
+            MAKE_STYLES_ADDRESS = $"{PORTRAITAI_BASE_ADDRESS}v1/c/make-styles.php";
+
+            STYLES_READY_ADDRESS = $"{PORTRAITAI_BASE_ADDRESS}v1/c/styles-ready.php?hex={HASH_SUBSTITUTE_PLACEHOLDER}";
+            GET_PORTRAIT_IMAGE_ADDRESS = $"{PORTRAITAI_BASE_ADDRESS}v1/cropped/{HASH_SUBSTITUTE_PLACEHOLDER}/portraitai.com-{STYLE_INDEX_PLACEHOLDER}.jpg";
+        }
 
         public static async Task PostImage(string imageFilename)
         {
+            ReseedUrls();
+
             //determine type of the image to be sent
             string mimeType;
             if (!new FileExtensionContentTypeProvider().TryGetContentType(Path.GetFileName(imageFilename), out mimeType))
