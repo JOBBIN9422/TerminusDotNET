@@ -87,7 +87,7 @@ namespace TerminusDotNetCore.Helpers
                 string responseContent = await stylesReadyResponse.Content.ReadAsStringAsync();
                 Console.WriteLine(stylesReadyResponse.ToString());
                 Console.WriteLine(responseContent);
-                Thread.Sleep(500);
+                Thread.Sleep(1000);
                 if (responseContent.StartsWith('['))
                 {
                     continue;
