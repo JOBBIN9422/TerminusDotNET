@@ -30,11 +30,14 @@ namespace TerminusDotNetCore.Modules
 
                 foreach (CommandInfo command in commands)
                 {
+                    //create a new embed if we've hit the field limit for the current embed
                     if (embedBuilder.Fields.Count % EmbedBuilder.MaxFieldCount == 0 && embedBuilder.Fields.Count > 0)
                     {
                         helpTexts.Add(embedBuilder.Build());
                         embedBuilder = new EmbedBuilder();
                     }
+
+                    //add a summary field of the current cmd to the current embed
                     AddCommandField(embedBuilder, command);
                 }
 
@@ -63,11 +66,14 @@ namespace TerminusDotNetCore.Modules
 
                     foreach (CommandMatch commandMatch in cmdSearchResult.Commands)
                     {
+                        //create a new embed if we've hit the field limit for the current embed
                         if (embedBuilder.Fields.Count % EmbedBuilder.MaxFieldCount == 0 && embedBuilder.Fields.Count > 0)
                         {
                             helpTexts.Add(embedBuilder.Build());
                             embedBuilder = new EmbedBuilder();
                         }
+
+                        //add a summary field of the current cmd to the current embed
                         AddCommandField(embedBuilder, commandMatch.Command);
                     }
 
@@ -76,9 +82,10 @@ namespace TerminusDotNetCore.Modules
                         helpTexts.Add(embedBuilder.Build());
                     }
 
+                    //send the list of embeds
                     foreach (var helpEmbed in helpTexts)
                     {
-                        await ReplyAsync("Available commands: ", false, helpEmbed);
+                        await ReplyAsync(embed: helpEmbed);
                     }
                 }
             }
@@ -93,9 +100,11 @@ namespace TerminusDotNetCore.Modules
             //add each command parameter to the help embed
             foreach (ParameterInfo param in parameters)
             {
+                //if there is a default value, print it
+                string defaultVal = param.DefaultValue == null ? string.Empty : $", default = `{param.DefaultValue}`";
                 if (param.Summary != null)
                 {
-                    commandText += $"\n- `{param.Name}` ({param.Type.Name}, optional = {param.IsOptional}): {param.Summary}";
+                    commandText += $"\n- `{param.Name}` ({param.Type.Name}, optional = `{param.IsOptional}`{defaultVal}): {param.Summary}";
                 }
             }
 
