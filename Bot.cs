@@ -143,12 +143,13 @@ namespace TerminusDotNetCore
         {
             try
             {
+                string cmdDisplayName = $"{command.Value.Module.Group ?? ""} {command.Value.Name}";
                 if (!result.IsSuccess && result is ExecuteResult execResult)
                 {
                     //alert user and print error details to console
                     await context.Channel.SendMessageAsync(result.ErrorReason);
-                    await Logger.Log(new LogMessage(LogSeverity.Error, "CommandExecution", $"Error in command '{command.Value.Name}': {execResult.ErrorReason}"));
-                    await Logger.Log(new LogMessage(LogSeverity.Error, "CommandExecution", $"Exception details (see errors.txt): {execResult.Exception.StackTrace}"));
+                    await Logger.Log(new LogMessage(LogSeverity.Error, "CommandExecution", $"Error in command '{cmdDisplayName}': {execResult.ErrorReason}"));
+                    await Logger.Log(new LogMessage(LogSeverity.Error, "CommandExecution", $"Exception details (see errors.txt):\n {execResult.Exception.StackTrace}"));
 
                     //dump exception details to error log
                     string currLogFilename = $"errors_{DateTime.Today.ToString("MM-dd-yyyy")}.txt";
@@ -156,7 +157,7 @@ namespace TerminusDotNetCore
                     {
                         writer.WriteLine("----- BEGIN ENTRY -----");
                         writer.WriteLine($"ERROR DATETIME: {DateTime.Now.ToString()}");
-                        writer.WriteLine($"COMMAND NAME  : {command.Value.Name}");
+                        writer.WriteLine($"COMMAND NAME  : {cmdDisplayName}");
                         writer.WriteLine();
                         writer.WriteLine(execResult.Exception.ToString());
                         writer.WriteLine("----- END ENTRY   -----");
@@ -166,13 +167,13 @@ namespace TerminusDotNetCore
                 else
                 {
                     //on successful command execution
-                    await Logger.Log(new LogMessage(LogSeverity.Info, "CommandExecution", $"Command '{command.Value.Name}' executed successfully."));
+                    await Logger.Log(new LogMessage(LogSeverity.Info, "CommandExecution", $"Command '{cmdDisplayName}' executed successfully."));
                 }
             }
-            catch (InvalidOperationException)
+            catch (InvalidOperationException e)
             {
-                await context.Channel.SendMessageAsync($"Unknown command: `{result.ErrorReason}`");
-                await Logger.Log(new LogMessage(LogSeverity.Error, "CommandExecution", $"Unknown command: `{result.ErrorReason}`"));
+                await context.Channel.SendMessageAsync($"Unknown command: `{e.ToString()}`");
+                await Logger.Log(new LogMessage(LogSeverity.Error, "CommandExecution", $"Unknown command: {e.ToString()}"));
             }
         }
 
