@@ -7,14 +7,16 @@ using System.Text;
 
 namespace TerminusDotNetCore.Helpers
 {
-    public class CommandSummaryHelper
+    public static class CommandSummaryHelper
     {
-        public static List<Embed> GenerateHelpEmbeds(CommandService commandService, string commandName = null)
+        public static CommandService CommandService { get; set; }
+
+        public static List<Embed> GenerateHelpEmbeds(string commandName = null)
         {
             //if no command name was given, print help for all commands
             if (string.IsNullOrEmpty(commandName))
             {
-                IEnumerable<CommandInfo> commands = commandService.Commands.OrderBy(c => c.Aliases.First());
+                IEnumerable<CommandInfo> commands = CommandService.Commands.OrderBy(c => c.Aliases.First());
                 List<Embed> helpTexts = new List<Embed>();
                 EmbedBuilder embedBuilder = new EmbedBuilder();
 
@@ -41,7 +43,7 @@ namespace TerminusDotNetCore.Helpers
             else
             {
                 //search for the given command by name
-                SearchResult cmdSearchResult = commandService.Search(commandName);
+                SearchResult cmdSearchResult = CommandService.Search(commandName);
                 if (!cmdSearchResult.IsSuccess)
                 {
                     return null;
@@ -74,7 +76,7 @@ namespace TerminusDotNetCore.Helpers
             }
         }
 
-        public static void AddCommandSummary(EmbedBuilder embedBuilder, CommandInfo command)
+        private static void AddCommandSummary(EmbedBuilder embedBuilder, CommandInfo command)
         {
             string commandText = command.Summary ?? "No description available.\n";
 
@@ -92,6 +94,20 @@ namespace TerminusDotNetCore.Helpers
             }
 
             embedBuilder.AddField($"`{command.Aliases.First()}`", commandText);
+        }
+
+        public static void AddCommandSummary(EmbedBuilder embedBuilder, string commandName)
+        {
+            SearchResult cmdSearchResult = CommandService.Search(commandName);
+            if (!cmdSearchResult.IsSuccess)
+            {
+                return;
+            }
+
+            foreach (CommandMatch commandMatch in cmdSearchResult.Commands)
+            {
+                AddCommandSummary(embedBuilder, commandMatch.Command);
+            }
         }
     }
 }

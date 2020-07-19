@@ -94,6 +94,23 @@ namespace TerminusDotNetCore.Modules
                 }
             }
 
+            [Command]
+            [Summary("Display usage info about the `log` command.")]
+            public async Task PrintUsageInfo()
+            {
+                EmbedBuilder embedBuilder = new EmbedBuilder();
+                Attribute[] attributes = Attribute.GetCustomAttributes(GetType());
+
+                foreach(Attribute attribute in attributes)
+                {
+                    CommandAttribute cmdAttribute = attribute as CommandAttribute;
+                    if (cmdAttribute != null)
+                    {
+                        CommandSummaryHelper.AddCommandSummary(embedBuilder, cmdAttribute.Text);
+                    }
+                }
+            }
+
             [Command("console")]
             [Summary("Download the most recent stdout log file, if any exist.")]
             public async Task DownloadMostRecentConsoleLog()

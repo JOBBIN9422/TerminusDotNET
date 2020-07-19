@@ -23,7 +23,7 @@ namespace TerminusDotNetCore
         public DiscordSocketClient Client { get; private set; }
 
         //Discord.NET command management
-        private CommandService _commandService;
+        public CommandService CommandService { get; private set; }
 
         //command services
         private IServiceProvider _serviceProvider;
@@ -43,7 +43,10 @@ namespace TerminusDotNetCore
             StartTime = DateTime.Now;
 
             _regexMsgParser = new RegexCommands();
-            _commandService = new CommandService();
+            CommandService = new CommandService();
+
+            //set command summary helper's command service ref
+            CommandSummaryHelper.CommandService = CommandService;
 
             //instantiate client and register log event handler
             Client = new DiscordSocketClient();
@@ -99,8 +102,8 @@ namespace TerminusDotNetCore
             _serviceProvider = InstallServices();
 
             //init commands service
-            await _commandService.AddModulesAsync(assembly: Assembly.GetEntryAssembly(), services: _serviceProvider);
-            _commandService.CommandExecuted += OnCommandExecutedAsync;
+            await CommandService.AddModulesAsync(assembly: Assembly.GetEntryAssembly(), services: _serviceProvider);
+            CommandService.CommandExecuted += OnCommandExecutedAsync;
 
             //hang out for now
             await Task.Delay(-1);
@@ -136,7 +139,7 @@ namespace TerminusDotNetCore
 
             //handle commands
             var context = new SocketCommandContext(Client, message);
-            var commandResult = await _commandService.ExecuteAsync(context: context, argPos: argPos, services: _serviceProvider);
+            var commandResult = await CommandService.ExecuteAsync(context: context, argPos: argPos, services: _serviceProvider);
         }
 
         private async Task OnCommandExecutedAsync(Optional<CommandInfo> command, ICommandContext context, IResult result)
