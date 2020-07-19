@@ -109,6 +109,8 @@ namespace TerminusDotNetCore.Modules
                         CommandSummaryHelper.AddCommandSummary(embedBuilder, cmdAttribute.Text);
                     }
                 }
+
+                await ReplyAsync(embed: embedBuilder.Build());
             }
 
             [Command("console")]
