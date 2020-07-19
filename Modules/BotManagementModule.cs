@@ -100,7 +100,7 @@ namespace TerminusDotNetCore.Modules
             {
                 EmbedBuilder embedBuilder = new EmbedBuilder();
                 Type type = GetType();
-                Attribute[] attributes = Attribute.GetCustomAttributes(type);
+                Attribute[] attributes = Attribute.GetCustomAttributes(type, true);
 
                 foreach(Attribute attribute in attributes)
                 {
