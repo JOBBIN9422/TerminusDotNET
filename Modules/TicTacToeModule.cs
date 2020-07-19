@@ -22,6 +22,15 @@ namespace TerminusDotNetCore.Modules
             _tttService.ParentModule = this;
         }
 
+        [Command]
+        [Summary("Display usage info about the `ttt` command.")]
+        public async Task PrintUsageInfo()
+        {
+            EmbedBuilder embedBuilder = new EmbedBuilder();
+            CommandSummaryHelper.GenerateGroupCommandSummary(GetType(), embedBuilder, "ttt");
+            await ReplyAsync(embed: embedBuilder.Build());
+        }
+
         [Command("new")]
         [Summary("Starts a new game with the given parameters.")]
         public async Task StartNewGame([Summary("The player to challenge.")]IUser player2, [Summary("Number of rows.")]int numRows = 3, [Summary("Number of columns.")]int numCols = 3, [Summary("How many pieces in a row count as a win.")]int winCount = 3)
