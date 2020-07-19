@@ -3,6 +3,7 @@ using Discord.Commands;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 
 namespace TerminusDotNetCore.Helpers
@@ -80,10 +81,10 @@ namespace TerminusDotNetCore.Helpers
         {
             string commandText = command.Summary ?? "No description available.\n";
 
-            IReadOnlyList<ParameterInfo> parameters = command.Parameters;
+            IReadOnlyList<Discord.Commands.ParameterInfo> parameters = command.Parameters;
 
             //add each command parameter to the help embed
-            foreach (ParameterInfo param in parameters)
+            foreach (Discord.Commands.ParameterInfo param in parameters)
             {
                 //if there is a default value, print it
                 string defaultVal = param.DefaultValue == null ? string.Empty : $", default = `{param.DefaultValue}`";
@@ -109,6 +110,21 @@ namespace TerminusDotNetCore.Helpers
                 if (commandMatch.Alias == commandName)
                 {
                     AddCommandSummary(embedBuilder, commandMatch.Command);
+                }
+            }
+        }
+
+        public static void GenerateGroupCommandSummary(Type type, EmbedBuilder embedBuilder, string groupPrefix)
+        {
+            MethodInfo[] methods = type.GetMethods();
+
+            foreach (MethodInfo method in methods)
+            {
+                Attribute attribute = method.GetCustomAttributes().Where(a => a is CommandAttribute).FirstOrDefault();
+                CommandAttribute cmdAttribute = attribute as CommandAttribute;
+                if (cmdAttribute != null && !string.IsNullOrEmpty(cmdAttribute.Text))
+                {
+                    AddCommandSummary(embedBuilder, $"{groupPrefix} {cmdAttribute.Text}");
                 }
             }
         }
