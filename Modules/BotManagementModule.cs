@@ -101,11 +101,12 @@ namespace TerminusDotNetCore.Modules
             {
                 EmbedBuilder embedBuilder = new EmbedBuilder();
                 var methods = GetType().GetMethods();
-                foreach(MethodInfo method in methods)
+
+                foreach (MethodInfo method in methods)
                 {
                     Attribute attribute = method.GetCustomAttributes().Where(a => a is CommandAttribute).First();
                     CommandAttribute cmdAttribute = attribute as CommandAttribute;
-                    if (cmdAttribute != null)
+                    if (cmdAttribute != null && !string.IsNullOrEmpty(cmdAttribute.Text))
                     {
                         CommandSummaryHelper.AddCommandSummary(embedBuilder, cmdAttribute.Text);
                     }
