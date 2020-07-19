@@ -106,7 +106,10 @@ namespace TerminusDotNetCore.Helpers
 
             foreach (CommandMatch commandMatch in cmdSearchResult.Commands)
             {
-                AddCommandSummary(embedBuilder, commandMatch.Command);
+                if (commandMatch.Alias == commandName)
+                {
+                    AddCommandSummary(embedBuilder, commandMatch.Command);
+                }
             }
         }
     }
