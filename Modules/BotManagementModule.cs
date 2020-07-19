@@ -100,7 +100,7 @@ namespace TerminusDotNetCore.Modules
             public async Task PrintUsageInfo()
             {
                 EmbedBuilder embedBuilder = new EmbedBuilder();
-                var methods = GetType().GetMethods();
+                MethodInfo[] methods = GetType().GetMethods();
 
                 foreach (MethodInfo method in methods)
                 {
@@ -108,7 +108,7 @@ namespace TerminusDotNetCore.Modules
                     CommandAttribute cmdAttribute = attribute as CommandAttribute;
                     if (cmdAttribute != null && !string.IsNullOrEmpty(cmdAttribute.Text))
                     {
-                        CommandSummaryHelper.AddCommandSummary(embedBuilder, cmdAttribute.Text);
+                        CommandSummaryHelper.AddCommandSummary(embedBuilder, $"log {cmdAttribute.Text}");
                     }
                 }
 
