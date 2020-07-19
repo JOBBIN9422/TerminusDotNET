@@ -104,7 +104,7 @@ namespace TerminusDotNetCore.Modules
 
                 foreach (MethodInfo method in methods)
                 {
-                    Attribute attribute = method.GetCustomAttributes().Where(a => a is CommandAttribute).First();
+                    Attribute attribute = method.GetCustomAttributes().Where(a => a is CommandAttribute).FirstOrDefault();
                     CommandAttribute cmdAttribute = attribute as CommandAttribute;
                     if (cmdAttribute != null && !string.IsNullOrEmpty(cmdAttribute.Text))
                     {
