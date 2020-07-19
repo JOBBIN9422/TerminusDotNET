@@ -100,14 +100,10 @@ namespace TerminusDotNetCore.Modules
             public async Task PrintUsageInfo()
             {
                 EmbedBuilder embedBuilder = new EmbedBuilder();
-                var types = Assembly.GetExecutingAssembly()
-                    .GetTypes()
-                    .Where(t => t.Name == "LogModule")
-                    .ToArray();
-                var attributes = Attribute.GetCustomAttributes(types[0]);
-
-                foreach(var attribute in attributes)
+                var methods = GetType().GetMethods();
+                foreach(MethodInfo method in methods)
                 {
+                    Attribute attribute = method.GetCustomAttributes().Where(a => a is CommandAttribute).First();
                     CommandAttribute cmdAttribute = attribute as CommandAttribute;
                     if (cmdAttribute != null)
                     {
