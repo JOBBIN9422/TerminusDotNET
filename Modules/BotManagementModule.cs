@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using TerminusDotNetCore.Helpers;
@@ -99,10 +100,13 @@ namespace TerminusDotNetCore.Modules
             public async Task PrintUsageInfo()
             {
                 EmbedBuilder embedBuilder = new EmbedBuilder();
-                Type type = GetType();
-                Attribute[] attributes = Attribute.GetCustomAttributes(type, true);
+                var types = Assembly.GetExecutingAssembly()
+                    .GetTypes()
+                    .Where(t => t.Name == "LogModule")
+                    .ToArray();
+                var attributes = Attribute.GetCustomAttributes(types[0]);
 
-                foreach(Attribute attribute in attributes)
+                foreach(var attribute in attributes)
                 {
                     CommandAttribute cmdAttribute = attribute as CommandAttribute;
                     if (cmdAttribute != null)
