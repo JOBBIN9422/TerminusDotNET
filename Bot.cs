@@ -170,10 +170,10 @@ namespace TerminusDotNetCore
                     await Logger.Log(new LogMessage(LogSeverity.Info, "CommandExecution", $"Command '{cmdDisplayName}' executed successfully."));
                 }
             }
-            catch (InvalidOperationException e)
+            catch (InvalidOperationException)
             {
-                await context.Channel.SendMessageAsync($"Unknown command: `{e.ToString()}`");
-                await Logger.Log(new LogMessage(LogSeverity.Error, "CommandExecution", $"Unknown command: {e.ToString()}"));
+                await context.Channel.SendMessageAsync($"Unknown command.");
+                await Logger.Log(new LogMessage(LogSeverity.Error, "CommandExecution", $"Unknown command."));
             }
         }
 
