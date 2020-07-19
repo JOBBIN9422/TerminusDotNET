@@ -99,7 +99,7 @@ namespace TerminusDotNetCore.Modules
             public async Task PrintUsageInfo()
             {
                 EmbedBuilder embedBuilder = new EmbedBuilder();
-                Attribute[] attributes = Attribute.GetCustomAttributes(GetType().GetNestedTypes("log"));
+                Attribute[] attributes = Attribute.GetCustomAttributes(GetType().GetNestedType("log"));
 
                 foreach(Attribute attribute in attributes)
                 {
