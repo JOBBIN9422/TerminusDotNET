@@ -24,7 +24,7 @@ namespace TerminusDotNetCore.Modules
             //if no command name was given, print help for all commands
             if (string.IsNullOrEmpty(commandName))
             {
-                IEnumerable<CommandInfo> commands = _commandService.Commands;
+                IEnumerable<CommandInfo> commands = _commandService.Commands.OrderBy(c => c.Aliases.First());
                 List<Embed> helpTexts = new List<Embed>();
                 EmbedBuilder embedBuilder = new EmbedBuilder();
 
