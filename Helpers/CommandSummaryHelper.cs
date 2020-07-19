@@ -12,6 +12,11 @@ namespace TerminusDotNetCore.Helpers
     {
         public static CommandService CommandService { get; set; }
 
+        /// <summary>
+        /// Generate help embed(s). If no command name is given, generate embeds for all available commands.
+        /// </summary>
+        /// <param name="commandName">Command to generate help embed(s) for.</param>
+        /// <returns>List of formatted embeds containing command help.</returns>
         public static List<Embed> GenerateHelpEmbeds(string commandName = null)
         {
             //if no command name was given, print help for all commands
@@ -76,7 +81,11 @@ namespace TerminusDotNetCore.Helpers
                 }
             }
         }
-
+        /// <summary>
+        /// Add a summary of the command to the given embed builder.
+        /// </summary>
+        /// <param name="embedBuilder">Embed builder to add command summary fields to.</param>
+        /// <param name="command">Command to generate a summary for.</param>
         private static void AddCommandSummary(EmbedBuilder embedBuilder, CommandInfo command)
         {
             string commandText = command.Summary ?? "No description available.\n";
@@ -88,6 +97,8 @@ namespace TerminusDotNetCore.Helpers
             {
                 //if there is a default value, print it
                 string defaultVal = param.DefaultValue == null ? string.Empty : $", default = `{param.DefaultValue}`";
+
+                //add parameter details
                 if (param.Summary != null)
                 {
                     commandText += $"\n- `{param.Name}` (`{param.Type.Name}`, optional = `{param.IsOptional}`{defaultVal}): {param.Summary}";
@@ -97,6 +108,11 @@ namespace TerminusDotNetCore.Helpers
             embedBuilder.AddField($"`{command.Aliases.First()}`", commandText);
         }
 
+        /// <summary>
+        /// Add a summary of the command to the given embed builder.
+        /// </summary>
+        /// <param name="embedBuilder">Embed builder to add command summary fields to.</param>
+        /// <param name="commandName">Name of the command to search for.</param>
         public static void AddCommandSummary(EmbedBuilder embedBuilder, string commandName)
         {
             SearchResult cmdSearchResult = CommandService.Search(commandName);
@@ -114,14 +130,23 @@ namespace TerminusDotNetCore.Helpers
             }
         }
 
+        /// <summary>
+        /// Add fields which summarize each command under the given group prefix.
+        /// </summary>
+        /// <param name="type">The module tagged with the group prefix.</param>
+        /// <param name="embedBuilder">Embed builder to add command summary fields to.</param>
+        /// <param name="groupPrefix">The module group prefix.</param>
         public static void GenerateGroupCommandSummary(Type type, EmbedBuilder embedBuilder, string groupPrefix)
         {
             MethodInfo[] methods = type.GetMethods();
 
+            //choose only methods with the 'Command' attribute
             foreach (MethodInfo method in methods)
             {
                 Attribute attribute = method.GetCustomAttributes().Where(a => a is CommandAttribute).FirstOrDefault();
                 CommandAttribute cmdAttribute = attribute as CommandAttribute;
+
+                //add a summary of the command searched by its full name
                 if (cmdAttribute != null && !string.IsNullOrEmpty(cmdAttribute.Text))
                 {
                     AddCommandSummary(embedBuilder, $"{groupPrefix} {cmdAttribute.Text}");
