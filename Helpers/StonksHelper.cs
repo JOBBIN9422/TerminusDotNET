@@ -12,10 +12,10 @@ namespace TerminusDotNetCore.Helpers
 {
     class StonksHelper
     {
-        public static async Task<string> DownloadImage(string stock_name)
+        public static async Task<string> DownloadImage(string baseIP, string stockName)
         {
             var httpClient = new HttpClient();
-            var url = "http://68.201.65.4:1234/get_stock?ticker=" + stock_name;
+            var url = $"http://{baseIP}/get_stock?ticker=" + stockName;
             byte[] imageBytes = await httpClient.GetByteArrayAsync(url);
 
             string localFilename = "graph.png";

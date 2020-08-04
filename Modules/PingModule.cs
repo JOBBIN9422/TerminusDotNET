@@ -4,12 +4,15 @@ using System.Net;
 using System.Net.NetworkInformation;
 using Discord.Commands;
 using TerminusDotNetCore.Services;
+using Microsoft.Extensions.Configuration;
 
 namespace TerminusDotNetCore.Modules
 {
-    public class PingModule : ModuleBase<SocketCommandContext>
+    public class PingModule : ServiceControlModule
     {
-        [Command("Ping")]
+        public PingModule(IConfiguration config) : base(config) { }
+
+        [Command("ping")]
         [Summary("Pings a server address that must be specified as an argument")]
         public async Task PingAsync([Remainder]string message = null)
         {
@@ -22,28 +25,28 @@ namespace TerminusDotNetCore.Modules
             }
             else
             {
-                string ip_addr = "";
+                string ipAddr = "";
 
                 //Custom ip for minecraft
                 if (message == "minecraft")
                 {
-                    ip_addr = "98.200.245.252";
+                    ipAddr = Config["MinecraftIP"];
                 }
                 else
                 {
-                    ip_addr = message;
+                    ipAddr = message;
                 }
 
                 //Validates given ip address
-                if (!(IPAddress.TryParse(ip_addr.Split(':')[0], out IP)))
+                if (!(IPAddress.TryParse(ipAddr.Split(':')[0], out IP)))
                 {
-                    await ReplyAsync(ip_addr + " is not a valid IP address.");
+                    await ReplyAsync(ipAddr + " is not a valid IP address.");
                 }
                 else
                 {
                     //Ping the specified server
                     PingReply reply;
-                    reply = PingService.PingRequest(ip_addr);
+                    reply = PingService.PingRequest(ipAddr);
 
                     if (reply.Status == IPStatus.Success)
                     {
@@ -56,7 +59,7 @@ namespace TerminusDotNetCore.Modules
                     }
                     else
                     {
-                        await ReplyAsync("Address " + ip_addr + " is currently unreachable.");
+                        await ReplyAsync("Address " + ipAddr + " is currently unreachable.");
                     }
                 }
             }

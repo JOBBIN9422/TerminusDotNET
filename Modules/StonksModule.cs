@@ -24,16 +24,16 @@ namespace TerminusDotNetCore.Modules
 
         [Command("stonks")]
         [Summary("Get a stock chart for the given company.")]
-        public async Task StonksAsync([Summary("Stock acronym for desired company")]string stock_name = null)
+        public async Task StonksAsync([Summary("Stock acronym for desired company")]string stockName = null)
         {
-            if (string.IsNullOrEmpty(stock_name))
+            if (string.IsNullOrEmpty(stockName))
             {
                 await ServiceReplyAsync("Please add a stock name.");
                 return;
             }
-            await ServiceReplyAsync("Downloading stock data for " + stock_name + ".");
+            await ServiceReplyAsync("Downloading stock data for " + stockName + ".");
             
-            string graphImgPath = await StonksHelper.DownloadImage(stock_name);
+            string graphImgPath = await StonksHelper.DownloadImage(Config["StonksIP"], stockName);
 
             await ServiceReplyAsync("Download finished.");
 
