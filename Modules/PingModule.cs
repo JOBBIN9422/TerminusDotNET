@@ -12,7 +12,7 @@ namespace TerminusDotNetCore.Modules
     {
         public PingModule(IConfiguration config) : base(config) { }
 
-        [Command("ping")]
+        [Command("ping", RunMode = RunMode.Async)]
         [Summary("Pings a server address that must be specified as an argument")]
         public async Task PingAsync([Remainder]string message = null)
         {
