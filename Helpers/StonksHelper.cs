@@ -7,6 +7,7 @@ using System.Net.Http;
 using System.Net;
 using System.Web;
 using System.IO;
+using System.Collections.Specialized;
 
 namespace TerminusDotNetCore.Helpers
 {
@@ -14,15 +15,28 @@ namespace TerminusDotNetCore.Helpers
     {
         public static async Task<string> DownloadImage(string baseIP, string stockName)
         {
-            var httpClient = new HttpClient();
-            var url = $"http://{baseIP}/get_stock?ticker=" + stockName;
-            byte[] imageBytes = await httpClient.GetByteArrayAsync(url);
+            //init client/url (load IP from secrets.config)
+            HttpClient httpClient = new HttpClient();
+            string url = $"http://{baseIP}/get_stock?ticker=" + stockName;
 
-            string localFilename = "graph.png";
-            string localPath = Path.Combine("assets", "images", localFilename);
-            File.WriteAllBytes(localPath, imageBytes);
+            //check for additional user-entered query parameters (certified coner moment)
+            string queryString = url.Substring(url.IndexOf('?') + 1);
+            NameValueCollection queryParams = HttpUtility.ParseQueryString(queryString);
+            if (queryParams.Count > 1)
+            {
+                throw new ArgumentException($"Blocked attempt to pass multiple query parameters: `?{queryString}`");
+            }
+            else
+            {
+                //download stock chart img for valid requests
+                byte[] imageBytes = await httpClient.GetByteArrayAsync(url);
 
-            return localPath;
+                string localFilename = "graph.png";
+                string localPath = Path.Combine("assets", "images", localFilename);
+                File.WriteAllBytes(localPath, imageBytes);
+
+                return localPath;
+            }
         }
     }
 }
