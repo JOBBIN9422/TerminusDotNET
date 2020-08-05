@@ -85,6 +85,11 @@ namespace TerminusDotNetCore.Modules
             await ReplyAsync(embed: builder.Build());
         }
 
+        [Command("libraries")]
+        public async Task ListLibraries()
+        {
+        }
+
         [Group("log")]
         public class LogModule : ModuleBase<SocketCommandContext>
         {

@@ -10,6 +10,8 @@ using TerminusDotNetCore.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using TerminusDotNetCore.Helpers;
+using System.Xml.Linq;
+using System.Linq;
 
 namespace TerminusDotNetCore
 {
@@ -17,18 +19,22 @@ namespace TerminusDotNetCore
     {
         public DateTime StartTime { get; private set; }
 
-        //for detecting regex matches in messages
-        private RegexCommands _regexMsgParser;
+        
 
         public DiscordSocketClient Client { get; private set; }
 
         //Discord.NET command management
         public CommandService CommandService { get; private set; }
 
+        public bool IsRegexActive { get; set; } = true;
+
+        public Dictionary<string, string> InstalledLibraries { get; private set; } = new Dictionary<string, string>();
+
         //command services
         private IServiceProvider _serviceProvider;
 
-        public bool IsRegexActive { get; set; } = true;
+        //for detecting regex matches in messages
+        private RegexCommands _regexMsgParser;
 
         //ignored channels
         private List<ulong> _blacklistChannels = new List<ulong>();
@@ -41,6 +47,9 @@ namespace TerminusDotNetCore
         public async Task Initialize()
         {
             StartTime = DateTime.Now;
+
+            //load libraries into version dict
+            PopulateInstalledLibrariesList();
 
             _regexMsgParser = new RegexCommands();
             CommandService = new CommandService();
@@ -232,6 +241,26 @@ namespace TerminusDotNetCore
                     }
                 }
             }
+        }
+
+        private void PopulateInstalledLibrariesList()
+        {
+            XNamespace msBuild = "http://schemas.microsoft.com/developer/msbuild/2003";
+            XDocument projectDoc = XDocument.Load("TerminusDotNetCore.csproj");
+            IEnumerable<string> references = projectDoc.Element(msBuild + "Project")
+                                                       .Element(msBuild + "ItemGroup")
+                                                       .Element(msBuild + "PackageReference")
+                                                       .Attributes("Include")
+                                                       .Select(e => e.Value);
+
+            IEnumerable<string> versions = projectDoc.Element(msBuild + "Project")
+                                                       .Element(msBuild + "ItemGroup")
+                                                       .Element(msBuild + "PackageReference")
+                                                       .Attributes("Version")
+                                                       .Select(e => e.Value);
+
+            InstalledLibraries = references.Zip(versions, (pkg, version) => new { pkg, version })
+                .ToDictionary(x => x.pkg, x => x.version);
         }
     }
 }
