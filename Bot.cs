@@ -85,6 +85,9 @@ namespace TerminusDotNetCore
                 }
             }
 
+            //load regex state from config
+            IsRegexActive = bool.Parse(_config["RegexEnabled"]);
+
             //log in & start the client
             string token = _config["DiscordToken"];
             await Client.LoginAsync(TokenType.Bot, token);
