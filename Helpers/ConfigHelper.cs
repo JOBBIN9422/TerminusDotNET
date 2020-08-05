@@ -16,7 +16,7 @@ namespace TerminusDotNetCore.Helpers
 
         public static void UpdateConfig(JObject newSettings)
         {
-            File.WriteAllText("appsettings.json", JsonConvert.SerializeObject(newSettings));
+            File.WriteAllText("appsettings.json", JsonConvert.SerializeObject(newSettings, Formatting.Indented));
         }
     }
 }
