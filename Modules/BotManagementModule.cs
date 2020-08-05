@@ -2,6 +2,8 @@
 using Discord.Commands;
 using Discord.Rest;
 using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -36,16 +38,23 @@ namespace TerminusDotNetCore.Modules
                 await ReplyAsync($"Regex responses are currently {regexState}.");
                 return;
             }
-            state = state.ToLower();
 
+            JObject configObj = ConfigHelper.ReadConfig();
+            state = state.ToLower();
             if (state == "off" || state == "n" || state == "no" || state == "disabled")
             {
+                //set the regex state and write it to config
                 _bot.IsRegexActive = false;
+                configObj["RegexEnabled"] = _bot.IsRegexActive;
+                ConfigHelper.UpdateConfig(configObj);
+
                 await ReplyAsync("Disabled regex responses.");
             }
             else if (state == "on" || state == "y" || state == "yes" || state == "enabled")
             {
                 _bot.IsRegexActive = true;
+                configObj["RegexEnabled"] = _bot.IsRegexActive;
+                ConfigHelper.UpdateConfig(configObj);
                 await ReplyAsync("Enabled regex responses.");
             }
             else
