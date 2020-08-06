@@ -75,12 +75,12 @@ namespace TerminusDotNetCore.Modules
 
             TimeSpan uptime = DateTime.Now - _bot.StartTime;
 
-            builder.AddField("Name: ", appInfo.Name);
-            builder.AddField("Created at: ", appInfo.CreatedAt);
-            builder.AddField("Owner: ", appInfo.Owner);
-            builder.AddField("Discord.Net Version: ", DiscordConfig.Version);
-            builder.AddField("Discord API Version: ", DiscordConfig.APIVersion);
-            builder.AddField("Uptime: ", $"{uptime.ToString("%d")} days, {uptime.ToString("%h")} hours, {uptime.ToString("%m")} minutes");
+            builder.AddField("Name: ", $"`{appInfo.Name}`");
+            builder.AddField("Created at: ", $"`{appInfo.CreatedAt}`");
+            builder.AddField("Owner: ", $"`{appInfo.Owner}`");
+            builder.AddField("Discord.Net Version: ", $"`{DiscordConfig.Version}`");
+            builder.AddField("Discord API Version: ", $"`{DiscordConfig.APIVersion}`");
+            builder.AddField("Uptime: ", $"`{uptime.ToString("%d")} days, {uptime.ToString("%h")} hours, {uptime.ToString("%m")} minutes`");
 
             await ReplyAsync(embed: builder.Build());
         }
@@ -152,21 +152,21 @@ namespace TerminusDotNetCore.Modules
                 await ReplyAsync(embed: embedBuilder.Build());
             }
 
-            [Command("console")]
+            [Command("console", RunMode = RunMode.Async)]
             [Summary("Download the most recent stdout log file, if any exist.")]
             public async Task DownloadMostRecentConsoleLog()
             {
                 await DownloadMostRecentLog(Logger.ConsoleLogDir);
             }
 
-            [Command("errors")]
+            [Command("errors", RunMode = RunMode.Async)]
             [Summary("Download the most recent command error log file, if any exist.")]
             public async Task DownloadMostRecentErrorLog()
             {
                 await DownloadMostRecentLog(Logger.ErrorLogDir);
             }
 
-            [Command("stats")]
+            [Command("stats", RunMode = RunMode.Async)]
             [Summary("Get information about the total count and size (KB) of log files currently stored on the server.")]
             public async Task GetLogStats([Summary("The type of logs to filter on. Possible values: `console, errors, all (default value)`")]string logType = "all")
             {
@@ -198,7 +198,7 @@ namespace TerminusDotNetCore.Modules
                 await ReplyAsync($"{fileCount} log files totaling {totalSize / 1024.0:0.##} KB.");
             }
 
-            [Command("clean")]
+            [Command("clean", RunMode = RunMode.Async)]
             [Summary("Delete log files for the given log type.")]
             public async Task CleanLogFiles([Summary("The type of logs to delete. Possible values: `console, errors, all (default value)`")]string logType = "all")
             {
