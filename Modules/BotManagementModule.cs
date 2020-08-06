@@ -27,7 +27,7 @@ namespace TerminusDotNetCore.Modules
             Config = config;
         }
 
-        [Command("regex")]
+        [Command("regex", RunMode = RunMode.Async)]
         [Summary("Set the regex response behavior of the bot.")]
         public async Task SetRegexState([Summary("Set the regex response behavior. Possible values: `on/off`, `yes/no`, `y/n`, `enabled/disabled`")]string state = null)
         {
@@ -85,7 +85,7 @@ namespace TerminusDotNetCore.Modules
             await ReplyAsync(embed: builder.Build());
         }
 
-        [Command("libs")]
+        [Command("libs", RunMode = RunMode.Async)]
         public async Task ListLibraries()
         {
             //need a list of embeds since each embed can only have 25 fields max
