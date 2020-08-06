@@ -250,13 +250,13 @@ namespace TerminusDotNetCore
 
             IEnumerable<string> references = projectDoc.Element("Project")
                                                        .Element("ItemGroup")
-                                                       .Element("PackageReference")
+                                                       .Elements("PackageReference")
                                                        .Attributes("Include")
                                                        .Select(e => e.Value);
 
             IEnumerable<string> versions = projectDoc.Element("Project")
                                                        .Element("ItemGroup")
-                                                       .Element("PackageReference")
+                                                       .Elements("PackageReference")
                                                        .Attributes("Version")
                                                        .Select(e => e.Value);
 
@@ -266,7 +266,7 @@ namespace TerminusDotNetCore
             }
             foreach (var version in versions)
             {
-                Console.WriteLine($"version: {version}");
+                Console.WriteLine($"version: {}");
             }
 
             InstalledLibraries = references.Zip(versions, (pkg, version) => new { pkg, version })
