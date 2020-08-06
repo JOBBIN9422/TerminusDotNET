@@ -266,7 +266,7 @@ namespace TerminusDotNetCore
             }
             foreach (var version in versions)
             {
-                Console.WriteLine($"version: {}");
+                Console.WriteLine($"version: {version}");
             }
 
             InstalledLibraries = references.Zip(versions, (pkg, version) => new { pkg, version })
