@@ -248,14 +248,9 @@ namespace TerminusDotNetCore
             XNamespace msBuild = "http://schemas.microsoft.com/developer/msbuild/2003";
             XDocument projectDoc = XDocument.Load("TerminusDotNetCore.csproj");
 
-            foreach (var element in projectDoc.Elements())
-            {
-                Console.WriteLine(element.ToString());
-            }
-
-            IEnumerable<string> references = projectDoc.Element(msBuild + "Project")
-                                                       .Element(msBuild + "ItemGroup")
-                                                       .Element(msBuild + "PackageReference")
+            IEnumerable<string> references = projectDoc.Element("Project")
+                                                       .Element("ItemGroup")
+                                                       .Element("PackageReference")
                                                        .Attributes("Include")
                                                        .Select(e => e.Value);
 
