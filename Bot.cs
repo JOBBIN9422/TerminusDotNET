@@ -245,8 +245,14 @@ namespace TerminusDotNetCore
 
         private void PopulateInstalledLibrariesList()
         {
-            XNamespace msBuild = "http://schemas.microsoft.com/developer/msbuild/2003/";
+            XNamespace msBuild = "http://schemas.microsoft.com/developer/msbuild/2003";
             XDocument projectDoc = XDocument.Load("TerminusDotNetCore.csproj");
+
+            foreach (var element in projectDoc.Elements())
+            {
+                Console.WriteLine(element.ToString());
+            }
+
             IEnumerable<string> references = projectDoc.Element(msBuild + "Project")
                                                        .Element(msBuild + "ItemGroup")
                                                        .Element(msBuild + "PackageReference")
