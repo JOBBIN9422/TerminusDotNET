@@ -260,6 +260,15 @@ namespace TerminusDotNetCore
                                                        .Attributes("Version")
                                                        .Select(e => e.Value);
 
+            foreach (var reference in references)
+            {
+                Console.WriteLine($"reference: {reference}");
+            }
+            foreach (var version in versions)
+            {
+                Console.WriteLine($"version: {version}");
+            }
+
             InstalledLibraries = references.Zip(versions, (pkg, version) => new { pkg, version })
                 .ToDictionary(x => x.pkg, x => x.version);
         }
