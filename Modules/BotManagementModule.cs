@@ -88,6 +88,40 @@ namespace TerminusDotNetCore.Modules
         [Command("libraries")]
         public async Task ListLibraries()
         {
+            //need a list of embeds since each embed can only have 25 fields max
+            List<Embed> libList = new List<Embed>();
+            int entryCount = 0;
+
+            var embed = new EmbedBuilder
+            {
+                Title = $"{_bot.InstalledLibraries.Count} Installed Libraries"
+            };
+
+
+            foreach (var library in _bot.InstalledLibraries)
+            {
+                entryCount++;
+
+                //if we have 25 entries in an embed already, need to make a new one 
+                if (entryCount % EmbedBuilder.MaxFieldCount == 0 && entryCount > 0)
+                {
+                    libList.Add(embed.Build());
+                    embed = new EmbedBuilder();
+                }
+
+                embed.AddField(library.Key, library.Value);
+            }
+
+            //add the most recently built embed if it's not in the list yet 
+            if (libList.Count == 0 || !libList.Contains(embed.Build()))
+            {
+                libList.Add(embed.Build());
+            }
+
+            foreach (var libEmbed in libList)
+            {
+                await ReplyAsync(embed: libEmbed);
+            }
         }
 
         [Group("log")]

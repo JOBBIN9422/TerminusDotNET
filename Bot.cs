@@ -245,30 +245,24 @@ namespace TerminusDotNetCore
 
         private void PopulateInstalledLibrariesList()
         {
+            //open the .csproj
             XNamespace msBuild = "http://schemas.microsoft.com/developer/msbuild/2003";
             XDocument projectDoc = XDocument.Load("TerminusDotNetCore.csproj");
 
+            //get nuget package names
             IEnumerable<string> references = projectDoc.Element("Project")
                                                        .Element("ItemGroup")
                                                        .Elements("PackageReference")
                                                        .Attributes("Include")
                                                        .Select(e => e.Value);
-
+            //get nuget package versions
             IEnumerable<string> versions = projectDoc.Element("Project")
                                                        .Element("ItemGroup")
                                                        .Elements("PackageReference")
                                                        .Attributes("Version")
                                                        .Select(e => e.Value);
 
-            foreach (var reference in references)
-            {
-                Console.WriteLine($"reference: {reference}");
-            }
-            foreach (var version in versions)
-            {
-                Console.WriteLine($"version: {version}");
-            }
-
+            //zip into dict of package-version pairs
             InstalledLibraries = references.Zip(versions, (pkg, version) => new { pkg, version })
                 .ToDictionary(x => x.pkg, x => x.version);
         }
