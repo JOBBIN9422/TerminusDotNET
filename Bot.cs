@@ -254,9 +254,9 @@ namespace TerminusDotNetCore
                                                        .Attributes("Include")
                                                        .Select(e => e.Value);
 
-            IEnumerable<string> versions = projectDoc.Element(msBuild + "Project")
-                                                       .Element(msBuild + "ItemGroup")
-                                                       .Element(msBuild + "PackageReference")
+            IEnumerable<string> versions = projectDoc.Element("Project")
+                                                       .Element("ItemGroup")
+                                                       .Element("PackageReference")
                                                        .Attributes("Version")
                                                        .Select(e => e.Value);
 
