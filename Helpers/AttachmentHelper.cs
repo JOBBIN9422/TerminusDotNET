@@ -29,6 +29,7 @@ namespace TerminusDotNetCore.Helpers
             ".mp3"
         };
 
+        //any plaintext content (including source code files)
         private static readonly string[] _validPlaintextExtensions = {
             ".txt",
             ".py",
@@ -37,45 +38,39 @@ namespace TerminusDotNetCore.Helpers
             ".h",
             ".c",
             ".java",
-            ".cs"
+            ".cs",
+            ".js"
         };
 
+        //get the most recently posted attachments for the given context, or null if none exist
         public async static Task<IReadOnlyCollection<Attachment>> GetMostRecentAttachmentsAsync(SocketCommandContext context, AttachmentFilter filter, int priorMsgCount = 20)
         {
-            //choose the array containing the proper file extensions to filter by 
+            //filter attachments by file category
             string[] validExtensions = GetValidExtensions(filter);
-
             var attachments = context.Message.Attachments;
 
-            //if there are no attachments in the current message
             if (attachments == null || attachments.Count == 0)
             {
-                //check the last 20 messages for attachments (from most recent to oldest)
+                //look backwords by priorMsgCount messages for the most recent attachments
                 var messages = await context.Channel.GetMessagesAsync(priorMsgCount).FlattenAsync();
                 foreach (var message in messages)
                 {
                     if (message.Attachments.Count > 0)
                     {
-                        //skip this message if its attachments don't pass the filter
-                        if (!AttachmentsAreValid(message.Attachments, validExtensions))
-                        {
-                            continue;
-                        }
-
-                        //return attachments if they're all valid
-                        else
+                        //if we've found valid attachments
+                        if (AttachmentsAreValid(message.Attachments, validExtensions))
                         {
                             return (IReadOnlyCollection<Attachment>)message.Attachments;
                         }
                     }
                 }
 
-                //if none of the previous messages had any attachments
+                //if none of the previous messages had any filtered attachments
                 return null;
             }
+            //if there are valid attachments in the current message
             else
             {
-                //if there are valid attachments in the current message
                 if (AttachmentsAreValid(attachments, validExtensions))
                 {
                     return attachments;
@@ -87,6 +82,7 @@ namespace TerminusDotNetCore.Helpers
             }
         }
 
+        //get a list of valid extensions for the given file category
         private static string[] GetValidExtensions(AttachmentFilter filter)
         {
             string[] validExtensions;
@@ -122,6 +118,7 @@ namespace TerminusDotNetCore.Helpers
 
         private static bool AttachmentsAreValid(IReadOnlyCollection<IAttachment> attachments, string[] validExtensions)
         {
+            //check each attachment's file extension against the given list of valid extensions
             foreach (var attachment in attachments)
             {
                 if (!FileIsValid(attachment.Filename, validExtensions))
@@ -138,16 +135,6 @@ namespace TerminusDotNetCore.Helpers
             //check if the file's extension is in the extension filter array
             string extension = Path.GetExtension(filename).ToLower();
             return Array.Exists(validExtensions, element => element == extension);
-        }
-        
-        public static List<string> DownloadAttachments(IMessage message)
-        {
-            if (message.Attachments.Count == 0)
-            {
-                throw new ArgumentException("The given message did not have any attachments.");
-            }
-
-            return DownloadAttachments(message.Attachments);
         }
 
         public static List<string> DownloadAttachments(IReadOnlyCollection<IAttachment> attachments)
@@ -182,7 +169,7 @@ namespace TerminusDotNetCore.Helpers
 
                 var filename = attachment.Filename;
                 var url = attachment.Url;
-                var fileIdString = System.Guid.NewGuid().ToString("N");
+                var fileIdString = Guid.NewGuid().ToString("N");
                     
                 var downloadFilename = Path.Combine("assets", "audio", filename);
                 webClient.DownloadFile(url, downloadFilename);
@@ -191,7 +178,7 @@ namespace TerminusDotNetCore.Helpers
             }
         }
 
-        public static List<string> GetTempAssets(string regex = "*")
+        public static List<string> GetTempAssets(string regex = "*", bool fullPath = true)
         {
             DirectoryInfo d = new DirectoryInfo(Path.Combine("assets", "temp"));
 
@@ -199,9 +186,9 @@ namespace TerminusDotNetCore.Helpers
             FileInfo[] Files = d.GetFiles(regex);
 
             List<string> filePaths = new List<string>();
-            foreach(FileInfo file in Files )
+            foreach(FileInfo file in Files)
             {
-              filePaths.Add(file.FullName);
+                filePaths.Add(file.FullName);
             }
 
             return filePaths;
