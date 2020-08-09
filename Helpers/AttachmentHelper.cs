@@ -10,13 +10,18 @@ namespace TerminusDotNetCore.Helpers
 {
     public enum AttachmentFilter
     {
+        All,
         Images,
         Audio,
+        Media,
         Plaintext
     }
     
     public static class AttachmentHelper
     {
+        private static readonly string[] _wildcardExtension = {
+            "*"
+        };
         private static readonly string[] _validImageExtensions = {
             ".jpg",
             ".jpeg",
@@ -27,6 +32,12 @@ namespace TerminusDotNetCore.Helpers
 
         private static readonly string[] _validAudioExtensions = {
             ".mp3"
+        };
+
+        private static readonly string[] _validMediaExtensions = {
+            ".mp3",
+            ".mp4",
+            ".webm"
         };
 
         //any plaintext content (including source code files)
@@ -101,6 +112,10 @@ namespace TerminusDotNetCore.Helpers
                     validExtensions = _validPlaintextExtensions;
                     break;
 
+                case AttachmentFilter.All:
+                    validExtensions = _wildcardExtension;
+                    break;
+
                 default:
                     validExtensions = new string[] { };
                     break;
@@ -132,7 +147,13 @@ namespace TerminusDotNetCore.Helpers
 
         private static bool FileIsValid(string filename, string[] validExtensions)
         {
-            //check if the file's extension is in the extension filter array
+            //wildcards always valid
+            if (Array.Exists(validExtensions, element => element == "*"))
+            {
+                return true;
+            }
+
+            //if not wildcard, check if the file's extension is in the extension filter array
             string extension = Path.GetExtension(filename).ToLower();
             return Array.Exists(validExtensions, element => element == extension);
         }
@@ -178,7 +199,7 @@ namespace TerminusDotNetCore.Helpers
             }
         }
 
-        public static List<string> GetTempAssets(string regex = "*", bool fullPath = true)
+        public static List<string> GetTempAssets(string regex = "*")
         {
             DirectoryInfo d = new DirectoryInfo(Path.Combine("assets", "temp"));
 
@@ -194,12 +215,46 @@ namespace TerminusDotNetCore.Helpers
             return filePaths;
         }
 
+        public static List<string> GetTempAssets(AttachmentFilter filter)
+        {
+            string[] validExtensions = GetValidExtensions(filter);
+
+            DirectoryInfo d = new DirectoryInfo(Path.Combine("assets", "temp"));
+
+            //Filter files by regex
+            FileInfo[] Files = d.GetFiles();
+
+            List<string> filePaths = new List<string>();
+            foreach (FileInfo file in Files)
+            {
+                if (FileIsValid(file.FullName, validExtensions))
+                {
+                    filePaths.Add(file.FullName);
+                }
+            }
+
+            return filePaths;
+
+        }
+
         public static void DeleteFiles(List<string> files)
         {
             foreach (var file in files)
             {
                 File.Delete(file);
             }
+        }
+
+        //delete the file if it exists and return a success flag
+        public static bool DeleteFile(string filename)
+        {
+            string filePath = Path.Combine("assets", "temp", filename);
+            if (File.Exists(filePath))
+            {
+                File.Delete(filePath);
+                return true;
+            }
+            return false;
         }
     }
 }

@@ -231,5 +231,97 @@ namespace TerminusDotNetCore.Modules
                 await ReplyAsync($"Deleted {fileCount} log files totaling {totalSize / 1024.0:0.##} KB.");
             }
         }
+
+        [Group("temp")]
+        public class TempDirModule : ModuleBase<SocketCommandContext>
+        {
+            [Command]
+            [Summary("Display usage info about the `temp` command.")]
+            public async Task PrintUsageInfo()
+            {
+                EmbedBuilder embedBuilder = new EmbedBuilder();
+                CommandSummaryHelper.GenerateGroupCommandSummary(GetType(), embedBuilder, "temp");
+                await ReplyAsync(embed: embedBuilder.Build());
+            }
+
+            [Command("list", RunMode = RunMode.Async)]
+            [Summary("Print a list of files in the temp assets directory.")]
+            public async Task ListTempDir()
+            {
+                List<string> tempFiles = AttachmentHelper.GetTempAssets();
+                if (tempFiles.Count == 0)
+                {
+                    await ReplyAsync("`empty`");
+                }
+                else 
+                {
+                    string fileList = string.Empty;
+
+                    //build a list of filenames (no paths included)
+                    foreach (string filePath in tempFiles)
+                    {
+                        fileList += Path.GetFileName(filePath) + Environment.NewLine;
+                    }
+                    fileList = $"```{Environment.NewLine}{fileList}{Environment.NewLine}```";
+
+                    await ReplyAsync(fileList);
+                } 
+            }
+            [Command("clean")]
+            [Summary("Delete temp files of the given type.")]
+            public async Task CleanTempDir([Summary("The type of temp files to delete. Possible values: `images, media, text, all (default value)`")]string filter = "all")
+            {
+                AttachmentFilter filterType;
+                switch (filter)
+                {
+                    case "all":
+                    default:
+                        filterType = AttachmentFilter.All;
+                        break;
+                    case "images":
+                        filterType = AttachmentFilter.Images;
+                        break;
+
+                    case "media":
+                        filterType = AttachmentFilter.Media;
+                        break;
+
+                    case "text":
+                        filterType = AttachmentFilter.Plaintext;
+                        break;
+                }
+                List<string> files = AttachmentHelper.GetTempAssets(filterType);
+                if (files.Count == 0)
+                {
+                    await ReplyAsync("No temp files to delete.");
+                }
+                else
+                {
+                    AttachmentHelper.DeleteFiles(files);
+                    await ReplyAsync($"Deleted {files.Count} temp files.");
+                }
+            }
+
+            [Command("remove")]
+            [Summary("Delete a temp file by name, if it exists.")]
+            public async Task DeleteTempFile(string filename = "")
+            {
+                if (string.IsNullOrEmpty(filename))
+                {
+                    await ReplyAsync("No filename provided.");
+                }
+                else
+                {
+                    if (AttachmentHelper.DeleteFile(filename))
+                    {
+                        await ReplyAsync($"Deleted file `{filename}`.");
+                    }
+                    else
+                    {
+                        await ReplyAsync($"File `{filename}` not found.");
+                    }
+                }
+            }
+        }
     }
 }
