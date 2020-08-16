@@ -353,6 +353,16 @@ namespace TerminusDotNetCore.Modules
                 _service.ParentModule = this;
             }
 
+            [Command]
+            [Summary("Display usage info about the `hideki` command.")]
+            public async Task PrintUsageInfo()
+            {
+                EmbedBuilder embedBuilder = new EmbedBuilder();
+                embedBuilder.Title = "**_UNDERSTAND UNDERSTAND_**";
+                CommandSummaryHelper.GenerateGroupCommandSummary(GetType(), embedBuilder, "hideki");
+                await ReplyAsync(embed: embedBuilder.Build());
+            }
+
             [Command("jam", RunMode = RunMode.Async)]
             public async Task AddRandomHidekiSong(
             [Summary("Which end of the queue to insert the song at (appended to the back by default.)")]string qEnd = "back",

@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using TerminusDotNetCore.Services;
 using System.Linq;
 using Microsoft.Extensions.Configuration;
+using TerminusDotNetCore.Helpers;
 
 namespace TerminusDotNetCore.Modules
 {
@@ -111,6 +112,15 @@ namespace TerminusDotNetCore.Modules
                 //do not need to set config for service here (set in twitterSvc constructor via DI)
                 _twitterService = service;
                 _twitterService.ParentModule = this;
+            }
+
+            [Command]
+            [Summary("Display usage info about the `hideki` command.")]
+            public async Task PrintUsageInfo()
+            {
+                EmbedBuilder embedBuilder = new EmbedBuilder();
+                CommandSummaryHelper.GenerateGroupCommandSummary(GetType(), embedBuilder, "hideki");
+                await ReplyAsync(embed: embedBuilder.Build());
             }
 
             [Command("status", RunMode = RunMode.Async)]
