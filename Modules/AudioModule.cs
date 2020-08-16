@@ -343,12 +343,45 @@ namespace TerminusDotNetCore.Modules
         }
 
         [Group("hideki")]
-        public class HidekiAudioModule : ModuleBase<SocketCommandContext>
+        public class HidekiAudioModule : ServiceControlModule
         {
-            [Command("jam", RunMode = RunMode.Async)]
-            public async Task AddRandomHidekiSong()
+            private AudioService _service;
+            public HidekiAudioModule(IConfiguration config, AudioService service) : base(config)
             {
-                await ReplyAsync("<:hideki:711930651888058368>**_hideki moment_**<:hideki:711930651888058368>");
+                //do not need to set service config here - passed into audioSvc constructor via DI
+                _service = service;
+                _service.ParentModule = this;
+            }
+
+            [Command("jam", RunMode = RunMode.Async)]
+            public async Task AddRandomHidekiSong(
+            [Summary("Which end of the queue to insert the song at (appended to the back by default.)")]string qEnd = "back",
+            [Summary("Channel ID to play the song in.")]string channelID = "-1")
+            {
+                ulong voiceID;
+                if (channelID.Equals("-1"))
+                {
+                    voiceID = ulong.Parse(Config["AudioChannelId"]);
+                }
+                else
+                {
+                    try
+                    {
+                        voiceID = ulong.Parse(channelID);
+                    }
+                    catch
+                    {
+                        await ReplyAsync("Unable to parse channel ID, try letting it use the default");
+                        return;
+                    }
+                }
+                if (Context.Guild.GetVoiceChannel(voiceID) == null)
+                {
+                    await ReplyAsync("Invalid channel ID, try letting it use the default");
+                    return;
+                }
+
+                await _service.AddRandomHidekiSong(Context.Message.Author, voiceID, qEnd != "front");
             }
         }
     }

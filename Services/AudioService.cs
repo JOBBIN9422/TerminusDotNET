@@ -74,11 +74,15 @@ namespace TerminusDotNetCore.Services
 
         //path for local (aliased) audio files
         public string AudioPath { get; } = Path.Combine("assets", "audio");
+
+        //RNG
+        private Random _random;
         #endregion
 
         #region init
-        public AudioService(IConfiguration config)
+        public AudioService(IConfiguration config, Random random)
         {
+            _random = random;
             Config = config;
             FFMPEG_PROCESS_NAME = Config["FfmpegCommand"];
             Task.Run(async () => await InitYoutubeService());
@@ -481,30 +485,7 @@ namespace TerminusDotNetCore.Services
                 return;
             }
 
-            List<string> videoUrls = new List<string>();
-            string nextPageToken = "";
-
-            //iterate over paginated playlist results from youtube and extract video URLs
-            while (nextPageToken != null)
-            {
-                //prepare a paged playlist request for the given playlist URL
-                var playlistRequest = _ytService.PlaylistItems.List("snippet,contentDetails");
-                playlistRequest.PlaylistId = GetPlaylistIdFromUrl(playlistURL);
-                playlistRequest.MaxResults = 50;
-                playlistRequest.PageToken = nextPageToken;
-
-                var searchListResponse = await playlistRequest.ExecuteAsync();
-
-                //iterate over the results and build each video URL
-                foreach (var item in searchListResponse.Items)
-                {
-                    string videoUrl = $"http://www.youtube.com/watch?v={item.Snippet.ResourceId.VideoId}";
-                    videoUrls.Add(videoUrl);
-                }
-
-                //index to the next page of results
-                nextPageToken = searchListResponse.NextPageToken;
-            }
+            List<string> videoUrls = await GetYoutubePlaylistUrlsAsync(playlistURL);
 
             await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"Fetched all video URLs for playlist URL '{playlistURL}'."));
 
@@ -1047,6 +1028,36 @@ namespace TerminusDotNetCore.Services
             }
         }
 
+        private async Task<List<string>> GetYoutubePlaylistUrlsAsync(string playlistUrl)
+        {
+            List<string> videoUrls = new List<string>();
+            string nextPageToken = "";
+
+            //iterate over paginated playlist results from youtube and extract video URLs
+            while (nextPageToken != null)
+            {
+                //prepare a paged playlist request for the given playlist URL
+                var playlistRequest = _ytService.PlaylistItems.List("snippet,contentDetails");
+                playlistRequest.PlaylistId = GetPlaylistIdFromUrl(playlistUrl);
+                playlistRequest.MaxResults = 50;
+                playlistRequest.PageToken = nextPageToken;
+
+                var searchListResponse = await playlistRequest.ExecuteAsync();
+
+                //iterate over the results and build each video URL
+                foreach (var item in searchListResponse.Items)
+                {
+                    string videoUrl = $"http://www.youtube.com/watch?v={item.Snippet.ResourceId.VideoId}";
+                    videoUrls.Add(videoUrl);
+                }
+
+                //index to the next page of results
+                nextPageToken = searchListResponse.NextPageToken;
+            }
+
+            return videoUrls;
+        }
+
         private static bool PlaylistUrlIsValid(string url)
         {
             return Regex.IsMatch(url, @"https:\/\/www.youtube.com\/playlist\?list=.+");
@@ -1109,7 +1120,18 @@ namespace TerminusDotNetCore.Services
         #endregion
 
         #region Hideki ZONE
+        public async Task AddRandomHidekiSong(SocketUser owner, ulong channelId, bool append = true)
+        {
+            //choose random hideki playlist URL
+            var playlistUrls = Config.GetSection("HidekiPlaylists").GetChildren();
+            var randomPlaylistUrl = playlistUrls.ElementAt(_random.Next(playlistUrls.Count())).ToString();
 
+            //get random video URL from random playlist URL
+            List<string> videoUrls = await GetYoutubePlaylistUrlsAsync(randomPlaylistUrl);
+            string randomVideoUrl = videoUrls[_random.Next(videoUrls.Count)];
+
+            await QueueYoutubeSongPreDownloaded(owner, randomVideoUrl, channelId, append);
+        }
         #endregion
     }
 }
