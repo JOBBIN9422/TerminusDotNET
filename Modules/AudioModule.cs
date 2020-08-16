@@ -291,7 +291,7 @@ namespace TerminusDotNetCore.Modules
             await _service.StopAllAudio();
         }
 
-        [Command("addpersistentsong", RunMode = RunMode.Async)]
+        [Command("addlocalsong", RunMode = RunMode.Async)]
         [Summary("Store an audio file on the server and give an alias for use in !play commands.")]
         public async Task AddSong([Summary("alias to use when playing this song in the future")]string alias)
         {
@@ -306,7 +306,7 @@ namespace TerminusDotNetCore.Modules
             await _service.SaveCurrentSong(alias);
         }
 
-        [Command("availablesongs", RunMode = RunMode.Async)]
+        [Command("localsongs", RunMode = RunMode.Async)]
         [Summary("Prints the list of song aliases that are available locally.")]
         public async Task PrintAvailableSongs()
         {
