@@ -1133,8 +1133,15 @@ namespace TerminusDotNetCore.Services
             string randomVideoUrl = videoUrls[_random.Next(videoUrls.Count)];
 
             await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"Selected Hideki video url: {randomVideoUrl}"));
-
-            await QueueYoutubeSongPreDownloaded(owner, randomVideoUrl, channelId, append);
+            try
+            {
+                await QueueYoutubeSongPreDownloaded(owner, randomVideoUrl, channelId, append);
+            }
+            catch (ArgumentException)
+            {
+                await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"Video url is invalid, retrying..."));
+                await AddRandomHidekiSong(owner, channelId, append);
+            }
         }
         #endregion
     }
