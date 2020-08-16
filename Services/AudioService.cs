@@ -1124,7 +1124,7 @@ namespace TerminusDotNetCore.Services
         {
             //choose random hideki playlist URL
             var playlistUrls = Config.GetSection("HidekiPlaylists").GetChildren();
-            var randomPlaylistUrl = playlistUrls.ElementAt(_random.Next(playlistUrls.Count())).ToString();
+            var randomPlaylistUrl = playlistUrls.ElementAt(_random.Next(playlistUrls.Count())).Value;
 
             //get random video URL from random playlist URL
             List<string> videoUrls = await GetYoutubePlaylistUrlsAsync(randomPlaylistUrl);
