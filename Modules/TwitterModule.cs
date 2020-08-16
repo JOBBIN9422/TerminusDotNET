@@ -86,6 +86,7 @@ namespace TerminusDotNetCore.Modules
                 Debug.WriteLine(e.Message);
             }
         }
+
         [Command("copypasta", RunMode = RunMode.Async)]
         public async Task GetCopypasta()
         {
@@ -97,6 +98,16 @@ namespace TerminusDotNetCore.Modules
             catch (Exception e)
             {
                 Debug.WriteLine(e.Message);
+            }
+        }
+
+        [Group("hideki")]
+        public class HidekiTwitterModule : ModuleBase<SocketCommandContext>
+        {
+            [Command("status", RunMode = RunMode.Async)]
+            public async Task AddRandomHidekiSong()
+            {
+                await ReplyAsync("<:hideki:711930651888058368>**_ASK SEGA_**<:hideki:711930651888058368>");
             }
         }
     }

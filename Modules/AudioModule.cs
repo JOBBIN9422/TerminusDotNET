@@ -341,5 +341,15 @@ namespace TerminusDotNetCore.Modules
 
             await _service.LoadQueueContents();
         }
+
+        [Group("hideki")]
+        public class HidekiAudioModule : ModuleBase<SocketCommandContext>
+        {
+            [Command("jam", RunMode = RunMode.Async)]
+            public async Task AddRandomHidekiSong()
+            {
+                await ReplyAsync("<:hideki:711930651888058368>**_hideki moment_**<:hideki:711930651888058368>");
+            }
+        }
     }
 }

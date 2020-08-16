@@ -21,6 +21,7 @@ using Google.Apis.Util.Store;
 using Google.Apis.Services;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json;
+using Discord.Commands;
 
 namespace TerminusDotNetCore.Services
 {
@@ -1105,6 +1106,10 @@ namespace TerminusDotNetCore.Services
                 await this.ScheduleWeed(vc);
             }
         }
+        #endregion
+
+        #region Hideki ZONE
+
         #endregion
     }
 }
