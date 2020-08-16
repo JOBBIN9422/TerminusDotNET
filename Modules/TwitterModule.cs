@@ -73,7 +73,7 @@ namespace TerminusDotNetCore.Modules
         }
 
         [Command("notch", RunMode = RunMode.Async)]
-        [Summary("Get the most recent tweet from pro gamer `@Notch`.")]
+        [Summary("Get the most recent tweet from Hideki Naganuma.")]
         public async Task GetLastNotchTweet()
         {
             string tweet = await _twitterService.GetLastNotchTweet();
@@ -102,12 +102,29 @@ namespace TerminusDotNetCore.Modules
         }
 
         [Group("hideki")]
-        public class HidekiTwitterModule : ModuleBase<SocketCommandContext>
+        public class HidekiTwitterModule : ServiceControlModule
         {
-            [Command("status", RunMode = RunMode.Async)]
-            public async Task AddRandomHidekiSong()
+            private TwitterService _twitterService;
+
+            public HidekiTwitterModule(IConfiguration config, TwitterService service) : base(config)
             {
-                await ReplyAsync("<:hideki:711930651888058368>**_ASK SEGA_**<:hideki:711930651888058368>");
+                //do not need to set config for service here (set in twitterSvc constructor via DI)
+                _twitterService = service;
+                _twitterService.ParentModule = this;
+            }
+
+            [Command("status", RunMode = RunMode.Async)]
+            public async Task GetLastHidekTweet()
+            {
+                string tweet = await _twitterService.GetLastNotchTweet();
+                try
+                {
+                    await ReplyAsync(tweet);
+                }
+                catch (Exception e)
+                {
+                    Debug.WriteLine(e.Message);
+                }
             }
         }
     }

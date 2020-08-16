@@ -127,7 +127,27 @@ namespace TerminusDotNetCore.Services
             }
             return "No user found.";
         }
-        
+
+        public async Task<string> GetLastHidekiTweet()
+        {
+            var user =
+                await
+                (from tweet in _twitterContext.User
+                 where tweet.Type == UserType.Show &&
+                       tweet.ScreenName == "Hideki_Naganuma"
+                 select tweet)
+                .SingleOrDefaultAsync();
+
+            if (user != null)
+            {
+                var name = user.ScreenNameResponse;
+                var lastStatus =
+                    user.Status == null ? "No recent tweet(s) found." : user.Status.Text;
+                return lastStatus;
+            }
+            return "No user found.";
+        }
+
         public async Task<string> SearchTweetRandom(string searchTerm)
         {
             List<Search> userQuery = new List<Search>();
