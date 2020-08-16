@@ -358,6 +358,10 @@ namespace TerminusDotNetCore.Modules
             [Summary("Which end of the queue to insert the song at (appended to the back by default.)")]string qEnd = "back",
             [Summary("Channel ID to play the song in.")]string channelID = "-1")
             {
+                if (Context != null && Context.Guild != null)
+                {
+                    _service.SetGuildClient(Context.Guild, Context.Client);
+                }
                 ulong voiceID;
                 if (channelID.Equals("-1"))
                 {
