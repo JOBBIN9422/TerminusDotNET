@@ -74,7 +74,7 @@ namespace TerminusDotNetCore.Modules
         }
 
         [Command("notch", RunMode = RunMode.Async)]
-        [Summary("Get the most recent tweet from Hideki Naganuma.")]
+        [Summary("Get the most recent tweet from pro gamer `@notch`.")]
         public async Task GetLastNotchTweet()
         {
             string tweet = await _twitterService.GetLastNotchTweet();
@@ -115,6 +115,7 @@ namespace TerminusDotNetCore.Modules
             }
 
             [Command("status", RunMode = RunMode.Async)]
+            [Summary("Get the most recent tweet from `@Hideki_Naganuma`.")]
             public async Task GetLastHidekTweet()
             {
                 string tweet = await _twitterService.GetLastNotchTweet();

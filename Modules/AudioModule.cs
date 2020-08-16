@@ -365,6 +365,7 @@ namespace TerminusDotNetCore.Modules
             }
 
             [Command("jam", RunMode = RunMode.Async)]
+            [Summary("Add a random Hideki Naganuma song to the queue.")]
             public async Task AddRandomHidekiSong(
             [Summary("Which end of the queue to insert the song at (appended to the back by default.)")]string qEnd = "back",
             [Summary("Channel ID to play the song in.")]string channelID = "-1")
