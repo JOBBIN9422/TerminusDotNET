@@ -360,6 +360,7 @@ namespace TerminusDotNetCore.Modules
                 EmbedBuilder embedBuilder = new EmbedBuilder();
                 embedBuilder.Title = "**_UNDERSTAND UNDERSTAND_**";
                 CommandSummaryHelper.GenerateGroupCommandSummary(GetType(), embedBuilder, "hideki");
+                CommandSummaryHelper.GenerateGroupCommandSummary(typeof(TwitterModule.HidekiTwitterModule), embedBuilder, "hideki");
                 await ReplyAsync(embed: embedBuilder.Build());
             }
 

@@ -114,15 +114,6 @@ namespace TerminusDotNetCore.Modules
                 _twitterService.ParentModule = this;
             }
 
-            [Command]
-            [Summary("Display usage info about the `hideki` command.")]
-            public async Task PrintUsageInfo()
-            {
-                EmbedBuilder embedBuilder = new EmbedBuilder();
-                CommandSummaryHelper.GenerateGroupCommandSummary(GetType(), embedBuilder, "hideki");
-                await ReplyAsync(embed: embedBuilder.Build());
-            }
-
             [Command("status", RunMode = RunMode.Async)]
             public async Task GetLastHidekTweet()
             {
