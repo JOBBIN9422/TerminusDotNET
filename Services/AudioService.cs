@@ -1126,12 +1126,15 @@ namespace TerminusDotNetCore.Services
             var playlistUrls = Config.GetSection("HidekiPlaylists").GetChildren();
             var randomPlaylistUrl = playlistUrls.ElementAt(_random.Next(playlistUrls.Count())).Value;
 
+            await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"Selected Hideki playlist url: {randomPlaylistUrl}"));
+
             //get random video URL from random playlist URL
             List<string> videoUrls = await GetYoutubePlaylistUrlsAsync(randomPlaylistUrl);
             string randomVideoUrl = videoUrls[_random.Next(videoUrls.Count)];
 
+            await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"Selected Hideki video url: {randomVideoUrl}"));
+
             await QueueYoutubeSongPreDownloaded(owner, randomVideoUrl, channelId, append);
-            await ParentModule.ServiceReplyAsync($"<:hideki:711930651888058368> {randomVideoUrl} <:hideki:711930651888058368>");
         }
         #endregion
     }
