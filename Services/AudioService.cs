@@ -1131,7 +1131,7 @@ namespace TerminusDotNetCore.Services
             string randomVideoUrl = videoUrls[_random.Next(videoUrls.Count)];
 
             await QueueYoutubeSongPreDownloaded(owner, randomVideoUrl, channelId, append);
-            await ParentModule.ServiceReplyAsync($"<:hideki:711930651888058368> {randomVideoUrl} <:hideki:711930651888058368> ");
+            await ParentModule.ServiceReplyAsync($"<:hideki:711930651888058368> {randomVideoUrl} <:hideki:711930651888058368>");
         }
         #endregion
     }
