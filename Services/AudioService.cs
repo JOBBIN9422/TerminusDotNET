@@ -38,6 +38,11 @@ namespace TerminusDotNetCore.Services
         private LinkedList<AudioItem> _songQueue = new LinkedList<AudioItem>();
         private LinkedList<AudioItem> _backupQueue = new LinkedList<AudioItem>();
 
+        //cache hideki playlist songs to prevent too many API calls
+        private List<string> _hidekiSongsCache = new List<string>();
+
+        private DateTime _lastHidekiReload = DateTime.MinValue;
+
         //metadata about the currently playing song
         private AudioItem _currentSong = null;
 
@@ -1122,15 +1127,15 @@ namespace TerminusDotNetCore.Services
         #region Hideki ZONE
         public async Task AddRandomHidekiSong(SocketUser owner, ulong channelId, bool append = true)
         {
-            //choose random hideki playlist URL
-            var playlistUrls = Config.GetSection("HidekiPlaylists").GetChildren();
-            var randomPlaylistUrl = playlistUrls.ElementAt(_random.Next(playlistUrls.Count())).Value;
+            //check if we need to reload
+            if (DateTime.Now.Subtract(_lastHidekiReload).TotalHours > 1.0)
+            {
+                await LoadHidekiSongsCache();
+                _lastHidekiReload = DateTime.Now;
+            }
 
-            await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"Selected Hideki playlist url: {randomPlaylistUrl}"));
-
-            //get random video URL from random playlist URL
-            List<string> videoUrls = await GetYoutubePlaylistUrlsAsync(randomPlaylistUrl);
-            string randomVideoUrl = videoUrls[_random.Next(videoUrls.Count)];
+            //choose random hideki video URL
+            string randomVideoUrl = _hidekiSongsCache[_random.Next(_hidekiSongsCache.Count)];
 
             await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"Selected Hideki video url: {randomVideoUrl}"));
             try
@@ -1141,6 +1146,18 @@ namespace TerminusDotNetCore.Services
             {
                 await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"Video url is invalid, retrying..."));
                 await AddRandomHidekiSong(owner, channelId, append);
+            }
+        }
+
+        private async Task LoadHidekiSongsCache()
+        {
+            //load playlist URL from config
+            var playlistUrls = Config.GetSection("HidekiPlaylists").GetChildren();
+            foreach (var playlistUrlSection in playlistUrls)
+            {
+                string currPlaylistUrl = playlistUrlSection.Value;
+                List<string> songs = await GetYoutubePlaylistUrlsAsync(currPlaylistUrl);
+                _hidekiSongsCache.AddRange(songs);
             }
         }
         #endregion
