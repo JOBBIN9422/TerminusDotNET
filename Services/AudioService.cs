@@ -38,6 +38,9 @@ namespace TerminusDotNetCore.Services
         private LinkedList<AudioItem> _songQueue = new LinkedList<AudioItem>();
         private LinkedList<AudioItem> _backupQueue = new LinkedList<AudioItem>();
 
+        //lock object for queue synchronization
+        private readonly object _queueLock = new object();
+
         //cache hideki playlist songs to prevent too many API calls
         private List<string> _hidekiSongsCache = new List<string>();
 
@@ -252,8 +255,11 @@ namespace TerminusDotNetCore.Services
         public async Task PlayRegexAudio(string filename)
         {
             //copy the queue and set the playing state
-            _backupQueue = _songQueue;
-            _weedPlaying = true;
+            lock (_queueLock)
+            {
+                _backupQueue = _songQueue;
+                _weedPlaying = true;
+            }
 
             //stop any currently active streams
             if (_playing)
@@ -272,8 +278,11 @@ namespace TerminusDotNetCore.Services
             await SendAudioAsync(path);
 
             _weedPlaying = false;
-            _songQueue = _backupQueue;
-            _backupQueue = new LinkedList<AudioItem>();
+            lock (_queueLock)
+            {
+                _songQueue = _backupQueue;
+                _backupQueue = new LinkedList<AudioItem>();
+            }
 
             if (Client != null)
             {
@@ -306,7 +315,7 @@ namespace TerminusDotNetCore.Services
             {
                 //fetch the next song in queue
                 AudioItem nextInQueue;
-                lock (_songQueue)
+                lock (_queueLock)
                 {
                     nextInQueue = _songQueue.First.Value;
                     _songQueue.RemoveFirst();
@@ -396,8 +405,12 @@ namespace TerminusDotNetCore.Services
             else
             {
                 //get the song at the requested index and remove it
-                AudioItem moveSong = _songQueue.ElementAt(index - 2);
-                _songQueue.Remove(moveSong);
+                AudioItem moveSong;
+                lock (_queueLock)
+                {
+                    moveSong = _songQueue.ElementAt(index - 2);
+                    _songQueue.Remove(moveSong);
+                }
 
                 //insert it at the front of the queue
                 await EnqueueSong(moveSong, false);
@@ -432,7 +445,7 @@ namespace TerminusDotNetCore.Services
             //put the item in the backup queue if weed is ongoing
             if (_weedPlaying)
             {
-                lock (_backupQueue)
+                lock (_queueLock)
                 {
                     if (append)
                     {
@@ -446,7 +459,7 @@ namespace TerminusDotNetCore.Services
             }
             else
             {
-                lock (_songQueue)
+                lock (_queueLock)
                 {
                     if (append)
                     {
@@ -555,13 +568,16 @@ namespace TerminusDotNetCore.Services
                 {
                     //add the item to the front of the queue (preserve order)
                     LinkedListNode<AudioItem> insertNode = new LinkedListNode<AudioItem>(currVideo);
-                    if (insertAtNode != null)
+                    lock (_queueLock)
                     {
-                        _songQueue.AddAfter(insertAtNode, insertNode);
-                    }
-                    else
-                    {
-                        _songQueue.AddFirst(insertNode);
+                        if (insertAtNode != null)
+                        {
+                            _songQueue.AddAfter(insertAtNode, insertNode);
+                        }
+                        else
+                        {
+                            _songQueue.AddFirst(insertNode);
+                        }
                     }
 
                     await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"Added song '{currVideo.DisplayName}' to front of main queue."));
@@ -617,7 +633,10 @@ namespace TerminusDotNetCore.Services
                 string[] text = (await jsonReader.ReadToEndAsync()).Split(new[] { Environment.NewLine }, StringSplitOptions.None);
 
                 //reset the queue
-                _songQueue.Clear();
+                lock (_queueLock)
+                {
+                    _songQueue.Clear();
+                }
 
                 if (_playing)
                 {
@@ -771,7 +790,10 @@ namespace TerminusDotNetCore.Services
 
             await Task.Delay((int)fourTwenty.Subtract(DateTime.Now).TotalMilliseconds);
 
-            _backupQueue = _songQueue;
+            lock (_queueLock)
+            {
+                _backupQueue = _songQueue;
+            }
             _weedPlaying = true;
 
             CurrentChannel = weedChannel;
@@ -798,8 +820,11 @@ namespace TerminusDotNetCore.Services
             await SendAudioAsync(path);
 
             _weedPlaying = false;
-            _songQueue = _backupQueue;
-            _backupQueue = new LinkedList<AudioItem>();
+            lock (_queueLock)
+            {
+                _songQueue = _backupQueue;
+                _backupQueue = new LinkedList<AudioItem>();
+            }
 
             if (Client != null)
             {
