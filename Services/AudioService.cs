@@ -258,14 +258,11 @@ namespace TerminusDotNetCore.Services
             lock (_queueLock)
             {
                 _backupQueue = _songQueue;
-                _weedPlaying = true;
             }
+            _weedPlaying = true;
 
             //stop any currently active streams
-            if (_playing)
-            {
-                StopFfmpeg();
-            }
+            StopFfmpeg();
 
             if (_currAudioClient == null || _currAudioClient.ConnectionState != ConnectionState.Connected)
             {
@@ -282,11 +279,6 @@ namespace TerminusDotNetCore.Services
             {
                 _songQueue = _backupQueue;
                 _backupQueue = new LinkedList<AudioItem>();
-            }
-
-            if (Client != null)
-            {
-                await Client.SetGameAsync(null);
             }
 
             if (_songQueue.Count == 0)
