@@ -18,6 +18,7 @@ namespace TerminusDotNetCore.Services
 
         public WeedTimerService(IConfiguration config, AudioService audioService)
         {
+            Console.WriteLine("INIT WEED TIMER");
             Config = config;
             _audioService = audioService;
 
@@ -29,7 +30,6 @@ namespace TerminusDotNetCore.Services
                 fourTwenty = fourTwenty.AddDays(1.0);
             }
             int fourTwentyMs = (int)(fourTwenty - now).TotalMilliseconds;
-            Console.WriteLine(fourTwentyMs);
             _timer = new Timer(async _ => await _audioService.PlayWeed(), null, fourTwentyMs, (int)new TimeSpan(24, 0, 0).TotalMilliseconds);
         }
     }
