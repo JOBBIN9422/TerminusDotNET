@@ -208,8 +208,7 @@ namespace TerminusDotNetCore.Services
             {
                 //set playback state and spawn the stream process
                 _playing = true;
-                _currentAudioStreamTask = StreamFfmpegAudio(path);
-                await _currentAudioStreamTask;
+                await StreamFfmpegAudio(path);
             }
             else
             {
@@ -230,7 +229,8 @@ namespace TerminusDotNetCore.Services
                     await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"Started playback for file '{path}'."));
 
                     //stream audio with cancellation token for skipping
-                    await output.CopyToAsync(stream, _ffmpegCancelTokenSrc.Token);
+                    _currentAudioStreamTask = output.CopyToAsync(stream, _ffmpegCancelTokenSrc.Token);
+                    await _currentAudioStreamTask;
 
                     await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"Finished playback for file '{path}'."));
                 }
