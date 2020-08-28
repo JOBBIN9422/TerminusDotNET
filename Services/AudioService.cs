@@ -99,7 +99,7 @@ namespace TerminusDotNetCore.Services
 
             //init weed timer
             DateTime now = DateTime.Now;
-            DateTime fourTwenty = DateTime.Today.AddHours(17).AddMinutes(16);
+            DateTime fourTwenty = DateTime.Today.AddHours(16).AddMinutes(20);
 
             if (now > fourTwenty)
             {
