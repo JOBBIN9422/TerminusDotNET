@@ -74,6 +74,9 @@ namespace TerminusDotNetCore.Services
         private bool _playing = false;
         bool _weedPlaying = false;
 
+        //weed timer
+        private readonly Timer _timer;
+
         private YouTubeService _ytService;
 
         //Discord info objects
@@ -93,6 +96,18 @@ namespace TerminusDotNetCore.Services
             _random = random;
             Config = config;
             FFMPEG_PROCESS_NAME = Config["FfmpegCommand"];
+
+            //init weed timer
+            DateTime now = DateTime.Now;
+            DateTime fourTwenty = DateTime.Today.AddHours(17).AddMinutes(16);
+
+            if (now > fourTwenty)
+            {
+                fourTwenty = fourTwenty.AddDays(1.0);
+            }
+            int fourTwentyMs = (int)(fourTwenty - now).TotalMilliseconds;
+            _timer = new Timer(async _ => await PlayWeed(), null, fourTwentyMs, (int)new TimeSpan(24, 0, 0).TotalMilliseconds);
+
             Task.Run(async () => await InitYoutubeService());
         }
 

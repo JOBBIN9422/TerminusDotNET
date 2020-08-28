@@ -207,7 +207,6 @@ namespace TerminusDotNetCore
                              .AddSingleton<IronPythonService>()
                              .AddSingleton(new Random())
                              .AddSingleton(this);
-            serviceCollection.AddSingleton<WeedTimerService>();
 
             return serviceCollection.BuildServiceProvider();
         }
