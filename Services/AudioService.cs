@@ -771,7 +771,7 @@ namespace TerminusDotNetCore.Services
             if (_playing)
             {
                 StopFfmpeg();
-                Thread.Sleep(1000);
+                Thread.Sleep(2000);
                 try
                 {
                     await _currentAudioStreamTask;
