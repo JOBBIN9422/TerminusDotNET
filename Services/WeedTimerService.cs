@@ -18,6 +18,7 @@ namespace TerminusDotNetCore.Services
 
         public WeedTimerService(IConfiguration config, AudioService audioService)
         {
+            Console.WriteLine("INIT WEED TIMER SERVICE");
             Config = config;
             _audioService = audioService;
 
