@@ -22,14 +22,15 @@ namespace TerminusDotNetCore.Services
             _audioService = audioService;
 
             DateTime now = DateTime.Now;
-            DateTime fourTwenty = DateTime.Today.AddHours(16.333);
+            DateTime fourTwenty = DateTime.Today.AddHours(17);
 
             if (now > fourTwenty)
             {
                 fourTwenty = fourTwenty.AddDays(1.0);
             }
             int fourTwentyMs = (int)(fourTwenty - now).TotalMilliseconds;
-            _timer = new Timer(async _ => await _audioService.PlayWeed(), null, fourTwentyMs, (int)(new TimeSpan(24, 0, 0).TotalMilliseconds));
+            Console.WriteLine(fourTwentyMs);
+            _timer = new Timer(async _ => await _audioService.PlayWeed(), null, fourTwentyMs, (int)new TimeSpan(24, 0, 0).TotalMilliseconds);
         }
     }
 }
