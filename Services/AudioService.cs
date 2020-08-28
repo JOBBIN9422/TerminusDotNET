@@ -782,13 +782,14 @@ namespace TerminusDotNetCore.Services
         public async Task PlayWeed()
         {
             await SaveQueueContents();
+            
+
+            ulong weedID = ulong.Parse(Config["WeedChannelId"]);
+            await EnqueueSong(new LocalAudioItem() { Path = Path.Combine(AudioPath, "weedlmao.mp3"), PlayChannelId = weedID, AudioSource = FileAudioType.Local, DisplayName = "weed", OwnerName = "Terminus.NET" }, false);
             if (_playing)
             {
                 StopFfmpeg();
             }
-
-            ulong weedID = ulong.Parse(Config["WeedChannelId"]);
-            await EnqueueSong(new LocalAudioItem() { Path = Path.Combine(AudioPath, "weedlmao.mp3"), PlayChannelId = weedID, AudioSource = FileAudioType.Local, DisplayName = "weed", OwnerName = "Terminus.NET" }, false);
 
             await LoadQueueContents();
         }
