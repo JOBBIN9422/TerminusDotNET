@@ -187,7 +187,7 @@ namespace TerminusDotNetCore.Services
             if (CurrentChannel != null)
             {
                 await CurrentChannel.DisconnectAsync();
-                await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"Disconnected from channel '{CurrentChannel.Name}'."));
+                await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"Disconnected from channel."));
                 CurrentChannel = null;
             }
             if (_currAudioClient != null)
