@@ -214,11 +214,6 @@ namespace TerminusDotNetCore.Services
                 _playing = true;
                 await StreamFfmpegAudio(path);
             }
-            else
-            {
-                await ParentModule.ServiceReplyAsync($"Could not find a valid audio client for playback.");
-                return;
-            }
         }
 
         private async Task StreamFfmpegAudio(string path)
