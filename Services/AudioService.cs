@@ -71,18 +71,8 @@ namespace TerminusDotNetCore.Services
         };
 
         //state flags
-        private bool _playing
-        {
-            get
-            {
-                if (_currentAudioStreamTask == null)
-                {
-                    return false;
-                }
-                return _currentAudioStreamTask.Status == TaskStatus.Running;
-            }
-        }
-        private bool _weedPlaying = false;
+        private bool _playing = false;
+        bool _weedPlaying = false;
 
         private YouTubeService _ytService;
 
@@ -139,7 +129,7 @@ namespace TerminusDotNetCore.Services
             await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", "Stopping all audio..."));
 
             _songQueue = new LinkedList<AudioItem>();
-            //_playing = false;
+            _playing = false;
             _currentSong = null;
             await LeaveAudio();
             CleanAudioFiles();
@@ -195,7 +185,7 @@ namespace TerminusDotNetCore.Services
         {
             //update playing & song states
             _currentSong = null;
-            //_playing = false;
+            _playing = false;
             if (Client != null)
             {
                 await Client.SetGameAsync("");
@@ -220,8 +210,6 @@ namespace TerminusDotNetCore.Services
         {
             if (_currAudioClient != null)
             {
-                //set playback state and spawn the stream process
-                //_playing = true;
                 await StreamFfmpegAudio(path);
             }
         }
@@ -238,6 +226,7 @@ namespace TerminusDotNetCore.Services
                     await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"Started playback for file '{path}'."));
 
                     //stream audio with cancellation token for skipping
+                    _playing = true;
                     _currentAudioStreamTask = output.CopyToAsync(stream, _ffmpegCancelTokenSrc.Token);
                     await _currentAudioStreamTask;
 
@@ -265,7 +254,7 @@ namespace TerminusDotNetCore.Services
                     output.Dispose();
                     stream.Clear();
                     ffmpeg.Kill(true);
-                    //_playing = false;
+                    _playing = false;
                 }
             }
         }
