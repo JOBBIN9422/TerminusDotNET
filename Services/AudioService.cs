@@ -765,23 +765,15 @@ namespace TerminusDotNetCore.Services
 
             ulong weedID = ulong.Parse(Config["WeedChannelId"]);
             await EnqueueSong(new LocalAudioItem() { Path = Path.Combine(AudioPath, "weedlmao.mp3"), PlayChannelId = weedID, AudioSource = FileAudioType.Local, DisplayName = "weed", OwnerName = "Terminus.NET" }, false);
+            await SaveQueueContents("weed-queue.json");
             if (!_playing)
             {
                 await PlayNextInQueue(false);
             }
             else
             {
-                StopFfmpeg();
-                Thread.Sleep(2000);
-                try
-                {
-                    await _currentAudioStreamTask;
-                }
-                catch (OperationCanceledException)
-                {
-                    return;
-                }
-                await LoadQueueContents("weed-backup.json", false);
+                await StopAllAudio();
+                await LoadQueueContents("weed-queue.json");
             }
         }
         #endregion
