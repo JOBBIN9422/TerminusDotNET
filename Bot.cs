@@ -205,6 +205,7 @@ namespace TerminusDotNetCore
                              .AddSingleton<MarkovService>()
                              .AddSingleton<TicTacToeService>()
                              .AddSingleton<IronPythonService>()
+                             .AddSingleton<WeedTimerService>()
                              .AddSingleton(new Random())
                              .AddSingleton(this);
 
