@@ -72,7 +72,6 @@ namespace TerminusDotNetCore.Services
 
         //state flags
         private bool _playing = false;
-        bool _weedPlaying = false;
 
         //weed timer
         private readonly Timer _timer;
@@ -275,27 +274,21 @@ namespace TerminusDotNetCore.Services
         }
         public async Task PlayRegexAudio(string filename)
         {
-            //copy the queue and set the playing state
-            _weedPlaying = true;
-
-            //stop any currently active streams
-            StopFfmpeg();
-
-            if (_currAudioClient == null || _currAudioClient.ConnectionState != ConnectionState.Connected)
-            {
-                await JoinAudio();
-            }
-
             string path = Path.Combine(AudioPath, filename);
             path = Path.GetFullPath(path);
 
-            await SendAudioAsync(path);
+            ulong playID = ulong.Parse(Config["AudioChannelId"]);
+            await EnqueueSong(new LocalAudioItem() { Path = path, PlayChannelId = playID, AudioSource = FileAudioType.Local, DisplayName = Path.GetFileName(path), OwnerName = "Terminus.NET" }, false);
+            await SaveQueueContents("weed-queue.json");
 
-            _weedPlaying = false;
-
-            if (_songQueue.Count == 0)
+            if (!_playing)
             {
-                await LeaveAudio();
+                await PlayNextInQueue(false);
+            }
+            else
+            {
+                await StopAllAudio();
+                await LoadQueueContents("weed-queue.json", true);
             }
         }
 
@@ -473,10 +466,8 @@ namespace TerminusDotNetCore.Services
                 }
             }
 
-            string queueName = _weedPlaying == true ? "weed" : "main";
             string queueEnd = append == true ? "back" : "front";
-
-            await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"Added song '{item.DisplayName}' to {queueEnd} of {queueName} queue."));
+            await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"Added song '{item.DisplayName}' to {queueEnd} of queue."));
         }
 
         public async Task QueueLocalSong(SocketUser owner, string path, ulong channelId, bool append = true)
