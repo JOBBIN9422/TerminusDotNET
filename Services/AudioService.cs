@@ -175,6 +175,10 @@ namespace TerminusDotNetCore.Services
                 await JoinAudio(--retryCount);
                 return;
             }
+            catch (TaskCanceledException)
+            {
+                return;
+            }
         }
 
         public async Task LeaveAudio()
