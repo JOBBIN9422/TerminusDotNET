@@ -302,7 +302,7 @@ namespace TerminusDotNetCore.Services
         #region queue control methods
         public async Task PlayNextInQueue(bool saveQueue = true)
         {
-            if (_songQueue.Count > 0)
+            while (_songQueue.Count > 0)
             {
                 //fetch the next song in queue
                 AudioItem nextInQueue;
@@ -329,8 +329,7 @@ namespace TerminusDotNetCore.Services
                         await Logger.Log(new LogMessage(LogSeverity.Warning, "AudioSvc", $"failed to download local file for {nextVideo.DisplayName}, skipping..."));
 
                         //skip this item if the download fails
-                        await PlayNextInQueue();
-                        return;
+                        continue;
                     }
                 }
 
@@ -375,19 +374,18 @@ namespace TerminusDotNetCore.Services
                 await SendAudioAsync(nextInQueue.Path);
 
                 //play next in queue (if any)
-                await PlayNextInQueue();
+                //await PlayNextInQueue();
             }
-            else
-            {
-                //out of songs, leave channel and clean up
-                await LeaveAudio();
-                if (Client != null)
-                {
-                    await Client.SetGameAsync(null);
-                }
 
-                CleanAudioFiles();
+            //out of songs, leave channel and clean up
+            await LeaveAudio();
+            if (Client != null)
+            {
+                await Client.SetGameAsync(null);
             }
+
+            CleanAudioFiles();
+
         }
 
         public async Task MoveSongToFront(int index)
@@ -768,24 +766,7 @@ namespace TerminusDotNetCore.Services
 
             ulong weedID = ulong.Parse(Config["WeedChannelId"]);
             await EnqueueSong(new LocalAudioItem() { Path = Path.Combine(AudioPath, "weedlmao.mp3"), PlayChannelId = weedID, AudioSource = FileAudioType.Local, DisplayName = "weed", OwnerName = "Terminus.NET" }, false);
-            if (_playing)
-            {
-                StopFfmpeg();
-                Thread.Sleep(2000);
-                try
-                {
-                    await _currentAudioStreamTask;
-                }
-                catch (OperationCanceledException)
-                {
-                    return;
-                }
-                await LoadQueueContents("weed-backup.json", false);
-            }
-            else
-            {
-                await PlayNextInQueue(false);
-            }
+            StopFfmpeg();
         }
         #endregion
 
