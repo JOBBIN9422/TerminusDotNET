@@ -188,10 +188,12 @@ namespace TerminusDotNetCore.Services
             {
                 await CurrentChannel.DisconnectAsync();
                 await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"Disconnected from channel '{CurrentChannel.Name}'."));
+                CurrentChannel = null;
             }
             if (_currAudioClient != null)
             {
                 await _currAudioClient.StopAsync();
+                _currAudioClient = null;
             }
         }
 
