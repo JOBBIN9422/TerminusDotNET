@@ -301,7 +301,7 @@ namespace TerminusDotNetCore.Services
         #endregion
 
         #region queue control methods
-        public async Task PlayNextInQueue()
+        public async Task PlayNextInQueue(bool saveQueue = true)
         {
             if (_songQueue.Count > 0)
             {
@@ -365,7 +365,10 @@ namespace TerminusDotNetCore.Services
                 _currentSong = nextInQueue;
 
                 //record current queue state 
-                await SaveQueueContents();
+                if (saveQueue)
+                {
+                    await SaveQueueContents();
+                }
 
                 _currentSong.StartTime = DateTime.Now;
 
@@ -778,8 +781,13 @@ namespace TerminusDotNetCore.Services
 
         public async Task PlayWeed()
         {
+            await SaveQueueContents();
+
             ulong weedID = ulong.Parse(Config["WeedChannelId"]);
             await EnqueueSong(new LocalAudioItem() { Path = Path.Combine(AudioPath, "weedlmao.mp3"), PlayChannelId = weedID, AudioSource = FileAudioType.Local, DisplayName = "weed", OwnerName = "Terminus.NET" }, false);
+
+            await PlayNextInQueue();
+            await LoadQueueContents();
 
             if (!_playing)
             {
