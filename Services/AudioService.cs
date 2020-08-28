@@ -769,13 +769,13 @@ namespace TerminusDotNetCore.Services
         }
         #endregion
 
-        public async Task PlayWeed(IVoiceChannel weedChannel)
+        public async Task PlayWeed()
         {
-            await EnqueueSong(new LocalAudioItem() { Path = Path.Combine(AudioPath, "weedlmao.mp3"), PlayChannelId = weedChannel.Id, AudioSource = FileAudioType.Local, DisplayName = "weed", OwnerName = "Terminus.NET" }, false);
+            ulong weedID = ulong.Parse(Config["WeedChannelId"]);
+            await EnqueueSong(new LocalAudioItem() { Path = Path.Combine(AudioPath, "weedlmao.mp3"), PlayChannelId = weedID, AudioSource = FileAudioType.Local, DisplayName = "weed", OwnerName = "Terminus.NET" }, false);
 
             if (!_playing)
             {
-                //want to trigger playing next song in queue
                 await PlayNextInQueue();
             }
             else
