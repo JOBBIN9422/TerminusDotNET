@@ -182,6 +182,11 @@ namespace TerminusDotNetCore.Services
             //update playing & song states
             _currentSong = null;
             _playing = false;
+            if (Client != null)
+            {
+                await Client.SetGameAsync("");
+            }
+
 
             //disconnect and stop the audio client if needed
             if (CurrentChannel != null)
