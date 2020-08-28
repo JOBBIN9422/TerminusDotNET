@@ -769,6 +769,11 @@ namespace TerminusDotNetCore.Services
         }
         #endregion
 
+        public async Task PlayWeed(IVoiceChannel weedChannel)
+        {
+            await EnqueueSong(new LocalAudioItem() { Path = Path.Combine(AudioPath, "weedlmao.mp3"), PlayChannelId = weedChannel.Id, AudioSource = FileAudioType.Local, DisplayName = "weed", OwnerName = "Terminus.NET" }, false);
+        }
+
         #region weed
         public async Task ScheduleWeed(IVoiceChannel weedChannel)
         {
