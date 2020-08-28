@@ -781,7 +781,6 @@ namespace TerminusDotNetCore.Services
                 {
                     return;
                 }
-                await StopAllAudio();
                 await LoadQueueContents("weed-backup.json");
             }
         }
