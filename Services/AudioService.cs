@@ -298,6 +298,20 @@ namespace TerminusDotNetCore.Services
         #endregion
 
         #region queue control methods
+        public async Task StartQueueIfIdle()
+        {
+            if (!_playing)
+            {
+                //start playing if idle
+                await PlayNextInQueue();
+            }
+            else
+            {
+                //save if already playing
+                await SaveQueueContents();
+            }
+        }
+
         public async Task PlayNextInQueue(bool saveQueue = true)
         {
             while (_songQueue.Count > 0)
@@ -426,15 +440,7 @@ namespace TerminusDotNetCore.Services
 
             await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"Queued temp song '{displayName}'."));
 
-            if (!_playing)
-            {
-                //want to trigger playing next song in queue
-                await PlayNextInQueue();
-            }
-            else
-            {
-                await SaveQueueContents();
-            }
+            StartQueueIfIdle();
         }
 
         private async Task EnqueueSong(AudioItem item, bool append = true)
@@ -463,14 +469,7 @@ namespace TerminusDotNetCore.Services
             string displayName = Path.GetFileNameWithoutExtension(path);
             await EnqueueSong(new LocalAudioItem() { Path = path, PlayChannelId = channelId, AudioSource = FileAudioType.Local, DisplayName = displayName, OwnerName = owner.Username }, append);
 
-            if (!_playing)
-            {
-                await PlayNextInQueue();
-            }
-            else
-            {
-                await SaveQueueContents();
-            }
+            StartQueueIfIdle();
         }
 
         public async Task QueueYoutubePlaylist(SocketUser owner, string playlistURL, ulong channelId, bool append = true)
@@ -566,15 +565,7 @@ namespace TerminusDotNetCore.Services
                 }
             }
 
-            if (!_playing)
-            {
-                //want to trigger playing next song in queue
-                await PlayNextInQueue();
-            }
-            else
-            {
-                await SaveQueueContents();
-            }
+            StartQueueIfIdle();
         }
 
         public async Task QueueYoutubeSongPreDownloaded(SocketUser owner, string url, ulong channelId, bool append = true)
@@ -586,14 +577,7 @@ namespace TerminusDotNetCore.Services
 
             await EnqueueSong(new YouTubeAudioItem() { Path = filePath, VideoUrl = url, PlayChannelId = channelId, AudioSource = YouTubeAudioType.PreDownloaded, DisplayName = displayName, OwnerName = owner.Username }, append);
 
-            if (!_playing)
-            {
-                await PlayNextInQueue();
-            }
-            else
-            {
-                await SaveQueueContents();
-            }
+            StartQueueIfIdle();
         }
         #endregion
 
@@ -771,17 +755,18 @@ namespace TerminusDotNetCore.Services
         #region weed
         public async Task PlayWeed()
         {
-            await SaveQueueContents("weed-backup.json");
-
+            //get the weed channel ID and queue the weed song
             ulong weedID = ulong.Parse(Config["WeedChannelId"]);
             await EnqueueSong(new LocalAudioItem() { Path = Path.Combine(AudioPath, "weedlmao.mp3"), PlayChannelId = weedID, AudioSource = FileAudioType.Local, DisplayName = "weed", OwnerName = "Terminus.NET" }, false);
             await SaveQueueContents("weed-queue.json");
+
             if (!_playing)
             {
                 await PlayNextInQueue(false);
             }
             else
             {
+                //load the current queue with the weed song added to the front of it
                 await StopAllAudio();
                 await LoadQueueContents("weed-queue.json", true);
             }
