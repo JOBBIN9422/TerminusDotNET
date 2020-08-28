@@ -602,10 +602,10 @@ namespace TerminusDotNetCore.Services
         #endregion
 
         #region queue/song state management methods
-        public async Task LoadQueueContents()
+        public async Task LoadQueueContents(string filename = "queue-contents.json")
         {
             //try to load the queue state file
-            string queueFilename = Path.Combine(AudioPath, "backup", "queue-contents.json");
+            string queueFilename = Path.Combine(AudioPath, "backup", filename);
             if (!File.Exists(queueFilename))
             {
                 throw new FileNotFoundException("No queue backup file was found in the backup directory.");
@@ -646,10 +646,10 @@ namespace TerminusDotNetCore.Services
             }
         }
 
-        public async Task SaveQueueContents()
+        public async Task SaveQueueContents(string filename = "queue-contents.json")
         {
             //store the queue contents to file
-            using (StreamWriter jsonWriter = new StreamWriter(Path.Combine(AudioPath, "backup", "queue-contents.json"), false))
+            using (StreamWriter jsonWriter = new StreamWriter(Path.Combine(AudioPath, "backup", filename), false))
             {
                 //save the current song (if any)
                 if (_currentSong != null)
@@ -764,13 +764,15 @@ namespace TerminusDotNetCore.Services
         #region weed
         public async Task PlayWeed()
         {
-            await SaveQueueContents();
+            await SaveQueueContents("weed-backup.json");
 
             ulong weedID = ulong.Parse(Config["WeedChannelId"]);
             await EnqueueSong(new LocalAudioItem() { Path = Path.Combine(AudioPath, "weedlmao.mp3"), PlayChannelId = weedID, AudioSource = FileAudioType.Local, DisplayName = "weed", OwnerName = "Terminus.NET" }, false);
             if (_playing)
             {
                 StopFfmpeg();
+                await _currentAudioStreamTask;
+                await LoadQueueContents("weed-backup.json");
             }
             else
             {
