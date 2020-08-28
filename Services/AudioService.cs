@@ -643,7 +643,9 @@ namespace TerminusDotNetCore.Services
                 var currSong = _songQueue.First();
                 _songQueue.RemoveFirst();
                 var weedSong = _songQueue.First();
+                _songQueue.RemoveFirst();
                 _songQueue.AddFirst(currSong);
+                _songQueue.AddFirst(weedSong);
             }
 
             if (!_playing)
