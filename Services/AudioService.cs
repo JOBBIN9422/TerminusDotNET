@@ -602,7 +602,7 @@ namespace TerminusDotNetCore.Services
         #endregion
 
         #region queue/song state management methods
-        public async Task LoadQueueContents(string filename = "queue-contents.json")
+        public async Task LoadQueueContents(string filename = "queue-contents.json", bool autoPlay = true)
         {
             //try to load the queue state file
             string queueFilename = Path.Combine(AudioPath, "backup", filename);
@@ -640,7 +640,7 @@ namespace TerminusDotNetCore.Services
                 await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"Loaded queue contents ({text.Length - 1} songs)."));
             }
 
-            if (!_playing)
+            if (!_playing && autoPlay)
             {
                 await PlayNextInQueue();
             }
@@ -780,7 +780,7 @@ namespace TerminusDotNetCore.Services
                 {
                     return;
                 }
-                await LoadQueueContents("weed-backup.json");
+                await LoadQueueContents("weed-backup.json", false);
             }
             else
             {
