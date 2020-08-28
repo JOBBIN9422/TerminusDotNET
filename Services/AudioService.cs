@@ -346,8 +346,8 @@ namespace TerminusDotNetCore.Services
                 }
                 else if (CurrentChannel.Id != nextInQueue.PlayChannelId)
                 {
-                    CurrentChannel = await Guild.GetVoiceChannelAsync(nextInQueue.PlayChannelId);
                     await LeaveAudio();
+                    CurrentChannel = await Guild.GetVoiceChannelAsync(nextInQueue.PlayChannelId);
                     await JoinAudio();
                 }
 
