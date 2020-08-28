@@ -36,7 +36,6 @@ namespace TerminusDotNetCore.Services
 
         //primary queue and backup (used when switching voice contexts)
         private LinkedList<AudioItem> _songQueue = new LinkedList<AudioItem>();
-        private LinkedList<AudioItem> _backupQueue = new LinkedList<AudioItem>();
 
         //lock object for queue synchronization
         private readonly object _queueLock = new object();
@@ -48,6 +47,8 @@ namespace TerminusDotNetCore.Services
 
         //metadata about the currently playing song
         private AudioItem _currentSong = null;
+
+        private Task _currentAudioStreamTask = null;
 
         //currently-connected channel (needs to be set from outside the service occasionally)
         public IVoiceChannel CurrentChannel { get; set; } = null;
@@ -71,8 +72,9 @@ namespace TerminusDotNetCore.Services
 
         //state flags
         private bool _playing = false;
-        private bool _weedStarted = false;
-        private bool _weedPlaying = false;
+
+        //weed timer
+        private readonly Timer _timer;
 
         private YouTubeService _ytService;
 
@@ -93,6 +95,18 @@ namespace TerminusDotNetCore.Services
             _random = random;
             Config = config;
             FFMPEG_PROCESS_NAME = Config["FfmpegCommand"];
+
+            //init weed timer
+            DateTime now = DateTime.Now;
+            DateTime fourTwenty = DateTime.Today.AddHours(16).AddMinutes(20);
+
+            if (now > fourTwenty)
+            {
+                fourTwenty = fourTwenty.AddDays(1.0);
+            }
+            int fourTwentyMs = (int)(fourTwenty - now).TotalMilliseconds;
+            _timer = new Timer(async _ => await PlayWeed(), null, fourTwentyMs, (int)new TimeSpan(24, 0, 0).TotalMilliseconds);
+
             Task.Run(async () => await InitYoutubeService());
         }
 
@@ -175,6 +189,10 @@ namespace TerminusDotNetCore.Services
                 await JoinAudio(--retryCount);
                 return;
             }
+            catch (TaskCanceledException)
+            {
+                return;
+            }
         }
 
         public async Task LeaveAudio()
@@ -182,16 +200,23 @@ namespace TerminusDotNetCore.Services
             //update playing & song states
             _currentSong = null;
             _playing = false;
+            if (Client != null)
+            {
+                await Client.SetGameAsync("");
+            }
+
 
             //disconnect and stop the audio client if needed
             if (CurrentChannel != null)
             {
                 await CurrentChannel.DisconnectAsync();
-                await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"Disconnected from channel '{CurrentChannel.Name}'."));
+                await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"Disconnected from channel."));
+                CurrentChannel = null;
             }
             if (_currAudioClient != null)
             {
                 await _currAudioClient.StopAsync();
+                _currAudioClient = null;
             }
         }
 
@@ -199,14 +224,7 @@ namespace TerminusDotNetCore.Services
         {
             if (_currAudioClient != null)
             {
-                //set playback state and spawn the stream process
-                _playing = true;
                 await StreamFfmpegAudio(path);
-            }
-            else
-            {
-                await ParentModule.ServiceReplyAsync($"Could not find a valid audio client for playback.");
-                return;
             }
         }
 
@@ -222,7 +240,9 @@ namespace TerminusDotNetCore.Services
                     await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"Started playback for file '{path}'."));
 
                     //stream audio with cancellation token for skipping
-                    await output.CopyToAsync(stream, _ffmpegCancelTokenSrc.Token);
+                    _playing = true;
+                    _currentAudioStreamTask = output.CopyToAsync(stream, _ffmpegCancelTokenSrc.Token);
+                    await _currentAudioStreamTask;
 
                     await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"Finished playback for file '{path}'."));
                 }
@@ -254,36 +274,21 @@ namespace TerminusDotNetCore.Services
         }
         public async Task PlayRegexAudio(string filename)
         {
-            //copy the queue and set the playing state
-            lock (_queueLock)
-            {
-                _backupQueue = _songQueue;
-            }
-            _weedPlaying = true;
-
-            //stop any currently active streams
-            StopFfmpeg();
-
-            if (_currAudioClient == null || _currAudioClient.ConnectionState != ConnectionState.Connected)
-            {
-                await JoinAudio();
-            }
-
             string path = Path.Combine(AudioPath, filename);
             path = Path.GetFullPath(path);
 
-            await SendAudioAsync(path);
+            ulong playID = ulong.Parse(Config["AudioChannelId"]);
+            await EnqueueSong(new LocalAudioItem() { Path = path, PlayChannelId = playID, AudioSource = FileAudioType.Local, DisplayName = Path.GetFileName(path), OwnerName = "Terminus.NET" }, false);
+            await SaveQueueContents("weed-queue.json");
 
-            _weedPlaying = false;
-            lock (_queueLock)
+            if (!_playing)
             {
-                _songQueue = _backupQueue;
-                _backupQueue = new LinkedList<AudioItem>();
+                await PlayNextInQueue(false);
             }
-
-            if (_songQueue.Count == 0)
+            else
             {
-                await LeaveAudio();
+                await StopAllAudio();
+                await LoadQueueContents("weed-queue.json", true);
             }
         }
 
@@ -301,9 +306,23 @@ namespace TerminusDotNetCore.Services
         #endregion
 
         #region queue control methods
-        public async Task PlayNextInQueue()
+        public async Task StartQueueIfIdle()
         {
-            if (_songQueue.Count > 0)
+            if (!_playing)
+            {
+                //start playing if idle
+                await PlayNextInQueue();
+            }
+            else
+            {
+                //save if already playing
+                await SaveQueueContents();
+            }
+        }
+
+        public async Task PlayNextInQueue(bool saveQueue = true)
+        {
+            while (_songQueue.Count > 0)
             {
                 //fetch the next song in queue
                 AudioItem nextInQueue;
@@ -330,15 +349,21 @@ namespace TerminusDotNetCore.Services
                         await Logger.Log(new LogMessage(LogSeverity.Warning, "AudioSvc", $"failed to download local file for {nextVideo.DisplayName}, skipping..."));
 
                         //skip this item if the download fails
-                        await PlayNextInQueue();
-                        return;
+                        continue;
                     }
                 }
 
                 //set the current channel for the next song and join channel
-                CurrentChannel = await Guild.GetVoiceChannelAsync(nextInQueue.PlayChannelId);
-                if (_currAudioClient == null || _currAudioClient.ConnectionState != ConnectionState.Connected)
+                if (CurrentChannel == null)
                 {
+                    CurrentChannel = await Guild.GetVoiceChannelAsync(nextInQueue.PlayChannelId);
+                    await JoinAudio();
+
+                }
+                else if (CurrentChannel.Id != nextInQueue.PlayChannelId)
+                {
+                    await LeaveAudio();
+                    CurrentChannel = await Guild.GetVoiceChannelAsync(nextInQueue.PlayChannelId);
                     await JoinAudio();
                 }
 
@@ -347,7 +372,7 @@ namespace TerminusDotNetCore.Services
                 {
                     nextInQueue.DisplayName = Path.GetFileNameWithoutExtension(nextInQueue.Path);
                 }
-                
+
                 //set bot client's status to the song name
                 if (Client != null)
                 {
@@ -358,7 +383,10 @@ namespace TerminusDotNetCore.Services
                 _currentSong = nextInQueue;
 
                 //record current queue state 
-                await SaveQueueContents();
+                if (saveQueue)
+                {
+                    await SaveQueueContents();
+                }
 
                 _currentSong.StartTime = DateTime.Now;
 
@@ -366,19 +394,18 @@ namespace TerminusDotNetCore.Services
                 await SendAudioAsync(nextInQueue.Path);
 
                 //play next in queue (if any)
-                await PlayNextInQueue();
+                //await PlayNextInQueue();
             }
-            else
-            {
-                //out of songs, leave channel and clean up
-                await LeaveAudio();
-                if (Client != null)
-                {
-                    await Client.SetGameAsync(null);
-                }
 
-                CleanAudioFiles();
+            //out of songs, leave channel and clean up
+            await LeaveAudio();
+            if (Client != null)
+            {
+                await Client.SetGameAsync(null);
             }
+
+            CleanAudioFiles();
+
         }
 
         public async Task MoveSongToFront(int index)
@@ -421,53 +448,26 @@ namespace TerminusDotNetCore.Services
 
             await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"Queued temp song '{displayName}'."));
 
-            if (!_playing)
-            {
-                //want to trigger playing next song in queue
-                await PlayNextInQueue();
-            }
-            else
-            {
-                await SaveQueueContents();
-            }
+            await StartQueueIfIdle();
         }
 
         private async Task EnqueueSong(AudioItem item, bool append = true)
         {
             //put the item in the backup queue if weed is ongoing
-            if (_weedPlaying)
+            lock (_queueLock)
             {
-                lock (_queueLock)
+                if (append)
                 {
-                    if (append)
-                    {
-                        _backupQueue.AddLast(item);
-                    }
-                    else
-                    {
-                        _backupQueue.AddFirst(item);
-                    }
+                    _songQueue.AddLast(item);
                 }
-            }
-            else
-            {
-                lock (_queueLock)
+                else
                 {
-                    if (append)
-                    {
-                        _songQueue.AddLast(item);
-                    }
-                    else
-                    {
-                        _songQueue.AddFirst(item);
-                    }
+                    _songQueue.AddFirst(item);
                 }
             }
 
-            string queueName = _weedPlaying == true ? "weed" : "main";
             string queueEnd = append == true ? "back" : "front";
-
-            await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"Added song '{item.DisplayName}' to {queueEnd} of {queueName} queue."));
+            await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"Added song '{item.DisplayName}' to {queueEnd} of queue."));
         }
 
         public async Task QueueLocalSong(SocketUser owner, string path, ulong channelId, bool append = true)
@@ -475,14 +475,7 @@ namespace TerminusDotNetCore.Services
             string displayName = Path.GetFileNameWithoutExtension(path);
             await EnqueueSong(new LocalAudioItem() { Path = path, PlayChannelId = channelId, AudioSource = FileAudioType.Local, DisplayName = displayName, OwnerName = owner.Username }, append);
 
-            if (!_playing)
-            {
-                await PlayNextInQueue();
-            }
-            else
-            {
-                await SaveQueueContents();
-            }
+            await StartQueueIfIdle();
         }
 
         public async Task QueueYoutubePlaylist(SocketUser owner, string playlistURL, ulong channelId, bool append = true)
@@ -578,15 +571,7 @@ namespace TerminusDotNetCore.Services
                 }
             }
 
-            if (!_playing)
-            {
-                //want to trigger playing next song in queue
-                await PlayNextInQueue();
-            }
-            else
-            {
-                await SaveQueueContents();
-            }
+            await StartQueueIfIdle();
         }
 
         public async Task QueueYoutubeSongPreDownloaded(SocketUser owner, string url, ulong channelId, bool append = true)
@@ -598,22 +583,15 @@ namespace TerminusDotNetCore.Services
 
             await EnqueueSong(new YouTubeAudioItem() { Path = filePath, VideoUrl = url, PlayChannelId = channelId, AudioSource = YouTubeAudioType.PreDownloaded, DisplayName = displayName, OwnerName = owner.Username }, append);
 
-            if (!_playing)
-            {
-                await PlayNextInQueue();
-            }
-            else
-            {
-                await SaveQueueContents();
-            }
+            await StartQueueIfIdle();
         }
         #endregion
 
         #region queue/song state management methods
-        public async Task LoadQueueContents()
+        public async Task LoadQueueContents(string filename = "queue-contents.json", bool weedLoad = true)
         {
             //try to load the queue state file
-            string queueFilename = Path.Combine(AudioPath, "backup", "queue-contents.json");
+            string queueFilename = Path.Combine(AudioPath, "backup", filename);
             if (!File.Exists(queueFilename))
             {
                 throw new FileNotFoundException("No queue backup file was found in the backup directory.");
@@ -648,16 +626,27 @@ namespace TerminusDotNetCore.Services
                 await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"Loaded queue contents ({text.Length - 1} songs)."));
             }
 
+            //swap the "current" queued song with the weed song element
+            if (weedLoad)
+            {
+                var currSong = _songQueue.First();
+                _songQueue.RemoveFirst();
+                var weedSong = _songQueue.First();
+                _songQueue.RemoveFirst();
+                _songQueue.AddFirst(currSong);
+                _songQueue.AddFirst(weedSong);
+            }
+
             if (!_playing)
             {
                 await PlayNextInQueue();
             }
         }
 
-        public async Task SaveQueueContents()
+        public async Task SaveQueueContents(string filename = "queue-contents.json")
         {
             //store the queue contents to file
-            using (StreamWriter jsonWriter = new StreamWriter(Path.Combine(AudioPath, "backup", "queue-contents.json"), false))
+            using (StreamWriter jsonWriter = new StreamWriter(Path.Combine(AudioPath, "backup", filename), false))
             {
                 //save the current song (if any)
                 if (_currentSong != null)
@@ -770,64 +759,22 @@ namespace TerminusDotNetCore.Services
         #endregion
 
         #region weed
-        public async Task ScheduleWeed(IVoiceChannel weedChannel)
+        public async Task PlayWeed()
         {
-            DateTime now = DateTime.Now;
-            DateTime fourTwenty = DateTime.Today.AddHours(16.333);
+            //get the weed channel ID and queue the weed song
+            ulong weedID = ulong.Parse(Config["WeedChannelId"]);
+            await EnqueueSong(new LocalAudioItem() { Path = Path.Combine(AudioPath, "weedlmao.mp3"), PlayChannelId = weedID, AudioSource = FileAudioType.Local, DisplayName = "weed", OwnerName = "Terminus.NET" }, false);
+            await SaveQueueContents("weed-queue.json");
 
-            if (now > fourTwenty)
+            if (!_playing)
             {
-                fourTwenty = fourTwenty.AddDays(1.0);
+                await PlayNextInQueue(false);
             }
-
-            await Task.Delay((int)fourTwenty.Subtract(DateTime.Now).TotalMilliseconds);
-
-            lock (_queueLock)
+            else
             {
-                _backupQueue = _songQueue;
-            }
-            _weedPlaying = true;
-
-            CurrentChannel = weedChannel;
-
-            //stop any currently active streams
-            if (_playing)
-            {
-                StopFfmpeg();
-            }
-
-            if (_currAudioClient == null || _currAudioClient.ConnectionState != ConnectionState.Connected)
-            {
-                await JoinAudio();
-            }
-
-            string path = Path.Combine(AudioPath, "weedlmao.mp3");
-            path = Path.GetFullPath(path);
-
-            if (Client != null)
-            {
-                await Client.SetGameAsync("weeeeed");
-            }
-
-            await SendAudioAsync(path);
-
-            _weedPlaying = false;
-            lock (_queueLock)
-            {
-                _songQueue = _backupQueue;
-                _backupQueue = new LinkedList<AudioItem>();
-            }
-
-            if (Client != null)
-            {
-                await Client.SetGameAsync(null);
-            }
-
-            _ = ScheduleWeed(weedChannel);
-
-            if (_songQueue.Count == 0)
-            {
-                await LeaveAudio();
+                //load the current queue with the weed song added to the front of it
+                await StopAllAudio();
+                await LoadQueueContents("weed-queue.json", true);
             }
         }
         #endregion
@@ -1127,17 +1074,10 @@ namespace TerminusDotNetCore.Services
             AttachmentHelper.DeleteFiles(AttachmentHelper.GetTempAssets("*.mp4"));
             AttachmentHelper.DeleteFiles(AttachmentHelper.GetTempAssets("*.webm"));
         }
-        public async void SetGuildClient(IGuild g, DiscordSocketClient c)
+        public void SetGuildClient(IGuild g, DiscordSocketClient c)
         {
             Guild = g;
             Client = c;
-            if (_weedStarted == false)
-            {
-                _weedStarted = true;
-                ulong voiceID = ulong.Parse(Config["WeedChannelId"]);
-                IVoiceChannel vc = await Guild.GetVoiceChannelAsync(voiceID);
-                await this.ScheduleWeed(vc);
-            }
         }
         #endregion
 
