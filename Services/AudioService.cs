@@ -799,7 +799,6 @@ namespace TerminusDotNetCore.Services
             else 
             {
                 await PlayNextInQueue(false);
-                await LoadQueueContents();
             }
         }
 
