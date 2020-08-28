@@ -18,12 +18,11 @@ namespace TerminusDotNetCore.Services
 
         public WeedTimerService(IConfiguration config, AudioService audioService)
         {
-            Console.WriteLine("INIT WEED TIMER");
             Config = config;
             _audioService = audioService;
 
             DateTime now = DateTime.Now;
-            DateTime fourTwenty = DateTime.Today.AddHours(17);
+            DateTime fourTwenty = DateTime.Today.AddHours(17).AddMinutes(10);
 
             if (now > fourTwenty)
             {
