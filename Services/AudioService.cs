@@ -36,7 +36,6 @@ namespace TerminusDotNetCore.Services
 
         //primary queue and backup (used when switching voice contexts)
         private LinkedList<AudioItem> _songQueue = new LinkedList<AudioItem>();
-        private LinkedList<AudioItem> _backupQueue = new LinkedList<AudioItem>();
 
         //lock object for queue synchronization
         private readonly object _queueLock = new object();
@@ -48,6 +47,8 @@ namespace TerminusDotNetCore.Services
 
         //metadata about the currently playing song
         private AudioItem _currentSong = null;
+
+        private Task _currentAudioStreamTask = null;
 
         //currently-connected channel (needs to be set from outside the service occasionally)
         public IVoiceChannel CurrentChannel { get; set; } = null;
@@ -71,7 +72,6 @@ namespace TerminusDotNetCore.Services
 
         //state flags
         private bool _playing = false;
-        private bool _weedStarted = false;
         private bool _weedPlaying = false;
 
         private YouTubeService _ytService;
@@ -208,7 +208,8 @@ namespace TerminusDotNetCore.Services
             {
                 //set playback state and spawn the stream process
                 _playing = true;
-                await StreamFfmpegAudio(path);
+                _currentAudioStreamTask = StreamFfmpegAudio(path);
+                await _currentAudioStreamTask;
             }
             else
             {
@@ -262,10 +263,6 @@ namespace TerminusDotNetCore.Services
         public async Task PlayRegexAudio(string filename)
         {
             //copy the queue and set the playing state
-            lock (_queueLock)
-            {
-                _backupQueue = _songQueue;
-            }
             _weedPlaying = true;
 
             //stop any currently active streams
@@ -282,11 +279,6 @@ namespace TerminusDotNetCore.Services
             await SendAudioAsync(path);
 
             _weedPlaying = false;
-            lock (_queueLock)
-            {
-                _songQueue = _backupQueue;
-                _backupQueue = new LinkedList<AudioItem>();
-            }
 
             if (_songQueue.Count == 0)
             {
@@ -361,7 +353,7 @@ namespace TerminusDotNetCore.Services
                 {
                     nextInQueue.DisplayName = Path.GetFileNameWithoutExtension(nextInQueue.Path);
                 }
-                
+
                 //set bot client's status to the song name
                 if (Client != null)
                 {
@@ -452,32 +444,15 @@ namespace TerminusDotNetCore.Services
         private async Task EnqueueSong(AudioItem item, bool append = true)
         {
             //put the item in the backup queue if weed is ongoing
-            if (_weedPlaying)
+            lock (_queueLock)
             {
-                lock (_queueLock)
+                if (append)
                 {
-                    if (append)
-                    {
-                        _backupQueue.AddLast(item);
-                    }
-                    else
-                    {
-                        _backupQueue.AddFirst(item);
-                    }
+                    _songQueue.AddLast(item);
                 }
-            }
-            else
-            {
-                lock (_queueLock)
+                else
                 {
-                    if (append)
-                    {
-                        _songQueue.AddLast(item);
-                    }
-                    else
-                    {
-                        _songQueue.AddFirst(item);
-                    }
+                    _songQueue.AddFirst(item);
                 }
             }
 
@@ -786,6 +761,7 @@ namespace TerminusDotNetCore.Services
         }
         #endregion
 
+        #region weed
         public async Task PlayWeed()
         {
             await SaveQueueContents();
@@ -796,71 +772,9 @@ namespace TerminusDotNetCore.Services
             {
                 StopFfmpeg();
             }
-            else 
+            else
             {
                 await PlayNextInQueue(false);
-            }
-        }
-
-        #region weed
-        public async Task ScheduleWeed(IVoiceChannel weedChannel)
-        {
-            DateTime now = DateTime.Now;
-            DateTime fourTwenty = DateTime.Today.AddHours(16.333);
-
-            if (now > fourTwenty)
-            {
-                fourTwenty = fourTwenty.AddDays(1.0);
-            }
-
-            await Task.Delay((int)fourTwenty.Subtract(DateTime.Now).TotalMilliseconds);
-
-            lock (_queueLock)
-            {
-                _backupQueue = _songQueue;
-            }
-            _weedPlaying = true;
-
-            CurrentChannel = weedChannel;
-
-            //stop any currently active streams
-            if (_playing)
-            {
-                StopFfmpeg();
-            }
-
-            if (_currAudioClient == null || _currAudioClient.ConnectionState != ConnectionState.Connected)
-            {
-                await JoinAudio();
-            }
-
-            string path = Path.Combine(AudioPath, "weedlmao.mp3");
-            path = Path.GetFullPath(path);
-
-            if (Client != null)
-            {
-                await Client.SetGameAsync("weeeeed");
-            }
-
-            await SendAudioAsync(path);
-
-            _weedPlaying = false;
-            lock (_queueLock)
-            {
-                _songQueue = _backupQueue;
-                _backupQueue = new LinkedList<AudioItem>();
-            }
-
-            if (Client != null)
-            {
-                await Client.SetGameAsync(null);
-            }
-
-            _ = ScheduleWeed(weedChannel);
-
-            if (_songQueue.Count == 0)
-            {
-                await LeaveAudio();
             }
         }
         #endregion
@@ -1160,17 +1074,10 @@ namespace TerminusDotNetCore.Services
             AttachmentHelper.DeleteFiles(AttachmentHelper.GetTempAssets("*.mp4"));
             AttachmentHelper.DeleteFiles(AttachmentHelper.GetTempAssets("*.webm"));
         }
-        public async void SetGuildClient(IGuild g, DiscordSocketClient c)
+        public void SetGuildClient(IGuild g, DiscordSocketClient c)
         {
             Guild = g;
             Client = c;
-            if (_weedStarted == false)
-            {
-                _weedStarted = true;
-                ulong voiceID = ulong.Parse(Config["WeedChannelId"]);
-                IVoiceChannel vc = await Guild.GetVoiceChannelAsync(voiceID);
-                await this.ScheduleWeed(vc);
-            }
         }
         #endregion
 
