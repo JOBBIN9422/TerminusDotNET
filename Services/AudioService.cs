@@ -773,6 +773,17 @@ namespace TerminusDotNetCore.Services
             else
             {
                 StopFfmpeg();
+                Thread.Sleep(2000);
+                try
+                {
+                    await _currentAudioStreamTask;
+                }
+                catch (OperationCanceledException)
+                {
+                    return;
+                }
+                await StopAllAudio();
+                await LoadQueueContents("weed-backup.json");
             }
         }
         #endregion
