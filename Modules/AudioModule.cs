@@ -342,6 +342,17 @@ namespace TerminusDotNetCore.Modules
             await _service.LoadQueueContents();
         }
 
+        [Command("weed", RunMode = RunMode.Async)]
+        public async Task ForceWeed()
+        {
+            if (Context != null && Context.Guild != null)
+            {
+                _service.SetGuildClient(Context.Guild, Context.Client);
+            }
+
+            await _service.PlayWeed();
+        }
+
         [Group("hideki")]
         public class HidekiAudioModule : ServiceControlModule
         {
