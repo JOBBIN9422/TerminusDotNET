@@ -336,9 +336,16 @@ namespace TerminusDotNetCore.Services
                 }
 
                 //set the current channel for the next song and join channel
-                CurrentChannel = await Guild.GetVoiceChannelAsync(nextInQueue.PlayChannelId);
-                if (_currAudioClient == null || _currAudioClient.ConnectionState != ConnectionState.Connected)
+                if (CurrentChannel == null)
                 {
+                    CurrentChannel = await Guild.GetVoiceChannelAsync(nextInQueue.PlayChannelId);
+                    await JoinAudio();
+
+                }
+                else if (CurrentChannel.Id != nextInQueue.PlayChannelId)
+                {
+                    CurrentChannel = await Guild.GetVoiceChannelAsync(nextInQueue.PlayChannelId);
+                    await LeaveAudio();
                     await JoinAudio();
                 }
 
