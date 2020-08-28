@@ -790,8 +790,6 @@ namespace TerminusDotNetCore.Services
             {
                 StopFfmpeg();
             }
-
-            await LoadQueueContents();
         }
 
         #region weed
