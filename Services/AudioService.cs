@@ -599,7 +599,7 @@ namespace TerminusDotNetCore.Services
         #endregion
 
         #region queue/song state management methods
-        public async Task LoadQueueContents(string filename = "queue-contents.json", bool weedSwap = true)
+        public async Task LoadQueueContents(string filename = "queue-contents.json", bool weedLoad = true)
         {
             //try to load the queue state file
             string queueFilename = Path.Combine(AudioPath, "backup", filename);
@@ -638,13 +638,12 @@ namespace TerminusDotNetCore.Services
             }
 
             //swap the "current" queued song with the weed song element
-            if (weedSwap)
+            if (weedLoad)
             {
                 var currSong = _songQueue.First();
                 _songQueue.RemoveFirst();
                 var weedSong = _songQueue.First();
                 _songQueue.AddFirst(currSong);
-                _songQueue.AddFirst(weedSong);
             }
 
             if (!_playing)
