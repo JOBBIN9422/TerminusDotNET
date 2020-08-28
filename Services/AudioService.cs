@@ -440,7 +440,7 @@ namespace TerminusDotNetCore.Services
 
             await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"Queued temp song '{displayName}'."));
 
-            StartQueueIfIdle();
+            await StartQueueIfIdle();
         }
 
         private async Task EnqueueSong(AudioItem item, bool append = true)
@@ -469,7 +469,7 @@ namespace TerminusDotNetCore.Services
             string displayName = Path.GetFileNameWithoutExtension(path);
             await EnqueueSong(new LocalAudioItem() { Path = path, PlayChannelId = channelId, AudioSource = FileAudioType.Local, DisplayName = displayName, OwnerName = owner.Username }, append);
 
-            StartQueueIfIdle();
+            await StartQueueIfIdle();
         }
 
         public async Task QueueYoutubePlaylist(SocketUser owner, string playlistURL, ulong channelId, bool append = true)
@@ -565,7 +565,7 @@ namespace TerminusDotNetCore.Services
                 }
             }
 
-            StartQueueIfIdle();
+            await StartQueueIfIdle();
         }
 
         public async Task QueueYoutubeSongPreDownloaded(SocketUser owner, string url, ulong channelId, bool append = true)
@@ -577,7 +577,7 @@ namespace TerminusDotNetCore.Services
 
             await EnqueueSong(new YouTubeAudioItem() { Path = filePath, VideoUrl = url, PlayChannelId = channelId, AudioSource = YouTubeAudioType.PreDownloaded, DisplayName = displayName, OwnerName = owner.Username }, append);
 
-            StartQueueIfIdle();
+            await StartQueueIfIdle();
         }
         #endregion
 
