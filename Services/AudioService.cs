@@ -781,7 +781,7 @@ namespace TerminusDotNetCore.Services
                 {
                     return;
                 }
-                await LoadQueueContents("weed-backup.json");
+                await LoadQueueContents("weed-backup.json", false);
             }
         }
         #endregion
