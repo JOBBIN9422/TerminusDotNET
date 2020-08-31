@@ -118,7 +118,7 @@ namespace TerminusDotNetCore.Modules
             [Summary("Get the most recent tweet from `@Hideki_Naganuma`.")]
             public async Task GetLastHidekTweet()
             {
-                string tweet = await _twitterService.GetLastNotchTweet();
+                string tweet = await _twitterService.GetLastHidekiTweet();
                 try
                 {
                     await ReplyAsync(tweet);
