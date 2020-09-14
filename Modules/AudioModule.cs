@@ -411,5 +411,61 @@ namespace TerminusDotNetCore.Modules
                 await _service.AddRandomHidekiSong(Context.Message.Author, voiceID, qEnd != "front");
             }
         }
+
+        public class RadioAudioModule : ServiceControlModule
+        {
+            private AudioService _service;
+            public RadioAudioModule(IConfiguration config, AudioService service) : base(config)
+            {
+                //do not need to set service config here - passed into audioSvc constructor via DI
+                _service = service;
+                _service.ParentModule = this;
+            }
+
+            [Command]
+            [Summary("Display usage info about the `hideki` command.")]
+            public async Task PrintUsageInfo()
+            {
+                EmbedBuilder embedBuilder = new EmbedBuilder();
+                CommandSummaryHelper.GenerateGroupCommandSummary(GetType(), embedBuilder, "radio");
+                await ReplyAsync(embed: embedBuilder.Build());
+            }
+
+            [Command("create", RunMode = RunMode.Async)]
+            public async Task CreatePlaylist(string name)
+            {
+                if (string.IsNullOrEmpty(name))
+                {
+                    await ReplyAsync("Please provide a playlist name.");
+                }
+            }
+
+            [Command("add", RunMode = RunMode.Async)]
+            public async Task AddSongToPlaylist(string url)
+            {
+                if (string.IsNullOrEmpty(url))
+                {
+                    await ReplyAsync("Please provide a YouTube URL.");
+                }
+            }
+
+            [Command("delete", RunMode = RunMode.Async)]
+            public async Task RemoveSongFromPlaylist(int index = -1)
+            {
+                if (index == -1)
+                {
+                    await ReplyAsync("Please provide a valid index.");
+                }
+            }
+
+            [Command("play", RunMode = RunMode.Async)]
+            public async Task RemoveSongFromPlaylist(string name)
+            {
+                if (string.IsNullOrEmpty(name))
+                {
+                    await ReplyAsync("Please provide a playlist name.");
+                }
+            }
+        }
     }
 }

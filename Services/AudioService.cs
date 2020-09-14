@@ -84,6 +84,7 @@ namespace TerminusDotNetCore.Services
 
         //path for local (aliased) audio files
         public string AudioPath { get; } = Path.Combine("assets", "audio");
+        public string RadioPath { get; } = Path.Combine("assets", "audio", "playlists");
 
         //RNG
         private Random _random;
@@ -755,6 +756,70 @@ namespace TerminusDotNetCore.Services
             File.AppendAllText(Path.Combine(AudioPath, "audioaliases.txt"), alias + " " + newFileName + Environment.NewLine);
 
             await ParentModule.ServiceReplyAsync($"Successfully added aliased song '{alias}'.");
+        }
+        #endregion
+
+        #region radio commands
+        public async Task AddRadioSong(SocketUser owner, string playlistName, string youtubeUrl)
+        {
+            string playlistFilename = $"radio-{playlistName}.json";
+            //check if there is a playlist file with the given name
+            if (!File.Exists(Path.Combine(RadioPath, playlistFilename)))
+            {
+                await ParentModule.ServiceReplyAsync($"No playlist was found for the given name: `{playlistName}`.");
+                return;
+            }
+
+            //create a new youtube audio item to save
+            string displayName = await GetVideoTitleFromUrlAsync(youtubeUrl);
+            ulong channelId = ulong.Parse(Config["AudioChannelId"]);
+            YouTubeAudioItem newSong = new YouTubeAudioItem()
+            {
+                VideoUrl = youtubeUrl,
+                PlayChannelId = channelId,
+                AudioSource = YouTubeAudioType.Url,
+                DisplayName = displayName,
+                OwnerName = owner.Username
+            };
+
+            //add the song and save the playlist
+            RadioPlaylist currPlaylist = JsonConvert.DeserializeObject<RadioPlaylist>(await File.ReadAllTextAsync(Path.Combine(RadioPath, playlistFilename)), JSON_SETTINGS);
+            currPlaylist.Songs.AddLast(newSong);
+            await File.WriteAllTextAsync(Path.Combine(RadioPath, playlistFilename), JsonConvert.SerializeObject(currPlaylist, JSON_SETTINGS));
+        }
+
+        public async Task CreateRadioPlaylist(SocketUser owner, string playlistName)
+        {
+            string playlistFilename = $"radio-{playlistName}.json";
+            if (File.Exists(Path.Combine(RadioPath, playlistFilename)))
+            {
+                await ParentModule.ServiceReplyAsync($"A playlist with the name `{playlistName}` already exists.");
+            }
+
+            //create playlist object and save to file
+            RadioPlaylist newPlaylist = new RadioPlaylist()
+            {
+                OwnerName = owner.Username,
+                WhitelistUsers = new List<string>() { owner.Username },
+                Songs = new LinkedList<YouTubeAudioItem>()
+            };
+            await File.WriteAllTextAsync(Path.Combine(RadioPath, playlistFilename), JsonConvert.SerializeObject(newPlaylist, JSON_SETTINGS));
+        }
+
+        public async Task LoadRadioPlaylist(SocketUser owner, string playlistName)
+        {
+            string playlistFilename = $"radio-{playlistName}.json";
+            if (!File.Exists(Path.Combine(RadioPath, playlistFilename)))
+            {
+                await ParentModule.ServiceReplyAsync($"No playlist was found for the given name: `{playlistName}`.");
+                return;
+            }
+
+            RadioPlaylist loadPlaylist = JsonConvert.DeserializeObject<RadioPlaylist>(await File.ReadAllTextAsync(Path.Combine(RadioPath, playlistFilename)), JSON_SETTINGS);
+            foreach (YouTubeAudioItem song in loadPlaylist.Songs)
+            {
+                await EnqueueSong(song);
+            }
         }
         #endregion
 
