@@ -435,6 +435,11 @@ namespace TerminusDotNetCore.Modules
             [Command("create", RunMode = RunMode.Async)]
             public async Task CreatePlaylist(string name)
             {
+                if (Context != null && Context.Guild != null)
+                {
+                    _service.SetGuildClient(Context.Guild, Context.Client);
+                }
+
                 if (string.IsNullOrEmpty(name))
                 {
                     await ReplyAsync("Please provide a playlist name.");
@@ -446,6 +451,11 @@ namespace TerminusDotNetCore.Modules
             [Command("add", RunMode = RunMode.Async)]
             public async Task AddSongToPlaylist(string playlistName, string url)
             {
+                if (Context != null && Context.Guild != null)
+                {
+                    _service.SetGuildClient(Context.Guild, Context.Client);
+                }
+
                 if (string.IsNullOrEmpty(url))
                 {
                     await ReplyAsync("Please provide a YouTube URL.");
@@ -457,6 +467,11 @@ namespace TerminusDotNetCore.Modules
             [Command("delete", RunMode = RunMode.Async)]
             public async Task RemoveSongFromPlaylist(int index = -1)
             {
+                if (Context != null && Context.Guild != null)
+                {
+                    _service.SetGuildClient(Context.Guild, Context.Client);
+                }
+
                 if (index == -1)
                 {
                     await ReplyAsync("Please provide a valid index.");
@@ -466,6 +481,11 @@ namespace TerminusDotNetCore.Modules
             [Command("play", RunMode = RunMode.Async)]
             public async Task LoadPlaylist(string name)
             {
+                if (Context != null && Context.Guild != null)
+                {
+                    _service.SetGuildClient(Context.Guild, Context.Client);
+                }
+
                 if (string.IsNullOrEmpty(name))
                 {
                     await ReplyAsync("Please provide a playlist name.");
