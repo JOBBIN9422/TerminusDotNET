@@ -438,15 +438,19 @@ namespace TerminusDotNetCore.Modules
                 {
                     await ReplyAsync("Please provide a playlist name.");
                 }
+
+                await _service.CreateRadioPlaylist(Context.Message.Author, name);
             }
 
             [Command("add", RunMode = RunMode.Async)]
-            public async Task AddSongToPlaylist(string url)
+            public async Task AddSongToPlaylist(string playlistName, string url)
             {
                 if (string.IsNullOrEmpty(url))
                 {
                     await ReplyAsync("Please provide a YouTube URL.");
                 }
+
+                await _service.AddRadioSong(Context.Message.Author, playlistName, url);
             }
 
             [Command("delete", RunMode = RunMode.Async)]
@@ -465,6 +469,8 @@ namespace TerminusDotNetCore.Modules
                 {
                     await ReplyAsync("Please provide a playlist name.");
                 }
+
+                await _service.LoadRadioPlaylist(Context.Message.Author, name);
             }
         }
     }

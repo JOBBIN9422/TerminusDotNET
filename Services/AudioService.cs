@@ -820,6 +820,8 @@ namespace TerminusDotNetCore.Services
             {
                 await EnqueueSong(song);
             }
+
+            await StartQueueIfIdle();
         }
         #endregion
 
