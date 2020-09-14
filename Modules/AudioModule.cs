@@ -443,6 +443,7 @@ namespace TerminusDotNetCore.Modules
                 if (string.IsNullOrEmpty(name))
                 {
                     await ReplyAsync("Please provide a playlist name.");
+                    return;
                 }
 
                 await _service.CreateRadioPlaylist(Context.Message.Author, name);
