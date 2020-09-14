@@ -464,7 +464,7 @@ namespace TerminusDotNetCore.Modules
             }
 
             [Command("play", RunMode = RunMode.Async)]
-            public async Task RemoveSongFromPlaylist(string name)
+            public async Task LoadPlaylist(string name)
             {
                 if (string.IsNullOrEmpty(name))
                 {
