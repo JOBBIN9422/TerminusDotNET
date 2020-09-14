@@ -412,6 +412,7 @@ namespace TerminusDotNetCore.Modules
             }
         }
 
+        [Group("radio")]
         public class RadioAudioModule : ServiceControlModule
         {
             private AudioService _service;
