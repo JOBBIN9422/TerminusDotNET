@@ -826,7 +826,8 @@ namespace TerminusDotNetCore.Services
                 return;
             }
 
-            //attempt to remove the indexed song from the playlist
+            //attempt to remove the indexed song from the playlist (assume playlist is 1-indexed)
+            index--;
             RadioPlaylist playlist = JsonConvert.DeserializeObject<RadioPlaylist>(await File.ReadAllTextAsync(Path.Combine(RadioPath, playlistFilename)), JSON_SETTINGS);
             if (index < 0 || index > playlist.Songs.Count)
             {
@@ -964,7 +965,7 @@ namespace TerminusDotNetCore.Services
 
             foreach (YouTubeAudioItem item in playlist.Songs)
             {
-                
+                entryCount++;
 
                 //if we have 25 entries in an embed already, need to make a new one 
                 if (entryCount % EmbedBuilder.MaxFieldCount == 0 && entryCount > 0)
@@ -984,7 +985,6 @@ namespace TerminusDotNetCore.Services
                 string songSource = GetAudioSourceString(item);
 
                 embed.AddField(songName, songSource);
-                entryCount++;
             }
 
             //add the most recently built embed if it's not in the list yet 
