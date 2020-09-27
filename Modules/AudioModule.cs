@@ -466,7 +466,7 @@ namespace TerminusDotNetCore.Modules
             }
 
             [Command("delete", RunMode = RunMode.Async)]
-            public async Task RemoveSongFromPlaylist(int index = -1)
+            public async Task RemoveSongFromPlaylist(string playlistName, int index = -1)
             {
                 if (Context != null && Context.Guild != null)
                 {
@@ -477,6 +477,8 @@ namespace TerminusDotNetCore.Modules
                 {
                     await ReplyAsync("Please provide a valid index.");
                 }
+
+                await _service.DeleteRadioSong(Context.Message.Author, playlistName, index);
             }
 
             [Command("play", RunMode = RunMode.Async)]

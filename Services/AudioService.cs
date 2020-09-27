@@ -788,6 +788,38 @@ namespace TerminusDotNetCore.Services
             await File.WriteAllTextAsync(Path.Combine(RadioPath, playlistFilename), JsonConvert.SerializeObject(currPlaylist, JSON_SETTINGS));
         }
 
+        public async Task DeleteRadioSong(SocketUser owner, string playlistName, int index)
+        {
+            string playlistFilename = $"radio-{playlistName}.json";
+            //check if there is a playlist file with the given name
+            if (!File.Exists(Path.Combine(RadioPath, playlistFilename)))
+            {
+                await ParentModule.ServiceReplyAsync($"No playlist was found for the given name: `{playlistName}`.");
+                return;
+            }
+
+            //attempt to remove the indexed song from the playlist
+            RadioPlaylist loadPlaylist = JsonConvert.DeserializeObject<RadioPlaylist>(await File.ReadAllTextAsync(Path.Combine(RadioPath, playlistFilename)), JSON_SETTINGS);
+            if (index < 0 || index > loadPlaylist.Songs.Count)
+            {
+                await ParentModule.ServiceReplyAsync($"The given index was out of bounds for the playlist `{playlistName} ({loadPlaylist.Songs.Count} songs).`");
+                return;
+            }
+
+            //find the song by index and remove it 
+            int currIndex = 0;
+            LinkedListNode<YouTubeAudioItem> currNode = loadPlaylist.Songs.First;
+            while (currIndex != index && currNode != null)
+            {
+                currIndex++;
+                currNode = currNode.Next;
+            }
+            loadPlaylist.Songs.Remove(currNode);
+
+            //save updated playlist to file
+            await File.WriteAllTextAsync(Path.Combine(RadioPath, playlistFilename), JsonConvert.SerializeObject(loadPlaylist, JSON_SETTINGS));
+        }
+
         public async Task CreateRadioPlaylist(SocketUser owner, string playlistName)
         {
             string playlistFilename = $"radio-{playlistName}.json";
