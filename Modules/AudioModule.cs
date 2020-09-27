@@ -510,11 +510,21 @@ namespace TerminusDotNetCore.Modules
 
                 if (string.IsNullOrEmpty(name))
                 {
-                    await _service.ShowAllRadioPlaylists();
+                    await ReplyAsync("Please provide a playlist name.");
                     return;
                 }
 
                 await _service.ShowRadioPlaylistContents(name);
+            }
+
+            [Command("playlists", RunMode = RunMode.Async)]
+            public async Task ShowAllPlaylists()
+            {
+                if (Context != null && Context.Guild != null)
+                {
+                    _service.SetGuildClient(Context.Guild, Context.Client);
+                }
+                await _service.ShowAllRadioPlaylists();
             }
         }
     }
