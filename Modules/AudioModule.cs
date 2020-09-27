@@ -510,7 +510,7 @@ namespace TerminusDotNetCore.Modules
 
                 if (string.IsNullOrEmpty(name))
                 {
-                    await ReplyAsync("Please provide a playlist name.");
+                    await _service.ShowAllRadioPlaylists();
                     return;
                 }
 

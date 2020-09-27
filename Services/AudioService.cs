@@ -896,9 +896,19 @@ namespace TerminusDotNetCore.Services
             }
 
             RadioPlaylist playlist = JsonConvert.DeserializeObject<RadioPlaylist>(await File.ReadAllTextAsync(Path.Combine(RadioPath, playlistFilename)), JSON_SETTINGS);
-            List<Embed> playlistContents = ListPlaylistContents(playlist);
+            List<Embed> playlistContents = ListRadioPlaylistContents(playlist);
 
             foreach (Embed embed in playlistContents)
+            {
+                await ParentModule.ServiceReplyAsync(embed: embed);
+            }
+        }
+
+        public async Task ShowAllRadioPlaylists()
+        {
+            List<Embed> playlists = ListRadioPlaylists();
+
+            foreach (Embed embed in playlists)
             {
                 await ParentModule.ServiceReplyAsync(embed: embed);
             }
@@ -951,7 +961,7 @@ namespace TerminusDotNetCore.Services
             return builder.Build();
         }
 
-        public List<Embed> ListPlaylistContents(RadioPlaylist playlist)
+        public List<Embed> ListRadioPlaylistContents(RadioPlaylist playlist)
         {
             //need a list of embeds since each embed can only have 25 fields max
             List<Embed> songList = new List<Embed>();
@@ -994,6 +1004,45 @@ namespace TerminusDotNetCore.Services
             }
 
             return songList;
+        }
+
+        public List<Embed> ListRadioPlaylists()
+        {
+            //need a list of embeds since each embed can only have 25 fields max
+            var playlistFiles = Directory.GetFiles(RadioPath);
+            List<Embed> playlists = new List<Embed>();
+            int entryCount = 0;
+
+            var embed = new EmbedBuilder
+            {
+                Title = $"{playlistFiles.Count()} Playlists"
+            };
+
+            foreach (string playlistFile in playlistFiles)
+            {
+                RadioPlaylist playlist = JsonConvert.DeserializeObject<RadioPlaylist>(File.ReadAllText(playlistFile), JSON_SETTINGS);
+                entryCount++;
+
+                //if we have 25 entries in an embed already, need to make a new one 
+                if (entryCount % EmbedBuilder.MaxFieldCount == 0 && entryCount > 0)
+                {
+                    playlists.Add(embed.Build());
+                    embed = new EmbedBuilder();
+                }
+
+                //add the current queue item to the song list 
+                string songName = $"**{entryCount}:** {playlist.Name}";
+
+                embed.AddField(songName, $"owner: {playlist.OwnerName}");
+            }
+
+            //add the most recently built embed if it's not in the list yet 
+            if (playlists.Count == 0 || !playlists.Contains(embed.Build()))
+            {
+                playlists.Add(embed.Build());
+            }
+
+            return playlists;
         }
 
         public List<Embed> ListQueueContents()
