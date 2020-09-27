@@ -7,6 +7,7 @@ namespace TerminusDotNetCore.Helpers
 {
     public class RadioPlaylist
     {
+        public string Name { get; set; }
         public string OwnerName { get; set; }
         public List<string> WhitelistUsers { get; set; }
 

@@ -499,6 +499,21 @@ namespace TerminusDotNetCore.Modules
 
                 await _service.LoadRadioPlaylist(Context.Message.Author, name);
             }
+
+            [Command("list", RunMode = RunMode.Async)]
+            public async Task ShowPlaylistContents(string name)
+            {
+                if (Context != null && Context.Guild != null)
+                {
+                    _service.SetGuildClient(Context.Guild, Context.Client);
+                }
+
+                if (string.IsNullOrEmpty(name))
+                {
+                    await ReplyAsync("Please provide a playlist name.");
+                    return;
+                }
+            }
         }
     }
 }

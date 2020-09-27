@@ -827,25 +827,25 @@ namespace TerminusDotNetCore.Services
             }
 
             //attempt to remove the indexed song from the playlist
-            RadioPlaylist loadPlaylist = JsonConvert.DeserializeObject<RadioPlaylist>(await File.ReadAllTextAsync(Path.Combine(RadioPath, playlistFilename)), JSON_SETTINGS);
-            if (index < 0 || index > loadPlaylist.Songs.Count)
+            RadioPlaylist playlist = JsonConvert.DeserializeObject<RadioPlaylist>(await File.ReadAllTextAsync(Path.Combine(RadioPath, playlistFilename)), JSON_SETTINGS);
+            if (index < 0 || index > playlist.Songs.Count)
             {
-                await ParentModule.ServiceReplyAsync($"The given index was out of bounds for the playlist `{playlistName}` ({loadPlaylist.Songs.Count} songs).");
+                await ParentModule.ServiceReplyAsync($"The given index was out of bounds for the playlist `{playlistName}` ({playlist.Songs.Count} songs).");
                 return;
             }
 
             //find the song by index and remove it 
             int currIndex = 0;
-            LinkedListNode<YouTubeAudioItem> currNode = loadPlaylist.Songs.First;
+            LinkedListNode<YouTubeAudioItem> currNode = playlist.Songs.First;
             while (currIndex != index && currNode != null)
             {
                 currIndex++;
                 currNode = currNode.Next;
             }
-            loadPlaylist.Songs.Remove(currNode);
+            playlist.Songs.Remove(currNode);
 
             //save updated playlist to file
-            await File.WriteAllTextAsync(Path.Combine(RadioPath, playlistFilename), JsonConvert.SerializeObject(loadPlaylist, JSON_SETTINGS));
+            await File.WriteAllTextAsync(Path.Combine(RadioPath, playlistFilename), JsonConvert.SerializeObject(playlist, JSON_SETTINGS));
         }
 
         public async Task CreateRadioPlaylist(SocketUser owner, string playlistName)
@@ -859,6 +859,7 @@ namespace TerminusDotNetCore.Services
             //create playlist object and save to file
             RadioPlaylist newPlaylist = new RadioPlaylist()
             {
+                Name = playlistName,
                 OwnerName = owner.Username,
                 WhitelistUsers = new List<string>() { owner.Username },
                 Songs = new LinkedList<YouTubeAudioItem>()
@@ -882,6 +883,19 @@ namespace TerminusDotNetCore.Services
             }
 
             await StartQueueIfIdle();
+        }
+
+        public async Task ShowRadioPlaylistContents(string playlistName)
+        {
+            string playlistFilename = $"radio-{playlistName}.json";
+            if (!File.Exists(Path.Combine(RadioPath, playlistFilename)))
+            {
+                await ParentModule.ServiceReplyAsync($"No playlist was found for the given name: `{playlistName}`.");
+                return;
+            }
+
+            RadioPlaylist playlist = JsonConvert.DeserializeObject<RadioPlaylist>(await File.ReadAllTextAsync(Path.Combine(RadioPath, playlistFilename)), JSON_SETTINGS);
+
         }
         #endregion
 
@@ -931,6 +945,50 @@ namespace TerminusDotNetCore.Services
             return builder.Build();
         }
 
+        public List<Embed> ListPlaylistContents(RadioPlaylist playlist)
+        {
+            //need a list of embeds since each embed can only have 25 fields max
+            List<Embed> songList = new List<Embed>();
+            int numSongs = _songQueue.Count;
+            int entryCount = 0;
+
+            var embed = new EmbedBuilder
+            {
+                Title = $"{playlist.Name} ({numSongs} songs)"
+            };
+
+            foreach (YouTubeAudioItem item in playlist.Songs)
+            {
+                entryCount++;
+
+                //if we have 25 entries in an embed already, need to make a new one 
+                if (entryCount % EmbedBuilder.MaxFieldCount == 0 && entryCount > 0)
+                {
+                    songList.Add(embed.Build());
+                    embed = new EmbedBuilder();
+                }
+
+                string displayName = item.DisplayName;
+                if (string.IsNullOrEmpty(displayName))
+                {
+                    displayName = Path.GetFileNameWithoutExtension(item.Path);
+                }
+
+                //add the current queue item to the song list 
+                string songName = $"**{entryCount + 1}:** {displayName}";
+                string songSource = GetAudioSourceString(item);
+
+                embed.AddField(songName, songSource);
+            }
+
+            //add the most recently built embed if it's not in the list yet 
+            if (songList.Count == 0 || !songList.Contains(embed.Build()))
+            {
+                songList.Add(embed.Build());
+            }
+
+            return songList;
+        }
 
         public List<Embed> ListQueueContents()
         {
