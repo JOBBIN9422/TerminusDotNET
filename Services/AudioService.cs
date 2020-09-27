@@ -954,7 +954,7 @@ namespace TerminusDotNetCore.Services
         {
             //need a list of embeds since each embed can only have 25 fields max
             List<Embed> songList = new List<Embed>();
-            int numSongs = _songQueue.Count;
+            int numSongs = playlist.Songs.Count;
             int entryCount = 0;
 
             var embed = new EmbedBuilder
@@ -964,7 +964,7 @@ namespace TerminusDotNetCore.Services
 
             foreach (YouTubeAudioItem item in playlist.Songs)
             {
-                entryCount++;
+                
 
                 //if we have 25 entries in an embed already, need to make a new one 
                 if (entryCount % EmbedBuilder.MaxFieldCount == 0 && entryCount > 0)
@@ -980,10 +980,11 @@ namespace TerminusDotNetCore.Services
                 }
 
                 //add the current queue item to the song list 
-                string songName = $"**{entryCount + 1}:** {displayName}";
+                string songName = $"**{entryCount}:** {displayName}";
                 string songSource = GetAudioSourceString(item);
 
                 embed.AddField(songName, songSource);
+                entryCount++;
             }
 
             //add the most recently built embed if it's not in the list yet 
