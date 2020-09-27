@@ -513,6 +513,8 @@ namespace TerminusDotNetCore.Modules
                     await ReplyAsync("Please provide a playlist name.");
                     return;
                 }
+
+                await _service.ShowRadioPlaylistContents(name);
             }
         }
     }

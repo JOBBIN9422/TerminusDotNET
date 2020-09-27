@@ -22,16 +22,9 @@ namespace TerminusDotNetCore.Modules
 
 
         //allow services to reply on a text channel
-        public async Task ServiceReplyAsync(string s, EmbedBuilder embedBuilder = null)
+        public async Task ServiceReplyAsync(string s = null, Embed embed = null)
         {
-            if (embedBuilder == null)
-            {
-                await ReplyAsync(s);
-            }
-            else
-            {
-                await ReplyAsync(s, false, embedBuilder.Build());
-            }
+            await ReplyAsync(message: s, embed: embed);
         }
     }
 }

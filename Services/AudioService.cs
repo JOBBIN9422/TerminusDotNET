@@ -895,7 +895,12 @@ namespace TerminusDotNetCore.Services
             }
 
             RadioPlaylist playlist = JsonConvert.DeserializeObject<RadioPlaylist>(await File.ReadAllTextAsync(Path.Combine(RadioPath, playlistFilename)), JSON_SETTINGS);
+            List<Embed> playlistContents = ListPlaylistContents(playlist);
 
+            foreach (Embed embed in playlistContents)
+            {
+                await ParentModule.ServiceReplyAsync(embed: embed);
+            }
         }
         #endregion
 
