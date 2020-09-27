@@ -760,6 +760,20 @@ namespace TerminusDotNetCore.Services
         #endregion
 
         #region radio commands
+        private bool IsUserWhitelisted(SocketUser user, RadioPlaylist playlist)
+        {
+            //check if the user is in the playlist's whitelist
+            return playlist.WhitelistUsers.Contains(user.Username);
+        }
+
+        private bool IsUserWhitelisted(SocketUser user, string playlistName)
+        {
+            string playlistFilename = $"radio-{playlistName}.json";
+            RadioPlaylist playlist = JsonConvert.DeserializeObject<RadioPlaylist>(File.ReadAllText(Path.Combine(RadioPath, playlistFilename)), JSON_SETTINGS);
+
+            return IsUserWhitelisted(user, playlist);
+        }
+
         public async Task AddRadioSong(SocketUser owner, string playlistName, string youtubeUrl)
         {
             string playlistFilename = $"radio-{playlistName}.json";
@@ -767,6 +781,13 @@ namespace TerminusDotNetCore.Services
             if (!File.Exists(Path.Combine(RadioPath, playlistFilename)))
             {
                 await ParentModule.ServiceReplyAsync($"No playlist was found for the given name: `{playlistName}`.");
+                return;
+            }
+
+            //check if the user is whitelisted for the current playlist
+            if (!IsUserWhitelisted(owner, playlistName))
+            {
+                await ParentModule.ServiceReplyAsync($"You aren't whitelisted for the playlist `{playlistName}`.");
                 return;
             }
 
@@ -798,11 +819,18 @@ namespace TerminusDotNetCore.Services
                 return;
             }
 
+            //check if the user is whitelisted for the current playlist
+            if (!IsUserWhitelisted(owner, playlistName))
+            {
+                await ParentModule.ServiceReplyAsync($"You aren't whitelisted for the playlist `{playlistName}`.");
+                return;
+            }
+
             //attempt to remove the indexed song from the playlist
             RadioPlaylist loadPlaylist = JsonConvert.DeserializeObject<RadioPlaylist>(await File.ReadAllTextAsync(Path.Combine(RadioPath, playlistFilename)), JSON_SETTINGS);
             if (index < 0 || index > loadPlaylist.Songs.Count)
             {
-                await ParentModule.ServiceReplyAsync($"The given index was out of bounds for the playlist `{playlistName} ({loadPlaylist.Songs.Count} songs).`");
+                await ParentModule.ServiceReplyAsync($"The given index was out of bounds for the playlist `{playlistName}` ({loadPlaylist.Songs.Count} songs).");
                 return;
             }
 

@@ -424,7 +424,7 @@ namespace TerminusDotNetCore.Modules
             }
 
             [Command]
-            [Summary("Display usage info about the `hideki` command.")]
+            [Summary("Display usage info about the `radio` command.")]
             public async Task PrintUsageInfo()
             {
                 EmbedBuilder embedBuilder = new EmbedBuilder();
@@ -460,12 +460,13 @@ namespace TerminusDotNetCore.Modules
                 if (string.IsNullOrEmpty(url))
                 {
                     await ReplyAsync("Please provide a YouTube URL.");
+                    return;
                 }
 
                 await _service.AddRadioSong(Context.Message.Author, playlistName, url);
             }
 
-            [Command("delete", RunMode = RunMode.Async)]
+            [Command("remove", RunMode = RunMode.Async)]
             public async Task RemoveSongFromPlaylist(string playlistName, int index = -1)
             {
                 if (Context != null && Context.Guild != null)
@@ -476,6 +477,7 @@ namespace TerminusDotNetCore.Modules
                 if (index == -1)
                 {
                     await ReplyAsync("Please provide a valid index.");
+                    return;
                 }
 
                 await _service.DeleteRadioSong(Context.Message.Author, playlistName, index);
@@ -492,6 +494,7 @@ namespace TerminusDotNetCore.Modules
                 if (string.IsNullOrEmpty(name))
                 {
                     await ReplyAsync("Please provide a playlist name.");
+                    return;
                 }
 
                 await _service.LoadRadioPlaylist(Context.Message.Author, name);
