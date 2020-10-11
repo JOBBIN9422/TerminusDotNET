@@ -1065,9 +1065,11 @@ namespace TerminusDotNetCore.Services
             {
                 Title = "Whitelisted Users"
             };
+            int i = 1;
             foreach (string whitelistUsername in playlist.WhitelistUsers)
             {
-                whitelistEmbed.AddField(name: "User", value: whitelistUsername, inline: true);
+                whitelistEmbed.AddField(name: i.ToString(), value: whitelistUsername);
+                i++;
             }
             songList.Add(whitelistEmbed.Build());
 
