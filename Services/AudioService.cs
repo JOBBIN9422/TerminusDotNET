@@ -774,11 +774,26 @@ namespace TerminusDotNetCore.Services
             return IsUserWhitelisted(user, playlist);
         }
 
+        private string GetPlaylistFilename(string playlistName)
+        {
+            return Path.Combine(RadioPath, $"radio-{playlistName}.json");
+        }
+
+        private async Task<RadioPlaylist> LoadPlaylistFromFile(string playlistFilename)
+        {
+            return JsonConvert.DeserializeObject<RadioPlaylist>(await File.ReadAllTextAsync(playlistFilename), JSON_SETTINGS);
+        }
+
+        private async Task SavePlaylistToFile(RadioPlaylist playlist, string playlistFilename)
+        {
+            await File.WriteAllTextAsync(playlistFilename, JsonConvert.SerializeObject(playlist, JSON_SETTINGS));
+        }
+
         public async Task AddRadioSong(SocketUser owner, string playlistName, string youtubeUrl)
         {
-            string playlistFilename = $"radio-{playlistName}.json";
+            string playlistFilename = GetPlaylistFilename(playlistName);
             //check if there is a playlist file with the given name
-            if (!File.Exists(Path.Combine(RadioPath, playlistFilename)))
+            if (!File.Exists(playlistFilename))
             {
                 await ParentModule.ServiceReplyAsync($"No playlist was found for the given name: `{playlistName}`.");
                 return;
@@ -804,16 +819,16 @@ namespace TerminusDotNetCore.Services
             };
 
             //add the song and save the playlist
-            RadioPlaylist currPlaylist = JsonConvert.DeserializeObject<RadioPlaylist>(await File.ReadAllTextAsync(Path.Combine(RadioPath, playlistFilename)), JSON_SETTINGS);
+            RadioPlaylist currPlaylist = await LoadPlaylistFromFile(playlistFilename);
             currPlaylist.Songs.AddLast(newSong);
-            await File.WriteAllTextAsync(Path.Combine(RadioPath, playlistFilename), JsonConvert.SerializeObject(currPlaylist, JSON_SETTINGS));
+            await SavePlaylistToFile(currPlaylist, playlistFilename);
         }
 
         public async Task DeleteRadioSong(SocketUser owner, string playlistName, int index)
         {
-            string playlistFilename = $"radio-{playlistName}.json";
+            string playlistFilename = GetPlaylistFilename(playlistName);
             //check if there is a playlist file with the given name
-            if (!File.Exists(Path.Combine(RadioPath, playlistFilename)))
+            if (!File.Exists(playlistFilename))
             {
                 await ParentModule.ServiceReplyAsync($"No playlist was found for the given name: `{playlistName}`.");
                 return;
@@ -828,7 +843,7 @@ namespace TerminusDotNetCore.Services
 
             //attempt to remove the indexed song from the playlist (assume playlist is 1-indexed)
             index--;
-            RadioPlaylist playlist = JsonConvert.DeserializeObject<RadioPlaylist>(await File.ReadAllTextAsync(Path.Combine(RadioPath, playlistFilename)), JSON_SETTINGS);
+            RadioPlaylist playlist = await LoadPlaylistFromFile(playlistFilename);
             if (index < 0 || index > playlist.Songs.Count)
             {
                 await ParentModule.ServiceReplyAsync($"The given index was out of bounds for the playlist `{playlistName}` ({playlist.Songs.Count} songs).");
@@ -846,13 +861,13 @@ namespace TerminusDotNetCore.Services
             playlist.Songs.Remove(currNode);
 
             //save updated playlist to file
-            await File.WriteAllTextAsync(Path.Combine(RadioPath, playlistFilename), JsonConvert.SerializeObject(playlist, JSON_SETTINGS));
+            await SavePlaylistToFile(playlist, playlistFilename);
         }
 
         public async Task CreateRadioPlaylist(SocketUser owner, string playlistName)
         {
-            string playlistFilename = $"radio-{playlistName}.json";
-            if (File.Exists(Path.Combine(RadioPath, playlistFilename)))
+            string playlistFilename = GetPlaylistFilename(playlistName);
+            if (File.Exists(playlistFilename))
             {
                 await ParentModule.ServiceReplyAsync($"A playlist with the name `{playlistName}` already exists.");
             }
@@ -865,20 +880,20 @@ namespace TerminusDotNetCore.Services
                 WhitelistUsers = new List<string>() { owner.Username },
                 Songs = new LinkedList<YouTubeAudioItem>()
             };
-            await File.WriteAllTextAsync(Path.Combine(RadioPath, playlistFilename), JsonConvert.SerializeObject(newPlaylist, JSON_SETTINGS));
+            await SavePlaylistToFile(newPlaylist, playlistFilename);
         }
 
         public async Task WhitelistUserForRadioPlaylist(string playlistName, SocketUser commandUser, SocketUser whitelistUser)
         {
             //can't delete that which does not exist
-            string playlistFilename = $"radio-{playlistName}.json";
-            if (!File.Exists(Path.Combine(RadioPath, playlistFilename)))
+            string playlistFilename = GetPlaylistFilename(playlistName);
+            if (!File.Exists(playlistFilename))
             {
                 await ParentModule.ServiceReplyAsync($"No playlist was found for the given name: `{playlistName}`.");
                 return;
             }
 
-            RadioPlaylist whitelistPlaylist = JsonConvert.DeserializeObject<RadioPlaylist>(await File.ReadAllTextAsync(Path.Combine(RadioPath, playlistFilename)), JSON_SETTINGS);
+            RadioPlaylist whitelistPlaylist = await LoadPlaylistFromFile(playlistFilename);
 
             //only allow owner to whitelist other users
             if (whitelistPlaylist.OwnerName != commandUser.Username)
@@ -896,7 +911,7 @@ namespace TerminusDotNetCore.Services
 
             //add user to whitelist and save to file
             whitelistPlaylist.WhitelistUsers.Add(whitelistUser.Username);
-            await File.WriteAllTextAsync(Path.Combine(RadioPath, playlistFilename), JsonConvert.SerializeObject(whitelistPlaylist, JSON_SETTINGS));
+            await SavePlaylistToFile(whitelistPlaylist, playlistFilename);
 
             await ParentModule.ServiceReplyAsync($"Added user `{whitelistUser.Username}` to whitelist for `{whitelistPlaylist.Name}`.");
         }
@@ -905,14 +920,14 @@ namespace TerminusDotNetCore.Services
         public async Task DeleteRadioPlaylist(SocketUser user, string playlistName)
         {
             //can't delete that which does not exist
-            string playlistFilename = $"radio-{playlistName}.json";
-            if (!File.Exists(Path.Combine(RadioPath, playlistFilename)))
+            string playlistFilename = GetPlaylistFilename(playlistName);
+            if (!File.Exists(playlistFilename))
             {
                 await ParentModule.ServiceReplyAsync($"No playlist was found for the given name: `{playlistName}`.");
                 return;
             }
 
-            RadioPlaylist deletePlaylist = JsonConvert.DeserializeObject<RadioPlaylist>(await File.ReadAllTextAsync(Path.Combine(RadioPath, playlistFilename)), JSON_SETTINGS);
+            RadioPlaylist deletePlaylist = await LoadPlaylistFromFile(playlistFilename);
             
             //only allow playlist owner to delete
             if (deletePlaylist.OwnerName != user.Username)
@@ -921,20 +936,20 @@ namespace TerminusDotNetCore.Services
                 return;
             }
 
-            File.Delete(Path.Combine(RadioPath, playlistFilename));
+            File.Delete(playlistFilename);
             await ParentModule.ServiceReplyAsync($"Deleted playlist `{deletePlaylist.Name}`.");
         }
 
         public async Task LoadRadioPlaylist(SocketUser owner, string playlistName)
         {
-            string playlistFilename = $"radio-{playlistName}.json";
-            if (!File.Exists(Path.Combine(RadioPath, playlistFilename)))
+            string playlistFilename = GetPlaylistFilename(playlistName);
+            if (!File.Exists(playlistFilename))
             {
                 await ParentModule.ServiceReplyAsync($"No playlist was found for the given name: `{playlistName}`.");
                 return;
             }
 
-            RadioPlaylist loadPlaylist = JsonConvert.DeserializeObject<RadioPlaylist>(await File.ReadAllTextAsync(Path.Combine(RadioPath, playlistFilename)), JSON_SETTINGS);
+            RadioPlaylist loadPlaylist = await LoadPlaylistFromFile(playlistFilename);
             foreach (YouTubeAudioItem song in loadPlaylist.Songs)
             {
                 await EnqueueSong(song);
@@ -945,14 +960,14 @@ namespace TerminusDotNetCore.Services
 
         public async Task ShowRadioPlaylistContents(string playlistName)
         {
-            string playlistFilename = $"radio-{playlistName}.json";
-            if (!File.Exists(Path.Combine(RadioPath, playlistFilename)))
+            string playlistFilename = GetPlaylistFilename(playlistName);
+            if (!File.Exists(playlistFilename))
             {
                 await ParentModule.ServiceReplyAsync($"No playlist was found for the given name: `{playlistName}`.");
                 return;
             }
 
-            RadioPlaylist playlist = JsonConvert.DeserializeObject<RadioPlaylist>(await File.ReadAllTextAsync(Path.Combine(RadioPath, playlistFilename)), JSON_SETTINGS);
+            RadioPlaylist playlist = await LoadPlaylistFromFile(playlistFilename);
             List<Embed> playlistContents = ListRadioPlaylistContents(playlist);
 
             foreach (Embed embed in playlistContents)
