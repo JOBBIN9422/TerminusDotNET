@@ -7,6 +7,7 @@ using TerminusDotNetCore.Services;
 using System.Collections.Generic;
 using Microsoft.Extensions.Configuration;
 using TerminusDotNetCore.Helpers;
+using Discord.WebSocket;
 
 namespace TerminusDotNetCore.Modules
 {
