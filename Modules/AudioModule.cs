@@ -434,7 +434,8 @@ namespace TerminusDotNetCore.Modules
             }
 
             [Command("create", RunMode = RunMode.Async)]
-            public async Task CreatePlaylist(string name)
+            [Summary("Create a new, empty playlist. The command issuer is the owner of this playlist.")]
+            public async Task CreatePlaylist([Summary("Name of the new playlist.")]string name)
             {
                 if (Context != null && Context.Guild != null)
                 {
@@ -451,7 +452,10 @@ namespace TerminusDotNetCore.Modules
             }
 
             [Command("add", RunMode = RunMode.Async)]
-            public async Task AddSongToPlaylist(string playlistName, string url)
+            [Summary("Add a YouTube song to the given playlist (if it exists).")]
+            public async Task AddSongToPlaylist(
+                [Summary("The name of the playlist to add a song to.")]string playlistName, 
+                [Summary("URL of the YouTube song to add.")]string url)
             {
                 if (Context != null && Context.Guild != null)
                 {
@@ -474,7 +478,10 @@ namespace TerminusDotNetCore.Modules
             }
 
             [Command("delete", RunMode = RunMode.Async)]
-            public async Task RemoveSongFromPlaylist(string playlistName, int index = -1)
+            [Summary("Delete a song from the given playlist by its index. If no index is provided, then delete the playlist. Only the playlist owner may delete a playlist. Only whitelisted users may delete a song from a playlist.")]
+            public async Task RemoveSongFromPlaylist(
+                [Summary("The name of the playlist to delete or delete a song from.")]string playlistName, 
+                [Summary("The index of the song in the playlist to delete (obtain with `!radio list <playlist-name>` command). If not given, delete the entire playlist.")]int index = -1)
             {
                 if (Context != null && Context.Guild != null)
                 {
@@ -498,7 +505,10 @@ namespace TerminusDotNetCore.Modules
             }
 
             [Command("whitelist", RunMode = RunMode.Async)]
-            public async Task WhitelistUserForPlaylist(string playlistName, SocketUser whitelistUser = null)
+            [Summary("Add a user to the whitelist of the given playlist. This user can then add and delete songs to/from the playlist.")]
+            public async Task WhitelistUserForPlaylist(
+                [Summary("The name of the playlist to whitelist a user for.")]string playlistName, 
+                [Summary("The `@user` to add to the whitelist of the given playlist.")]SocketUser whitelistUser = null)
             {
                 if (Context != null && Context.Guild != null)
                 {
@@ -521,7 +531,10 @@ namespace TerminusDotNetCore.Modules
             }
 
             [Command("blacklist", RunMode = RunMode.Async)]
-            public async Task RemoveWhitelistUserFromPlaylist(string playlistName, SocketUser blacklistUser = null)
+            [Summary("Remove a user from the whitelist of the given playlist (if they are on the whitelist already).")]
+            public async Task RemoveWhitelistUserFromPlaylist(
+                [Summary("The name of the playlist to delete a user from.")]string playlistName, 
+                [Summary("The `@user` to remove from the whitelist of the given playlist (if they are on the whitelist already).")]SocketUser blacklistUser = null)
             {
                 if (Context != null && Context.Guild != null)
                 {
@@ -544,7 +557,8 @@ namespace TerminusDotNetCore.Modules
             }
 
             [Command("play", RunMode = RunMode.Async)]
-            public async Task LoadPlaylist(string name)
+            [Summary("Load the specified playlist into the song queue.")]
+            public async Task LoadPlaylist([Summary("The name of the playlist to start playing.")]string name)
             {
                 if (Context != null && Context.Guild != null)
                 {
@@ -561,7 +575,8 @@ namespace TerminusDotNetCore.Modules
             }
 
             [Command("list", RunMode = RunMode.Async)]
-            public async Task ShowPlaylistContents(string name)
+            [Summary("List the contents and whitelist of the given playlist.")]
+            public async Task ShowPlaylistContents([Summary("Name of the playlist to show details for.")]string name)
             {
                 if (Context != null && Context.Guild != null)
                 {
@@ -578,6 +593,7 @@ namespace TerminusDotNetCore.Modules
             }
 
             [Command("playlists", RunMode = RunMode.Async)]
+            [Summary("List all existing playlists.")]
             public async Task ShowAllPlaylists()
             {
                 if (Context != null && Context.Guild != null)
