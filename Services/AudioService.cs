@@ -822,6 +822,8 @@ namespace TerminusDotNetCore.Services
             RadioPlaylist currPlaylist = await LoadPlaylistFromFile(playlistFilename);
             currPlaylist.Songs.AddLast(newSong);
             await SavePlaylistToFile(currPlaylist, playlistFilename);
+
+            await ParentModule.ServiceReplyAsync($"Added song `{newSong.DisplayName}` to `{currPlaylist.Name}`.");
         }
 
         public async Task DeleteRadioSong(SocketUser owner, string playlistName, int index)
@@ -862,6 +864,8 @@ namespace TerminusDotNetCore.Services
 
             //save updated playlist to file
             await SavePlaylistToFile(playlist, playlistFilename);
+
+            await ParentModule.ServiceReplyAsync($"Deleted song `{currNode.Value.DisplayName}` from `{playlist.Name}`.");
         }
 
         public async Task CreateRadioPlaylist(SocketUser owner, string playlistName)
@@ -881,6 +885,8 @@ namespace TerminusDotNetCore.Services
                 Songs = new LinkedList<YouTubeAudioItem>()
             };
             await SavePlaylistToFile(newPlaylist, playlistFilename);
+
+            await ParentModule.ServiceReplyAsync($"Created new playlist `{newPlaylist.Name}`.");
         }
 
         public async Task WhitelistUserForRadioPlaylist(string playlistName, SocketUser commandUser, SocketUser whitelistUser)
