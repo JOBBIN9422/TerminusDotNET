@@ -457,6 +457,12 @@ namespace TerminusDotNetCore.Modules
                     _service.SetGuildClient(Context.Guild, Context.Client);
                 }
 
+                if (string.IsNullOrEmpty(playlistName))
+                {
+                    await ReplyAsync("Please provide a playlist name.");
+                    return;
+                }
+                
                 if (string.IsNullOrEmpty(url))
                 {
                     await ReplyAsync("Please provide a YouTube URL.");
@@ -466,7 +472,7 @@ namespace TerminusDotNetCore.Modules
                 await _service.AddRadioSong(Context.Message.Author, playlistName, url);
             }
 
-            [Command("remove", RunMode = RunMode.Async)]
+            [Command("delete", RunMode = RunMode.Async)]
             public async Task RemoveSongFromPlaylist(string playlistName, int index = -1)
             {
                 if (Context != null && Context.Guild != null)
@@ -474,13 +480,43 @@ namespace TerminusDotNetCore.Modules
                     _service.SetGuildClient(Context.Guild, Context.Client);
                 }
 
+                if (string.IsNullOrEmpty(playlistName))
+                {
+                    await ReplyAsync("Please provide a playlist name.");
+                    return;
+                }
+
                 if (index == -1)
                 {
-                    await ReplyAsync("Please provide a valid index.");
+                    //delete the playlist if no song specified
+                    await _service.DeleteRadioPlaylist(Context.Message.Author, playlistName);
                     return;
                 }
 
                 await _service.DeleteRadioSong(Context.Message.Author, playlistName, index);
+            }
+
+            [Command("whitelist", RunMode = RunMode.Async)]
+            public async Task WhitelistUserForPlaylist(string playlistName, SocketUser whitelistUser = null)
+            {
+                if (Context != null && Context.Guild != null)
+                {
+                    _service.SetGuildClient(Context.Guild, Context.Client);
+                }
+
+                if (string.IsNullOrEmpty(playlistName))
+                {
+                    await ReplyAsync("Please provide a playlist name.");
+                    return;
+                }
+
+                if (whitelistUser == null)
+                {
+                    await ReplyAsync("Please provide a `@user` to whitelist.");
+                    return;
+                }
+
+                await _service.WhitelistUserForRadioPlaylist(playlistName, Context.Message.Author, whitelistUser);
             }
 
             [Command("play", RunMode = RunMode.Async)]

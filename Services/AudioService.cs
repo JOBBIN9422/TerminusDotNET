@@ -868,6 +868,63 @@ namespace TerminusDotNetCore.Services
             await File.WriteAllTextAsync(Path.Combine(RadioPath, playlistFilename), JsonConvert.SerializeObject(newPlaylist, JSON_SETTINGS));
         }
 
+        public async Task WhitelistUserForRadioPlaylist(string playlistName, SocketUser commandUser, SocketUser whitelistUser)
+        {
+            //can't delete that which does not exist
+            string playlistFilename = $"radio-{playlistName}.json";
+            if (!File.Exists(Path.Combine(RadioPath, playlistFilename)))
+            {
+                await ParentModule.ServiceReplyAsync($"No playlist was found for the given name: `{playlistName}`.");
+                return;
+            }
+
+            RadioPlaylist whitelistPlaylist = JsonConvert.DeserializeObject<RadioPlaylist>(await File.ReadAllTextAsync(Path.Combine(RadioPath, playlistFilename)), JSON_SETTINGS);
+
+            //only allow owner to whitelist other users
+            if (whitelistPlaylist.OwnerName != commandUser.Username)
+            {
+                await ParentModule.ServiceReplyAsync($"Only the playlist owner (`{whitelistPlaylist.OwnerName}`) can whitelist users.");
+                return;
+            }
+
+            //don't add users that are already whitelisted
+            if (IsUserWhitelisted(whitelistUser, whitelistPlaylist))
+            {
+                await ParentModule.ServiceReplyAsync($"The user `{whitelistUser.Username}` is already whitelisted for `{playlistName}.`");
+                return;
+            }
+
+            //add user to whitelist and save to file
+            whitelistPlaylist.WhitelistUsers.Add(whitelistUser.Username);
+            await File.WriteAllTextAsync(Path.Combine(RadioPath, playlistFilename), JsonConvert.SerializeObject(whitelistPlaylist, JSON_SETTINGS));
+
+            await ParentModule.ServiceReplyAsync($"Added user `{whitelistUser.Username}` to whitelist for `{whitelistPlaylist.Name}`.");
+        }
+
+
+        public async Task DeleteRadioPlaylist(SocketUser user, string playlistName)
+        {
+            //can't delete that which does not exist
+            string playlistFilename = $"radio-{playlistName}.json";
+            if (!File.Exists(Path.Combine(RadioPath, playlistFilename)))
+            {
+                await ParentModule.ServiceReplyAsync($"No playlist was found for the given name: `{playlistName}`.");
+                return;
+            }
+
+            RadioPlaylist deletePlaylist = JsonConvert.DeserializeObject<RadioPlaylist>(await File.ReadAllTextAsync(Path.Combine(RadioPath, playlistFilename)), JSON_SETTINGS);
+            
+            //only allow playlist owner to delete
+            if (deletePlaylist.OwnerName != user.Username)
+            {
+                await ParentModule.ServiceReplyAsync($"Only the playlist owner (`{deletePlaylist.OwnerName}`) can delete `{deletePlaylist.Name}`.");
+                return;
+            }
+
+            File.Delete(Path.Combine(RadioPath, playlistFilename));
+            await ParentModule.ServiceReplyAsync($"Deleted playlist `{deletePlaylist.Name}`.");
+        }
+
         public async Task LoadRadioPlaylist(SocketUser owner, string playlistName)
         {
             string playlistFilename = $"radio-{playlistName}.json";
