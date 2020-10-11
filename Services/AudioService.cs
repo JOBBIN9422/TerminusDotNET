@@ -1027,7 +1027,7 @@ namespace TerminusDotNetCore.Services
 
             var embed = new EmbedBuilder
             {
-                Title = $"{playlist.Name} ({numSongs} songs)"
+                Title = $"{playlist.Name} by {playlist.OwnerName} ({numSongs} songs)"
             };
 
             foreach (YouTubeAudioItem item in playlist.Songs)
@@ -1059,6 +1059,17 @@ namespace TerminusDotNetCore.Services
             {
                 songList.Add(embed.Build());
             }
+
+            //add an embed for whitelisted users
+            EmbedBuilder whitelistEmbed = new EmbedBuilder
+            {
+                Title = "Whitelisted Users0"
+            };
+            foreach (string whitelistUsername in playlist.WhitelistUsers)
+            {
+                whitelistEmbed.AddField(name: whitelistUsername, value: null, inline: true);
+            }
+            songList.Add(whitelistEmbed.Build());
 
             return songList;
         }
