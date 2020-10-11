@@ -520,6 +520,29 @@ namespace TerminusDotNetCore.Modules
                 await _service.WhitelistUserForRadioPlaylist(playlistName, Context.Message.Author, whitelistUser);
             }
 
+            [Command("blacklist", RunMode = RunMode.Async)]
+            public async Task RemoveWhitelistUserFromPlaylist(string playlistName, SocketUser blacklistUser = null)
+            {
+                if (Context != null && Context.Guild != null)
+                {
+                    _service.SetGuildClient(Context.Guild, Context.Client);
+                }
+
+                if (string.IsNullOrEmpty(playlistName))
+                {
+                    await ReplyAsync("Please provide a playlist name.");
+                    return;
+                }
+
+                if (blacklistUser == null)
+                {
+                    await ReplyAsync("Please provide a `@user` to remove from whitelist.");
+                    return;
+                }
+
+                await _service.RemoveWhitelistUserFromRadioPlaylist(playlistName, Context.Message.Author, blacklistUser);
+            }
+
             [Command("play", RunMode = RunMode.Async)]
             public async Task LoadPlaylist(string name)
             {

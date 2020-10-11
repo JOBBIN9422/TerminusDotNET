@@ -889,9 +889,40 @@ namespace TerminusDotNetCore.Services
             await ParentModule.ServiceReplyAsync($"Created new playlist `{newPlaylist.Name}`.");
         }
 
+        public async Task RemoveWhitelistUserFromRadioPlaylist(string playlistName, SocketUser commandUser, SocketUser blacklistUser)
+        {
+            string playlistFilename = GetPlaylistFilename(playlistName);
+            if (!File.Exists(playlistFilename))
+            {
+                await ParentModule.ServiceReplyAsync($"No playlist was found for the given name: `{playlistName}`.");
+                return;
+            }
+
+            RadioPlaylist playlist = await LoadPlaylistFromFile(playlistFilename);
+
+            //only allow owner to whitelist other users
+            if (playlist.OwnerName != commandUser.Username)
+            {
+                await ParentModule.ServiceReplyAsync($"Only the playlist owner (`{playlist.OwnerName}`) can remove users from the whitelist.");
+                return;
+            }
+
+            //don't add users that are already whitelisted
+            if (!IsUserWhitelisted(blacklistUser, playlist))
+            {
+                await ParentModule.ServiceReplyAsync($"The user `{blacklistUser.Username}` is not on the whitelist for `{playlistName}.`");
+                return;
+            }
+
+            //remove user from whitelist and save to file
+            playlist.WhitelistUsers.Remove(blacklistUser.Username);
+            await SavePlaylistToFile(playlist, playlistFilename);
+
+            await ParentModule.ServiceReplyAsync($"Removed user `{blacklistUser.Username}` from whitelist for `{playlist.Name}`.");
+        }
+
         public async Task WhitelistUserForRadioPlaylist(string playlistName, SocketUser commandUser, SocketUser whitelistUser)
         {
-            //can't delete that which does not exist
             string playlistFilename = GetPlaylistFilename(playlistName);
             if (!File.Exists(playlistFilename))
             {
