@@ -1063,11 +1063,11 @@ namespace TerminusDotNetCore.Services
             //add an embed for whitelisted users
             EmbedBuilder whitelistEmbed = new EmbedBuilder
             {
-                Title = "Whitelisted Users0"
+                Title = "Whitelisted Users"
             };
             foreach (string whitelistUsername in playlist.WhitelistUsers)
             {
-                whitelistEmbed.AddField(name: whitelistUsername, value: null, inline: true);
+                whitelistEmbed.AddField(name: "", value: whitelistUsername, inline: true);
             }
             songList.Add(whitelistEmbed.Build());
 
