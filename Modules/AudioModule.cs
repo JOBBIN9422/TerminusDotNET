@@ -558,8 +558,10 @@ namespace TerminusDotNetCore.Modules
 
             [Command("play", RunMode = RunMode.Async)]
             [Summary("Load the specified playlist into the song queue.")]
-            public async Task LoadPlaylist([Summary("The name of the playlist to start playing.")]string name)
+            public async Task LoadPlaylist([Summary("The name of the playlist to start playing.")]string name, [Summary("Shuffle the playlist if this argument is not null/empty (e.g. `!radio play <name> shuffle`).")]string shuffle = "")
             {
+
+
                 if (Context != null && Context.Guild != null)
                 {
                     _service.SetGuildClient(Context.Guild, Context.Client);
@@ -571,7 +573,8 @@ namespace TerminusDotNetCore.Modules
                     return;
                 }
 
-                await _service.LoadRadioPlaylist(Context.Message.Author, name);
+                //shuffle if requested
+                await _service.LoadRadioPlaylist(Context.Message.Author, name, shuffle == "shuffle");
             }
 
             [Command("list", RunMode = RunMode.Async)]
