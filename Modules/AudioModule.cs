@@ -544,8 +544,10 @@ namespace TerminusDotNetCore.Modules
             }
 
             [Command("play", RunMode = RunMode.Async)]
-            public async Task LoadPlaylist(string name)
+            public async Task LoadPlaylist(string name, string shuffle = "")
             {
+
+
                 if (Context != null && Context.Guild != null)
                 {
                     _service.SetGuildClient(Context.Guild, Context.Client);
@@ -557,7 +559,8 @@ namespace TerminusDotNetCore.Modules
                     return;
                 }
 
-                await _service.LoadRadioPlaylist(Context.Message.Author, name);
+                //shuffle if requested
+                await _service.LoadRadioPlaylist(Context.Message.Author, name, shuffle == "shuffle");
             }
 
             [Command("list", RunMode = RunMode.Async)]

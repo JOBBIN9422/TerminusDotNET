@@ -977,7 +977,7 @@ namespace TerminusDotNetCore.Services
             await ParentModule.ServiceReplyAsync($"Deleted playlist `{deletePlaylist.Name}`.");
         }
 
-        public async Task LoadRadioPlaylist(SocketUser owner, string playlistName)
+        public async Task LoadRadioPlaylist(SocketUser owner, string playlistName, bool shuffle)
         {
             string playlistFilename = GetPlaylistFilename(playlistName);
             if (!File.Exists(playlistFilename))
@@ -987,6 +987,11 @@ namespace TerminusDotNetCore.Services
             }
 
             RadioPlaylist loadPlaylist = await LoadPlaylistFromFile(playlistFilename);
+            if (shuffle)
+            {
+                loadPlaylist.ShuffleSongs();
+            }
+
             foreach (YouTubeAudioItem song in loadPlaylist.Songs)
             {
                 await EnqueueSong(song);
