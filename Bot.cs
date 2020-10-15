@@ -59,6 +59,7 @@ namespace TerminusDotNetCore
             Client = new DiscordSocketClient();
             Client.Log += Logger.Log;
             Client.MessageReceived += HandleCommandAsync;
+            Client.LoggedIn += SetAudioSvcGuildAndClient;
 
             //verify that each required client secret is in the secrets file
             Dictionary<string, string> requiredSecrets = new Dictionary<string, string>()
@@ -117,6 +118,18 @@ namespace TerminusDotNetCore
 
             //hang out for now
             await Task.Delay(-1);
+        }
+
+        private Task SetAudioSvcGuildAndClient()
+        {
+            AudioService audioService = _serviceProvider.GetService(typeof(AudioService)) as AudioService;
+            if (audioService != null)
+            {
+                audioService.Client = Client;
+                audioService.Guild = Client.GetGuild(ulong.Parse(_config["ServerId"]));
+            }
+
+            return Task.CompletedTask;
         }
 
         //log message to file
