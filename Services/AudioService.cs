@@ -91,10 +91,12 @@ namespace TerminusDotNetCore.Services
         #endregion
 
         #region init
-        public AudioService(IConfiguration config, Random random)
+        public AudioService(IConfiguration config, Random random, DiscordSocketClient client)
         {
             _random = random;
             Config = config;
+            Client = client;
+            Guild = client.GetGuild(ulong.Parse(Config["ServerId"]));
             FFMPEG_PROCESS_NAME = Config["FfmpegCommand"];
 
             //init weed timer
@@ -1443,8 +1445,6 @@ namespace TerminusDotNetCore.Services
         }
         public void SetGuildClient(IGuild g, DiscordSocketClient c)
         {
-            Guild = g;
-            Client = c;
         }
         #endregion
 
