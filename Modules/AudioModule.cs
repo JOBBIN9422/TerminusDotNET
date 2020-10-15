@@ -54,10 +54,6 @@ namespace TerminusDotNetCore.Modules
             [Summary("Which end of the queue to insert the song at (appended to the back by default.)")]string qEnd = "back", 
             [Summary("ID of channel to play in (defaults to verbal shitposting)")]string channelID = "-1")
         {
-            if( Context != null && Context.Guild != null)
-            {
-                _service.SetGuildClient(Context.Guild, Context.Client);
-            }
             // TODO allow this function to accept mp3 attachments and play those
             //check if channel id is valid and exists
             ulong voiceID;
@@ -130,11 +126,6 @@ namespace TerminusDotNetCore.Modules
         public async Task SearchSong([Summary("YouTube search term (enclose in quotes if it contains spaces).")]string searchTerm, 
             [Summary("Channel ID to play the song in.")]string channelID = "-1")
         {
-            if (Context != null && Context.Guild != null)
-            {
-                _service.SetGuildClient(Context.Guild, Context.Client);
-            }
-
             //check if channel id is valid and exists
             ulong voiceID;
             if (channelID.Equals("-1"))
@@ -168,11 +159,6 @@ namespace TerminusDotNetCore.Modules
             [Summary("Which end of the queue to insert the song at (appended to the back by default.)")]string qEnd = "back", 
             [Summary("Channel ID to play the song in.")]string channelID = "-1")
         {
-            if (Context != null && Context.Guild != null)
-            {
-                _service.SetGuildClient(Context.Guild, Context.Client);
-            }
-
             //check if channel id is valid and exists
             ulong voiceID;
             if (channelID.Equals("-1"))
@@ -205,12 +191,7 @@ namespace TerminusDotNetCore.Modules
         public async Task StreamSong([Summary("URL of the YouTube video to add.")]string url, 
             [Summary("Which end of the queue to insert the song at (appended to the back by default.)")]string qEnd = "back",
             [Summary("Channel ID to play the song in.")]string channelID = "-1")
-        {
-            if (Context != null && Context.Guild != null)
-            {
-                _service.SetGuildClient(Context.Guild, Context.Client);
-            }
-            
+        {            
             //check if channel id is valid and exists
             ulong voiceID;
             if (channelID.Equals("-1"))
@@ -323,11 +304,6 @@ namespace TerminusDotNetCore.Modules
         [Summary("Saves the queue contents (if any) to file.")]
         public async Task SaveQueueContents()
         {
-            if (Context != null && Context.Guild != null)
-            {
-                _service.SetGuildClient(Context.Guild, Context.Client);
-            }
-
             await _service.SaveQueueContents();
         }
 
@@ -335,22 +311,12 @@ namespace TerminusDotNetCore.Modules
         [Summary("Loads the queue contents (if any) from file.")]
         public async Task LoadQueueContents()
         {
-            if (Context != null && Context.Guild != null)
-            {
-                _service.SetGuildClient(Context.Guild, Context.Client);
-            }
-
             await _service.LoadQueueContents();
         }
 
         [Command("weed", RunMode = RunMode.Async)]
         public async Task ForceWeed()
         {
-            if (Context != null && Context.Guild != null)
-            {
-                _service.SetGuildClient(Context.Guild, Context.Client);
-            }
-
             await _service.PlayWeed();
         }
 
@@ -382,10 +348,6 @@ namespace TerminusDotNetCore.Modules
             [Summary("Which end of the queue to insert the song at (appended to the back by default.)")]string qEnd = "back",
             [Summary("Channel ID to play the song in.")]string channelID = "-1")
             {
-                if (Context != null && Context.Guild != null)
-                {
-                    _service.SetGuildClient(Context.Guild, Context.Client);
-                }
                 ulong voiceID;
                 if (channelID.Equals("-1"))
                 {
@@ -437,11 +399,6 @@ namespace TerminusDotNetCore.Modules
             [Summary("Create a new, empty playlist. The command issuer is the owner of this playlist.")]
             public async Task CreatePlaylist([Summary("Name of the new playlist.")]string name)
             {
-                if (Context != null && Context.Guild != null)
-                {
-                    _service.SetGuildClient(Context.Guild, Context.Client);
-                }
-
                 if (string.IsNullOrEmpty(name))
                 {
                     await ReplyAsync("Please provide a playlist name.");
@@ -457,11 +414,6 @@ namespace TerminusDotNetCore.Modules
                 [Summary("The name of the playlist to add a song to.")]string playlistName, 
                 [Summary("URL of the YouTube song to add.")]string url)
             {
-                if (Context != null && Context.Guild != null)
-                {
-                    _service.SetGuildClient(Context.Guild, Context.Client);
-                }
-
                 if (string.IsNullOrEmpty(playlistName))
                 {
                     await ReplyAsync("Please provide a playlist name.");
@@ -483,11 +435,6 @@ namespace TerminusDotNetCore.Modules
                 [Summary("The name of the playlist to delete or delete a song from.")]string playlistName, 
                 [Summary("The index of the song in the playlist to delete (obtain with `!radio list <playlist-name>` command). If not given, delete the entire playlist.")]int index = -1)
             {
-                if (Context != null && Context.Guild != null)
-                {
-                    _service.SetGuildClient(Context.Guild, Context.Client);
-                }
-
                 if (string.IsNullOrEmpty(playlistName))
                 {
                     await ReplyAsync("Please provide a playlist name.");
@@ -510,11 +457,6 @@ namespace TerminusDotNetCore.Modules
                 [Summary("The name of the playlist to whitelist a user for.")]string playlistName, 
                 [Summary("The `@user` to add to the whitelist of the given playlist.")]SocketUser whitelistUser = null)
             {
-                if (Context != null && Context.Guild != null)
-                {
-                    _service.SetGuildClient(Context.Guild, Context.Client);
-                }
-
                 if (string.IsNullOrEmpty(playlistName))
                 {
                     await ReplyAsync("Please provide a playlist name.");
@@ -536,11 +478,6 @@ namespace TerminusDotNetCore.Modules
                 [Summary("The name of the playlist to delete a user from.")]string playlistName, 
                 [Summary("The `@user` to remove from the whitelist of the given playlist (if they are on the whitelist already).")]SocketUser blacklistUser = null)
             {
-                if (Context != null && Context.Guild != null)
-                {
-                    _service.SetGuildClient(Context.Guild, Context.Client);
-                }
-
                 if (string.IsNullOrEmpty(playlistName))
                 {
                     await ReplyAsync("Please provide a playlist name.");
@@ -560,13 +497,6 @@ namespace TerminusDotNetCore.Modules
             [Summary("Load the specified playlist into the song queue.")]
             public async Task LoadPlaylist([Summary("The name of the playlist to start playing.")]string name, [Summary("Shuffle the playlist if this argument is not null/empty (e.g. `!radio play <name> shuffle`).")]string shuffle = "")
             {
-
-
-                if (Context != null && Context.Guild != null)
-                {
-                    _service.SetGuildClient(Context.Guild, Context.Client);
-                }
-
                 if (string.IsNullOrEmpty(name))
                 {
                     await ReplyAsync("Please provide a playlist name.");
@@ -581,11 +511,6 @@ namespace TerminusDotNetCore.Modules
             [Summary("List the contents and whitelist of the given playlist.")]
             public async Task ShowPlaylistContents([Summary("Name of the playlist to show details for.")]string name)
             {
-                if (Context != null && Context.Guild != null)
-                {
-                    _service.SetGuildClient(Context.Guild, Context.Client);
-                }
-
                 if (string.IsNullOrEmpty(name))
                 {
                     await ReplyAsync("Please provide a playlist name.");
@@ -599,10 +524,6 @@ namespace TerminusDotNetCore.Modules
             [Summary("List all existing playlists.")]
             public async Task ShowAllPlaylists()
             {
-                if (Context != null && Context.Guild != null)
-                {
-                    _service.SetGuildClient(Context.Guild, Context.Client);
-                }
                 await _service.ShowAllRadioPlaylists();
             }
         }

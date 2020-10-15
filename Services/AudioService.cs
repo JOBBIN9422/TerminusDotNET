@@ -1441,9 +1441,6 @@ namespace TerminusDotNetCore.Services
             AttachmentHelper.DeleteFiles(AttachmentHelper.GetTempAssets("*.mp4"));
             AttachmentHelper.DeleteFiles(AttachmentHelper.GetTempAssets("*.webm"));
         }
-        public void SetGuildClient(IGuild g, DiscordSocketClient c)
-        {
-        }
         #endregion
 
         #region Hideki ZONE
