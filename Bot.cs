@@ -46,6 +46,9 @@ namespace TerminusDotNetCore
         {
             StartTime = DateTime.Now;
 
+            //init custom services
+            _serviceProvider = InstallServices();
+
             //load libraries into version dict
             PopulateInstalledLibrariesList();
 
@@ -109,9 +112,6 @@ namespace TerminusDotNetCore
                 _blacklistChannels.Add(id);
             }
 
-            //init custom services
-            _serviceProvider = InstallServices();
-
             //init commands service
             await CommandService.AddModulesAsync(assembly: Assembly.GetEntryAssembly(), services: _serviceProvider);
             CommandService.CommandExecuted += OnCommandExecutedAsync;
@@ -120,6 +120,7 @@ namespace TerminusDotNetCore
             await Task.Delay(-1);
         }
 
+        //set client and guild for audio service BEFORE any playback commands are executed
         private Task SetAudioSvcGuildAndClient()
         {
             AudioService audioService = _serviceProvider.GetService(typeof(AudioService)) as AudioService;
