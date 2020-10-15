@@ -204,6 +204,7 @@ namespace TerminusDotNetCore
                              .AddSingleton<TicTacToeService>()
                              .AddSingleton<IronPythonService>()
                              .AddSingleton(new Random())
+                             .AddSingleton(this)
                              .AddSingleton(Client);
 
             return serviceCollection.BuildServiceProvider();
