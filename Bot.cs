@@ -19,8 +19,6 @@ namespace TerminusDotNetCore
     {
         public DateTime StartTime { get; private set; }
 
-        
-
         public DiscordSocketClient Client { get; private set; }
 
         //Discord.NET command management
@@ -206,7 +204,7 @@ namespace TerminusDotNetCore
                              .AddSingleton<TicTacToeService>()
                              .AddSingleton<IronPythonService>()
                              .AddSingleton(new Random())
-                             .AddSingleton(this);
+                             .AddSingleton(Client);
 
             return serviceCollection.BuildServiceProvider();
         }
