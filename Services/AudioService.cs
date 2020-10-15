@@ -100,6 +100,7 @@ namespace TerminusDotNetCore.Services
             if (Guild == null)
             {
                 Console.WriteLine($"WARNING: guild not set properly! (config server id: {Config["ServerId"]})");
+                Console.WriteLine($"Client currently has {Client.Guilds.Count} guilds.");
             }
             FFMPEG_PROCESS_NAME = Config["FfmpegCommand"];
 
