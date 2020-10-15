@@ -59,7 +59,7 @@ namespace TerminusDotNetCore
             Client = new DiscordSocketClient();
             Client.Log += Logger.Log;
             Client.MessageReceived += HandleCommandAsync;
-            Client.LoggedIn += SetAudioSvcGuildAndClient;
+            Client.Ready += SetAudioSvcGuildAndClient;
 
             //verify that each required client secret is in the secrets file
             Dictionary<string, string> requiredSecrets = new Dictionary<string, string>()
@@ -209,7 +209,6 @@ namespace TerminusDotNetCore
 
             //new custom services (and objects passed via DI) get added here
             serviceCollection.AddSingleton(_config)
-                             .AddSingleton(Client)
                              .AddSingleton<ImageService>()
                              .AddSingleton<TextEditService>()
                              .AddSingleton<TwitterService>()
