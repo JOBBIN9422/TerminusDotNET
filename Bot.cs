@@ -196,6 +196,7 @@ namespace TerminusDotNetCore
 
             //new custom services (and objects passed via DI) get added here
             serviceCollection.AddSingleton(_config)
+                             .AddSingleton(Client)
                              .AddSingleton<ImageService>()
                              .AddSingleton<TextEditService>()
                              .AddSingleton<TwitterService>()
@@ -204,8 +205,7 @@ namespace TerminusDotNetCore
                              .AddSingleton<TicTacToeService>()
                              .AddSingleton<IronPythonService>()
                              .AddSingleton(new Random())
-                             .AddSingleton(this)
-                             .AddSingleton(Client);
+                             .AddSingleton(this);
 
             return serviceCollection.BuildServiceProvider();
         }
