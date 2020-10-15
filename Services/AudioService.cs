@@ -97,6 +97,10 @@ namespace TerminusDotNetCore.Services
             Config = config;
             Client = client;
             Guild = client.GetGuild(ulong.Parse(Config["ServerId"]));
+            if (Guild == null)
+            {
+                Console.WriteLine($"WARNING: guild not set properly! (config server id: {Config["ServerId"]})");
+            }
             FFMPEG_PROCESS_NAME = Config["FfmpegCommand"];
 
             //init weed timer
