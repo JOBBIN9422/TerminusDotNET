@@ -1337,7 +1337,7 @@ namespace TerminusDotNetCore.Services
             try
             {
                 //get the stream & video info for the current video
-                var videoInfo = await _ytClient.Videos.GetAsync(url);
+                string videoName = await GetVideoTitleFromUrlAsync(url);
                 var streamManifest = await _ytClient.Videos.Streams.GetManifestAsync(GetVideoIdFromUrl(url));
                 var streamInfo = streamManifest.GetAudioOnly().WithHighestBitrate();
 
@@ -1345,7 +1345,7 @@ namespace TerminusDotNetCore.Services
                 string videoDataFilename = Path.Combine(TempPath, $"{Guid.NewGuid().ToString("N")}.{streamInfo.Container}");
                 await _ytClient.Videos.Streams.DownloadAsync(streamInfo, videoDataFilename);
 
-                await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"Downloaded youtube video '{videoInfo.Title}'."));
+                await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"Downloaded youtube video '{videoName}'."));
 
                 return videoDataFilename;
             }
