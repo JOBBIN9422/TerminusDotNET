@@ -1,4 +1,3 @@
-using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
@@ -11,17 +10,15 @@ using System.Linq;
 using Microsoft.Extensions.Configuration;
 using System.Collections.Generic;
 using TerminusDotNetCore.Helpers;
-using VideoLibrary;
 using Google.Apis.YouTube.v3;
 using Google.Apis.Auth.OAuth2;
-using Google.Apis.Auth.OAuth2.Flows;
-using Google.Apis.Auth.OAuth2.Responses;
 using System.Threading;
 using Google.Apis.Util.Store;
 using Google.Apis.Services;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json;
-using Discord.Commands;
+using YoutubeExplode;
+using YoutubeExplode.Videos.Streams;
 
 namespace TerminusDotNetCore.Services
 {
@@ -56,6 +53,8 @@ namespace TerminusDotNetCore.Services
         //used for streaming audio in the currently-connected channel
         private IAudioClient _currAudioClient = null;
 
+        private YoutubeClient _ytClient = new YoutubeClient();
+
         //the currently active ffmpeg process for audio streaming
         private CancellationTokenSource _ffmpegCancelTokenSrc = new CancellationTokenSource();
 
@@ -84,6 +83,7 @@ namespace TerminusDotNetCore.Services
 
         //path for local (aliased) audio files
         public string AudioPath { get; } = Path.Combine("assets", "audio");
+        public string TempPath { get; } = Path.Combine("assets", "temp");
         public string RadioPath { get; } = Path.Combine("assets", "audio", "playlists");
 
         //RNG
@@ -1334,28 +1334,20 @@ namespace TerminusDotNetCore.Services
         #region Youtube helpers
         private async Task<string> DownloadYoutubeVideoAsync(string url)
         {
-            //define the directory to save video files to
-            string tempPath = Path.Combine(Environment.CurrentDirectory, "assets", "temp");
-            string videoDataFullPath;
-
             try
             {
-                //download the youtube video data (usually .mp4 or .webm)
-                var youtube = YouTube.Default;
-                var video = await youtube.GetVideoAsync(url);
-                var videoData = await video.GetBytesAsync();
+                //get the stream & video info for the current video
+                var videoInfo = await _ytClient.Videos.GetAsync(url);
+                var streamManifest = await _ytClient.Videos.Streams.GetManifestAsync(GetVideoIdFromUrl(url));
+                var streamInfo = streamManifest.GetAudioOnly().WithHighestBitrate();
 
-                await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"Downloaded youtube video '{video.FullName}'."));
+                //download the current stream
+                string videoDataFilename = Path.Combine(TempPath, $"{Guid.NewGuid().ToString("N")}.{streamInfo.Container}");
+                await _ytClient.Videos.Streams.DownloadAsync(streamInfo, videoDataFilename);
 
-                //give the video file a unique name to prevent collisions
-                //  **if libvideo fails to fetch the video's title, it names the file 'YouTube.mp4'**
-                string videoDataFilename = $"{Guid.NewGuid().ToString("N")}{Path.GetExtension(video.FullName)}";
+                await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"Downloaded youtube video '{videoInfo.Title}'."));
 
-                //write the downloaded media file to the temp assets dir
-                videoDataFullPath = Path.Combine(tempPath, videoDataFilename);
-                await File.WriteAllBytesAsync(videoDataFullPath, videoData);
-
-                return videoDataFullPath;
+                return videoDataFilename;
             }
             catch (Exception ex)
             {
