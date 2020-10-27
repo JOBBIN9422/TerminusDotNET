@@ -361,6 +361,7 @@ namespace TerminusDotNetCore.Services
                     await JoinAudio();
 
                 }
+                //switch channels if the current song was queued for another channel
                 else if (CurrentChannel.Id != nextInQueue.PlayChannelId)
                 {
                     await LeaveAudio();
