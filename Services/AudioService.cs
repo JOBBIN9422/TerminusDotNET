@@ -175,6 +175,7 @@ namespace TerminusDotNetCore.Services
             try
             {
                 _currAudioClient = await CurrentChannel.ConnectAsync();
+                _currAudioClient.Disconnected += _currAudioClient_Disconnected;
                 await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"Joined audio on channel '{CurrentChannel.Name}'."));
             }
 
@@ -195,6 +196,12 @@ namespace TerminusDotNetCore.Services
             {
                 return;
             }
+        }
+
+        private async Task _currAudioClient_Disconnected(Exception arg)
+        {
+            await StopFfmpeg();
+            await LeaveAudio();
         }
 
         public async Task LeaveAudio()
