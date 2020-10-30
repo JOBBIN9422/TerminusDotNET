@@ -203,6 +203,10 @@ namespace TerminusDotNetCore.Services
             StopFfmpeg();
             await LeaveAudio();
             await SaveQueueContents();
+            lock (_queueLock)
+            {
+                _songQueue.Clear();
+            }
         }
 
         public async Task LeaveAudio()
