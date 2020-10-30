@@ -36,6 +36,7 @@ namespace TerminusDotNetCore.Services
 
         //lock object for queue synchronization
         private readonly object _queueLock = new object();
+        private readonly object _cancelLock = new object();
 
         //cache hideki playlist songs to prevent too many API calls
         private List<string> _hidekiSongsCache = new List<string>();
@@ -161,7 +162,7 @@ namespace TerminusDotNetCore.Services
             //stop any currently active streams
             if (_ffmpegCancelTokenSrc != null)
             {
-                lock (_ffmpegCancelTokenSrc)
+                lock (_cancelLock)
                 {
                     //cancel and re-init the cancellation source
                     _ffmpegCancelTokenSrc.Cancel();
@@ -253,14 +254,11 @@ namespace TerminusDotNetCore.Services
                 {
                     await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"Playback cancelled for file '{path}'."));
 
-                    lock (_ffmpegCancelTokenSrc)
+                    lock (_cancelLock)
                     {
-                        if (_ffmpegCancelTokenSrc.IsCancellationRequested)
-                        {
-                            //reset the cancel state to prevent skipping multiple songs
-                            _ffmpegCancelTokenSrc.Dispose();
-                            _ffmpegCancelTokenSrc = new CancellationTokenSource();
-                        }
+                        //reset the cancel state to prevent skipping multiple songs
+                        _ffmpegCancelTokenSrc.Dispose();
+                        _ffmpegCancelTokenSrc = new CancellationTokenSource();
                     }
                 }
                 finally
@@ -966,7 +964,7 @@ namespace TerminusDotNetCore.Services
             }
 
             RadioPlaylist deletePlaylist = await LoadPlaylistFromFile(playlistFilename);
-            
+
             //only allow playlist owner to delete
             if (deletePlaylist.OwnerName != user.Username)
             {
