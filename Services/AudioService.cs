@@ -200,8 +200,9 @@ namespace TerminusDotNetCore.Services
 
         private async Task _currAudioClient_Disconnected(Exception arg)
         {
-            await StopFfmpeg();
+            StopFfmpeg();
             await LeaveAudio();
+            await SaveQueueContents();
         }
 
         public async Task LeaveAudio()
