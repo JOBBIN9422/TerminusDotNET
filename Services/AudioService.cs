@@ -268,9 +268,12 @@ namespace TerminusDotNetCore.Services
 
                     lock (_cancelLock)
                     {
-                        //reset the cancel state to prevent skipping multiple songs
-                        _ffmpegCancelTokenSrc.Dispose();
-                        _ffmpegCancelTokenSrc = new CancellationTokenSource();
+                        if (_ffmpegCancelTokenSrc.IsCancellationRequested)
+                        {
+                            //reset the cancel state to prevent skipping multiple songs
+                            _ffmpegCancelTokenSrc.Dispose();
+                            _ffmpegCancelTokenSrc = new CancellationTokenSource();
+                        }
                     }
                 }
                 finally
