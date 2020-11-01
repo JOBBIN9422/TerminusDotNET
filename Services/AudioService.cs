@@ -251,6 +251,9 @@ namespace TerminusDotNetCore.Services
 
                     await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"Finished playback for file '{path}'."));
                 }
+                catch (OperationCanceledException) 
+                { 
+                }
                 finally
                 {
                     // reset cancellation token source if needed
