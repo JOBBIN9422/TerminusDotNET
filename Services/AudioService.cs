@@ -164,7 +164,6 @@ namespace TerminusDotNetCore.Services
             {
                 lock (_cancelLock)
                 {
-                    //cancel and re-init the cancellation source
                     _ffmpegCancelTokenSrc.Cancel();
                 }
             }
@@ -200,13 +199,13 @@ namespace TerminusDotNetCore.Services
 
         private async Task _currAudioClient_Disconnected(Exception arg)
         {
-            StopFfmpeg();
-            await LeaveAudio();
-            await SaveQueueContents();
-            lock (_queueLock)
-            {
-                _songQueue.Clear();
-            }
+            //StopFfmpeg();
+            //await LeaveAudio();
+            //await SaveQueueContents();
+            //lock (_queueLock)
+            //{
+            //    _songQueue.Clear();
+            //}
         }
 
         public async Task LeaveAudio()
@@ -234,14 +233,6 @@ namespace TerminusDotNetCore.Services
             }
         }
 
-        public async Task SendAudioAsync(string path)
-        {
-            if (_currAudioClient != null)
-            {
-                await StreamFfmpegAudio(path);
-            }
-        }
-
         private async Task StreamFfmpegAudio(string path)
         {
             //init ffmpeg and audio streams
@@ -260,12 +251,9 @@ namespace TerminusDotNetCore.Services
 
                     await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"Finished playback for file '{path}'."));
                 }
-
-                //don't allow cancellation exceptions to propogate
-                catch (OperationCanceledException)
+                finally
                 {
-                    await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"Playback cancelled for file '{path}'."));
-
+                    // reset cancellation token source if needed
                     lock (_cancelLock)
                     {
                         if (_ffmpegCancelTokenSrc.IsCancellationRequested)
@@ -275,9 +263,7 @@ namespace TerminusDotNetCore.Services
                             _ffmpegCancelTokenSrc = new CancellationTokenSource();
                         }
                     }
-                }
-                finally
-                {
+
                     //clean up
                     output.Dispose();
                     stream.Clear();
@@ -406,10 +392,7 @@ namespace TerminusDotNetCore.Services
                 _currentSong.StartTime = DateTime.Now;
 
                 //begin playback
-                await SendAudioAsync(nextInQueue.Path);
-
-                //play next in queue (if any)
-                //await PlayNextInQueue();
+                await StreamFfmpegAudio(nextInQueue.Path);
             }
 
             //out of songs, leave channel and clean up
