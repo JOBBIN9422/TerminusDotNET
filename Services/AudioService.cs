@@ -238,6 +238,7 @@ namespace TerminusDotNetCore.Services
             //init ffmpeg and audio streams
             using (var ffmpeg = CreateProcess(path))
             using (var output = ffmpeg.StandardOutput.BaseStream)
+            using (var debugStream = new MemoryStream())
             using (var stream = _currAudioClient.CreatePCMStream(AudioApplication.Mixed))
             {
                 try
@@ -246,7 +247,9 @@ namespace TerminusDotNetCore.Services
 
                     //stream audio with cancellation token for skipping
                     _playing = true;
-                    await output.CopyToAsync(stream, _ffmpegCancelTokenSrc.Token);
+                    await output.CopyToAsync(debugStream, _ffmpegCancelTokenSrc.Token);
+                    await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"Mem stream length: {debugStream.Length}."));
+                    //await output.CopyToAsync(stream, _ffmpegCancelTokenSrc.Token);
 
                     await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"Finished playback for file '{path}'."));
                 }
