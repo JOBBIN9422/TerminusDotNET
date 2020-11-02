@@ -238,7 +238,7 @@ namespace TerminusDotNetCore.Services
             //init ffmpeg and audio streams
             using (var ffmpeg = CreateProcess(path))
             using (var output = ffmpeg.StandardOutput.BaseStream)
-            using (var stream = _currAudioClient.CreatePCMStream(AudioApplication.Music))
+            using (var stream = _currAudioClient.CreatePCMStream(AudioApplication.Mixed))
             {
                 try
                 {
