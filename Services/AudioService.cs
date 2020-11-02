@@ -255,15 +255,13 @@ namespace TerminusDotNetCore.Services
                 }
                 finally
                 {
-                    // reset cancellation token source if needed
+                    // reset cancellation token source
                     lock (_cancelLock)
                     {
-                        //reset the cancel state to prevent skipping multiple songs
                         _ffmpegCancelTokenSrc.Dispose();
                         _ffmpegCancelTokenSrc = new CancellationTokenSource();
                     }
 
-                    //clean up
                     await stream.FlushAsync();
                     _playing = false;
                 }
