@@ -246,8 +246,7 @@ namespace TerminusDotNetCore.Services
 
                     //stream audio with cancellation token for skipping
                     _playing = true;
-                    _currentAudioStreamTask = output.CopyToAsync(stream, _ffmpegCancelTokenSrc.Token);
-                    await _currentAudioStreamTask;
+                    await output.CopyToAsync(stream, _ffmpegCancelTokenSrc.Token);
 
                     await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"Finished playback for file '{path}'."));
                 }
