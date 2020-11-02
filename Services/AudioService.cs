@@ -268,9 +268,7 @@ namespace TerminusDotNetCore.Services
                     }
 
                     //clean up
-                    ffmpeg.Kill(true);
-                    output.Dispose();
-                    stream.Clear();
+                    await stream.FlushAsync();
                     _playing = false;
                 }
             }
