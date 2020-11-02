@@ -250,27 +250,22 @@ namespace TerminusDotNetCore.Services
 
                     await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"Finished playback for file '{path}'."));
                 }
-                catch (OperationCanceledException) 
-                { 
+                catch (OperationCanceledException)
+                {
                 }
                 finally
                 {
                     // reset cancellation token source if needed
                     lock (_cancelLock)
                     {
-                        if (_ffmpegCancelTokenSrc.IsCancellationRequested)
-                        {
-                            //reset the cancel state to prevent skipping multiple songs
-                            _ffmpegCancelTokenSrc.Dispose();
-                            _ffmpegCancelTokenSrc = new CancellationTokenSource();
-                        }
+                        //reset the cancel state to prevent skipping multiple songs
+                        _ffmpegCancelTokenSrc.Dispose();
+                        _ffmpegCancelTokenSrc = new CancellationTokenSource();
                     }
 
                     //clean up
                     await stream.FlushAsync();
                     _playing = false;
-
-                    Thread.Sleep(1000);
                 }
             }
         }
