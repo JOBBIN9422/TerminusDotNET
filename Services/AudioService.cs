@@ -269,6 +269,8 @@ namespace TerminusDotNetCore.Services
                     //clean up
                     await stream.FlushAsync();
                     _playing = false;
+
+                    Thread.Sleep(1000);
                 }
             }
         }
