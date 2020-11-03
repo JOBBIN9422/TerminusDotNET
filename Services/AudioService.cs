@@ -385,6 +385,7 @@ namespace TerminusDotNetCore.Services
 
                     //begin playback
                     await StreamFfmpegAudio(stream, nextInQueue.Path);
+                    Thread.Sleep(5000);
                 }
             }
 
