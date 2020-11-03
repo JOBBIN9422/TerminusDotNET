@@ -313,7 +313,7 @@ namespace TerminusDotNetCore.Services
             }
             while (_songQueue.Count > 0)
             {
-                using (var stream = _currAudioClient.CreateDirectPCMStream(AudioApplication.Mixed))
+                using (var stream = _currAudioClient.CreatePCMStream(AudioApplication.Music))
                 {
 
                     //fetch the next song in queue
