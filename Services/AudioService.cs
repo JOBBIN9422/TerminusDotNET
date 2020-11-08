@@ -221,12 +221,12 @@ namespace TerminusDotNetCore.Services
             }
         }
 
-        private async Task StreamFfmpegAudio(AudioOutStream stream, string path)
+        private async Task StreamFfmpegAudio(string path)
         {
             //init ffmpeg and audio streams
             using (var ffmpeg = CreateProcess(path))
             using (var output = ffmpeg.StandardOutput.BaseStream)
-            //using (var stream = _currAudioClient.CreateDirectPCMStream(AudioApplication.Mixed))
+            using (var stream = _currAudioClient.CreateDirectPCMStream(AudioApplication.Music))
             {
                 try
                 {
@@ -305,88 +305,77 @@ namespace TerminusDotNetCore.Services
 
         public async Task PlayNextInQueue(bool saveQueue = true)
         {
-            if (CurrentChannel == null)
-            {
-                CurrentChannel = await Guild.GetVoiceChannelAsync(ulong.Parse(Config["AudioChannelId"]));
-                await JoinAudio();
-
-            }
             while (_songQueue.Count > 0)
             {
-                using (var stream = _currAudioClient.CreatePCMStream(AudioApplication.Music))
+                //fetch the next song in queue
+                AudioItem nextInQueue;
+                lock (_queueLock)
                 {
-
-                    //fetch the next song in queue
-                    AudioItem nextInQueue;
-                    lock (_queueLock)
-                    {
-                        nextInQueue = _songQueue.First.Value;
-                        _songQueue.RemoveFirst();
-                    }
-
-                    //need to download if not already saved locally (change the URL to the path of the downloaded file)
-                    if (nextInQueue is YouTubeAudioItem)
-                    {
-                        YouTubeAudioItem nextVideo = nextInQueue as YouTubeAudioItem;
-                        try
-                        {
-                            //if the youtube video has not been downloaded yet
-                            if (nextVideo.AudioSource == YouTubeAudioType.Url)
-                            {
-                                nextVideo.Path = await DownloadYoutubeVideoAsync(nextVideo.VideoUrl);
-                            }
-                        }
-                        catch (ArgumentException)
-                        {
-                            await Logger.Log(new LogMessage(LogSeverity.Warning, "AudioSvc", $"failed to download local file for {nextVideo.DisplayName}, skipping..."));
-
-                            //skip this item if the download fails
-                            continue;
-                        }
-                    }
-
-                    //set the current channel for the next song and join channel
-                    if (CurrentChannel == null)
-                    {
-                        CurrentChannel = await Guild.GetVoiceChannelAsync(nextInQueue.PlayChannelId);
-                        await JoinAudio();
-
-                    }
-                    //switch channels if the current song was queued for another channel
-                    else if (CurrentChannel.Id != nextInQueue.PlayChannelId)
-                    {
-                        await LeaveAudio();
-                        CurrentChannel = await Guild.GetVoiceChannelAsync(nextInQueue.PlayChannelId);
-                        await JoinAudio();
-                    }
-
-                    //set the display name to file name if it's empty
-                    if (string.IsNullOrEmpty(nextInQueue.DisplayName))
-                    {
-                        nextInQueue.DisplayName = Path.GetFileNameWithoutExtension(nextInQueue.Path);
-                    }
-
-                    //set bot client's status to the song name
-                    if (Client != null)
-                    {
-                        await Client.SetGameAsync(nextInQueue.DisplayName);
-                    }
-
-                    //update the currently-playing song
-                    _currentSong = nextInQueue;
-
-                    //record current queue state 
-                    if (saveQueue)
-                    {
-                        await SaveQueueContents();
-                    }
-
-                    _currentSong.StartTime = DateTime.Now;
-
-                    //begin playback
-                    await StreamFfmpegAudio(stream, nextInQueue.Path);
-                    Thread.Sleep(5000);
+                    nextInQueue = _songQueue.First.Value;
+                    _songQueue.RemoveFirst();
                 }
+
+                //need to download if not already saved locally (change the URL to the path of the downloaded file)
+                if (nextInQueue is YouTubeAudioItem)
+                {
+                    YouTubeAudioItem nextVideo = nextInQueue as YouTubeAudioItem;
+                    try
+                    {
+                        //if the youtube video has not been downloaded yet
+                        if (nextVideo.AudioSource == YouTubeAudioType.Url)
+                        {
+                            nextVideo.Path = await DownloadYoutubeVideoAsync(nextVideo.VideoUrl);
+                        }
+                    }
+                    catch (ArgumentException)
+                    {
+                        await Logger.Log(new LogMessage(LogSeverity.Warning, "AudioSvc", $"failed to download local file for {nextVideo.DisplayName}, skipping..."));
+
+                        //skip this item if the download fails
+                        continue;
+                    }
+                }
+
+                //set the current channel for the next song and join channel
+                if (CurrentChannel == null)
+                {
+                    CurrentChannel = await Guild.GetVoiceChannelAsync(nextInQueue.PlayChannelId);
+                    await JoinAudio();
+
+                }
+                //switch channels if the current song was queued for another channel
+                else if (CurrentChannel.Id != nextInQueue.PlayChannelId)
+                {
+                    await LeaveAudio();
+                    CurrentChannel = await Guild.GetVoiceChannelAsync(nextInQueue.PlayChannelId);
+                    await JoinAudio();
+                }
+
+                //set the display name to file name if it's empty
+                if (string.IsNullOrEmpty(nextInQueue.DisplayName))
+                {
+                    nextInQueue.DisplayName = Path.GetFileNameWithoutExtension(nextInQueue.Path);
+                }
+
+                //set bot client's status to the song name
+                if (Client != null)
+                {
+                    await Client.SetGameAsync(nextInQueue.DisplayName);
+                }
+
+                //update the currently-playing song
+                _currentSong = nextInQueue;
+
+                //record current queue state 
+                if (saveQueue)
+                {
+                    await SaveQueueContents();
+                }
+
+                _currentSong.StartTime = DateTime.Now;
+
+                //begin playback
+                await StreamFfmpegAudio(nextInQueue.Path);
             }
 
             //out of songs, leave channel and clean up
@@ -397,7 +386,6 @@ namespace TerminusDotNetCore.Services
             }
 
             CleanAudioFiles();
-
         }
 
         public async Task MoveSongToFront(int index)
