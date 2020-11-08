@@ -235,8 +235,6 @@ namespace TerminusDotNetCore.Services
                     //stream audio with cancellation token for skipping
                     _playing = true;
                     await output.CopyToAsync(stream, _ffmpegCancelTokenSrc.Token);
-
-                    await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"Finished playback for file '{path}'."));
                 }
                 catch (OperationCanceledException)
                 {
@@ -250,7 +248,7 @@ namespace TerminusDotNetCore.Services
                         _ffmpegCancelTokenSrc = new CancellationTokenSource();
                     }
 
-                    await stream.FlushAsync();
+                    await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"Finished playback for file '{path}'."));
                     _playing = false;
                 }
             }
