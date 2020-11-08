@@ -281,7 +281,7 @@ namespace TerminusDotNetCore.Services
             return Process.Start(new ProcessStartInfo
             {
                 FileName = FFMPEG_PROCESS_NAME,
-                Arguments = $"-hide_banner -i \"{path}\" -ac 2 -f s16le -ar 48000 pipe:1",
+                Arguments = $"-hide_banner -loglevel panic -i \"{path}\" -ac 2 -f s16le -ar 48000 pipe:1",
                 UseShellExecute = false,
                 RedirectStandardOutput = true
             });
