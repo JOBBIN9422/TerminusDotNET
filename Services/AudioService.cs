@@ -390,6 +390,9 @@ namespace TerminusDotNetCore.Services
 
                     //begin playback
                     await StreamFfmpegAudio(nextInQueue.Path);
+
+                    //prevent queue from skipping songs if there is an unexpected disconnect
+                    Thread.Sleep(500);
                 }
             }
             finally
