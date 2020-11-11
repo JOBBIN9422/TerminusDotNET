@@ -326,6 +326,10 @@ namespace TerminusDotNetCore.Services
                     lock (_queueLock)
                     {
                         nextInQueue = _songQueue.First.Value;
+
+                        //prevent queue from skipping songs if there is an unexpected disconnect
+                        Thread.Sleep(1000);
+
                         _songQueue.RemoveFirst();
                     }
 
@@ -390,9 +394,6 @@ namespace TerminusDotNetCore.Services
 
                     //begin playback
                     await StreamFfmpegAudio(nextInQueue.Path);
-
-                    //prevent queue from skipping songs if there is an unexpected disconnect
-                    Thread.Sleep(5000);
                 }
             }
             finally
