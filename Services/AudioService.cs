@@ -201,26 +201,26 @@ namespace TerminusDotNetCore.Services
             try
             {
                 //stop playback loop if running
-                _queueCancelTokenSrc.Cancel();
+                //_queueCancelTokenSrc.Cancel();
                 await Logger.Log(new LogMessage(LogSeverity.Warning, "AudioSvc", $"Exception caused audio client disconnect: {arg.Message}"));
 
-                //save queue contents to dedicated backup file
-                await SaveQueueContents("crash-backup.json");
-                await Logger.Log(new LogMessage(LogSeverity.Warning, "AudioSvc", $"Saved queue contents to backup file."));
+                ////save queue contents to dedicated backup file
+                //await SaveQueueContents("crash-backup.json");
+                //await Logger.Log(new LogMessage(LogSeverity.Warning, "AudioSvc", $"Saved queue contents to backup file."));
 
-                lock (_queueLock)
-                {
-                    _songQueue.Clear();
-                }
+                //lock (_queueLock)
+                //{
+                //    _songQueue.Clear();
+                //}
 
-                //leave & clean up
-                await LeaveAudio();
+                ////leave & clean up
+                //await LeaveAudio();
             }
             finally
             {
                 //reset token
-                _queueCancelTokenSrc.Dispose();
-                _queueCancelTokenSrc = new CancellationTokenSource();
+                //_queueCancelTokenSrc.Dispose();
+                //_queueCancelTokenSrc = new CancellationTokenSource();
             }
         }
 
@@ -277,13 +277,6 @@ namespace TerminusDotNetCore.Services
 
                     await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"Finished playback for file '{path}'."));
                     _playing = false;
-
-                    //stop queue if we got disconnected somehow
-                    if (_currAudioClient.ConnectionState != ConnectionState.Connected)
-                    {
-                        _queueCancelTokenSrc.Cancel();
-                        await Logger.Log(new LogMessage(LogSeverity.Warning, "AudioSvc", $"Disconnected from channel - cancelling queue token."));
-                    }
                 }
             }
         }
