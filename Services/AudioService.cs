@@ -282,6 +282,7 @@ namespace TerminusDotNetCore.Services
                     if (_currAudioClient.ConnectionState != ConnectionState.Connected)
                     {
                         _queueCancelTokenSrc.Cancel();
+                        await Logger.Log(new LogMessage(LogSeverity.Warning, "AudioSvc", $"Disconnected from channel - cancelling queue token."));
                     }
                 }
             }
