@@ -198,29 +198,17 @@ namespace TerminusDotNetCore.Services
 
         private async Task _currAudioClient_Disconnected(Exception arg)
         {
-            try
+            //stop playback loop if running
+            _queueCancelTokenSrc.Cancel();
+            await Logger.Log(new LogMessage(LogSeverity.Warning, "AudioSvc", $"Exception caused audio client disconnect: {arg.Message}"));
+
+            //save queue contents to dedicated backup file
+            await SaveQueueContents("crash-backup.json");
+            await Logger.Log(new LogMessage(LogSeverity.Warning, "AudioSvc", $"Saved queue contents to backup file."));
+
+            lock (_queueLock)
             {
-                //stop playback loop if running
-                //_queueCancelTokenSrc.Cancel();
-                await Logger.Log(new LogMessage(LogSeverity.Warning, "AudioSvc", $"Exception caused audio client disconnect: {arg.Message}"));
-
-                ////save queue contents to dedicated backup file
-                //await SaveQueueContents("crash-backup.json");
-                //await Logger.Log(new LogMessage(LogSeverity.Warning, "AudioSvc", $"Saved queue contents to backup file."));
-
-                //lock (_queueLock)
-                //{
-                //    _songQueue.Clear();
-                //}
-
-                ////leave & clean up
-                //await LeaveAudio();
-            }
-            finally
-            {
-                //reset token
-                //_queueCancelTokenSrc.Dispose();
-                //_queueCancelTokenSrc = new CancellationTokenSource();
+                _songQueue.Clear();
             }
         }
 
@@ -655,6 +643,10 @@ namespace TerminusDotNetCore.Services
                 _songQueue.AddFirst(currSong);
                 _songQueue.AddFirst(weedSong);
             }
+
+            //reset queue token
+            _queueCancelTokenSrc.Dispose();
+            _queueCancelTokenSrc = new CancellationTokenSource();
 
             if (!_playing)
             {
