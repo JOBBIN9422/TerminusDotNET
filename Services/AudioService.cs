@@ -56,7 +56,6 @@ namespace TerminusDotNetCore.Services
 
         //tokens for cancelling playback
         private CancellationTokenSource _ffmpegCancelTokenSrc = new CancellationTokenSource();
-        private CancellationTokenSource _queueCancelTokenSrc = new CancellationTokenSource();
 
         //command name (.exe extension for Windows use)
         private static string FFMPEG_PROCESS_NAME;
@@ -326,10 +325,6 @@ namespace TerminusDotNetCore.Services
                     lock (_queueLock)
                     {
                         nextInQueue = _songQueue.First.Value;
-
-                        //prevent queue from skipping songs if there is an unexpected disconnect
-                        Thread.Sleep(1000);
-
                         _songQueue.RemoveFirst();
                     }
 
@@ -633,10 +628,6 @@ namespace TerminusDotNetCore.Services
                 _songQueue.AddFirst(currSong);
                 _songQueue.AddFirst(weedSong);
             }
-
-            //reset queue token
-            _queueCancelTokenSrc.Dispose();
-            _queueCancelTokenSrc = new CancellationTokenSource();
 
             if (!_playing)
             {

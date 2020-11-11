@@ -309,16 +309,9 @@ namespace TerminusDotNetCore.Modules
 
         [Command("qload", RunMode = RunMode.Async)]
         [Summary("Loads the queue contents (if any) from file.")]
-        public async Task LoadQueueContents(string backup = "")
+        public async Task LoadQueueContents()
         {
-            if (backup == "backup")
-            {
-                await _service.LoadQueueContents("crash-backup.json");
-            }
-            else
-            {
-                await _service.LoadQueueContents();
-            }
+            await _service.LoadQueueContents();
         }
 
         [Command("weed", RunMode = RunMode.Async)]
