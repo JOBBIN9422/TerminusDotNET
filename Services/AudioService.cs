@@ -198,17 +198,28 @@ namespace TerminusDotNetCore.Services
 
         private async Task _currAudioClient_Disconnected(Exception arg)
         {
-            //stop playback loop if running
-            _queueCancelTokenSrc.Cancel();
-            await Logger.Log(new LogMessage(LogSeverity.Warning, "AudioSvc", $"Exception caused audio client disconnect: {arg.Message}"));
-
-            //save queue contents to dedicated backup file
-            await SaveQueueContents("crash-backup.json");
-            await Logger.Log(new LogMessage(LogSeverity.Warning, "AudioSvc", $"Saved queue contents to backup file."));
-
-            lock (_queueLock)
+            if (arg is OperationCanceledException)
             {
-                _songQueue.Clear();
+                await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"Routine audio client disconnect."));
+
+                //reset token
+                _queueCancelTokenSrc.Dispose();
+                _queueCancelTokenSrc = new CancellationTokenSource();
+            }
+            else
+            {
+                //stop playback loop if running
+                _queueCancelTokenSrc.Cancel();
+                await Logger.Log(new LogMessage(LogSeverity.Warning, "AudioSvc", $"Exception caused audio client disconnect: {arg.Message}"));
+
+                //save queue contents to dedicated backup file
+                await SaveQueueContents("crash-backup.json");
+                await Logger.Log(new LogMessage(LogSeverity.Warning, "AudioSvc", $"Saved queue contents to backup file."));
+
+                lock (_queueLock)
+                {
+                    _songQueue.Clear();
+                }
             }
         }
 
@@ -318,11 +329,11 @@ namespace TerminusDotNetCore.Services
 
         public async Task PlayNextInQueue(bool saveQueue = true)
         {
-            //abort if already cancelled
-            _queueCancelTokenSrc.Token.ThrowIfCancellationRequested();
-
             try
             {
+                //abort if already cancelled
+                _queueCancelTokenSrc.Token.ThrowIfCancellationRequested();
+
                 while (_songQueue.Count > 0)
                 {
                     //poll cancellation token 
