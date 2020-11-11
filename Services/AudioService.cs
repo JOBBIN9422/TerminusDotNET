@@ -212,6 +212,7 @@ namespace TerminusDotNetCore.Services
 
                 //save queue contents to dedicated backup file
                 await SaveQueueContents("crash-backup.json");
+                await Logger.Log(new LogMessage(LogSeverity.Warning, "AudioSvc", $"Saved queue contents to backup file."));
 
                 //leave & clean up
                 await LeaveAudio();
