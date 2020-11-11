@@ -58,7 +58,7 @@ namespace TerminusDotNetCore.Services
 
         //tokens for cancelling playback
         private CancellationTokenSource _ffmpegCancelTokenSrc = new CancellationTokenSource();
-        private CancellationTokenSource _queueCancelTokenSrc  = new CancellationTokenSource();
+        private CancellationTokenSource _queueCancelTokenSrc = new CancellationTokenSource();
 
         //command name (.exe extension for Windows use)
         private static string FFMPEG_PROCESS_NAME;
@@ -200,23 +200,16 @@ namespace TerminusDotNetCore.Services
 
         private async Task _currAudioClient_Disconnected(Exception arg)
         {
-            if (arg is TaskCanceledException)
-            {
-                await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"Routine disconnection from channel."));
-            }
-            else
-            {
-                //stop playback loop if running
-                _queueCancelTokenSrc.Cancel();
-                await Logger.Log(new LogMessage(LogSeverity.Warning, "AudioSvc", $"Exception caused audio client disconnect: {arg.Message}"));
+            //stop playback loop if running
+            _queueCancelTokenSrc.Cancel();
+            await Logger.Log(new LogMessage(LogSeverity.Warning, "AudioSvc", $"Exception caused audio client disconnect: {arg.Message}"));
 
-                //save queue contents to dedicated backup file
-                await SaveQueueContents("crash-backup.json");
-                await Logger.Log(new LogMessage(LogSeverity.Warning, "AudioSvc", $"Saved queue contents to backup file."));
+            //save queue contents to dedicated backup file
+            await SaveQueueContents("crash-backup.json");
+            await Logger.Log(new LogMessage(LogSeverity.Warning, "AudioSvc", $"Saved queue contents to backup file."));
 
-                //leave & clean up
-                await LeaveAudio();
-            }
+            //leave & clean up
+            await LeaveAudio();
         }
 
         public async Task LeaveAudio()
