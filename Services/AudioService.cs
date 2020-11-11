@@ -207,6 +207,8 @@ namespace TerminusDotNetCore.Services
             else
             {
                 //stop playback loop if running
+                _queueCancelTokenSrc.Cancel();
+                await Logger.Log(new LogMessage(LogSeverity.Warning, "AudioSvc", $"Exception caused audio client disconnect: {arg.Message}"));
 
                 //save queue contents to dedicated backup file
                 await SaveQueueContents("crash-backup.json");
