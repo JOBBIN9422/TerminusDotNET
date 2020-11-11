@@ -46,8 +46,6 @@ namespace TerminusDotNetCore.Services
         //metadata about the currently playing song
         private AudioItem _currentSong = null;
 
-        private Task _currentAudioStreamTask = null;
-
         //currently-connected channel (needs to be set from outside the service occasionally)
         public IVoiceChannel CurrentChannel { get; set; } = null;
 
@@ -279,6 +277,12 @@ namespace TerminusDotNetCore.Services
 
                     await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"Finished playback for file '{path}'."));
                     _playing = false;
+
+                    //stop queue if we got disconnected somehow
+                    if (_currAudioClient.ConnectionState != ConnectionState.Connected)
+                    {
+                        _queueCancelTokenSrc.Cancel();
+                    }
                 }
             }
         }
