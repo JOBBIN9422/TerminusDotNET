@@ -200,16 +200,25 @@ namespace TerminusDotNetCore.Services
 
         private async Task _currAudioClient_Disconnected(Exception arg)
         {
-            //stop playback loop if running
-            _queueCancelTokenSrc.Cancel();
-            await Logger.Log(new LogMessage(LogSeverity.Warning, "AudioSvc", $"Exception caused audio client disconnect: {arg.Message}"));
+            try
+            {
+                //stop playback loop if running
+                _queueCancelTokenSrc.Cancel();
+                await Logger.Log(new LogMessage(LogSeverity.Warning, "AudioSvc", $"Exception caused audio client disconnect: {arg.Message}"));
 
-            //save queue contents to dedicated backup file
-            await SaveQueueContents("crash-backup.json");
-            await Logger.Log(new LogMessage(LogSeverity.Warning, "AudioSvc", $"Saved queue contents to backup file."));
+                //save queue contents to dedicated backup file
+                await SaveQueueContents("crash-backup.json");
+                await Logger.Log(new LogMessage(LogSeverity.Warning, "AudioSvc", $"Saved queue contents to backup file."));
 
-            //leave & clean up
-            await LeaveAudio();
+                //leave & clean up
+                await LeaveAudio();
+            }
+            finally
+            {
+                //reset queue token
+                _queueCancelTokenSrc.Dispose();
+                _queueCancelTokenSrc = new CancellationTokenSource();
+            }
         }
 
         public async Task LeaveAudio()
@@ -408,10 +417,6 @@ namespace TerminusDotNetCore.Services
 
             finally
             {
-                //reset queue token
-                _queueCancelTokenSrc.Dispose();
-                _queueCancelTokenSrc = new CancellationTokenSource();
-
                 //out of songs, leave channel and clean up
                 await LeaveAudio();
 
