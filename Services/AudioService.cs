@@ -197,10 +197,20 @@ namespace TerminusDotNetCore.Services
             }
         }
 
-        private Task _currAudioClient_Disconnected(Exception arg)
+        private async Task _currAudioClient_Disconnected(Exception arg)
         {
-            Console.WriteLine(arg);
-            return Task.CompletedTask;
+            if (arg is TaskCanceledException)
+            {
+                await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"Routine disconnection from channel."));
+            }
+            else
+            {
+                //stop playback loop if running
+
+                //save queue contents
+
+                //leave & clean up
+            }
         }
 
         public async Task LeaveAudio()
