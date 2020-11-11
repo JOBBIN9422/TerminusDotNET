@@ -204,23 +204,25 @@ namespace TerminusDotNetCore.Services
             {
                 //stop playback loop if running
                 _queueCancelTokenSrc.Cancel();
-                _ffmpegCancelTokenSrc.Cancel();
                 await Logger.Log(new LogMessage(LogSeverity.Warning, "AudioSvc", $"Exception caused audio client disconnect: {arg.Message}"));
 
                 //save queue contents to dedicated backup file
                 await SaveQueueContents("crash-backup.json");
                 await Logger.Log(new LogMessage(LogSeverity.Warning, "AudioSvc", $"Saved queue contents to backup file."));
 
+                lock (_queueLock)
+                {
+                    _songQueue.Clear();
+                }
+
                 //leave & clean up
                 await LeaveAudio();
             }
             finally
             {
-                //reset tokens
+                //reset token
                 _queueCancelTokenSrc.Dispose();
                 _queueCancelTokenSrc = new CancellationTokenSource();
-                _ffmpegCancelTokenSrc.Dispose();
-                _ffmpegCancelTokenSrc = new CancellationTokenSource();
             }
         }
 
