@@ -56,8 +56,9 @@ namespace TerminusDotNetCore.Services
 
         private YoutubeClient _ytClient = new YoutubeClient();
 
-        //the currently active ffmpeg process for audio streaming
+        //tokens for cancelling playback
         private CancellationTokenSource _ffmpegCancelTokenSrc = new CancellationTokenSource();
+        private CancellationTokenSource _queueCancelTokenSrc  = new CancellationTokenSource();
 
         //command name (.exe extension for Windows use)
         private static string FFMPEG_PROCESS_NAME;
@@ -207,9 +208,11 @@ namespace TerminusDotNetCore.Services
             {
                 //stop playback loop if running
 
-                //save queue contents
+                //save queue contents to dedicated backup file
+                await SaveQueueContents("crash-backup.json");
 
                 //leave & clean up
+                await LeaveAudio();
             }
         }
 
@@ -222,7 +225,6 @@ namespace TerminusDotNetCore.Services
             {
                 await Client.SetGameAsync("");
             }
-
 
             //disconnect and stop the audio client if needed
             if (CurrentChannel != null)
@@ -320,87 +322,105 @@ namespace TerminusDotNetCore.Services
 
         public async Task PlayNextInQueue(bool saveQueue = true)
         {
-            while (_songQueue.Count > 0)
-            {
-                //fetch the next song in queue
-                AudioItem nextInQueue;
-                lock (_queueLock)
-                {
-                    nextInQueue = _songQueue.First.Value;
-                    _songQueue.RemoveFirst();
-                }
+            //abort if already cancelled
+            _queueCancelTokenSrc.Token.ThrowIfCancellationRequested();
 
-                //need to download if not already saved locally (change the URL to the path of the downloaded file)
-                if (nextInQueue is YouTubeAudioItem)
+            try
+            {
+                while (_songQueue.Count > 0)
                 {
-                    YouTubeAudioItem nextVideo = nextInQueue as YouTubeAudioItem;
-                    try
+                    //poll cancellation token 
+                    if (_queueCancelTokenSrc.Token.IsCancellationRequested)
                     {
-                        //if the youtube video has not been downloaded yet
-                        if (nextVideo.AudioSource == YouTubeAudioType.Url)
+                        _queueCancelTokenSrc.Token.ThrowIfCancellationRequested();
+                    }
+
+                    //fetch the next song in queue
+                    AudioItem nextInQueue;
+                    lock (_queueLock)
+                    {
+                        nextInQueue = _songQueue.First.Value;
+                        _songQueue.RemoveFirst();
+                    }
+
+                    //need to download if not already saved locally (change the URL to the path of the downloaded file)
+                    if (nextInQueue is YouTubeAudioItem)
+                    {
+                        YouTubeAudioItem nextVideo = nextInQueue as YouTubeAudioItem;
+                        try
                         {
-                            nextVideo.Path = await DownloadYoutubeVideoAsync(nextVideo.VideoUrl);
+                            //if the youtube video has not been downloaded yet
+                            if (nextVideo.AudioSource == YouTubeAudioType.Url)
+                            {
+                                nextVideo.Path = await DownloadYoutubeVideoAsync(nextVideo.VideoUrl);
+                            }
+                        }
+                        catch (ArgumentException)
+                        {
+                            await Logger.Log(new LogMessage(LogSeverity.Warning, "AudioSvc", $"failed to download local file for {nextVideo.DisplayName}, skipping..."));
+
+                            //skip this item if the download fails
+                            continue;
                         }
                     }
-                    catch (ArgumentException)
+
+                    //set the current channel for the next song and join channel
+                    if (CurrentChannel == null)
                     {
-                        await Logger.Log(new LogMessage(LogSeverity.Warning, "AudioSvc", $"failed to download local file for {nextVideo.DisplayName}, skipping..."));
+                        CurrentChannel = await Guild.GetVoiceChannelAsync(nextInQueue.PlayChannelId);
+                        await JoinAudio();
 
-                        //skip this item if the download fails
-                        continue;
                     }
+                    //switch channels if the current song was queued for another channel
+                    else if (CurrentChannel.Id != nextInQueue.PlayChannelId)
+                    {
+                        await LeaveAudio();
+                        CurrentChannel = await Guild.GetVoiceChannelAsync(nextInQueue.PlayChannelId);
+                        await JoinAudio();
+                    }
+
+                    //set the display name to file name if it's empty
+                    if (string.IsNullOrEmpty(nextInQueue.DisplayName))
+                    {
+                        nextInQueue.DisplayName = Path.GetFileNameWithoutExtension(nextInQueue.Path);
+                    }
+
+                    //set bot client's status to the song name
+                    if (Client != null)
+                    {
+                        await Client.SetGameAsync(nextInQueue.DisplayName);
+                    }
+
+                    //update the currently-playing song
+                    _currentSong = nextInQueue;
+
+                    //record current queue state 
+                    if (saveQueue)
+                    {
+                        await SaveQueueContents();
+                    }
+
+                    _currentSong.StartTime = DateTime.Now;
+
+                    //begin playback
+                    await StreamFfmpegAudio(nextInQueue.Path);
                 }
-
-                //set the current channel for the next song and join channel
-                if (CurrentChannel == null)
-                {
-                    CurrentChannel = await Guild.GetVoiceChannelAsync(nextInQueue.PlayChannelId);
-                    await JoinAudio();
-
-                }
-                //switch channels if the current song was queued for another channel
-                else if (CurrentChannel.Id != nextInQueue.PlayChannelId)
-                {
-                    await LeaveAudio();
-                    CurrentChannel = await Guild.GetVoiceChannelAsync(nextInQueue.PlayChannelId);
-                    await JoinAudio();
-                }
-
-                //set the display name to file name if it's empty
-                if (string.IsNullOrEmpty(nextInQueue.DisplayName))
-                {
-                    nextInQueue.DisplayName = Path.GetFileNameWithoutExtension(nextInQueue.Path);
-                }
-
-                //set bot client's status to the song name
-                if (Client != null)
-                {
-                    await Client.SetGameAsync(nextInQueue.DisplayName);
-                }
-
-                //update the currently-playing song
-                _currentSong = nextInQueue;
-
-                //record current queue state 
-                if (saveQueue)
-                {
-                    await SaveQueueContents();
-                }
-
-                _currentSong.StartTime = DateTime.Now;
-
-                //begin playback
-                await StreamFfmpegAudio(nextInQueue.Path);
             }
-
-            //out of songs, leave channel and clean up
-            await LeaveAudio();
-            if (Client != null)
+            catch (OperationCanceledException)
             {
-                await Client.SetGameAsync(null);
             }
 
-            CleanAudioFiles();
+            finally
+            {
+                //reset queue token
+                _queueCancelTokenSrc.Dispose();
+                _queueCancelTokenSrc = new CancellationTokenSource();
+
+                //out of songs, leave channel and clean up
+                await LeaveAudio();
+
+                CleanAudioFiles();
+            }
         }
 
         public async Task MoveSongToFront(int index)
