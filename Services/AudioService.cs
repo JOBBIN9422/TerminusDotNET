@@ -204,6 +204,7 @@ namespace TerminusDotNetCore.Services
             {
                 //stop playback loop if running
                 _queueCancelTokenSrc.Cancel();
+                _ffmpegCancelTokenSrc.Cancel();
                 await Logger.Log(new LogMessage(LogSeverity.Warning, "AudioSvc", $"Exception caused audio client disconnect: {arg.Message}"));
 
                 //save queue contents to dedicated backup file
@@ -215,9 +216,11 @@ namespace TerminusDotNetCore.Services
             }
             finally
             {
-                //reset queue token
+                //reset tokens
                 _queueCancelTokenSrc.Dispose();
                 _queueCancelTokenSrc = new CancellationTokenSource();
+                _ffmpegCancelTokenSrc.Dispose();
+                _ffmpegCancelTokenSrc = new CancellationTokenSource();
             }
         }
 
