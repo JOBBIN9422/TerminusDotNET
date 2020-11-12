@@ -197,7 +197,12 @@ namespace TerminusDotNetCore.Services
 
         private async Task _currAudioClient_Disconnected(Exception arg)
         {
-            //update state to keep queue from burning
+            //update state to keep queue from burning through songs
+            /*NOTE: I can't really find an elegant way to pause the song queue
+                    when a disconnect occurs. This means that the queue will sometimes
+                    burn through a song or two (with failed playback since it's not in 
+                    channel) before this disconnect handler fires and lets the queue
+                    know that it needs to reconnect to voice.*/
             CurrentChannel = null;
             if (arg is OperationCanceledException)
             {
@@ -236,7 +241,7 @@ namespace TerminusDotNetCore.Services
         private async Task StreamFfmpegAudio(string path)
         {
             //init ffmpeg and audio streams
-            using (var ffmpeg = CreateProcess(path))
+            using (var ffmpeg = CreateFfmpegProcess(path))
             using (var output = ffmpeg.StandardOutput.BaseStream)
             using (var stream = _currAudioClient.CreatePCMStream(AudioApplication.Music))
             {
@@ -285,7 +290,7 @@ namespace TerminusDotNetCore.Services
             }
         }
 
-        private Process CreateProcess(string path)
+        private Process CreateFfmpegProcess(string path)
         {
             //start an ffmpeg process for the given song file
             return Process.Start(new ProcessStartInfo
@@ -319,7 +324,6 @@ namespace TerminusDotNetCore.Services
             {
                 while (_songQueue.Count > 0)
                 {
-
                     //fetch the next song in queue
                     AudioItem nextInQueue;
                     lock (_queueLock)
