@@ -115,19 +115,30 @@ namespace TerminusDotNetCore.Services
 
         private void InitYoutubeClient()
         {
-            Uri baseUri = new Uri("https://www.youtube.com");
-            HttpClientHandler handler = new HttpClientHandler();
-            CookieContainer cookieContainer = new CookieContainer();
+            //load cookie toggle setting from config
+            bool useCookies = bool.Parse(Config["UseYoutubeCookies"]);
 
-            //load cookies from config
-            foreach (IConfigurationSection cookiePair in Config.GetSection("YoutubeCookies").GetChildren())
+            if (useCookies)
             {
-                cookieContainer.Add(baseUri, new Cookie(cookiePair.Key, cookiePair.Value));
-            }
+                Uri baseUri = new Uri("https://www.youtube.com");
+                HttpClientHandler handler = new HttpClientHandler();
+                CookieContainer cookieContainer = new CookieContainer();
 
-            handler.CookieContainer = cookieContainer;
-            HttpClient client = new HttpClient(handler);
-            _ytClient = new YoutubeClient(client);
+                //load cookies from config
+                foreach (IConfigurationSection cookiePair in Config.GetSection("YoutubeCookies").GetChildren())
+                {
+                    cookieContainer.Add(baseUri, new Cookie(cookiePair.Key, cookiePair.Value));
+                }
+
+                handler.CookieContainer = cookieContainer;
+                HttpClient client = new HttpClient(handler);
+                _ytClient = new YoutubeClient(client);
+            }
+            else
+            {
+                //if not using cookies, init yt client without an HttpClient
+                _ytClient = new YoutubeClient();
+            }
         }
         
         private async Task InitYoutubeService()
