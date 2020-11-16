@@ -19,6 +19,8 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using YoutubeExplode;
 using YoutubeExplode.Videos.Streams;
+using System.Net.Http;
+using System.Net;
 
 namespace TerminusDotNetCore.Services
 {
@@ -52,7 +54,7 @@ namespace TerminusDotNetCore.Services
         //used for streaming audio in the currently-connected channel
         private IAudioClient _currAudioClient = null;
 
-        private YoutubeClient _ytClient = new YoutubeClient();
+        private YoutubeClient _ytClient = null;
 
         //tokens for cancelling playback
         private CancellationTokenSource _ffmpegCancelTokenSrc = new CancellationTokenSource();
@@ -108,9 +110,27 @@ namespace TerminusDotNetCore.Services
             _timer = new Timer(async _ => await PlayWeed(), null, fourTwentyMs, (int)new TimeSpan(24, 0, 0).TotalMilliseconds);
 
             Task.Run(async () => await InitYoutubeService());
+            InitYoutubeClient();
         }
 
-        public async Task InitYoutubeService()
+        private void InitYoutubeClient()
+        {
+            Uri baseUri = new Uri("https://www.youtube.com");
+            HttpClientHandler handler = new HttpClientHandler();
+            CookieContainer cookieContainer = new CookieContainer();
+
+            //load cookies from config
+            foreach (IConfigurationSection cookiePair in Config.GetSection("YoutubeCookies").GetChildren())
+            {
+                cookieContainer.Add(baseUri, new Cookie(cookiePair.Key, cookiePair.Value));
+            }
+
+            handler.CookieContainer = cookieContainer;
+            HttpClient client = new HttpClient(handler);
+            _ytClient = new YoutubeClient(client);
+        }
+        
+        private async Task InitYoutubeService()
         {
             //attempt to read auth info from secrets file 
             UserCredential credentials;
