@@ -38,6 +38,7 @@ namespace TerminusDotNetCore.Modules
             if (!_channelNameToIdMap.ContainsKey(channelName))
             {
                 await ReplyAsync("Invalid channel name (please use `main` or `weed`).");
+                return;
             }
             ulong voiceID = _channelNameToIdMap[channelName];
 
@@ -113,6 +114,7 @@ namespace TerminusDotNetCore.Modules
             if (!_channelNameToIdMap.ContainsKey(channelName))
             {
                 await ReplyAsync("Invalid channel name (please use `main` or `weed`).");
+                return;
             }
             ulong voiceID = _channelNameToIdMap[channelName];
 
@@ -129,6 +131,7 @@ namespace TerminusDotNetCore.Modules
             if (!_channelNameToIdMap.ContainsKey(channelName))
             {
                 await ReplyAsync("Invalid channel name (please use `main` or `weed`).");
+                return;
             }
             ulong voiceID = _channelNameToIdMap[channelName];
 
@@ -279,6 +282,7 @@ namespace TerminusDotNetCore.Modules
                 if (!_channelNameToIdMap.ContainsKey(channelName))
                 {
                     await ReplyAsync("Invalid channel name (please use `main` or `weed`).");
+                    return;
                 }
                 ulong voiceID = _channelNameToIdMap[channelName];
 
