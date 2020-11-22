@@ -104,6 +104,10 @@ namespace TerminusDotNetCore.Helpers
                     validExtensions = _validAudioExtensions;
                     break;
 
+                case AttachmentFilter.Media:
+                    validExtensions = _validMediaExtensions;
+                    break;
+
                 case AttachmentFilter.Images:
                     validExtensions = _validImageExtensions;
                     break;
