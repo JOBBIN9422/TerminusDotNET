@@ -127,8 +127,12 @@ namespace TerminusDotNetCore.Helpers
             //determine top & bottom text location
             float padding = 10f;
             float textMaxWidth = image.Width - (padding * 2);
+
+            //determine how much to vertically offset bottom text (need to account for word wrap)
+            int paddingScaleFactor = (int)(botTextSize.Width / textMaxWidth);
+
             PointF topLeftLocation = new PointF(padding, padding);
-            PointF bottomLeftLocation = new PointF(padding, image.Height - botTextSize.Height - padding * 2);
+            PointF bottomLeftLocation = new PointF(padding, image.Height - botTextSize.Height * paddingScaleFactor - padding * 2);
 
             //white brush for text fill and black pen for text outline
             SolidBrush brush = new SolidBrush(Color.White);
