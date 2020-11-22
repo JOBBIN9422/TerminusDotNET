@@ -107,8 +107,8 @@ namespace TerminusDotNetCore.Modules
         [Command("playlist", RunMode = RunMode.Async)]
         [Summary("Add all of the songs in the playlist to the queue in the order they appear in the playlist.")]
         public async Task AddPlaylist([Summary("The URL of the YouTube playlist to add.")]string playlistUrl, 
+            [Summary("Which end of the queue to insert the song at (appended to the back by default.)")]string qEnd = "back",
             [Summary("whether or not to shuffle the playlist when adding it to the song queue.")]string shuffle = "false",
-            [Summary("Which end of the queue to insert the song at (appended to the back by default.)")]string qEnd = "back", 
             [Summary("Channel name to play the song in (`main` or `weed`).")]string channelName = "main")
         {
             //check if channel id is valid and exists
