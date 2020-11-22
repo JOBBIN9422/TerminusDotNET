@@ -96,6 +96,7 @@ namespace TerminusDotNetCore.Modules
             if (!_channelNameToIdMap.ContainsKey(channelName))
             {
                 await ReplyAsync("Invalid channel name (please use `main` or `weed`).");
+                return;
             }
             ulong voiceID = _channelNameToIdMap[channelName];
 
@@ -251,6 +252,10 @@ namespace TerminusDotNetCore.Modules
                 //do not need to set service config here - passed into audioSvc constructor via DI
                 _service = service;
                 _service.ParentModule = this;
+
+                //create a mapping from channel names to their IDs
+                _channelNameToIdMap.Add("main", ulong.Parse(config["AudioChannelId"]));
+                _channelNameToIdMap.Add("weed", ulong.Parse(config["WeedChannelId"]));
             }
 
             [Command]
