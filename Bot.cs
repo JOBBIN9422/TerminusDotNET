@@ -17,6 +17,7 @@ namespace TerminusDotNetCore
 {
     public class Bot
     {
+        public ulong BeanId { get; private set; } = 647265224205926410;
         public DateTime StartTime { get; private set; }
 
         public DiscordSocketClient Client { get; private set; }
@@ -154,9 +155,9 @@ namespace TerminusDotNetCore
                 await HandleRegexResponses(message);
             }
 
-            //check if message is not command or not sent by bot
+            //check if message is not command or sent by bot ( except for bean stalk :'} )
             if (!(message.HasCharPrefix('!', ref argPos) || message.HasMentionPrefix(Client.CurrentUser, ref argPos))
-            || message.Author.IsBot)
+            || (message.Author.IsBot && message.Author.Id != BeanId))
             {
                 return;
             }
