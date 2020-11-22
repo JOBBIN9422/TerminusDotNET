@@ -129,7 +129,7 @@ namespace TerminusDotNetCore.Helpers
             float textMaxWidth = image.Width - (padding * 2);
 
             //determine how much to vertically offset bottom text (need to account for word wrap)
-            int paddingScaleFactor = (int)(botTextSize.Width / textMaxWidth);
+            int paddingScaleFactor = (int)Math.Round(botTextSize.Width / textMaxWidth);
 
             PointF topLeftLocation = new PointF(padding, padding);
             PointF bottomLeftLocation = new PointF(padding, image.Height - botTextSize.Height * paddingScaleFactor - padding * 2);
