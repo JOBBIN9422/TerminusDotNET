@@ -22,32 +22,6 @@ namespace TerminusDotNetCore.Modules
             _service.ParentModule = this;
         }
 
-        private async Task<IReadOnlyCollection<Attachment>> GetAttachmentsAsync()
-        {
-            var attachments = Context.Message.Attachments;
-            if (attachments == null || attachments.Count == 0)
-            {
-                //check the last 20 messages for attachments (from most recent to oldest)
-                var messages = await Context.Channel.GetMessagesAsync(20).FlattenAsync();
-                foreach (var message in messages)
-                {
-                    if (message.Attachments.Count == 1)
-                    {
-                        if ( message.Attachments.GetEnumerator().Current.Filename.EndsWith(".mp3") )
-                        {
-                            return (IReadOnlyCollection<Attachment>)message.Attachments ;
-                        }
-                    }
-                }
-                //if none of the previous messages had any attachments
-                throw new NullReferenceException("Exactly one mp3 attachment must be present in one of the recent messages.");
-            }
-            else
-            {
-                return attachments;
-            }
-        }
-
         [Command("play", RunMode = RunMode.Async)]
         [Summary("Play a song of your choice in an audio channel of your choice (defaults to verbal shitposting). List local songs with !availablesongs.")]
         public async Task PlaySong([Summary("name of song to play (use \"attached\" to play an attached mp3 file")]string song, 
