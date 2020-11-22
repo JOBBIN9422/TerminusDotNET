@@ -32,7 +32,7 @@ namespace TerminusDotNetCore.Modules
         [Summary("Play a song of your choice in an audio channel of your choice (defaults to verbal shitposting). List local songs with !availablesongs.")]
         public async Task PlaySong([Summary("name of song to play (use \"attached\" to play an attached mp3 file")]string song, 
             [Summary("Which end of the queue to insert the song at (appended to the back by default.)")]string qEnd = "back", 
-            [Summary("ID of channel to play in (defaults to verbal shitposting)")]string channelName = "main")
+            [Summary("Channel name to play the song in (`main` or `weed`).")]string channelName = "main")
         {
             //check if channel id is valid and exists
             if (!_channelNameToIdMap.ContainsKey(channelName))
@@ -91,7 +91,7 @@ namespace TerminusDotNetCore.Modules
         [Command("search", RunMode = RunMode.Async)]
         [Summary("Search for a YouTube video and add the result to the queue.")]
         public async Task SearchSong([Summary("YouTube search term (enclose in quotes if it contains spaces).")]string searchTerm, 
-            [Summary("Channel ID to play the song in.")]string channelName = "main")
+            [Summary("Channel name to play the song in (`main` or `weed`).")]string channelName = "main")
         {
             //check if channel id is valid and exists
             if (!_channelNameToIdMap.ContainsKey(channelName))
@@ -107,8 +107,9 @@ namespace TerminusDotNetCore.Modules
         [Command("playlist", RunMode = RunMode.Async)]
         [Summary("Add all of the songs in the playlist to the queue in the order they appear in the playlist.")]
         public async Task AddPlaylist([Summary("The URL of the YouTube playlist to add.")]string playlistUrl, 
+            [Summary("whether or not to shuffle the playlist when adding it to the song queue.")]string shuffle = "false",
             [Summary("Which end of the queue to insert the song at (appended to the back by default.)")]string qEnd = "back", 
-            [Summary("Channel ID to play the song in.")]string channelName = "main")
+            [Summary("Channel name to play the song in (`main` or `weed`).")]string channelName = "main")
         {
             //check if channel id is valid and exists
             if (!_channelNameToIdMap.ContainsKey(channelName))
@@ -118,14 +119,14 @@ namespace TerminusDotNetCore.Modules
             }
             ulong voiceID = _channelNameToIdMap[channelName];
 
-            await _service.QueueYoutubePlaylist(Context.Message.Author, playlistUrl, voiceID, qEnd != "front");
+            await _service.QueueYoutubePlaylist(Context.Message.Author, playlistUrl, voiceID, qEnd != "front", shuffle == "shuffle");
         }
 
         [Command("yt", RunMode = RunMode.Async)]
         [Summary("Add the given YouTube video to the queue.")]
         public async Task StreamSong([Summary("URL of the YouTube video to add.")]string url, 
             [Summary("Which end of the queue to insert the song at (appended to the back by default.)")]string qEnd = "back",
-            [Summary("Channel ID to play the song in.")]string channelName = "main")
+            [Summary("Channel name to play the song in (`main` or `weed`).")]string channelName = "main")
         {
             //check if channel id is valid and exists
             if (!_channelNameToIdMap.ContainsKey(channelName))
@@ -276,7 +277,7 @@ namespace TerminusDotNetCore.Modules
             [Summary("Add a random Hideki Naganuma song to the queue.")]
             public async Task AddRandomHidekiSong(
             [Summary("Which end of the queue to insert the song at (appended to the back by default.)")]string qEnd = "back",
-            [Summary("Channel ID to play the song in.")]string channelName = "main")
+            [Summary("Channel name to play the song in (`main` or `weed`).")]string channelName = "main")
             {
                 //check if channel id is valid and exists
                 if (!_channelNameToIdMap.ContainsKey(channelName))
