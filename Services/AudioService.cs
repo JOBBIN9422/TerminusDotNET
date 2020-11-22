@@ -502,7 +502,7 @@ namespace TerminusDotNetCore.Services
             await StartQueueIfIdle();
         }
 
-        public async Task QueueYoutubePlaylist(SocketUser owner, string playlistURL, ulong channelId, bool append = true)
+        public async Task QueueYoutubePlaylist(SocketUser owner, string playlistURL, ulong channelId, bool append = true, bool shuffle = false)
         {
             //check if the given URL refers to a youtube playlist
             if (!PlaylistUrlIsValid(playlistURL))
@@ -513,6 +513,18 @@ namespace TerminusDotNetCore.Services
             }
 
             List<string> videoUrls = await GetYoutubePlaylistUrlsAsync(playlistURL);
+
+            //shuffle w/ Fisher-Yates algo if requested
+            if (shuffle)
+            {
+                for (int i = videoUrls.Count - 1; i >= 1; i--)
+                {
+                    int swapIndex = _random.Next(0, i);
+                    string temp = videoUrls[i];
+                    videoUrls[i] = videoUrls[swapIndex];
+                    videoUrls[swapIndex] = temp;
+                }
+            }
 
             await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"Fetched all video URLs for playlist URL '{playlistURL}'."));
 
