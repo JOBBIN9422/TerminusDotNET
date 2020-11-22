@@ -136,7 +136,7 @@ namespace TerminusDotNetCore.Services
                 _ytClient = new YoutubeClient();
             }
         }
-        
+
         private async Task InitYoutubeService()
         {
             //attempt to read auth info from secrets file 
@@ -359,28 +359,35 @@ namespace TerminusDotNetCore.Services
                         _songQueue.RemoveFirst();
                     }
 
+                    //set the display name to file name if it's empty
+                    if (string.IsNullOrEmpty(nextInQueue.DisplayName))
+                    {
+                        nextInQueue.DisplayName = Path.GetFileNameWithoutExtension(nextInQueue.Path);
+                    }
+
                     //need to download if not already saved locally (change the URL to the path of the downloaded file)
                     if (nextInQueue is YouTubeAudioItem)
                     {
                         YouTubeAudioItem nextVideo = nextInQueue as YouTubeAudioItem;
-                        try
+
+                        //if the youtube video has not been downloaded yet
+                        if (nextVideo.AudioSource == YouTubeAudioType.Url)
                         {
-                            //if the youtube video has not been downloaded yet
-                            if (nextVideo.AudioSource == YouTubeAudioType.Url)
+                            try
                             {
                                 nextVideo.Path = await DownloadYoutubeVideoAsync(nextVideo.VideoUrl);
                             }
-                        }
-                        catch (ArgumentException)
-                        {
-                            await Logger.Log(new LogMessage(LogSeverity.Warning, "AudioSvc", $"failed to download local file for {nextVideo.DisplayName}, skipping..."));
+                            catch (ArgumentException)
+                            {
+                                await Logger.Log(new LogMessage(LogSeverity.Warning, "AudioSvc", $"failed to download local file for {nextVideo.DisplayName}, skipping..."));
 
-                            //skip this item if the download fails
-                            continue;
+                                //skip this item if the download fails
+                                continue;
+                            }
                         }
-                    }
+                    }                    
 
-                    //set the current channel for the next song and join channel
+                    //join channel if not in channel
                     if (CurrentChannel == null)
                     {
                         CurrentChannel = await Guild.GetVoiceChannelAsync(nextInQueue.PlayChannelId);
@@ -395,16 +402,10 @@ namespace TerminusDotNetCore.Services
                         await JoinAudio();
                     }
 
-                    //set the display name to file name if it's empty
-                    if (string.IsNullOrEmpty(nextInQueue.DisplayName))
-                    {
-                        nextInQueue.DisplayName = Path.GetFileNameWithoutExtension(nextInQueue.Path);
-                    }
-
                     //set bot client's status to the song name
                     if (Client != null)
                     {
-                        await Client.SetGameAsync(nextInQueue.DisplayName);
+                        await Client.SetGameAsync(nextInQueue.DisplayName, null, ActivityType.Listening);
                     }
 
                     //update the currently-playing song
