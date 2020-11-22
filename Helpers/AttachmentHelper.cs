@@ -37,6 +37,7 @@ namespace TerminusDotNetCore.Helpers
         private static readonly string[] _validMediaExtensions = {
             ".mp3",
             ".mp4",
+            ".wav",
             ".webm"
         };
 
