@@ -15,43 +15,31 @@ namespace TerminusDotNetCore.Modules
     {
         private AudioService _service;
 
+        private Dictionary<string, ulong> _channelNameToIdMap = new Dictionary<string, ulong>();
+
         public AudioModule(IConfiguration config, AudioService service) : base(config)
         {
             //do not need to set service config here - passed into audioSvc constructor via DI
             _service = service;
             _service.ParentModule = this;
+
+            //create a mapping from channel names to their IDs
+            _channelNameToIdMap.Add("main", ulong.Parse(config["AudioChannelId"]));
+            _channelNameToIdMap.Add("weed", ulong.Parse(config["WeedChannelId"]));
         }
 
         [Command("play", RunMode = RunMode.Async)]
         [Summary("Play a song of your choice in an audio channel of your choice (defaults to verbal shitposting). List local songs with !availablesongs.")]
         public async Task PlaySong([Summary("name of song to play (use \"attached\" to play an attached mp3 file")]string song, 
             [Summary("Which end of the queue to insert the song at (appended to the back by default.)")]string qEnd = "back", 
-            [Summary("ID of channel to play in (defaults to verbal shitposting)")]string channelID = "-1")
+            [Summary("ID of channel to play in (defaults to verbal shitposting)")]string channelName = "main")
         {
-            // TODO allow this function to accept mp3 attachments and play those
             //check if channel id is valid and exists
-            ulong voiceID;
-            if ( channelID.Equals("-1") )
+            if (!_channelNameToIdMap.ContainsKey(channelName))
             {
-                voiceID = ulong.Parse(Config["AudioChannelId"]);
+                await ReplyAsync("Invalid channel name (please use `main` or `weed`).");
             }
-            else
-            {
-                try
-                {
-                    voiceID = ulong.Parse(channelID);
-                }
-                catch
-                {
-                    await ReplyAsync("Unable to parse channel ID, try letting it use the default");
-                    return;
-                }
-            }
-            if ( Context.Guild.GetVoiceChannel(voiceID) == null )
-            {
-                await ReplyAsync("Invalid channel ID, try letting it use the default");
-                return;
-            }
+            ulong voiceID = _channelNameToIdMap[channelName];
 
             //check if path is valid and exists
             bool useFile = false;
@@ -102,31 +90,14 @@ namespace TerminusDotNetCore.Modules
         [Command("search", RunMode = RunMode.Async)]
         [Summary("Search for a YouTube video and add the result to the queue.")]
         public async Task SearchSong([Summary("YouTube search term (enclose in quotes if it contains spaces).")]string searchTerm, 
-            [Summary("Channel ID to play the song in.")]string channelID = "-1")
+            [Summary("Channel ID to play the song in.")]string channelName = "main")
         {
             //check if channel id is valid and exists
-            ulong voiceID;
-            if (channelID.Equals("-1"))
+            if (!_channelNameToIdMap.ContainsKey(channelName))
             {
-                voiceID = ulong.Parse(Config["AudioChannelId"]);
+                await ReplyAsync("Invalid channel name (please use `main` or `weed`).");
             }
-            else
-            {
-                try
-                {
-                    voiceID = ulong.Parse(channelID);
-                }
-                catch
-                {
-                    await ReplyAsync("Unable to parse channel ID, try letting it use the default");
-                    return;
-                }
-            }
-            if (Context.Guild.GetVoiceChannel(voiceID) == null)
-            {
-                await ReplyAsync("Invalid channel ID, try letting it use the default");
-                return;
-            }
+            ulong voiceID = _channelNameToIdMap[channelName];
 
             await _service.QueueSearchedYoutubeSong(Context.Message.Author, searchTerm, voiceID);
         }
@@ -135,31 +106,14 @@ namespace TerminusDotNetCore.Modules
         [Summary("Add all of the songs in the playlist to the queue in the order they appear in the playlist.")]
         public async Task AddPlaylist([Summary("The URL of the YouTube playlist to add.")]string playlistUrl, 
             [Summary("Which end of the queue to insert the song at (appended to the back by default.)")]string qEnd = "back", 
-            [Summary("Channel ID to play the song in.")]string channelID = "-1")
+            [Summary("Channel ID to play the song in.")]string channelName = "main")
         {
             //check if channel id is valid and exists
-            ulong voiceID;
-            if (channelID.Equals("-1"))
+            if (!_channelNameToIdMap.ContainsKey(channelName))
             {
-                voiceID = ulong.Parse(Config["AudioChannelId"]);
+                await ReplyAsync("Invalid channel name (please use `main` or `weed`).");
             }
-            else
-            {
-                try
-                {
-                    voiceID = ulong.Parse(channelID);
-                }
-                catch
-                {
-                    await ReplyAsync("Unable to parse channel ID, try letting it use the default");
-                    return;
-                }
-            }
-            if (Context.Guild.GetVoiceChannel(voiceID) == null)
-            {
-                await ReplyAsync("Invalid channel ID, try letting it use the default");
-                return;
-            }
+            ulong voiceID = _channelNameToIdMap[channelName];
 
             await _service.QueueYoutubePlaylist(Context.Message.Author, playlistUrl, voiceID, qEnd != "front");
         }
@@ -168,31 +122,14 @@ namespace TerminusDotNetCore.Modules
         [Summary("Add the given YouTube video to the queue.")]
         public async Task StreamSong([Summary("URL of the YouTube video to add.")]string url, 
             [Summary("Which end of the queue to insert the song at (appended to the back by default.)")]string qEnd = "back",
-            [Summary("Channel ID to play the song in.")]string channelID = "-1")
-        {            
+            [Summary("Channel ID to play the song in.")]string channelName = "main")
+        {
             //check if channel id is valid and exists
-            ulong voiceID;
-            if (channelID.Equals("-1"))
+            if (!_channelNameToIdMap.ContainsKey(channelName))
             {
-                voiceID = ulong.Parse(Config["AudioChannelId"]);
+                await ReplyAsync("Invalid channel name (please use `main` or `weed`).");
             }
-            else
-            {
-                try
-                {
-                    voiceID = ulong.Parse(channelID);
-                }
-                catch
-                {
-                    await ReplyAsync("Unable to parse channel ID, try letting it use the default");
-                    return;
-                }
-            }
-            if (Context.Guild.GetVoiceChannel(voiceID) == null)
-            {
-                await ReplyAsync("Invalid channel ID, try letting it use the default");
-                return;
-            }
+            ulong voiceID = _channelNameToIdMap[channelName];
 
             await _service.QueueYoutubeSongPreDownloaded(Context.Message.Author, url, voiceID, qEnd != "front");
         }
@@ -306,6 +243,9 @@ namespace TerminusDotNetCore.Modules
         public class HidekiAudioModule : ServiceControlModule
         {
             private AudioService _service;
+
+            private Dictionary<string, ulong> _channelNameToIdMap = new Dictionary<string, ulong>();
+
             public HidekiAudioModule(IConfiguration config, AudioService service) : base(config)
             {
                 //do not need to set service config here - passed into audioSvc constructor via DI
@@ -328,30 +268,14 @@ namespace TerminusDotNetCore.Modules
             [Summary("Add a random Hideki Naganuma song to the queue.")]
             public async Task AddRandomHidekiSong(
             [Summary("Which end of the queue to insert the song at (appended to the back by default.)")]string qEnd = "back",
-            [Summary("Channel ID to play the song in.")]string channelID = "-1")
+            [Summary("Channel ID to play the song in.")]string channelName = "main")
             {
-                ulong voiceID;
-                if (channelID.Equals("-1"))
+                //check if channel id is valid and exists
+                if (!_channelNameToIdMap.ContainsKey(channelName))
                 {
-                    voiceID = ulong.Parse(Config["AudioChannelId"]);
+                    await ReplyAsync("Invalid channel name (please use `main` or `weed`).");
                 }
-                else
-                {
-                    try
-                    {
-                        voiceID = ulong.Parse(channelID);
-                    }
-                    catch
-                    {
-                        await ReplyAsync("Unable to parse channel ID, try letting it use the default");
-                        return;
-                    }
-                }
-                if (Context.Guild.GetVoiceChannel(voiceID) == null)
-                {
-                    await ReplyAsync("Invalid channel ID, try letting it use the default");
-                    return;
-                }
+                ulong voiceID = _channelNameToIdMap[channelName];
 
                 await _service.AddRandomHidekiSong(Context.Message.Author, voiceID, qEnd != "front");
             }
