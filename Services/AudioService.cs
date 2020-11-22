@@ -59,9 +59,6 @@ namespace TerminusDotNetCore.Services
         //tokens for cancelling playback
         private CancellationTokenSource _ffmpegCancelTokenSrc = new CancellationTokenSource();
 
-        //command name (.exe extension for Windows use)
-        private static string FFMPEG_PROCESS_NAME;
-
         //JSON converter settings for queue save/load
         private static readonly JsonSerializerSettings JSON_SETTINGS = new JsonSerializerSettings()
         {
@@ -96,7 +93,6 @@ namespace TerminusDotNetCore.Services
         {
             _random = random;
             Config = config;
-            FFMPEG_PROCESS_NAME = Config["FfmpegCommand"];
 
             //init weed timer
             DateTime now = DateTime.Now;
@@ -326,7 +322,7 @@ namespace TerminusDotNetCore.Services
             //start an ffmpeg process for the given song file
             return Process.Start(new ProcessStartInfo
             {
-                FileName = FFMPEG_PROCESS_NAME,
+                FileName = "ffmpeg",
                 Arguments = $"-hide_banner -loglevel panic -i \"{path}\" -ac 2 -f s16le -ar 48000 pipe:1",
                 UseShellExecute = false,
                 RedirectStandardOutput = true
