@@ -183,18 +183,13 @@ namespace TerminusDotNetCore.Helpers
             }
         }
 
+        //download the attached audio file and save it locally for later use
         public static string DownloadPersistentAudioAttachment(IAttachment attachment)
         {
             using (var webClient = new WebClient())
             {
-
-                var filename = attachment.Filename;
-                var url = attachment.Url;
-                var fileIdString = Guid.NewGuid().ToString("N");
-                    
-                var downloadFilename = Path.Combine("assets", "audio", filename);
-                webClient.DownloadFile(url, downloadFilename);
-
+                string downloadFilename = Path.Combine("assets", "audio", attachment.Filename);
+                webClient.DownloadFile(attachment.Url, downloadFilename);
                 return Path.GetFileName(downloadFilename);
             }
         }
