@@ -128,15 +128,13 @@ namespace TerminusDotNetCore.Modules
         {
             if (libName == "check")
             {
-                string currLibName = await _service.GetYoutubeDownloaderName(libName);
-                if (currLibName == null)
-                {
-                    return;
-                }
-
+                string currLibName = _service.GetYoutubeDownloaderName();
                 await ReplyAsync($"Currently using YouTube downloader library `{currLibName}`");
             }
-            await _service.SwitchYoutubeDownloaderLibrary(libName);
+            else
+            {
+                await _service.SwitchYoutubeDownloaderLibrary(libName);
+            }
         }
 
         [Command("yt", RunMode = RunMode.Async)]

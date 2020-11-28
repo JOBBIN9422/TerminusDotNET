@@ -1358,15 +1358,9 @@ namespace TerminusDotNetCore.Services
             await ParentModule.ServiceReplyAsync($"Now using YouTube downloader `{libName}`.");
         }
 
-        public async Task<string> GetYoutubeDownloaderName(string libName)
+        public string GetYoutubeDownloaderName()
         {
-            if (!_youtubeDownloaders.ContainsKey(libName))
-            {
-                await ParentModule.ServiceReplyAsync($"Invalid library name: `{libName}`");
-                return null;
-            }
-
-            Type downloaderType = _youtubeDownloaders[libName];
+            Type downloaderType = _ytDownloader.GetType();
             return downloaderType.Name;
         }
 
