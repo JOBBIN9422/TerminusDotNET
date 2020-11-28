@@ -126,6 +126,16 @@ namespace TerminusDotNetCore.Modules
         [Summary("Switch the library used to download YouTube videos.")]
         public async Task SwitchYoutubeDownloaderLibrary([Summary("The library alias (`libvideo` or `yt-explode`).")]string libName)
         {
+            if (string.IsNullOrEmpty(libName))
+            {
+                string currLibName = await _service.GetYoutubeDownloaderName(libName);
+                if (currLibName == null)
+                {
+                    return;
+                }
+
+                await ReplyAsync($"Currently using YouTube downloader library `{currLibName}`");
+            }
             await _service.SwitchYoutubeDownloaderLibrary(libName);
         }
 
