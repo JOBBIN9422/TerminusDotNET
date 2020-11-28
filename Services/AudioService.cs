@@ -1348,7 +1348,7 @@ namespace TerminusDotNetCore.Services
         {
             if (!_youtubeDownloaders.ContainsKey(libName))
             {
-                await ParentModule.ServiceReplyAsync($"Invalid library name: `libname`");
+                await ParentModule.ServiceReplyAsync($"Invalid library name: `{libName}`");
                 return;
             }
 
