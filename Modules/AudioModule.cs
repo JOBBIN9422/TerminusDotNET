@@ -122,6 +122,13 @@ namespace TerminusDotNetCore.Modules
             await _service.QueueYoutubePlaylist(Context.Message.Author, playlistUrl, voiceID, qEnd != "front", shuffle == "shuffle");
         }
 
+        [Command("downloader", RunMode = RunMode.Async)]
+        [Summary("Switch the library used to download YouTube videos.")]
+        public async Task SwitchYoutubeDownloaderLibrary([Summary("The library alias (`libvideo` or `yt-explode`).")]string libName)
+        {
+            await _service.SwitchYoutubeDownloaderLibrary(libName);
+        }
+
         [Command("yt", RunMode = RunMode.Async)]
         [Summary("Add the given YouTube video to the queue.")]
         public async Task StreamSong([Summary("URL of the YouTube video to add.")]string url, 

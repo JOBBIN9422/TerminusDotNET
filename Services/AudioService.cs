@@ -54,8 +54,6 @@ namespace TerminusDotNetCore.Services
         //used for streaming audio in the currently-connected channel
         private IAudioClient _currAudioClient = null;
 
-        private YoutubeClient _ytClient = null;
-
         //tokens for cancelling playback
         private CancellationTokenSource _ffmpegCancelTokenSrc = new CancellationTokenSource();
 
@@ -74,6 +72,10 @@ namespace TerminusDotNetCore.Services
         private readonly Timer _timer;
 
         private YouTubeService _ytService;
+
+        private IYoutubeDownloader _ytDownloader = new YoutubeExplodeDownloader();
+
+        private Dictionary<string, Type> _youtubeDownloaders = new Dictionary<string, Type>();
 
         //Discord info objects
         public IGuild Guild { get; set; }
@@ -106,35 +108,10 @@ namespace TerminusDotNetCore.Services
             _timer = new Timer(async _ => await PlayWeed(), null, fourTwentyMs, (int)new TimeSpan(24, 0, 0).TotalMilliseconds);
 
             Task.Run(async () => await InitYoutubeService());
-            InitYoutubeClient();
-        }
 
-        private void InitYoutubeClient()
-        {
-            //load cookie toggle setting from config
-            bool useCookies = bool.Parse(Config["UseYoutubeCookies"]);
-
-            if (useCookies)
-            {
-                Uri baseUri = new Uri("https://www.youtube.com");
-                HttpClientHandler handler = new HttpClientHandler();
-                CookieContainer cookieContainer = new CookieContainer();
-
-                //load cookies from config
-                foreach (IConfigurationSection cookiePair in Config.GetSection("YoutubeCookies").GetChildren())
-                {
-                    cookieContainer.Add(baseUri, new Cookie(cookiePair.Key, cookiePair.Value));
-                }
-
-                handler.CookieContainer = cookieContainer;
-                HttpClient client = new HttpClient(handler);
-                _ytClient = new YoutubeClient(client);
-            }
-            else
-            {
-                //if not using cookies, init yt client without an HttpClient
-                _ytClient = new YoutubeClient();
-            }
+            //init youtube downloader dict
+            _youtubeDownloaders.Add("libvideo", typeof(LibVideoDownloader));
+            _youtubeDownloaders.Add("yt-explode", typeof(YoutubeExplodeDownloader));
         }
 
         private async Task InitYoutubeService()
@@ -1367,22 +1344,23 @@ namespace TerminusDotNetCore.Services
         #endregion
 
         #region Youtube helpers
+        public async Task SwitchYoutubeDownloaderLibrary(string libName)
+        {
+            if (!_youtubeDownloaders.ContainsKey(libName))
+            {
+                await ParentModule.ServiceReplyAsync($"Invalid library name: `libname`");
+                return;
+            }
+
+            Type downloaderType = _youtubeDownloaders[libName];
+            _ytDownloader = (IYoutubeDownloader)Activator.CreateInstance(downloaderType);
+        }
+
         private async Task<string> DownloadYoutubeVideoAsync(string url)
         {
             try
             {
-                //get the stream & video info for the current video
-                string videoName = await GetVideoTitleFromUrlAsync(url);
-                var streamManifest = await _ytClient.Videos.Streams.GetManifestAsync(GetVideoIdFromUrl(url));
-                var streamInfo = streamManifest.GetAudioOnly().WithHighestBitrate();
-
-                //download the current stream
-                string videoDataFilename = Path.Combine(TempPath, $"{Guid.NewGuid().ToString("N")}.{streamInfo.Container}");
-                await _ytClient.Videos.Streams.DownloadAsync(streamInfo, videoDataFilename);
-
-                await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"Downloaded youtube video '{videoName}'."));
-
-                return videoDataFilename;
+                return await _ytDownloader.DownloadYoutubeVideoAsync(url);
             }
             catch (Exception ex)
             {
