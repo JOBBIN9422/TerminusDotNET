@@ -362,7 +362,7 @@ namespace TerminusDotNetCore.Services
                                 continue;
                             }
                         }
-                    }                    
+                    }
 
                     //join channel if not in channel
                     if (CurrentChannel == null)
@@ -1354,6 +1354,8 @@ namespace TerminusDotNetCore.Services
 
             Type downloaderType = _youtubeDownloaders[libName];
             _ytDownloader = (IYoutubeDownloader)Activator.CreateInstance(downloaderType);
+
+            await ParentModule.ServiceReplyAsync($"Now using YouTube downloader `${libName}`.");
         }
 
         private async Task<string> DownloadYoutubeVideoAsync(string url)
@@ -1418,8 +1420,24 @@ namespace TerminusDotNetCore.Services
 
         private async Task<string> GetVideoTitleFromUrlAsync(string url)
         {
-            var videoInfo = await _ytClient.Videos.GetAsync(url);
-            return videoInfo.Title;
+            var videoRequest = _ytService.Videos.List("snippet");
+            videoRequest.Id = GetVideoIdFromUrl(url);
+
+            var searchResponse = await videoRequest.ExecuteAsync();
+
+            string title = string.Empty;
+
+            //grab the video title from the response (any should do)
+            foreach (var item in searchResponse.Items)
+            {
+                if (!string.IsNullOrEmpty(item.Snippet.Title))
+                {
+                    title = item.Snippet.Title;
+                    break;
+                }
+            }
+
+            return title;
         }
         #endregion
 
