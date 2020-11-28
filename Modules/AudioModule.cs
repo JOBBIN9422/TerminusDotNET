@@ -124,9 +124,9 @@ namespace TerminusDotNetCore.Modules
 
         [Command("downloader", RunMode = RunMode.Async)]
         [Summary("Switch the library used to download YouTube videos.")]
-        public async Task SwitchYoutubeDownloaderLibrary([Summary("The library alias (`libvideo` or `yt-explode`).")]string libName)
+        public async Task SwitchYoutubeDownloaderLibrary([Summary("The library alias (`libvideo` or `yt-explode`).")]string libName = "check")
         {
-            if (string.IsNullOrEmpty(libName))
+            if (libName == "check")
             {
                 string currLibName = await _service.GetYoutubeDownloaderName(libName);
                 if (currLibName == null)
