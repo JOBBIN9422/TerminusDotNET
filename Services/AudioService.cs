@@ -1355,7 +1355,7 @@ namespace TerminusDotNetCore.Services
             Type downloaderType = _youtubeDownloaders[libName];
             _ytDownloader = (IYoutubeDownloader)Activator.CreateInstance(downloaderType);
 
-            await ParentModule.ServiceReplyAsync($"Now using YouTube downloader `${libName}`.");
+            await ParentModule.ServiceReplyAsync($"Now using YouTube downloader `{libName}`.");
         }
 
         private async Task<string> DownloadYoutubeVideoAsync(string url)
