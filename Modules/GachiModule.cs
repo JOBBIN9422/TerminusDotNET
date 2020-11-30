@@ -16,5 +16,12 @@ namespace TerminusDotNetCore.Modules
             var gachiPastas = File.ReadAllLines(Path.Combine("RandomMessages", "gachi.txt"));
             await ReplyAsync(gachiPastas[_random.Next(gachiPastas.Length)]);
         }
+
+        [Command("E")]
+        [Summary("Uhhhhh")]
+        public override async Task SayAsync()
+        {
+            await ReplyAsync("-R");
+        }
     }
 }
