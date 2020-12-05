@@ -18,7 +18,7 @@ namespace TerminusDotNetCore.Modules
             Config = config;
         }
 
-        [Command("liberty")]
+        [Command("liberty", RunMode = RunMode.Async)]
         [Summary("Activates the Liberty Prime Bot")]
         public async Task Liberty([Summary("Which branch of the liberty repo to pull")] string branch="master")
         {
@@ -38,7 +38,7 @@ namespace TerminusDotNetCore.Modules
             await ReplyAsync("Liberty Prime Activated");
         }
 
-        [Command("kill_liberty")]
+        [Command("kill_liberty", RunMode = RunMode.Async)]
         [Summary("Decommissions Liberty Prime.... For Now")]
         public async Task KillLiberty()
         {
