@@ -26,7 +26,7 @@ git checkout $LIBERTY_BRANCH
 git pull origin $LIBERTY_BRANCH
 
 # Copy over files into liberty dir
-rsync -r persistent_files/ liberty/
+rsync -r ../persistent_files/ .
 
 # Run Liberty
 ./run.sh
