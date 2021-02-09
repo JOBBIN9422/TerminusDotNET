@@ -1,0 +1,19 @@
+{
+  "baseImage": "emmy.png",
+  "topLeft": {
+    "x": 958,
+    "y": 101
+  },
+  "topRight": {
+    "x": 1447,
+    "y": 46
+  },
+  "bottomLeft": {
+    "x": 958,
+    "y": 339
+  },
+  "bottomRight": {
+    "x": 1447,
+    "y": 325
+  }
+}

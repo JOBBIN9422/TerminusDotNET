@@ -468,6 +468,18 @@ namespace TerminusDotNetCore.Services
             return images;
         }
 
+        public List<string> EmmyImages(IReadOnlyCollection<Attachment> attachments, uint numTimes = 1)
+        {
+            var images = AttachmentHelper.DownloadAttachments(attachments);
+
+            foreach (var image in images)
+            {
+                EmmyImage(image, numTimes);
+            }
+
+            return images;
+        }
+
         private void TrumpImage(string imageFilename, uint numTimes = 1)
         {
             for (uint i = 0; i < numTimes; i++)
@@ -526,6 +538,28 @@ namespace TerminusDotNetCore.Services
         public string HankText(string text)
         {
             using (var image = ImageHelper.ProjectText(text, Path.Combine("assets", "images", "hank.json")))
+            {
+                string outputFilename = $"{Guid.NewGuid().ToString("N")}.jpg";
+                image.Save(outputFilename);
+
+                return outputFilename;
+            }
+        }
+
+        private void EmmyImage(string imageFilename, uint numTimes = 1)
+        {
+            for (uint i = 0; i < numTimes; i++)
+            {
+                using (var image = ImageHelper.ProjectOnto(imageFilename, Path.Combine("assets", "images", "emmy.json")))
+                {
+                    image.Save(imageFilename);
+                }
+            }
+        }
+
+        public string EmmyText(string text)
+        {
+            using (var image = ImageHelper.ProjectText(text, Path.Combine("assets", "images", "emmy.json")))
             {
                 string outputFilename = $"{Guid.NewGuid().ToString("N")}.jpg";
                 image.Save(outputFilename);

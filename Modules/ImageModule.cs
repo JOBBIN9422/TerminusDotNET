@@ -495,5 +495,38 @@ namespace TerminusDotNetCore.Modules
                     break;
             }
         }
+
+        [Command("emmy", RunMode = RunMode.Async)]
+        [Summary("Overlays a custom image attachment onto Emerson's TV.")]
+        public async Task EmmyImagesAsync([Remainder][Summary("Text to project onto the canvas. If a number is supplied, number of times to repeat the projection instead.")] string text = null)
+        {
+            IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
+            if (attachments == null && text == null)
+            {
+                await ServiceReplyAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
+                return;
+            }
+
+            ParamType paramType = ParseParamType(text);
+            List<string> images = new List<string>();
+
+            switch (paramType)
+            {
+                case ParamType.Numeric:
+                    images = _imageService.EmmyImages(attachments, uint.Parse(text));
+                    await SendImages(images);
+                    break;
+
+                case ParamType.Text:
+                    string textImg = _imageService.EmmyText(text);
+                    await SendImage(textImg);
+                    break;
+
+                case ParamType.None:
+                    images = _imageService.EmmyImages(attachments);
+                    await SendImages(images);
+                    break;
+            }
+        }
     }
 }
