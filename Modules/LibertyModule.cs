@@ -32,9 +32,11 @@ namespace TerminusDotNetCore.Modules
             psi.UseShellExecute = false;
             psi.RedirectStandardOutput = true;
 
-            Process p = Process.Start(psi);
-            string strOutput = p.StandardOutput.ReadToEnd();
-            p.WaitForExit();
+            using (Process p = Process.Start(psi))
+            {
+                string strOutput = p.StandardOutput.ReadToEnd();
+                p.WaitForExit();
+            }
             await ReplyAsync("Liberty Prime Activated");
         }
 
@@ -50,9 +52,11 @@ namespace TerminusDotNetCore.Modules
             psi.UseShellExecute = false;
             psi.RedirectStandardOutput = true;
 
-            Process p = Process.Start(psi);
-            string strOutput = p.StandardOutput.ReadToEnd();
-            p.WaitForExit();
+            using (Process p = Process.Start(psi))
+            {
+                string strOutput = p.StandardOutput.ReadToEnd();
+                p.WaitForExit();
+            }
             await ReplyAsync("Liberty Prime Deactivated");
         }
     }
