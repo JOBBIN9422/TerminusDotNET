@@ -186,6 +186,7 @@ namespace TerminusDotNetCore.Services
                 if (retryCount == 0)
                 {
                     await Logger.Log(new LogMessage(LogSeverity.Error, "AudioSvc", $"failed to connect to voice channel after repeated timeouts."));
+                    await StopAllAudio();
                     return;
                 }
 
