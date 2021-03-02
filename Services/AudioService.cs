@@ -269,6 +269,10 @@ namespace TerminusDotNetCore.Services
                         _ffmpegCancelTokenSrc = new CancellationTokenSource();
                     }
 
+                    //make sure the current audio process is killed to prevent overlapping playback
+                    ffmpeg.Kill();
+                    await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"Killed ffmpeg process {ffmpeg.Id}."));
+
                     await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"Finished playback for file '{path}'."));
                     _playing = false;
                 }
