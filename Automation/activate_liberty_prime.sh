@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # This is a script meant to pull in the latest liberty prime and run it
 # Expects the LIBERTY_DIR variable to be exported before running
 
@@ -22,6 +23,7 @@ fi
 # Checkout the selected branch and pull latest
 # I hope this won't ever fail, but I guess I can fix it if it does
 cd liberty
+git fetch origin $LIBERTY_BRANCH
 git checkout $LIBERTY_BRANCH
 git pull origin $LIBERTY_BRANCH
 
