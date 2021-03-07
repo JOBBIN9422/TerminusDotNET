@@ -27,7 +27,10 @@ namespace TerminusDotNetCore.Services
 
             foreach (var image in images)
             {
-                DeepfryImage(image, numPasses);
+                using (var deepFriedImg = ImageHelper.DeepfryImage(image, numPasses))
+                {
+                    deepFriedImg.Save(image);
+                }
             }
 
             return images;
@@ -39,7 +42,10 @@ namespace TerminusDotNetCore.Services
 
             foreach (var image in images)
             {
-                GrayscaleImage(image);
+                using (var grayscaleImg = ImageHelper.GrayscaleImage(image))
+                {
+                    grayscaleImg.Save(image);
+                }
             }
 
             return images;
@@ -51,7 +57,10 @@ namespace TerminusDotNetCore.Services
 
             foreach (var image in images)
             {
-                PolaroidImage(image);
+                using (var polaroidImg = ImageHelper.PolaroidImage(image))
+                {
+                    polaroidImg.Save(image);
+                }
             }
 
             return images;
@@ -63,7 +72,10 @@ namespace TerminusDotNetCore.Services
 
             foreach (var image in images)
             {
-                InvertImage(image);
+                using (var invertedImg = ImageHelper.InvertImage(image))
+                {
+                    invertedImg.Save(image);
+                }
             }
 
             return images;
@@ -75,26 +87,13 @@ namespace TerminusDotNetCore.Services
 
             foreach (var image in images)
             {
-                KodakImage(image);
+                using (var kodakImg = ImageHelper.KodakImage(image))
+                {
+                    kodakImg.Save(image);
+                }
             }
 
             return images;
-        }
-
-        private void KodakImage(string imageFilename)
-        {
-            using (var image = ImageHelper.KodakImage(imageFilename))
-            {
-                image.Save(imageFilename);
-            }
-        }
-
-        private void InvertImage(string imageFilename)
-        {
-            using (var image = ImageHelper.InvertImage(imageFilename))
-            {
-                image.Save(imageFilename);
-            }
         }
 
         public List<string> PixelateImages(IReadOnlyCollection<Attachment> attachments, int size)
@@ -103,7 +102,10 @@ namespace TerminusDotNetCore.Services
 
             foreach (var image in images)
             {
-                PixelateImage(image, size);
+                using (var pixelatedImg = ImageHelper.PixelateImage(image, size))
+                {
+                    pixelatedImg.Save(image);
+                }
             }
 
             return images;
@@ -115,7 +117,10 @@ namespace TerminusDotNetCore.Services
 
             foreach (var image in images)
             {
-                ContrastImage(image, amount);
+                using (var contrastImg = ImageHelper.ContrastImage(image, amount))
+                {
+                    contrastImg.Save(image);
+                }
             }
 
             return images;
@@ -127,63 +132,18 @@ namespace TerminusDotNetCore.Services
 
             foreach (var image in images)
             {
-                SaturateImage(image, amount);
+                using (var saturatedImg = ImageHelper.SaturateImage(image, amount))
+                {
+                    saturatedImg.Save(image);
+                }
             }
 
             return images;
         }
 
-        private void SaturateImage(string imageFilename, float amount)
-        {
-            using (var image = ImageHelper.SaturateImage(imageFilename, amount))
-            {
-                image.Save(imageFilename);
-            }
-        }
-
-        private void ContrastImage(string imageFilename, float amount)
-        {
-            using (var image = ImageHelper.ContrastImage(imageFilename, amount))
-            {
-                image.Save(imageFilename);
-            }
-        }
-
-        private void PixelateImage(string imageFilename, int size)
-        {
-            using (var image = ImageHelper.PixelateImage(imageFilename, size))
-            {
-                image.Save(imageFilename);
-            }
-        }
-
-        private void PolaroidImage(string imageFilename)
-        {
-            using (var image = ImageHelper.PolaroidImage(imageFilename))
-            {
-                image.Save(imageFilename);
-            }
-        }
-
-        private void GrayscaleImage(string imageFilename)
-        {
-            using (var image = ImageHelper.GrayscaleImage(imageFilename))
-            {
-                image.Save(imageFilename);
-            }
-        }
-
         public void DeleteImages(List<string> images)
         {
             AttachmentHelper.DeleteFiles(images);
-        }
-
-        private void DeepfryImage(string imageFilename, uint numPasses = 1)
-        {
-            using (var image = ImageHelper.DeepfryImage(imageFilename, numPasses))
-            {
-                image.Save(imageFilename);
-            }
         }
 
         public List<string> MorrowindImages(IReadOnlyCollection<Attachment> attachments)
