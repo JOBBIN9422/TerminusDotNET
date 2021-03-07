@@ -348,17 +348,17 @@ namespace TerminusDotNetCore.Modules
             switch (paramType)
             {
                 case ParamType.Numeric:
-                    images = _imageService.BobRossImages(attachments, uint.Parse(text));
+                    images = _imageService.ProjectImagesOnto("bobross.json", attachments, uint.Parse(text));
                     await SendImages(images);
                     break;
 
                 case ParamType.Text:
-                    string textImg = _imageService.BobRossText(text);
+                    string textImg = _imageService.ProjectTextOnto("bobross.json", text);
                     await SendImage(textImg);
                     break;
 
                 case ParamType.None:
-                    images = _imageService.BobRossImages(attachments);
+                    images = _imageService.ProjectImagesOnto("bobross.json", attachments);
                     await SendImages(images);
                     break;
             }
@@ -381,17 +381,17 @@ namespace TerminusDotNetCore.Modules
             switch (paramType)
             {
                 case ParamType.Numeric:
-                    images = _imageService.PCImages(attachments, uint.Parse(text));
+                    images = _imageService.ProjectImagesOnto("pc.json", attachments, uint.Parse(text));
                     await SendImages(images);
                     break;
 
                 case ParamType.Text:
-                    string textImg = _imageService.PCText(text);
+                    string textImg = _imageService.ProjectTextOnto("pc.json", text);
                     await SendImage(textImg);
                     break;
 
                 case ParamType.None:
-                    images = _imageService.PCImages(attachments);
+                    images = _imageService.ProjectImagesOnto("pc.json", attachments);
                     await SendImages(images);
                     break;
             }
@@ -414,17 +414,17 @@ namespace TerminusDotNetCore.Modules
             switch (paramType)
             {
                 case ParamType.Numeric:
-                    images = _imageService.TrumpImages(attachments, uint.Parse(text));
+                    images = _imageService.ProjectImagesOnto("trump.json", attachments, uint.Parse(text));
                     await SendImages(images);
                     break;
 
                 case ParamType.Text:
-                    string textImg = _imageService.TrumpText(text);
+                    string textImg = _imageService.ProjectTextOnto("trump.json", text);
                     await SendImage(textImg);
                     break;
 
                 case ParamType.None:
-                    images = _imageService.TrumpImages(attachments);
+                    images = _imageService.ProjectImagesOnto("trump.json", attachments);
                     await SendImages(images);
                     break;
             }
@@ -447,17 +447,17 @@ namespace TerminusDotNetCore.Modules
             switch (paramType)
             {
                 case ParamType.Numeric:
-                    images = _imageService.WalterImages(attachments, uint.Parse(text));
+                    images = _imageService.ProjectImagesOnto("walter.json", attachments, uint.Parse(text));
                     await SendImages(images);
                     break;
 
                 case ParamType.Text:
-                    string textImg = _imageService.WalterText(text);
+                    string textImg = _imageService.ProjectTextOnto("walter.json", text);
                     await SendImage(textImg);
                     break;
 
                 case ParamType.None:
-                    images = _imageService.WalterImages(attachments);
+                    images = _imageService.ProjectImagesOnto("walter.json", attachments);
                     await SendImages(images);
                     break;
             }
@@ -480,17 +480,17 @@ namespace TerminusDotNetCore.Modules
             switch (paramType)
             {
                 case ParamType.Numeric:
-                    images = _imageService.HankImages(attachments, uint.Parse(text));
+                    images = _imageService.ProjectImagesOnto("hank.json", attachments, uint.Parse(text));
                     await SendImages(images);
                     break;
 
                 case ParamType.Text:
-                    string textImg = _imageService.HankText(text);
+                    string textImg = _imageService.ProjectTextOnto("hank.json", text);
                     await SendImage(textImg);
                     break;
 
                 case ParamType.None:
-                    images = _imageService.HankImages(attachments);
+                    images = _imageService.ProjectImagesOnto("hank.json", attachments);
                     await SendImages(images);
                     break;
             }
@@ -513,17 +513,17 @@ namespace TerminusDotNetCore.Modules
             switch (paramType)
             {
                 case ParamType.Numeric:
-                    images = _imageService.EmmyImages(attachments, uint.Parse(text));
+                    images = _imageService.ProjectImagesOnto("emmy.json", attachments, uint.Parse(text));
                     await SendImages(images);
                     break;
 
                 case ParamType.Text:
-                    string textImg = _imageService.EmmyText(text);
+                    string textImg = _imageService.ProjectTextOnto("emmy.json", text);
                     await SendImage(textImg);
                     break;
 
                 case ParamType.None:
-                    images = _imageService.EmmyImages(attachments);
+                    images = _imageService.ProjectImagesOnto("emmy.json", attachments);
                     await SendImages(images);
                     break;
             }

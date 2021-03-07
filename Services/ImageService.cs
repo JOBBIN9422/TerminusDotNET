@@ -251,24 +251,6 @@ namespace TerminusDotNetCore.Services
             return images;
         }
 
-        public List<string> BobRossImages(IReadOnlyCollection<Attachment> attachments, uint numTimes = 1)
-        {
-            var images = AttachmentHelper.DownloadAttachments(attachments);
-
-            foreach (var image in images)
-            {
-                for (uint i = 0; i < numTimes; i++)
-                {
-                    using (var bobRossImg = ImageHelper.ProjectOnto(image, Path.Combine("assets", "images", "bobross.json")))
-                    {
-                        bobRossImg.Save(image);
-                    }
-                }
-            }
-
-            return images;
-        }
-
         public List<string> MirrorImages(IReadOnlyCollection<Attachment> attachments, string flipModeStr)
         {
             var returnImgs = new List<string>();
@@ -307,18 +289,7 @@ namespace TerminusDotNetCore.Services
             }
         }
 
-        public string BobRossText(string text)
-        {
-            using (var image = ImageHelper.ProjectText(text, Path.Combine("assets", "images", "bobross.json")))
-            {
-                string outputFilename = $"{Guid.NewGuid().ToString("N")}.jpg";
-                image.Save(outputFilename);
-
-                return outputFilename;
-            }
-        }
-
-        public List<string> PCImages(IReadOnlyCollection<Attachment> attachments, uint numTimes = 1)
+        public List<string> ProjectImagesOnto(string projectionFilename, IReadOnlyCollection<Attachment> attachments, uint numTimes = 1)
         {
             var images = AttachmentHelper.DownloadAttachments(attachments);
 
@@ -326,9 +297,9 @@ namespace TerminusDotNetCore.Services
             {
                 for (uint i = 0; i < numTimes; i++)
                 {
-                    using (var pcImg = ImageHelper.ProjectOnto(image, Path.Combine("assets", "images", "pc.json")))
+                    using (var projectionImg = ImageHelper.ProjectOnto(image, Path.Combine("assets", "images", projectionFilename)))
                     {
-                        pcImg.Save(image);
+                        projectionImg.Save(image);
                     }
                 }
             }
@@ -336,168 +307,16 @@ namespace TerminusDotNetCore.Services
             return images;
         }
 
-        public string PCText(string text)
+        public string ProjectTextOnto(string projectionFilename, string text)
         {
-            using (var image = ImageHelper.ProjectText(text, Path.Combine("assets", "images", "pc.json")))
             {
-                string outputFilename = $"{Guid.NewGuid().ToString("N")}.jpg";
-                image.Save(outputFilename);
-
-                return outputFilename;
-            }
-        }
-
-        public List<string> WalterImages(IReadOnlyCollection<Attachment> attachments, uint numTimes = 1)
-        {
-            var images = AttachmentHelper.DownloadAttachments(attachments);
-
-            foreach (var image in images)
-            {
-                for (uint i = 0; i < numTimes; i++)
+                using (var image = ImageHelper.ProjectText(text, Path.Combine("assets", "images", projectionFilename)))
                 {
-                    using (var walterImg = ImageHelper.ProjectOnto(image, Path.Combine("assets", "images", "walter.json")))
-                    {
-                        walterImg.Save(image);
-                    }
+                    string outputFilename = $"{Guid.NewGuid().ToString("N")}.jpg";
+                    image.Save(outputFilename);
+
+                    return outputFilename;
                 }
-            }
-
-            return images;
-        }
-
-        public List<string> TrumpImages(IReadOnlyCollection<Attachment> attachments, uint numTimes = 1)
-        {
-            var images = AttachmentHelper.DownloadAttachments(attachments);
-
-            foreach (var image in images)
-            {
-                for (uint i = 0; i < numTimes; i++)
-                {
-                    using (var trumpImg = ImageHelper.ProjectOnto(image, Path.Combine("assets", "images", "trump.json")))
-                    {
-                        trumpImg.Save(image);
-                    }
-                }
-            }
-
-            return images;
-        }
-
-        public List<string> HankImages(IReadOnlyCollection<Attachment> attachments, uint numTimes = 1)
-        {
-            var images = AttachmentHelper.DownloadAttachments(attachments);
-
-            foreach (var image in images)
-            {
-                for (uint i = 0; i < numTimes; i++)
-                {
-                    using (var hankImg = ImageHelper.ProjectOnto(image, Path.Combine("assets", "images", "hank.json")))
-                    {
-                        hankImg.Save(image);
-                    }
-                }
-            }
-
-            return images;
-        }
-
-        public List<string> EmmyImages(IReadOnlyCollection<Attachment> attachments, uint numTimes = 1)
-        {
-            var images = AttachmentHelper.DownloadAttachments(attachments);
-
-            foreach (var image in images)
-            {
-                EmmyImage(image, numTimes);
-            }
-
-            return images;
-        }
-
-        private void TrumpImage(string imageFilename, uint numTimes = 1)
-        {
-            for (uint i = 0; i < numTimes; i++)
-            {
-                using (var image = ImageHelper.ProjectOnto(imageFilename, Path.Combine("assets", "images", "trump.json")))
-                {
-                    image.Save(imageFilename);
-                }
-            }
-        }
-
-        public string TrumpText(string text)
-        {
-            using (var image = ImageHelper.ProjectText(text, Path.Combine("assets", "images", "trump.json")))
-            {
-                string outputFilename = $"{Guid.NewGuid().ToString("N")}.jpg";
-                image.Save(outputFilename);
-
-                return outputFilename;
-            }
-        }
-
-        private void WalterImage(string imageFilename, uint numTimes = 1)
-        {
-            for (uint i = 0; i < numTimes; i++)
-            {
-                using (var image = ImageHelper.ProjectOnto(imageFilename, Path.Combine("assets", "images", "walter.json")))
-                {
-                    image.Save(imageFilename);
-                }
-            }
-        }
-
-        public string WalterText(string text)
-        {
-            using (var image = ImageHelper.ProjectText(text, Path.Combine("assets", "images", "walter.json")))
-            {
-                string outputFilename = $"{Guid.NewGuid().ToString("N")}.jpg";
-                image.Save(outputFilename);
-
-                return outputFilename;
-            }
-        }
-
-        private void HankImage(string imageFilename, uint numTimes = 1)
-        {
-            for (uint i = 0; i < numTimes; i++)
-            {
-                using (var image = ImageHelper.ProjectOnto(imageFilename, Path.Combine("assets", "images", "hank.json")))
-                {
-                    image.Save(imageFilename);
-                }
-            }
-        }
-
-        public string HankText(string text)
-        {
-            using (var image = ImageHelper.ProjectText(text, Path.Combine("assets", "images", "hank.json")))
-            {
-                string outputFilename = $"{Guid.NewGuid().ToString("N")}.jpg";
-                image.Save(outputFilename);
-
-                return outputFilename;
-            }
-        }
-
-        private void EmmyImage(string imageFilename, uint numTimes = 1)
-        {
-            for (uint i = 0; i < numTimes; i++)
-            {
-                using (var image = ImageHelper.ProjectOnto(imageFilename, Path.Combine("assets", "images", "emmy.json")))
-                {
-                    image.Save(imageFilename);
-                }
-            }
-        }
-
-        public string EmmyText(string text)
-        {
-            using (var image = ImageHelper.ProjectText(text, Path.Combine("assets", "images", "emmy.json")))
-            {
-                string outputFilename = $"{Guid.NewGuid().ToString("N")}.jpg";
-                image.Save(outputFilename);
-
-                return outputFilename;
             }
         }
     }
