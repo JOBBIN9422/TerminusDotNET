@@ -152,7 +152,10 @@ namespace TerminusDotNetCore.Services
 
             foreach (var image in images)
             {
-                MorrowindImage(image);
+                using (var morrowindImg = ImageHelper.WatermarkImage(image, Path.Combine("assets", "images", "morrowind.png"), AnchorPositionMode.Bottom, 0.1, 0.1, 0.67))
+                {
+                    morrowindImg.Save(image);
+                }
             }
 
             return images;
@@ -164,7 +167,10 @@ namespace TerminusDotNetCore.Services
 
             foreach (var image in images)
             {
-                DMCWatermarkImage(image);
+                using (var dmcImg = ImageHelper.WatermarkImage(image, Path.Combine("assets", "images", "dmc.png"), AnchorPositionMode.BottomLeft, 0.1, 0.1, 0.25))
+                {
+                    dmcImg.Save(image);
+                }
             }
 
             return images;
@@ -176,7 +182,10 @@ namespace TerminusDotNetCore.Services
 
             foreach (var image in images)
             {
-                BebopWatermarkImage(image);
+                using (var bebopImg = ImageHelper.WatermarkImage(image, Path.Combine("assets", "images", "bebop.png"), AnchorPositionMode.BottomRight, 0.05, 0.05, 0.6, 1.0f))
+                {
+                    bebopImg.Save(image);
+                }
             }
 
             return images;
@@ -188,7 +197,10 @@ namespace TerminusDotNetCore.Services
 
             foreach (var image in images)
             {
-                NintendoWatermarkImage(image);
+                using (var nintendoImg = ImageHelper.WatermarkImage(image, Path.Combine("assets", "images", "nintendo.png"), AnchorPositionMode.BottomRight, 0.1, 0.1, 0.25))
+                {
+                    nintendoImg.Save(image);
+                }
             }
 
             return images;
@@ -200,50 +212,13 @@ namespace TerminusDotNetCore.Services
 
             foreach (var image in images)
             {
-                MemeCaptionImage(image, topText, bottomText);
+                using (var bottomTextLmao = ImageHelper.MemeCaptionImage(image, topText, bottomText))
+                {
+                    bottomTextLmao.Save(image);
+                }
             }
 
             return images;
-        }
-
-        private void MemeCaptionImage(string imageFilename, string topText, string bottomText)
-        {
-            using (var image = ImageHelper.MemeCaptionImage(imageFilename, topText, bottomText))
-            {
-                image.Save(imageFilename);
-            }
-        }
-
-        private void MorrowindImage(string imageFilename)
-        {
-            using (var image = ImageHelper.WatermarkImage(imageFilename, Path.Combine("assets", "images", "morrowind.png"), AnchorPositionMode.Bottom, 0.1, 0.1, 0.67))
-            {
-                image.Save(imageFilename);
-            }
-        }
-
-        private void DMCWatermarkImage(string imageFilename)
-        {
-            using (var image = ImageHelper.WatermarkImage(imageFilename, Path.Combine("assets", "images", "dmc.png"), AnchorPositionMode.BottomLeft, 0.1, 0.1, 0.25))
-            {
-                image.Save(imageFilename);
-            }
-        }
-
-        private void BebopWatermarkImage(string imageFilename)
-        {
-            using (var image = ImageHelper.WatermarkImage(imageFilename, Path.Combine("assets", "images", "bebop.png"), AnchorPositionMode.BottomRight, 0.05, 0.05, 0.6, 1.0f))
-            {
-                image.Save(imageFilename);
-            }
-        }
-
-        private void NintendoWatermarkImage(string imageFilename)
-        {
-            using (var image = ImageHelper.WatermarkImage(imageFilename, Path.Combine("assets", "images", "nintendo.png"), AnchorPositionMode.BottomRight, 0.1, 0.1, 0.25))
-            {
-                image.Save(imageFilename);
-            }
         }
 
         public List<string> ThiccImages(IReadOnlyCollection<Attachment> attachments, int thiccCount = 2)
@@ -252,18 +227,13 @@ namespace TerminusDotNetCore.Services
 
             foreach (var image in images)
             {
-                ThiccImage(image, thiccCount);
+                using (var thiccImg = ImageHelper.ThiccImage(image, thiccCount))
+                {
+                    thiccImg.Save(image);
+                }
             }
 
             return images;
-        }
-
-        private void ThiccImage(string filename, int thiccCount)
-        {
-            using (var image = ImageHelper.ThiccImage(filename, thiccCount))
-            {
-                image.Save(filename);
-            }
         }
 
         public List<string> MosaicImages(IReadOnlyCollection<Attachment> attachments)
@@ -272,18 +242,13 @@ namespace TerminusDotNetCore.Services
 
             foreach (var image in images)
             {
-                MosaicImage(image);
+                using (var mosaicImg = ImageHelper.MosaicImage(image, Path.Combine("assets", "images", "GIMP_Pepper.png"), 0.02, 0.5f))
+                {
+                    mosaicImg.Save(image);
+                }
             }
 
             return images;
-        }
-
-        private void MosaicImage(string filename)
-        {
-            using (var image = ImageHelper.MosaicImage(filename, Path.Combine("assets", "images", "GIMP_Pepper.png"), 0.02, 0.5f))
-            {
-                image.Save(filename);
-            }
         }
 
         public List<string> BobRossImages(IReadOnlyCollection<Attachment> attachments, uint numTimes = 1)
@@ -292,7 +257,13 @@ namespace TerminusDotNetCore.Services
 
             foreach (var image in images)
             {
-                BobRossImage(image, numTimes);
+                for (uint i = 0; i < numTimes; i++)
+                {
+                    using (var bobRossImg = ImageHelper.ProjectOnto(image, Path.Combine("assets", "images", "bobross.json")))
+                    {
+                        bobRossImg.Save(image);
+                    }
+                }
             }
 
             return images;
@@ -336,17 +307,6 @@ namespace TerminusDotNetCore.Services
             }
         }
 
-        private void BobRossImage(string imageFilename, uint numTimes = 1)
-        {
-            for (uint i = 0; i < numTimes; i++)
-            {
-                using (var image = ImageHelper.ProjectOnto(imageFilename, Path.Combine("assets", "images", "bobross.json")))
-                {
-                    image.Save(imageFilename);
-                }
-            }
-        }
-
         public string BobRossText(string text)
         {
             using (var image = ImageHelper.ProjectText(text, Path.Combine("assets", "images", "bobross.json")))
@@ -364,21 +324,16 @@ namespace TerminusDotNetCore.Services
 
             foreach (var image in images)
             {
-                PCImage(image, numTimes);
+                for (uint i = 0; i < numTimes; i++)
+                {
+                    using (var pcImg = ImageHelper.ProjectOnto(image, Path.Combine("assets", "images", "pc.json")))
+                    {
+                        pcImg.Save(image);
+                    }
+                }
             }
 
             return images;
-        }
-
-        private void PCImage(string imageFilename, uint numTimes = 1)
-        {
-            for (uint i = 0; i < numTimes; i++)
-            {
-                using (var image = ImageHelper.ProjectOnto(imageFilename, Path.Combine("assets", "images", "pc.json")))
-                {
-                    image.Save(imageFilename);
-                }
-            }
         }
 
         public string PCText(string text)
@@ -398,7 +353,13 @@ namespace TerminusDotNetCore.Services
 
             foreach (var image in images)
             {
-                WalterImage(image, numTimes);
+                for (uint i = 0; i < numTimes; i++)
+                {
+                    using (var walterImg = ImageHelper.ProjectOnto(image, Path.Combine("assets", "images", "walter.json")))
+                    {
+                        walterImg.Save(image);
+                    }
+                }
             }
 
             return images;
@@ -410,7 +371,13 @@ namespace TerminusDotNetCore.Services
 
             foreach (var image in images)
             {
-                TrumpImage(image, numTimes);
+                for (uint i = 0; i < numTimes; i++)
+                {
+                    using (var trumpImg = ImageHelper.ProjectOnto(image, Path.Combine("assets", "images", "trump.json")))
+                    {
+                        trumpImg.Save(image);
+                    }
+                }
             }
 
             return images;
@@ -422,7 +389,13 @@ namespace TerminusDotNetCore.Services
 
             foreach (var image in images)
             {
-                HankImage(image, numTimes);
+                for (uint i = 0; i < numTimes; i++)
+                {
+                    using (var hankImg = ImageHelper.ProjectOnto(image, Path.Combine("assets", "images", "hank.json")))
+                    {
+                        hankImg.Save(image);
+                    }
+                }
             }
 
             return images;
