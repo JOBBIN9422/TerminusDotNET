@@ -58,7 +58,7 @@ namespace TerminusDotNetCore.Services
         public async Task RunBashCommandRoot(string cmd, ulong userID)
         {
             //check if user has root permissions (set in config)
-            if (RootUserIds.Contains(userID))
+            if (!RootUserIds.Contains(userID))
             {
                 await ParentModule.ServiceReplyAsync("You don't have root access.");
                 return;
