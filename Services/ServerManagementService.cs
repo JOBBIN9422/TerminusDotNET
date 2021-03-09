@@ -26,7 +26,7 @@ namespace TerminusDotNetCore.Services
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
                     CreateNoWindow = true,
-                    StandardOutputEncoding = Encoding.UTF32
+                    StandardOutputEncoding = Encoding.UTF8
                 }))
             {
                 return await bashProcess.StandardOutput.ReadToEndAsync();
@@ -36,7 +36,7 @@ namespace TerminusDotNetCore.Services
         public async Task ShowNeofetchOutput()
         {
             string neofetchOutput = await RunBashCommand("neofetch");
-            await ParentModule.ServiceReplyAsync($"```bash\n{neofetchOutput}\n```");
+            await ParentModule.ServiceReplyAsync(neofetchOutput);
         }
     }   
 }
