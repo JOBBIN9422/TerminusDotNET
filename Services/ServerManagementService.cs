@@ -36,6 +36,7 @@ namespace TerminusDotNetCore.Services
         public async Task ShowNeofetchOutput()
         {
             string neofetchOutput = await RunBashCommand("neofetch");
+            Console.WriteLine(neofetchOutput);
             await ParentModule.ServiceReplyAsync($"\\{neofetchOutput}");
         }
     }   
