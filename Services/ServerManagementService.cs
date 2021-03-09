@@ -21,6 +21,7 @@ namespace TerminusDotNetCore.Services
             var rootUserIds = Config.GetSection("ShellRootUsers").GetChildren();
             foreach (var userIdSection in rootUserIds)
             {
+                Console.WriteLine(userIdSection.Value);
                 RootUserIds.Add(ulong.Parse(userIdSection.Value));
             }
         }
@@ -57,6 +58,7 @@ namespace TerminusDotNetCore.Services
 
         public async Task RunBashCommandRoot(string cmd, ulong userID)
         {
+            Console.WriteLine(userID);
             //check if user has root permissions (set in config)
             if (!RootUserIds.Contains(userID))
             {
