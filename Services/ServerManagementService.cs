@@ -26,7 +26,7 @@ namespace TerminusDotNetCore.Services
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
                     CreateNoWindow = true,
-                    StandardOutputEncoding = Encoding.UTF8
+                    StandardOutputEncoding = Encoding.ASCII
                 }))
             {
                 return await bashProcess.StandardOutput.ReadToEndAsync();
