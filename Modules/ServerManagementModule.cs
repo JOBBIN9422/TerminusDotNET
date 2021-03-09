@@ -26,11 +26,41 @@ namespace TerminusDotNetCore.Modules
             await _service.ShowNeofetchOutput();
         }
 
-        [Command("update-packages", RunMode = RunMode.Async)]
-        [Summary("Run `apt update && apt full-upgrade -y`.")]
-        public async Task UpdatePackages()
+        
+
+        [Group("apt")]
+        public class AptModule : ServiceControlModule
         {
-            await _service.UpdatePackages();
+            private ServerManagementService _service;
+
+            public AptModule(IConfiguration config, ServerManagementService service) : base(config)
+            {
+                //do not need to set service config here - passed into audioSvc constructor via DI
+                _service = service;
+                _service.Config = config;
+                _service.ParentModule = this;
+            }
+
+            [Command("update", RunMode = RunMode.Async)]
+            [Summary("Run `apt update`.")]
+            public async Task UpdatePackages()
+            {
+                await _service.RunAptUpdate();
+            }
+
+            [Command("full-upgrade", RunMode = RunMode.Async)]
+            [Summary("Run `apt full-upgrade -y`.")]
+            public async Task FullUpgradePackages()
+            {
+                await _service.RunAptFullUpgrade();
+            }
+
+            [Command("clean", RunMode = RunMode.Async)]
+            [Summary("Run `apt autoremove -y && apt autoclean`.")]
+            public async Task CleanPackages()
+            {
+                await _service.RunAptCleanAndRemove();
+            }
         }
     }
 }

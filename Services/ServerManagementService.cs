@@ -39,9 +39,21 @@ namespace TerminusDotNetCore.Services
             await ParentModule.ServiceReplyAsync($"```\n{neofetchOutput}\n```");
         }
 
-        public async Task UpdatePackages()
+        public async Task RunAptUpdate()
         {
-            string aptOutput = await RunBashCommand("apt update && apt full-upgrade -y");
+            string aptOutput = await RunBashCommand("apt update");
+            await ParentModule.ServiceReplyAsync($"```\n{aptOutput}\n```");
+        }
+
+        public async Task RunAptFullUpgrade()
+        {
+            string aptOutput = await RunBashCommand("apt full-upgrade -y");
+            await ParentModule.ServiceReplyAsync($"```\n{aptOutput}\n```");
+        }
+
+        public async Task RunAptCleanAndRemove()
+        {
+            string aptOutput = await RunBashCommand("apt autoremove -y && apt autoclean");
             await ParentModule.ServiceReplyAsync($"```\n{aptOutput}\n```");
         }
     }   
