@@ -48,7 +48,7 @@ namespace TerminusDotNetCore.Services
 
         public async Task ShowNeofetchOutput()
         {
-            string neofetchOutput = await RunBashCommand("neofetch --stdout", "termy");
+            string neofetchOutput = await RunBashCommand("neofetch --stdout", "root");
             await ParentModule.ServiceReplyAsync($"```\n{neofetchOutput}\n```");
         }
 
