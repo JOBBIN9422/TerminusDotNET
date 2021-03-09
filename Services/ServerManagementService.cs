@@ -43,8 +43,6 @@ namespace TerminusDotNetCore.Services
         public async Task RunBashCommandNonRoot(string cmd)
         {
             string bashOutput = await RunBashCommand(cmd, "termy");
-            Console.WriteLine(cmd);
-            Console.WriteLine(bashOutput);
             await ParentModule.ServiceReplyAsync($"```\n{bashOutput}\n```");
         }
 
