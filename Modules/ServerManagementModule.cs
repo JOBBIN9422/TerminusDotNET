@@ -25,5 +25,12 @@ namespace TerminusDotNetCore.Modules
         {
             await _service.ShowNeofetchOutput();
         }
+
+        [Command("update-packages", RunMode = RunMode.Async)]
+        [Summary("Run `apt update && apt full-upgrade -y`.")]
+        public async Task UpdatePackages()
+        {
+            await _service.UpdatePackages();
+        }
     }
 }

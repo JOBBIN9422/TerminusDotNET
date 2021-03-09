@@ -36,8 +36,13 @@ namespace TerminusDotNetCore.Services
         public async Task ShowNeofetchOutput()
         {
             string neofetchOutput = await RunBashCommand("neofetch --stdout");
-            Console.WriteLine(neofetchOutput);
             await ParentModule.ServiceReplyAsync($"```\n{neofetchOutput}\n```");
+        }
+
+        public async Task UpdatePackages()
+        {
+            string aptOutput = await RunBashCommand("apt update && apt full-upgrade -y");
+            await ParentModule.ServiceReplyAsync($"```\n{aptOutput}\n```");
         }
     }   
 }
