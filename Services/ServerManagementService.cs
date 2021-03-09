@@ -21,7 +21,7 @@ namespace TerminusDotNetCore.Services
                 new ProcessStartInfo
                 {
                     FileName = "su",
-                    Arguments = $"-u {user} -c \"{cmd}\" -s bash",
+                    Arguments = $"-c \"{cmd}\" -s bash {user}",
                     UseShellExecute = false,
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
