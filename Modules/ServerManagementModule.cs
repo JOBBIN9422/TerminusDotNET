@@ -27,12 +27,19 @@ namespace TerminusDotNetCore.Modules
         }
 
         [Command("bash", RunMode = RunMode.Async)]
-        [Summary("Run the given `bash` command as a **non-root** user. Be responsible pls :')")]
+        [Summary("Run the given `bash` command as a **non-root** user.")]
         public async Task RunBashCommandNonRoot([Summary("Command to run.")][Remainder]string cmd)
         {
             await _service.RunBashCommandNonRoot(cmd);
         }
-        
+
+        [Command("root", RunMode = RunMode.Async)]
+        [Summary("Run the given `bash` command as a **root** user (must be authorized in `appsettings.json`). Be responsible pls :')")]
+        public async Task RunBashCommandRoot([Summary("Command to run.")][Remainder] string cmd)
+        {
+            await _service.RunBashCommandRoot(cmd, Context.Message.Author.Id);
+        }
+
 
         [Group("apt")]
         public class AptModule : ServiceControlModule

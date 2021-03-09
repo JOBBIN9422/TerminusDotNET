@@ -14,6 +14,16 @@ namespace TerminusDotNetCore.Services
         public IConfiguration Config { get; set; }
         public ServiceControlModule ParentModule { get; set; }
 
+        public List<ulong> RootUserIds { get; private set; } = new List<ulong>();
+
+        public void LoadRootUserIds()
+        {
+            var rootUserIds = Config.GetSection("ShellRootUsers").GetChildren();
+            foreach (var userIdSection in rootUserIds)
+            {
+                RootUserIds.Add(ulong.Parse(userIdSection.Value));
+            }
+        }
         private static async Task<string> RunBashCommand(string cmd, string user)
         {
             //escape double quotes in cmd
@@ -42,6 +52,19 @@ namespace TerminusDotNetCore.Services
         public async Task RunBashCommandNonRoot(string cmd)
         {
             string bashOutput = await RunBashCommand(cmd, "termy");
+            await ParentModule.ServiceReplyAsync($"```\n{bashOutput}\n```");
+        }
+
+        public async Task RunBashCommandRoot(string cmd, ulong userID)
+        {
+            //check if user has root permissions (set in config)
+            if (RootUserIds.Contains(userID))
+            {
+                await ParentModule.ServiceReplyAsync("You don't have root access.");
+                return;
+            }
+
+            string bashOutput = await RunBashCommand(cmd, "root");
             await ParentModule.ServiceReplyAsync($"```\n{bashOutput}\n```");
         }
 
