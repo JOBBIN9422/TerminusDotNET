@@ -59,7 +59,7 @@ namespace TerminusDotNetCore.Services
 
         public async Task RunAptFullUpgrade()
         {
-            string aptOutput = await RunBashCommand("apt-get full-upgrade -y", "root");
+            string aptOutput = await RunBashCommand("apt-get dist-upgrade -y", "root");
             await ParentModule.ServiceReplyAsync($"```\n{aptOutput}\n```");
         }
 
