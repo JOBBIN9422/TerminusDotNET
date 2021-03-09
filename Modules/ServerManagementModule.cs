@@ -26,6 +26,12 @@ namespace TerminusDotNetCore.Modules
             await _service.ShowNeofetchOutput();
         }
 
+        [Command("bash", RunMode = RunMode.Async)]
+        [Summary("Run the given `bash` command as a **non-root** user. Be responsible pls :')")]
+        public async Task RunBashCommandNonRoot([Summary("Command to run.")][Remainder]string cmd)
+        {
+            await _service.RunBashCommandNonRoot(cmd);
+        }
         
 
         [Group("apt")]
