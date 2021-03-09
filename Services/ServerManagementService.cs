@@ -19,6 +19,7 @@ namespace TerminusDotNetCore.Services
         {
             //escape double quotes in cmd
             cmd = cmd.Replace("'", @"\'");
+            Console.WriteLine(cmd);
             using (var bashProcess = Process.Start(
                 new ProcessStartInfo
                 {
