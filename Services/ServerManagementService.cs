@@ -29,6 +29,11 @@ namespace TerminusDotNetCore.Services
                     StandardOutputEncoding = Encoding.UTF8
                 }))
             {
+                string stdError = await bashProcess.StandardError.ReadToEndAsync();
+                if (!string.IsNullOrEmpty(stdError))
+                {
+                    return stdError;
+                }
                 return await bashProcess.StandardOutput.ReadToEndAsync();
             }
         }
