@@ -48,21 +48,21 @@ namespace TerminusDotNetCore.Modules
             }
 
             [Command("update", RunMode = RunMode.Async)]
-            [Summary("Run `apt update`.")]
+            [Summary("Run `apt-get update`.")]
             public async Task UpdatePackages()
             {
                 await _service.RunAptUpdate();
             }
 
-            [Command("full-upgrade", RunMode = RunMode.Async)]
-            [Summary("Run `apt full-upgrade -y`.")]
+            [Command("dist-upgrade", RunMode = RunMode.Async)]
+            [Summary("Run `apt-get dist-upgrade -y`.")]
             public async Task FullUpgradePackages()
             {
                 await _service.RunAptFullUpgrade();
             }
 
             [Command("clean", RunMode = RunMode.Async)]
-            [Summary("Run `apt autoremove -y && apt autoclean`.")]
+            [Summary("Run `apt-get autoremove -y && apt-get autoclean`.")]
             public async Task CleanPackages()
             {
                 await _service.RunAptCleanAndRemove();
