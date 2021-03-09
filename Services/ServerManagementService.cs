@@ -18,13 +18,12 @@ namespace TerminusDotNetCore.Services
         private static async Task<string> RunBashCommand(string cmd, string user)
         {
             //escape double quotes in cmd
-            cmd = cmd.Replace("'", @"\'");
             Console.WriteLine(cmd);
             using (var bashProcess = Process.Start(
                 new ProcessStartInfo
                 {
-                    FileName = "su",
-                    Arguments = $"-s /bin/bash -c \'{cmd}\' {user}",
+                    FileName = "sudo",
+                    Arguments = $"-u {user }-s /bin/bash {cmd}",
                     UseShellExecute = false,
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
