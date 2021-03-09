@@ -23,7 +23,7 @@ namespace TerminusDotNetCore.Services
                 new ProcessStartInfo
                 {
                     FileName = "sudo",
-                    Arguments = $"-u {user} -s /bin/bash {cmd}",
+                    Arguments = $"-u {user} {cmd}",
                     UseShellExecute = false,
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
