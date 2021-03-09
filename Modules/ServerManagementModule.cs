@@ -14,8 +14,8 @@ namespace TerminusDotNetCore.Modules
         private ServerManagementService _service;
         public ServerManagementModule(IConfiguration config, ServerManagementService service) : base(config)
         {
-            _service.Config = config;
             _service = service;
+            _service.Config = config;
             _service.ParentModule = this;
         }
 
