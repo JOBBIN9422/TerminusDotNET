@@ -18,7 +18,7 @@ namespace TerminusDotNetCore.Services
         private static async Task<string> RunBashCommand(string cmd, string user)
         {
             //escape double quotes in cmd
-            cmd.Replace("\"", @"\""");
+            cmd = cmd.Replace("\"", @"\""");
             using (var bashProcess = Process.Start(
                 new ProcessStartInfo
                 {
