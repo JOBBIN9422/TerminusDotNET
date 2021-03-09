@@ -16,8 +16,13 @@ namespace TerminusDotNetCore.Services
 
         public List<ulong> RootUserIds { get; private set; } = new List<ulong>();
 
-        public void LoadRootUserIds()
+        public void LoadRootUserIds(bool refresh)
         {
+            //don't re-read config unless refreshing user ID list
+            if (RootUserIds.Count > 0 && !refresh)
+            {
+                return;
+            }
             var rootUserIds = Config.GetSection("ShellRootUsers").GetChildren();
             foreach (var userIdSection in rootUserIds)
             {

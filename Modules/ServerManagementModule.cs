@@ -19,7 +19,7 @@ namespace TerminusDotNetCore.Modules
             _service.ParentModule = this;
 
             //read root user IDs from config
-            _service.LoadRootUserIds();
+            _service.LoadRootUserIds(false);
         }
 
         [Command("neofetch", RunMode = RunMode.Async)]
