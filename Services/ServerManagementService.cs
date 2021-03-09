@@ -14,17 +14,15 @@ namespace TerminusDotNetCore.Services
         public IConfiguration Config { get; set; }
         public ServiceControlModule ParentModule { get; set; }
 
-        //don't pass anything suspect into here, you're running as root :-]
         private static async Task<string> RunBashCommand(string cmd, string user)
         {
             //escape double quotes in cmd
             string escapedCmd = cmd.Replace("\"", "\\\"");
-            Console.WriteLine(cmd);
             using (var bashProcess = Process.Start(
                 new ProcessStartInfo
                 {
-                    FileName = "sudo",
-                    Arguments = $"-u {user} \"{cmd}\"",
+                    FileName = "su",
+                    Arguments = $"-s /bin/bash -c \"{escapedCmd}\" {user}",
                     UseShellExecute = false,
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
@@ -32,7 +30,6 @@ namespace TerminusDotNetCore.Services
                     StandardOutputEncoding = Encoding.UTF8
                 }))
             {
-                Console.WriteLine(bashProcess.StartInfo.Arguments);
                 string stdError = await bashProcess.StandardError.ReadToEndAsync();
                 if (!string.IsNullOrEmpty(stdError))
                 {
