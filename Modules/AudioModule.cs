@@ -18,6 +18,13 @@ namespace TerminusDotNetCore.Modules
 
         private Dictionary<string, ulong> _channelNameToIdMap = new Dictionary<string, ulong>();
 
+        private AudioQueueArgs _defaultArgs = new AudioQueueArgs
+        {
+            Append = true,
+            Shuffle = false,
+            Channel = "main"
+        };
+
         public AudioModule(IConfiguration config, AudioService service) : base(config)
         {
             //do not need to set service config here - passed into audioSvc constructor via DI
@@ -31,7 +38,7 @@ namespace TerminusDotNetCore.Modules
 
         [Command("play", RunMode = RunMode.Async)]
         [Summary("Play a song of your choice in an audio channel of your choice (defaults to verbal shitposting). List local songs with !availablesongs.")]
-        public async Task PlaySong([Summary("name of song to play (use \"attached\" to play an attached mp3 file")]string song, AudioQueueArgs namedArgs)
+        public async Task PlaySong([Summary("name of song to play (use \"attached\" to play an attached mp3 file")]string song, AudioQueueArgs namedArgs = _defaultArgs)
         {
             //check if channel id is valid and exists
             if (!_channelNameToIdMap.ContainsKey(namedArgs.Channel))
