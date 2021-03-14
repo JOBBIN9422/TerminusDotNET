@@ -7,6 +7,7 @@ using TerminusDotNetCore.Services;
 using System.Collections.Generic;
 using Microsoft.Extensions.Configuration;
 using TerminusDotNetCore.Helpers;
+using TerminusDotNetCore.NamedArgs;
 using Discord.WebSocket;
 
 namespace TerminusDotNetCore.Modules
@@ -30,12 +31,10 @@ namespace TerminusDotNetCore.Modules
 
         [Command("play", RunMode = RunMode.Async)]
         [Summary("Play a song of your choice in an audio channel of your choice (defaults to verbal shitposting). List local songs with !availablesongs.")]
-        public async Task PlaySong([Summary("name of song to play (use \"attached\" to play an attached mp3 file")]string song, 
-            [Summary("Which end of the queue to insert the song at (appended to the back by default.)")]string qEnd = "back", 
-            [Summary("Channel name to play the song in (`main` or `weed`).")]string channelName = "main")
+        public async Task PlaySong([Summary("name of song to play (use \"attached\" to play an attached mp3 file")]string song, AudioQueueArgs namedArgs)
         {
             //check if channel id is valid and exists
-            if (!_channelNameToIdMap.ContainsKey(channelName))
+            if (!_channelNameToIdMap.ContainsKey(namedArgs.Channel))
             {
                 await ReplyAsync("Invalid channel name (please use `main` or `weed`).");
                 return;
@@ -73,7 +72,7 @@ namespace TerminusDotNetCore.Modules
                 {
                     throw new NullReferenceException("No media attachments were found in the current or previous 20 messages.");
                 }
-                await _service.QueueTempSong(Context.Message.Author, atts, voiceID, qEnd != "front");
+                await _service.QueueTempSong(Context.Message.Author, atts, voiceID, namedArgs.Append);
             }
             else
             {
