@@ -39,7 +39,7 @@ namespace TerminusDotNetCore.Modules
                 await ReplyAsync("Invalid channel name (please use `main` or `weed`).");
                 return;
             }
-            ulong voiceID = _channelNameToIdMap[channelName];
+            ulong voiceID = _channelNameToIdMap[namedArgs.Channel];
 
             //check if path is valid and exists
             bool useFile = false;
@@ -83,7 +83,7 @@ namespace TerminusDotNetCore.Modules
                     Console.WriteLine(path);
                     return;
                 }
-                await _service.QueueLocalSong(Context.Message.Author, path, voiceID, qEnd != "front");
+                await _service.QueueLocalSong(Context.Message.Author, path, voiceID, namedArgs.Append);
             }
         }
 
