@@ -101,7 +101,7 @@ namespace TerminusDotNetCore.Modules
 
         [Command("search", RunMode = RunMode.Async)]
         [Summary("Search for a YouTube video and add the result to the queue.")]
-        public async Task SearchSong([Summary("YouTube search term (enclose in quotes if it contains spaces).")]string searchTerm, namedArgs = null)
+        public async Task SearchSong([Summary("YouTube search term (enclose in quotes if it contains spaces).")]string searchTerm, AudioQueueArgs namedArgs = null)
         {
             if (namedArgs == null)
             {
@@ -116,7 +116,7 @@ namespace TerminusDotNetCore.Modules
             }
             ulong voiceID = _channelNameToIdMap[namedArgs.Channel];
 
-            await _service.QueueSearchedYoutubeSong(Context.Message.Author, searchTerm, voiceID);
+            await _service.QueueSearchedYoutubeSong(Context.Message.Author, searchTerm, voiceID, NamedArgs.Append);
         }
 
         [Command("playlist", RunMode = RunMode.Async)]

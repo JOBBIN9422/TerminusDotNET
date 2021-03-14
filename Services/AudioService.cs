@@ -514,7 +514,7 @@ namespace TerminusDotNetCore.Services
             await QueueYoutubeURLs(videoUrls, owner, channelId, append);
         }
 
-        public async Task QueueSearchedYoutubeSong(SocketUser owner, string searchTerm, ulong channelId)
+        public async Task QueueSearchedYoutubeSong(SocketUser owner, string searchTerm, ulong channelId, bool append)
         {
             var searchListRequest = _ytService.Search.List("snippet");
             searchListRequest.Q = searchTerm;
@@ -529,7 +529,7 @@ namespace TerminusDotNetCore.Services
 
                 try
                 {
-                    await QueueYoutubeSongPreDownloaded(owner, url, channelId);
+                    await QueueYoutubeSongPreDownloaded(owner, url, channelId, append);
 
                     //if we successfully download and queue a song, exit this loop and return
                     return;
