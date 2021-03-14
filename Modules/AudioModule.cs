@@ -101,16 +101,20 @@ namespace TerminusDotNetCore.Modules
 
         [Command("search", RunMode = RunMode.Async)]
         [Summary("Search for a YouTube video and add the result to the queue.")]
-        public async Task SearchSong([Summary("YouTube search term (enclose in quotes if it contains spaces).")]string searchTerm, 
-            [Summary("Channel name to play the song in (`main` or `weed`).")]string channelName = "main")
+        public async Task SearchSong([Summary("YouTube search term (enclose in quotes if it contains spaces).")]string searchTerm, namedArgs = null)
         {
+            if (namedArgs == null)
+            {
+                namedArgs = DEFAULT_ARGS;
+            }
+
             //check if channel id is valid and exists
-            if (!_channelNameToIdMap.ContainsKey(channelName))
+            if (!_channelNameToIdMap.ContainsKey(namedArgs.Channel))
             {
                 await ReplyAsync("Invalid channel name (please use `main` or `weed`).");
                 return;
             }
-            ulong voiceID = _channelNameToIdMap[channelName];
+            ulong voiceID = _channelNameToIdMap[namedArgs.Channel];
 
             await _service.QueueSearchedYoutubeSong(Context.Message.Author, searchTerm, voiceID);
         }
