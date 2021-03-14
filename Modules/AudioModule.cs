@@ -116,7 +116,7 @@ namespace TerminusDotNetCore.Modules
             }
             ulong voiceID = _channelNameToIdMap[namedArgs.Channel];
 
-            await _service.QueueSearchedYoutubeSong(Context.Message.Author, searchTerm, voiceID, NamedArgs.Append);
+            await _service.QueueSearchedYoutubeSong(Context.Message.Author, searchTerm, voiceID, namedArgs.Append);
         }
 
         [Command("playlist", RunMode = RunMode.Async)]
