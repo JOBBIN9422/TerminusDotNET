@@ -12,10 +12,10 @@ namespace TerminusDotNetCore.NamedArgs
     {
         //true: enqueue at end (normal behavior)
         //false: enqueue at front (cut in queue)
-        public bool Append { get; set; } = true;
-        public bool Shuffle { get; set; } = false;
+        public bool Append { get; set; }
+        public bool Shuffle { get; set; }
 
         //channel alias ("main" or "weed")
-        public string Channel { get; set; } = "main";
+        public string Channel { get; set; }
     }
 }
