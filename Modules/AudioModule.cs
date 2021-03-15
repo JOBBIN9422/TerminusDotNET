@@ -121,20 +121,22 @@ namespace TerminusDotNetCore.Modules
 
         [Command("playlist", RunMode = RunMode.Async)]
         [Summary("Add all of the songs in the playlist to the queue in the order they appear in the playlist.")]
-        public async Task AddPlaylist([Summary("The URL of the YouTube playlist to add.")]string playlistUrl, 
-            [Summary("Which end of the queue to insert the song at (appended to the back by default.)")]string qEnd = "back",
-            [Summary("whether or not to shuffle the playlist when adding it to the song queue.")]string shuffle = "false",
-            [Summary("Channel name to play the song in (`main` or `weed`).")]string channelName = "main")
+        public async Task AddPlaylist([Summary("The URL of the YouTube playlist to add.")]string playlistUrl, AudioQueueArgs namedArgs = null)
         {
+            if (namedArgs == null)
+            {
+                namedArgs = DEFAULT_ARGS;
+            }
+
             //check if channel id is valid and exists
-            if (!_channelNameToIdMap.ContainsKey(channelName))
+            if (!_channelNameToIdMap.ContainsKey(namedArgs.Channel))
             {
                 await ReplyAsync("Invalid channel name (please use `main` or `weed`).");
                 return;
             }
-            ulong voiceID = _channelNameToIdMap[channelName];
+            ulong voiceID = _channelNameToIdMap[namedArgs.Channel];
 
-            await _service.QueueYoutubePlaylist(Context.Message.Author, playlistUrl, voiceID, qEnd != "front", shuffle == "shuffle");
+            await _service.QueueYoutubePlaylist(Context.Message.Author, playlistUrl, voiceID, namedArgs.Append, namedArgs.Shuffle);
         }
 
         [Command("downloader", RunMode = RunMode.Async)]
