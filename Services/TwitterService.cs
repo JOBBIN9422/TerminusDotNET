@@ -10,6 +10,8 @@ using System.Linq;
 using System.Diagnostics;
 using Discord;
 using System.IO;
+using LinqToTwitter.OAuth;
+using LinqToTwitter.Common;
 
 namespace TerminusDotNetCore.Services
 {
@@ -113,7 +115,7 @@ namespace TerminusDotNetCore.Services
             var user =
                 await
                 (from tweet in _twitterContext.User
-                 where tweet.Type == UserType.Show &&
+                 where tweet.Type == UserType.Search &&
                        tweet.ScreenName == "notch"
                  select tweet)
                 .SingleOrDefaultAsync();
@@ -133,7 +135,7 @@ namespace TerminusDotNetCore.Services
             var user =
                 await
                 (from tweet in _twitterContext.User
-                 where tweet.Type == UserType.Show &&
+                 where tweet.Type == UserType.Search &&
                        tweet.ScreenName == "Hideki_Naganuma"
                  select tweet)
                 .SingleOrDefaultAsync();
