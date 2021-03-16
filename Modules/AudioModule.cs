@@ -311,7 +311,7 @@ namespace TerminusDotNetCore.Modules
 
             [Command("jam", RunMode = RunMode.Async)]
             [Summary("Add a random Hideki Naganuma song to the queue.")]
-            public async Task AddRandomHidekiSong(AudioQueueArgs namedArgs)
+            public async Task AddRandomHidekiSong(AudioQueueArgs namedArgs = null)
             {
                 if (namedArgs == null)
                 {
