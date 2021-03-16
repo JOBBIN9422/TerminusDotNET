@@ -157,18 +157,22 @@ namespace TerminusDotNetCore.Modules
         [Command("yt", RunMode = RunMode.Async)]
         [Summary("Add the given YouTube video to the queue.")]
         public async Task StreamSong([Summary("URL of the YouTube video to add.")]string url, 
-            [Summary("Which end of the queue to insert the song at (appended to the back by default.)")]string qEnd = "back",
-            [Summary("Channel name to play the song in (`main` or `weed`).")]string channelName = "main")
+            [Summary("Which end of the queue to insert the song at (appended to the back by default.)")]AudioQueueArgs namedArgs = null)
         {
+            if (namedArgs == null)
+            {
+                namedArgs = DEFAULT_ARGS;
+            }
+
             //check if channel id is valid and exists
-            if (!_channelNameToIdMap.ContainsKey(channelName))
+            if (!_channelNameToIdMap.ContainsKey(namedArgs.Channel))
             {
                 await ReplyAsync("Invalid channel name (please use `main` or `weed`).");
                 return;
             }
-            ulong voiceID = _channelNameToIdMap[channelName];
+            ulong voiceID = _channelNameToIdMap[namedArgs.Channel];
 
-            await _service.QueueYoutubeSongPreDownloaded(Context.Message.Author, url, voiceID, qEnd != "front");
+            await _service.QueueYoutubeSongPreDownloaded(Context.Message.Author, url, voiceID, namedArgs.Append);
         }
 
         [Command("playnext", RunMode = RunMode.Async)]
