@@ -118,7 +118,7 @@ namespace TerminusDotNetCore.Services
                  where u.Type == UserType.Search &&
                        u.Query == "notch"
                  select u)
-                .SingleOrDefaultAsync();
+                .FirstOrDefaultAsync();
 
             if (user != null)
             {
@@ -138,7 +138,7 @@ namespace TerminusDotNetCore.Services
                  where u.Type == UserType.Search &&
                        u.Query == "Hideki_Naganuma"
                  select u)
-                .SingleOrDefaultAsync();
+                .FirstOrDefaultAsync();
 
             if (user != null)
             {
