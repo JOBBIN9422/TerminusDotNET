@@ -114,10 +114,10 @@ namespace TerminusDotNetCore.Services
         {
             var user =
                 await
-                (from tweet in _twitterContext.User
-                 where tweet.Type == UserType.Search &&
-                       tweet.ScreenName == "notch"
-                 select tweet)
+                (from u in _twitterContext.User
+                 where u.Type == UserType.Search &&
+                       u.Query == "notch"
+                 select u)
                 .SingleOrDefaultAsync();
 
             if (user != null)
@@ -134,10 +134,10 @@ namespace TerminusDotNetCore.Services
         {
             var user =
                 await
-                (from tweet in _twitterContext.User
-                 where tweet.Type == UserType.Search &&
-                       tweet.ScreenName == "Hideki_Naganuma"
-                 select tweet)
+                (from u in _twitterContext.User
+                 where u.Type == UserType.Search &&
+                       u.Query == "Hideki_Naganuma"
+                 select u)
                 .SingleOrDefaultAsync();
 
             if (user != null)
