@@ -1,4 +1,5 @@
-﻿using Discord.WebSocket;
+﻿using Discord.Commands;
+using Discord.WebSocket;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,6 +8,7 @@ using System.Threading.Tasks;
 
 namespace TerminusDotNetCore.NamedArgs
 {
+    [NamedArgumentType]
     public class RadioAccessControlArgs
     {
         public string Playlist { get; set; }

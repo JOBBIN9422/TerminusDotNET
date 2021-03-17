@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace TerminusDotNetCore.NamedArgs
 {
+    [NamedArgumentType]
     public class RadioPlayArgs
     {
         public string Playlist { get; set; }
