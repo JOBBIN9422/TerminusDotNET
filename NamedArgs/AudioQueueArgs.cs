@@ -4,9 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Discord.Commands;
+using TerminusDotNetCore.Attributes;
 
 namespace TerminusDotNetCore.NamedArgs
 {
+    [NamedArgument]
     [NamedArgumentType]
     public class AudioQueueArgs
     {
