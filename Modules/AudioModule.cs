@@ -365,101 +365,118 @@ namespace TerminusDotNetCore.Modules
 
             [Command("add", RunMode = RunMode.Async)]
             [Summary("Add a YouTube song to the given playlist (if it exists).")]
-            public async Task AddSongToPlaylist(
-                [Summary("The name of the playlist to add a song to.")]string playlistName, 
-                [Summary("URL of the YouTube song to add.")]string url)
+            public async Task AddSongToPlaylist(RadioAddSongArgs namedArgs = null)
             {
-                if (string.IsNullOrEmpty(playlistName))
+                if (namedArgs == null)
+                {
+                    await ReplyAsync("Please supply arguments (`playlist: <playlist-name> url: <url>`).");
+                    return;
+                }
+                if (string.IsNullOrEmpty(namedArgs.Playlist))
                 {
                     await ReplyAsync("Please provide a playlist name.");
                     return;
                 }
                 
-                if (string.IsNullOrEmpty(url))
+                if (string.IsNullOrEmpty(namedArgs.Url))
                 {
                     await ReplyAsync("Please provide a YouTube URL.");
                     return;
                 }
 
-                await _service.AddRadioSong(Context.Message.Author, playlistName, url);
+                await _service.AddRadioSong(Context.Message.Author, namedArgs.Playlist, namedArgs.Url);
             }
 
             [Command("delete", RunMode = RunMode.Async)]
             [Summary("Delete a song from the given playlist by its index. If no index is provided, then delete the playlist. Only the playlist owner may delete a playlist. Only whitelisted users may delete a song from a playlist.")]
-            public async Task RemoveSongFromPlaylist(
-                [Summary("The name of the playlist to delete or delete a song from.")]string playlistName, 
-                [Summary("The index of the song in the playlist to delete (obtain with `!radio list <playlist-name>` command). If not given, delete the entire playlist.")]int index = -1)
+            public async Task RemoveSongFromPlaylist(RadioDeleteArgs namedArgs = null)
             {
-                if (string.IsNullOrEmpty(playlistName))
+                if (namedArgs == null)
+                {
+                    await ReplyAsync("Please supply arguments (`playlist: <playlist-name> index: <song-index>`).");
+                    return;
+                }
+                if (string.IsNullOrEmpty(namedArgs.Playlist))
                 {
                     await ReplyAsync("Please provide a playlist name.");
                     return;
                 }
 
-                if (index == -1)
+                if (namedArgs.Index == -1)
                 {
                     //delete the playlist if no song specified
-                    await _service.DeleteRadioPlaylist(Context.Message.Author, playlistName);
+                    await _service.DeleteRadioPlaylist(Context.Message.Author, namedArgs.Playlist);
                     return;
                 }
 
-                await _service.DeleteRadioSong(Context.Message.Author, playlistName, index);
+                await _service.DeleteRadioSong(Context.Message.Author, namedArgs.Playlist, namedArgs.Index);
             }
 
             [Command("whitelist", RunMode = RunMode.Async)]
             [Summary("Add a user to the whitelist of the given playlist. This user can then add and delete songs to/from the playlist.")]
-            public async Task WhitelistUserForPlaylist(
-                [Summary("The name of the playlist to whitelist a user for.")]string playlistName, 
-                [Summary("The `@user` to add to the whitelist of the given playlist.")]SocketUser whitelistUser = null)
+            public async Task WhitelistUserForPlaylist(RadioAccessControlArgs namedArgs = null)
             {
-                if (string.IsNullOrEmpty(playlistName))
+                if (namedArgs == null)
+                {
+                    await ReplyAsync("Please supply arguments (`playlist: <playlist-name> user: <@user>`).");
+                    return;
+                }
+                if (string.IsNullOrEmpty(namedArgs.Playlist))
                 {
                     await ReplyAsync("Please provide a playlist name.");
                     return;
                 }
 
-                if (whitelistUser == null)
+                if (namedArgs.User == null)
                 {
                     await ReplyAsync("Please provide a `@user` to whitelist.");
                     return;
                 }
 
-                await _service.WhitelistUserForRadioPlaylist(playlistName, Context.Message.Author, whitelistUser);
+                await _service.WhitelistUserForRadioPlaylist(namedArgs.Playlist, Context.Message.Author, namedArgs.User);
             }
 
             [Command("blacklist", RunMode = RunMode.Async)]
             [Summary("Remove a user from the whitelist of the given playlist (if they are on the whitelist already).")]
-            public async Task RemoveWhitelistUserFromPlaylist(
-                [Summary("The name of the playlist to delete a user from.")]string playlistName, 
-                [Summary("The `@user` to remove from the whitelist of the given playlist (if they are on the whitelist already).")]SocketUser blacklistUser = null)
+            public async Task RemoveWhitelistUserFromPlaylist(RadioAccessControlArgs namedArgs = null)
             {
-                if (string.IsNullOrEmpty(playlistName))
+                if (namedArgs == null)
+                {
+                    await ReplyAsync("Please supply arguments (`playlist: <playlist-name> user: <@user>`).");
+                    return;
+                }
+                if (string.IsNullOrEmpty(namedArgs.Playlist))
                 {
                     await ReplyAsync("Please provide a playlist name.");
                     return;
                 }
 
-                if (blacklistUser == null)
+                if (namedArgs.User == null)
                 {
                     await ReplyAsync("Please provide a `@user` to remove from whitelist.");
                     return;
                 }
 
-                await _service.RemoveWhitelistUserFromRadioPlaylist(playlistName, Context.Message.Author, blacklistUser);
+                await _service.RemoveWhitelistUserFromRadioPlaylist(namedArgs.Playlist, Context.Message.Author, namedArgs.User);
             }
 
             [Command("play", RunMode = RunMode.Async)]
             [Summary("Load the specified playlist into the song queue.")]
-            public async Task LoadPlaylist([Summary("The name of the playlist to start playing.")]string name, [Summary("Shuffle the playlist if this argument is not null/empty (e.g. `!radio play <name> shuffle`).")]string shuffle = "")
+            public async Task LoadPlaylist(RadioPlayArgs namedArgs = null)
             {
-                if (string.IsNullOrEmpty(name))
+                if (namedArgs == null)
+                {
+                    await ReplyAsync("Please supply arguments (`playlist: <playlist-name> shuffle: <true/false> append: <true/false>`).");
+                    return;
+                }
+                if (string.IsNullOrEmpty(namedArgs.Playlist))
                 {
                     await ReplyAsync("Please provide a playlist name.");
                     return;
                 }
 
                 //shuffle if requested
-                await _service.LoadRadioPlaylist(Context.Message.Author, name, shuffle == "shuffle");
+                await _service.LoadRadioPlaylist(Context.Message.Author, namedArgs.Playlist, namedArgs.Shuffle, namedArgs.Append);
             }
 
             [Command("list", RunMode = RunMode.Async)]

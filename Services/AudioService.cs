@@ -994,7 +994,7 @@ namespace TerminusDotNetCore.Services
             await ParentModule.ServiceReplyAsync($"Deleted playlist `{deletePlaylist.Name}`.");
         }
 
-        public async Task LoadRadioPlaylist(SocketUser owner, string playlistName, bool shuffle)
+        public async Task LoadRadioPlaylist(SocketUser owner, string playlistName, bool shuffle, bool append)
         {
             string playlistFilename = GetPlaylistFilename(playlistName);
             if (!File.Exists(playlistFilename))
@@ -1009,9 +1009,33 @@ namespace TerminusDotNetCore.Services
                 loadPlaylist.ShuffleSongs();
             }
 
+            LinkedListNode<AudioItem> insertAtNode = null;
             foreach (YouTubeAudioItem song in loadPlaylist.Songs)
             {
-                await EnqueueSong(song);
+                if (append)
+                {
+                    await EnqueueSong(song);
+                }
+                else
+                {
+                    //add the item to the front of the queue (preserve order)
+                    LinkedListNode<AudioItem> insertNode = new LinkedListNode<AudioItem>(song);
+                    lock (_queueLock)
+                    {
+                        if (insertAtNode != null)
+                        {
+                            _songQueue.AddAfter(insertAtNode, insertNode);
+                        }
+                        else
+                        {
+                            _songQueue.AddFirst(insertNode);
+                        }
+                    }
+
+                    await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"Added song '{song.DisplayName}' to front of main queue."));
+
+                    insertAtNode = insertNode;
+                }
             }
 
             await StartQueueIfIdle();
