@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using TerminusDotNetCore.Attributes;
 
 namespace TerminusDotNetCore.Helpers
 {
@@ -95,13 +96,32 @@ namespace TerminusDotNetCore.Helpers
             //add each command parameter to the help embed
             foreach (Discord.Commands.ParameterInfo param in parameters)
             {
-                //if there is a default value, print it
-                string defaultVal = param.DefaultValue == null ? string.Empty : $", default = `{param.DefaultValue}`";
-
-                //add parameter details
-                if (param.Summary != null)
+                if (param.Attributes.Contains(new NamedArgument()))
                 {
-                    commandText += $"\n- `{param.Name}` (`{param.Type.Name}`, optional = `{param.IsOptional}`{defaultVal}): {param.Summary}";
+                    //loop over the properties (named parameters) of the named argument obj
+                    foreach (var propInfo in param.Type.GetProperties())
+                    {
+                        //fetch default value if it's set for the current property
+                        string defaultVal = "";
+                        if (propInfo.PropertyType.IsValueType)
+                        {
+                            object defaultValueInstance = Activator.CreateInstance(propInfo.PropertyType);
+                            defaultVal = defaultValueInstance == null ? string.Empty : $", default = `{defaultValueInstance}`";
+                        }
+                        commandText += $"\n- `{propInfo.Name}` (`{propInfo.PropertyType.Name}`, optional = `{param.IsOptional}`{defaultVal}): {param.Summary}";
+
+                    }
+                }
+                else
+                {
+                    //if there is a default value, print it
+                    string defaultVal = param.DefaultValue == null ? string.Empty : $", default = `{param.DefaultValue}`";
+
+                    //add parameter details
+                    if (param.Summary != null)
+                    {
+                        commandText += $"\n- `{param.Name}` (`{param.Type.Name}`, optional = `{param.IsOptional}`{defaultVal}): {param.Summary}";
+                    }
                 }
             }
 
