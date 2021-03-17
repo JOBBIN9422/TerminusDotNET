@@ -12,7 +12,9 @@ namespace TerminusDotNetCore.NamedArgs
     [NamedArgumentType]
     public class RadioAddSongArgs
     {
+        [Description("Name of playlist to add song to.")]
         public string Playlist { get; set; }
+        [Description("YouTube URL of song to add to playlist.")]
         public string Url { get; set; }
     }
 }

@@ -13,7 +13,9 @@ namespace TerminusDotNetCore.NamedArgs
     [NamedArgumentType]
     public class RadioAccessControlArgs
     {
+        [Description("Playlist name to whitelist/blacklist user for.")]
         public string Playlist { get; set; }
+        [Description("`@user` mention to whitelist/blacklist for the given playlist.")]
         public SocketUser User { get; set; } = null;
     }
 }
