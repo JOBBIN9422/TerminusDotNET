@@ -96,7 +96,7 @@ namespace TerminusDotNetCore.Helpers
             //add each command parameter to the help embed
             foreach (Discord.Commands.ParameterInfo param in parameters)
             {
-                if (param.Attributes.Contains(new NamedArgument()))
+                if (param.Type.GetCustomAttribute(new NamedArgument().GetType()) != null)
                 {
                     //loop over the properties (named parameters) of the named argument obj
                     foreach (var propInfo in param.Type.GetProperties())
