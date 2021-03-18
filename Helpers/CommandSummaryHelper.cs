@@ -103,12 +103,11 @@ namespace TerminusDotNetCore.Helpers
                     {
                         //fetch default value if it's set for the current property
                         string defaultVal = "";
-                        if (propInfo.PropertyType.IsValueType)
-                        {
-                            object defaultValueInstance = Activator.CreateInstance(propInfo.PropertyType);
-                            defaultVal = defaultValueInstance == null ? string.Empty : $", default = `{defaultValueInstance}`";
-                        }
-                        commandText += $"\n- `{propInfo.Name}` (`{propInfo.PropertyType.Name}`, `{defaultVal}): {((Description)propInfo.GetCustomAttribute(new NamedArgument().GetType())).Text}";
+
+                        object defaultValueInstance = Activator.CreateInstance(propInfo.PropertyType);
+                        defaultVal = defaultValueInstance == null ? string.Empty : $", default = `{defaultValueInstance}`";
+
+                        commandText += $"\n- `{propInfo.Name}` (`{propInfo.PropertyType.Name}`, `{defaultVal}): {propInfo.GetCustomAttribute<Description>().Text ?? ""}";
 
                     }
                 }
