@@ -101,21 +101,7 @@ namespace TerminusDotNetCore.Helpers
                     //loop over the properties (named parameters) of the named argument obj
                     foreach (var propInfo in param.Type.GetProperties())
                     {
-                        //fetch default value if it's set for the current property
-                        string defaultVal = "";
-
-                        try
-                        {
-                            object defaultValueInstance = Activator.CreateInstance(propInfo.PropertyType);
-                            defaultVal = defaultValueInstance == null ? string.Empty : $", default = `{defaultValueInstance}`";
-                        }
-                        catch (MissingMethodException)
-                        {
-                            defaultVal = string.Empty;
-                        }
-
-                        commandText += $"\n- `{propInfo.Name}` (`{propInfo.PropertyType.Name}` {defaultVal}): {propInfo.GetCustomAttribute<Description>().Text ?? ""}";
-
+                        commandText += $"\n- `{propInfo.Name}` (`{propInfo.PropertyType.Name}`): {propInfo.GetCustomAttribute<Description>().Text ?? ""}";
                     }
                 }
                 else
