@@ -107,14 +107,14 @@ namespace TerminusDotNetCore.Helpers
                         try
                         {
                             object defaultValueInstance = Activator.CreateInstance(propInfo.PropertyType);
-                            defaultVal = defaultValueInstance == null ? string.Empty : $", default = `{defaultValueInstance}`";
+                            defaultVal = defaultValueInstance == null ? string.Empty : $"`, default = `{defaultValueInstance}`";
                         }
                         catch (MissingMethodException)
                         {
                             defaultVal = string.Empty;
                         }
 
-                        commandText += $"\n- `{propInfo.Name}` (`{propInfo.PropertyType.Name}`, `{defaultVal}): {propInfo.GetCustomAttribute<Description>().Text ?? ""}";
+                        commandText += $"\n- `{propInfo.Name}` (`{propInfo.PropertyType.Name}` {defaultVal}): {propInfo.GetCustomAttribute<Description>().Text ?? ""}";
 
                     }
                 }
