@@ -108,7 +108,7 @@ namespace TerminusDotNetCore.Helpers
                             object defaultValueInstance = Activator.CreateInstance(propInfo.PropertyType);
                             defaultVal = defaultValueInstance == null ? string.Empty : $", default = `{defaultValueInstance}`";
                         }
-                        commandText += $"\n- `{propInfo.Name}` (`{propInfo.PropertyType.Name}`, optional = `{param.IsOptional}`{defaultVal}): {param.Summary}";
+                        commandText += $"\n- `{propInfo.Name}` (`{propInfo.PropertyType.Name}`, `{defaultVal}): {((Description)propInfo.GetCustomAttribute(new NamedArgument().GetType())).Text}";
 
                     }
                 }
