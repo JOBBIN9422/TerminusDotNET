@@ -104,8 +104,15 @@ namespace TerminusDotNetCore.Helpers
                         //fetch default value if it's set for the current property
                         string defaultVal = "";
 
-                        object defaultValueInstance = Activator.CreateInstance(propInfo.PropertyType);
-                        defaultVal = defaultValueInstance == null ? string.Empty : $", default = `{defaultValueInstance}`";
+                        try
+                        {
+                            object defaultValueInstance = Activator.CreateInstance(propInfo.PropertyType);
+                            defaultVal = defaultValueInstance == null ? string.Empty : $", default = `{defaultValueInstance}`";
+                        }
+                        catch (MissingMethodException)
+                        {
+                            defaultVal = string.Empty;
+                        }
 
                         commandText += $"\n- `{propInfo.Name}` (`{propInfo.PropertyType.Name}`, `{defaultVal}): {propInfo.GetCustomAttribute<Description>().Text ?? ""}";
 
