@@ -107,7 +107,7 @@ namespace TerminusDotNetCore.Helpers
                         try
                         {
                             object defaultValueInstance = Activator.CreateInstance(propInfo.PropertyType);
-                            defaultVal = defaultValueInstance == null ? string.Empty : $"`, default = `{defaultValueInstance}`";
+                            defaultVal = defaultValueInstance == null ? string.Empty : $", default = `{defaultValueInstance}`";
                         }
                         catch (MissingMethodException)
                         {
