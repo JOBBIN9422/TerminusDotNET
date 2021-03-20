@@ -136,8 +136,6 @@ namespace TerminusDotNetCore.Services
                     ApplicationName = this.GetType().ToString()
                 }
             );
-
-            await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", "Initialized youtube service."));
         }
         #endregion
 
@@ -159,7 +157,7 @@ namespace TerminusDotNetCore.Services
             await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", "Stopped audio and deleted temp audio files."));
         }
 
-        public void StopFfmpeg()
+        public async Task StopFfmpeg()
         {
             //stop any currently active streams
             if (_ffmpegCancelTokenSrc != null)
@@ -168,6 +166,7 @@ namespace TerminusDotNetCore.Services
                 {
                     _ffmpegCancelTokenSrc.Cancel();
                 }
+                await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", "ffmpeg token canceled."));
             }
         }
 
@@ -175,6 +174,7 @@ namespace TerminusDotNetCore.Services
         {
             try
             {
+                await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"Connecting to channel '{CurrentChannel.Name}'..."));
                 _currAudioClient = await CurrentChannel.ConnectAsync();
                 _currAudioClient.Disconnected += _currAudioClient_Disconnected;
                 await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"Joined audio on channel '{CurrentChannel.Name}'."));
@@ -233,7 +233,7 @@ namespace TerminusDotNetCore.Services
             if (CurrentChannel != null)
             {
                 await CurrentChannel.DisconnectAsync();
-                await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"Disconnected from channel."));
+                await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"Disconnected from channel '{CurrentChannel.Name}'."));
                 CurrentChannel = null;
             }
             if (_currAudioClient != null)
@@ -252,7 +252,8 @@ namespace TerminusDotNetCore.Services
             {
                 try
                 {
-                    await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"Started playback for file '{path}'."));
+                    await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"Spawned ffmpeg process {ffmpeg.Id}."));
+                    await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"Started playback for song '{_currentSong.DisplayName}' ({Path.GetFileName(path)})."));
 
                     //stream audio with cancellation token for skipping
                     _playing = true;
@@ -274,7 +275,7 @@ namespace TerminusDotNetCore.Services
                     ffmpeg.Kill();
                     await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"Killed ffmpeg process {ffmpeg.Id}."));
 
-                    await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"Finished playback for file '{path}'."));
+                    await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"Finished playback for song '{_currentSong.DisplayName}' ({Path.GetFileName(path)})."));
                     _playing = false;
                 }
             }
@@ -346,6 +347,8 @@ namespace TerminusDotNetCore.Services
                     {
                         nextInQueue.DisplayName = Path.GetFileNameWithoutExtension(nextInQueue.Path);
                     }
+
+                    await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"Removed song '{nextInQueue.DisplayName}' from queue."));
 
                     //need to download if not already saved locally (change the URL to the path of the downloaded file)
                     if (nextInQueue is YouTubeAudioItem)
@@ -678,6 +681,7 @@ namespace TerminusDotNetCore.Services
                     await SaveSongToFile(jsonWriter, item);
                 }
             }
+            await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"Saved queue contents."));
         }
 
         private async Task SaveSongToFile(StreamWriter writer, AudioItem song)
@@ -772,7 +776,7 @@ namespace TerminusDotNetCore.Services
             //add the song to the alias file
             File.AppendAllText(Path.Combine(AudioPath, "audioaliases.txt"), alias + " " + newFileName + Environment.NewLine);
 
-            await ParentModule.ServiceReplyAsync($"Successfully added aliased song '{alias}'.");
+            await ParentModule.ServiceReplyAsync($"Added alias '{alias}' for {newPath}.");
         }
         #endregion
 
@@ -1398,6 +1402,7 @@ namespace TerminusDotNetCore.Services
             try
             {
                 return await _ytDownloader.DownloadYoutubeVideoAsync(url);
+                await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"Downloaded file from '{url}'."));
             }
             catch (Exception ex)
             {

@@ -179,10 +179,7 @@ namespace TerminusDotNetCore.Modules
         [Summary("Play the next item in the song queue, if any.")]
         public async Task PlayNext()
         {
-            //don't need to call playnext since it recursively calls itself after playback
-
-            await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"User '{Context.Message.Author.Username}' requested a playnext."));
-            _service.StopFfmpeg();
+            await _service.StopFfmpeg();
         }
 
         [Command("qfront", RunMode = RunMode.Async)]
