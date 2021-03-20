@@ -1401,8 +1401,8 @@ namespace TerminusDotNetCore.Services
         {
             try
             {
+                await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"Downloading file from '{url}'."));
                 return await _ytDownloader.DownloadYoutubeVideoAsync(url);
-                await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"Downloaded file from '{url}'."));
             }
             catch (Exception ex)
             {
