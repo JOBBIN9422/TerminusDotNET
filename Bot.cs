@@ -192,6 +192,7 @@ namespace TerminusDotNetCore
                         writer.WriteLine();
                         writer.WriteLine(execResult.Exception.ToString());
                         writer.WriteLine();
+                        writer.WriteLine();
                     }
                 }
                 else
