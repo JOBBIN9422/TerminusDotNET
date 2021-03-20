@@ -232,8 +232,8 @@ namespace TerminusDotNetCore.Services
             //disconnect and stop the audio client if needed
             if (CurrentChannel != null)
             {
+                await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"Disconnecting from channel '{CurrentChannel.Name}'."));
                 await CurrentChannel.DisconnectAsync();
-                await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"Disconnected from channel '{CurrentChannel.Name}'."));
                 CurrentChannel = null;
             }
             if (_currAudioClient != null)
