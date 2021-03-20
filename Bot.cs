@@ -172,6 +172,8 @@ namespace TerminusDotNetCore
             try
             {
                 string cmdDisplayName = $"{command.Value.Module.Group ?? ""} {command.Value.Name}";
+                string cmdString = command.Value.ToString();
+                Console.WriteLine(cmdString);
                 if (!result.IsSuccess && result is ExecuteResult execResult)
                 {
                     //alert user and print error details to console
