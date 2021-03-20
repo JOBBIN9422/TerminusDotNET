@@ -1,6 +1,7 @@
 ﻿using Discord;
 using Discord.Commands;
 using Discord.Rest;
+using Discord.WebSocket;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -8,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
@@ -321,6 +323,43 @@ namespace TerminusDotNetCore.Modules
                         await ReplyAsync($"File `{filename}` not found.");
                     }
                 }
+            }
+        }
+
+        [Group("client")]
+        public class BotClientModule : ModuleBase<SocketCommandContext>
+        {
+            private Bot _bot;
+
+            public IConfiguration Config { get; set; }
+
+            public BotClientModule(IConfiguration config, Bot bot)
+            {
+                _bot = bot;
+                Config = config;
+            }
+
+            [Command("reset", RunMode = RunMode.Async)]
+            [Summary("Reset the bot's avatar and nickname.")]
+            public async Task ResetBotAvatarAndUsername()
+            {
+                await _bot.Client.CurrentUser.ModifyAsync(x => x.Avatar = new Image(Path.Combine("assets", "images", "terminus.jpg")));
+                await _bot.Client.CurrentUser.ModifyAsync(x => x.Username = "Terminus.NET");
+            }
+
+            [Command("mimic", RunMode = RunMode.Async)]
+            [Summary("Change the bot's avatar and username to the given user.")]
+            public async Task MimicUser(SocketGuildUser user)
+            {
+                var fileIdString = Guid.NewGuid().ToString("N");
+                var avatarPath = Path.Combine("assets", "temp", Guid.NewGuid().ToString("N"));
+                using (var webClient = new WebClient())
+                {
+                    webClient.DownloadFileAsync(new Uri(user.GetAvatarUrl()), avatarPath);
+                }
+
+                await _bot.Client.CurrentUser.ModifyAsync(x => x.Avatar = new Image(avatarPath));
+                await _bot.Client.CurrentUser.ModifyAsync(x => x.Username = user.Nickname);
             }
         }
     }
