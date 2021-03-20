@@ -38,6 +38,8 @@ namespace TerminusDotNetCore
         //ignored channels
         private List<ulong> _blacklistChannels = new List<ulong>();
 
+        public string LastCommandString { get; private set; }
+
         private IConfiguration _config = new ConfigurationBuilder()
                                         .AddJsonFile("appsettings.json", true, true)
                                         .AddJsonFile("secrets.json", true, true)
@@ -164,6 +166,7 @@ namespace TerminusDotNetCore
 
             //handle commands
             var context = new SocketCommandContext(Client, message);
+            LastCommandString = messageParam.Content;
             var commandResult = await CommandService.ExecuteAsync(context: context, argPos: argPos, services: _serviceProvider);
         }
 
@@ -171,14 +174,11 @@ namespace TerminusDotNetCore
         {
             try
             {
-                string cmdDisplayName = $"{command.Value.Module.Group ?? ""} {command.Value.Name}";
-                string cmdString = command.Value.ToString();
-                Console.WriteLine(cmdString);
                 if (!result.IsSuccess && result is ExecuteResult execResult)
                 {
                     //alert user and print error details to console
                     await context.Channel.SendMessageAsync(result.ErrorReason);
-                    await Logger.Log(new LogMessage(LogSeverity.Error, "CommandExecution", $"Error in command '{cmdDisplayName}': {execResult.ErrorReason}"));
+                    await Logger.Log(new LogMessage(LogSeverity.Error, "CommandExecution", $"Error in command '{LastCommandString}': {execResult.ErrorReason}"));
                     await Logger.Log(new LogMessage(LogSeverity.Error, "CommandExecution", $"Exception details (see errors.txt):\n {execResult.Exception.StackTrace}"));
 
                     //dump exception details to error log
@@ -187,7 +187,7 @@ namespace TerminusDotNetCore
                     {
                         writer.WriteLine("----- BEGIN ENTRY -----");
                         writer.WriteLine($"ERROR DATETIME: {DateTime.Now.ToString()}");
-                        writer.WriteLine($"COMMAND NAME  : {cmdDisplayName}");
+                        writer.WriteLine($"COMMAND       : {LastCommandString}");
                         writer.WriteLine();
                         writer.WriteLine(execResult.Exception.ToString());
                         writer.WriteLine("----- END ENTRY   -----");
@@ -197,7 +197,7 @@ namespace TerminusDotNetCore
                 else
                 {
                     //on successful command execution
-                    await Logger.Log(new LogMessage(LogSeverity.Info, "CommandExecution", $"Command '{cmdDisplayName}' executed successfully."));
+                    await Logger.Log(new LogMessage(LogSeverity.Info, "CommandExecution", $"Command '{LastCommandString}' executed successfully."));
                 }
             }
             catch (InvalidOperationException)
