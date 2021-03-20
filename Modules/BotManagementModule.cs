@@ -359,7 +359,7 @@ namespace TerminusDotNetCore.Modules
                 }
 
                 await _bot.Client.CurrentUser.ModifyAsync(x => x.Avatar = new Image(avatarPath));
-                await _bot.Client.CurrentUser.ModifyAsync(x => x.Username = user.Nickname);
+                await _bot.Client.CurrentUser.ModifyAsync(x => x.Username = string.IsNullOrEmpty(user.Nickname) ? user.Nickname : user.Username);
             }
         }
     }
