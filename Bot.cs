@@ -179,7 +179,6 @@ namespace TerminusDotNetCore
                     //alert user and print error details to console
                     await context.Channel.SendMessageAsync(result.ErrorReason);
                     await Logger.Log(new LogMessage(LogSeverity.Error, "CommandExecution", $"Error in command '{LastCommandString}': {execResult.ErrorReason}"));
-                    await Logger.Log(new LogMessage(LogSeverity.Error, "CommandExecution", $"Exception details (see errors.txt):\n {execResult.Exception.StackTrace}"));
 
                     //dump exception details to error log
                     string currLogFilename = $"errors_{DateTime.Today.ToString("MM-dd-yyyy")}.txt";
