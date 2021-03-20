@@ -264,19 +264,19 @@ namespace TerminusDotNetCore.Services
                 }
                 finally
                 {
-                    // reset cancellation token source
-                    lock (_cancelLock)
-                    {
-                        _ffmpegCancelTokenSrc.Dispose();
-                        _ffmpegCancelTokenSrc = new CancellationTokenSource();
-                    }
-
                     //make sure the current audio process is killed to prevent overlapping playback
                     ffmpeg.Kill();
                     await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"Killed ffmpeg process {ffmpeg.Id}."));
 
                     await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"Finished playback for song '{_currentSong.DisplayName}' ({Path.GetFileName(path)})."));
                     _playing = false;
+
+                    // reset cancellation token source
+                    lock (_cancelLock)
+                    {
+                        _ffmpegCancelTokenSrc.Dispose();
+                        _ffmpegCancelTokenSrc = new CancellationTokenSource();
+                    }
                 }
             }
         }
