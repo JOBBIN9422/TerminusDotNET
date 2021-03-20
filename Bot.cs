@@ -185,12 +185,12 @@ namespace TerminusDotNetCore
                     string currLogFilename = $"errors_{DateTime.Today.ToString("MM-dd-yyyy")}.txt";
                     using (StreamWriter writer = new StreamWriter(Path.Combine(Logger.ErrorLogDir,currLogFilename), true))
                     {
-                        writer.WriteLine("----- BEGIN ENTRY -----");
-                        writer.WriteLine($"ERROR DATETIME: {DateTime.Now.ToString()}");
-                        writer.WriteLine($"COMMAND       : {LastCommandString}");
-                        writer.WriteLine();
+                        writer.WriteLine($"   Date/Time: {DateTime.Now}");
+                        writer.WriteLine($"     Command: {LastCommandString}");
+                        writer.WriteLine($"Error Reason: {execResult.ErrorReason}");
+                        writer.WriteLine($"  Error Type: {execResult.Error}");
+                        writer.WriteLine("    Exception:\n");
                         writer.WriteLine(execResult.Exception.ToString());
-                        writer.WriteLine("----- END ENTRY   -----");
                         writer.WriteLine();
                     }
                 }
