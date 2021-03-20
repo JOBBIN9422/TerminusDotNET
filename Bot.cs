@@ -189,7 +189,7 @@ namespace TerminusDotNetCore
                         writer.WriteLine($"     Command: {LastCommandString}");
                         writer.WriteLine($"Error Reason: {execResult.ErrorReason}");
                         writer.WriteLine($"  Error Type: {execResult.Error}");
-                        writer.WriteLine("    Exception:\n");
+                        writer.WriteLine();
                         writer.WriteLine(execResult.Exception.ToString());
                         writer.WriteLine();
                     }
