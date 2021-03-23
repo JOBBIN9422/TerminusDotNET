@@ -345,8 +345,8 @@ namespace TerminusDotNetCore.Modules
             {
                 await _bot.Client.CurrentUser.ModifyAsync(x =>
                 {
-                    x.Avatar = new Image(Path.Combine("assets", "images", "terminus.jpg"));
                     x.Username = "Terminus.NET";
+                    x.Avatar = new Image(Path.Combine("assets", "images", "terminus.jpg"));
                 });
             }
 
@@ -366,8 +366,8 @@ namespace TerminusDotNetCore.Modules
 
                 await _bot.Client.CurrentUser.ModifyAsync(x =>
                 {
-                    x.Avatar = new Image(avatarPath);
                     x.Username = string.IsNullOrEmpty(user.Nickname) ? user.Username : user.Nickname;
+                    x.Avatar = new Image(avatarPath);
                 });
                 File.Delete(avatarPath);
             }
