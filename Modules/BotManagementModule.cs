@@ -343,23 +343,33 @@ namespace TerminusDotNetCore.Modules
             [Summary("Reset the bot's avatar and nickname.")]
             public async Task ResetBotAvatarAndUsername()
             {
-                await _bot.Client.CurrentUser.ModifyAsync(x => x.Avatar = new Image(Path.Combine("assets", "images", "terminus.jpg")));
-                await _bot.Client.CurrentUser.ModifyAsync(x => x.Username = "Terminus.NET");
+                await _bot.Client.CurrentUser.ModifyAsync(x =>
+                {
+                    x.Avatar = new Image(Path.Combine("assets", "images", "terminus.jpg"));
+                    x.Username = "Terminus.NET";
+                });
             }
 
             [Command("mimic", RunMode = RunMode.Async)]
             [Summary("Change the bot's avatar and username to the given user.")]
             public async Task MimicUser(SocketGuildUser user)
             {
+                //set avatar image temp path
                 var fileIdString = Guid.NewGuid().ToString("N");
                 var avatarPath = Path.Combine("assets", "temp", Guid.NewGuid().ToString("N"));
+
+                //download avatar from URL
                 using (var webClient = new WebClient())
                 {
                     webClient.DownloadFileAsync(new Uri(user.GetAvatarUrl()), avatarPath);
                 }
 
-                await _bot.Client.CurrentUser.ModifyAsync(x => x.Avatar = new Image(avatarPath));
-                await _bot.Client.CurrentUser.ModifyAsync(x => x.Username = string.IsNullOrEmpty(user.Nickname) ? user.Username : user.Nickname);
+                await _bot.Client.CurrentUser.ModifyAsync(x =>
+                {
+                    x.Avatar = new Image(avatarPath);
+                    x.Username = string.IsNullOrEmpty(user.Nickname) ? user.Username : user.Nickname;
+                });
+                File.Delete(avatarPath);
             }
         }
     }
