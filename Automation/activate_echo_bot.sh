@@ -8,7 +8,6 @@ set -euo pipefail
 
 # If no dir is specified, fail
 if [ -z "${ECHOBOT_DIR}" ]; then
-	echo "got here"
     exit 1
 fi
 
@@ -29,7 +28,7 @@ git checkout $ECHOBOT_BRANCH
 git pull origin $ECHOBOT_BRANCH
 
 # Copy over files into echobot dir
-rsync -r ../persistent_files/ .
+rsync -r ../persistent_files/ ./echobot/
 
 # Run Echo bot
 ./run.sh
