@@ -3,7 +3,7 @@ set -euo pipefail
 # This is a script meant to pull in the latest echo bot and run it
 # Expects the ECHOBOT_DIR variable to be exported before running
 
-# If no branch name is exported defualt to master
+# If no branch name is exported default to master
 : "${ECHOBOT_BRANCH:="master"}"
 
 # If no dir is specified, fail
@@ -15,14 +15,14 @@ fi
 cd $ECHOBOT_DIR
 
 # Check if echobot repo is already here
-if [ ! -d "echobot" ]; then
+if [ ! -d "Echo-Bot" ]; then
     # Need to clone the repo
     git clone https://github.com/leilanihc112/Echo-Bot.git
 fi
 
 # Checkout the selected branch and pull latest
 # I hope this won't ever fail, but I guess I can fix it if it does
-cd echobot
+cd Echo-Bot
 git fetch origin $ECHOBOT_BRANCH
 git checkout $ECHOBOT_BRANCH
 git pull origin $ECHOBOT_BRANCH
