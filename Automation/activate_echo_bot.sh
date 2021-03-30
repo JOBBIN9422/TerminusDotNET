@@ -4,7 +4,7 @@ set -euo pipefail
 # Expects the ECHOBOT_DIR variable to be exported before running
 
 # If no branch name is exported default to master
-: "${ECHOBOT_BRANCH:="master"}"
+: "${ECHOBOT_BRANCH:="main"}"
 
 # If no dir is specified, fail
 if [ -z "${ECHOBOT_DIR}" ]; then

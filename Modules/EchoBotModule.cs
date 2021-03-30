@@ -19,7 +19,7 @@ namespace TerminusDotNetCore.Modules
 
         [Command("echo-bot", RunMode = RunMode.Async)]
         [Summary("Activates the Echo Bot")]
-        public async Task EchoBot([Summary("Which branch of the Echo Bot repo to pull")] string branch="master")
+        public async Task EchoBot([Summary("Which branch of the Echo Bot repo to pull")] string branch="main")
         {
             // Hopefully this will set the right environment variables
             string lib_dir = Config["EchoBotDir"];
