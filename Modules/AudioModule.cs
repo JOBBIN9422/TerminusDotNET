@@ -38,7 +38,7 @@ namespace TerminusDotNetCore.Modules
 
         [Command("play", RunMode = RunMode.Async)]
         [Summary("Play a song of your choice in an audio channel of your choice (defaults to verbal shitposting). List local songs with !availablesongs.")]
-        public async Task PlaySong([Summary("name of song to play (use \"attached\" to play an attached mp3 file")]string song, AudioQueueArgs namedArgs = null)
+        public async Task PlaySong([Summary("name of song to play (use \"attached\" to play an attached mp3 file")] string song, AudioQueueArgs namedArgs = null)
         {
             if (namedArgs == null)
             {
@@ -56,28 +56,28 @@ namespace TerminusDotNetCore.Modules
             //check if path is valid and exists
             bool useFile = false;
             string path = _service.AudioPath;
-            if ( song == "attached" )
+            if (song == "attached")
             {
                 useFile = true;
             }
-            foreach ( string line in File.ReadAllLines(Path.Combine(_service.AudioPath, "audioaliases.txt")))
+            foreach (string line in File.ReadAllLines(Path.Combine(_service.AudioPath, "audioaliases.txt")))
             {
-                if ( line.StartsWith("#") || String.IsNullOrEmpty(line) )
+                if (line.StartsWith("#") || String.IsNullOrEmpty(line))
                 {
                     continue;
                 }
                 string[] tmp = line.Split(" ");
-                if ( song.Equals(tmp[0]) )
+                if (song.Equals(tmp[0]))
                 {
                     path = Path.Combine(path, tmp[1]);
                     break;
                 }
             }
-            if ( path.Equals(_service.AudioPath) )
+            if (path.Equals(_service.AudioPath))
             {
                 path = Path.Combine(path, song);
             }
-            if ( useFile )
+            if (useFile)
             {
                 IReadOnlyCollection<Attachment> atts = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Media);
                 if (atts == null)
@@ -101,7 +101,7 @@ namespace TerminusDotNetCore.Modules
 
         [Command("search", RunMode = RunMode.Async)]
         [Summary("Search for a YouTube video and add the result to the queue.")]
-        public async Task SearchSong([Summary("YouTube search term (enclose in quotes if it contains spaces).")]string searchTerm, AudioQueueArgs namedArgs = null)
+        public async Task SearchSong([Summary("YouTube search term (enclose in quotes if it contains spaces).")] string searchTerm, AudioQueueArgs namedArgs = null)
         {
             if (namedArgs == null)
             {
@@ -121,7 +121,7 @@ namespace TerminusDotNetCore.Modules
 
         [Command("playlist", RunMode = RunMode.Async)]
         [Summary("Add all of the songs in the playlist to the queue in the order they appear in the playlist.")]
-        public async Task AddPlaylist([Summary("The URL of the YouTube playlist to add.")]string playlistUrl, AudioQueueArgs namedArgs = null)
+        public async Task AddPlaylist([Summary("The URL of the YouTube playlist to add.")] string playlistUrl, AudioQueueArgs namedArgs = null)
         {
             if (namedArgs == null)
             {
@@ -141,7 +141,7 @@ namespace TerminusDotNetCore.Modules
 
         [Command("downloader", RunMode = RunMode.Async)]
         [Summary("Switch the library used to download YouTube videos.")]
-        public async Task SwitchYoutubeDownloaderLibrary([Summary("The library alias (`libvideo` or `yt-explode`).")]string libName = "check")
+        public async Task SwitchYoutubeDownloaderLibrary([Summary("The library alias (`libvideo` or `yt-explode`).")] string libName = "check")
         {
             if (libName == "check")
             {
@@ -156,8 +156,8 @@ namespace TerminusDotNetCore.Modules
 
         [Command("yt", RunMode = RunMode.Async)]
         [Summary("Add the given YouTube video to the queue.")]
-        public async Task StreamSong([Summary("URL of the YouTube video to add.")]string url, 
-            [Summary("Which end of the queue to insert the song at (appended to the back by default.)")]AudioQueueArgs namedArgs = null)
+        public async Task StreamSong([Summary("URL of the YouTube video to add.")] string url,
+            [Summary("Which end of the queue to insert the song at (appended to the back by default.)")] AudioQueueArgs namedArgs = null)
         {
             if (namedArgs == null)
             {
@@ -184,7 +184,7 @@ namespace TerminusDotNetCore.Modules
 
         [Command("qfront", RunMode = RunMode.Async)]
         [Summary("Move the item at the given index to the front of the queue.")]
-        public async Task MoveSongToFront([Summary("the index of the song to move to the front (1-indexed based on the items in the `!songs` list).")]int index = -1)
+        public async Task MoveSongToFront([Summary("the index of the song to move to the front (1-indexed based on the items in the `!songs` list).")] int index = -1)
         {
             if (index == -1)
             {
@@ -228,7 +228,7 @@ namespace TerminusDotNetCore.Modules
 
         [Command("addlocalsong", RunMode = RunMode.Async)]
         [Summary("Store an audio file on the server and give an alias for use in !play commands.")]
-        public async Task AddSong([Summary("alias to use when playing this song in the future")]string alias)
+        public async Task AddSong([Summary("alias to use when playing this song in the future")] string alias)
         {
             IReadOnlyCollection<Attachment> atts = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Media);
             if (atts == null)
@@ -240,7 +240,7 @@ namespace TerminusDotNetCore.Modules
 
         [Command("alias", RunMode = RunMode.Async)]
         [Summary("Store the currently-playing song to the server and give an alias for use in !play commands.")]
-        public async Task AddCurrentSong([Summary("alias to use when playing this song in the future")]string alias)
+        public async Task AddCurrentSong([Summary("alias to use when playing this song in the future")] string alias)
         {
             await _service.SaveCurrentSong(alias);
         }
@@ -349,7 +349,7 @@ namespace TerminusDotNetCore.Modules
 
             [Command("create", RunMode = RunMode.Async)]
             [Summary("Create a new, empty playlist. The command issuer is the owner of this playlist.")]
-            public async Task CreatePlaylist([Summary("Name of the new playlist.")]string name)
+            public async Task CreatePlaylist([Summary("Name of the new playlist.")] string name)
             {
                 if (string.IsNullOrEmpty(name))
                 {
@@ -374,7 +374,7 @@ namespace TerminusDotNetCore.Modules
                     await ReplyAsync("Please provide a playlist name.");
                     return;
                 }
-                
+
                 if (string.IsNullOrEmpty(namedArgs.Url))
                 {
                     await ReplyAsync("Please provide a YouTube URL.");
@@ -478,7 +478,7 @@ namespace TerminusDotNetCore.Modules
 
             [Command("list", RunMode = RunMode.Async)]
             [Summary("List the contents and whitelist of the given playlist.")]
-            public async Task ShowPlaylistContents([Summary("Name of the playlist to show details for.")]string name)
+            public async Task ShowPlaylistContents([Summary("Name of the playlist to show details for.")] string name)
             {
                 if (string.IsNullOrEmpty(name))
                 {
@@ -494,6 +494,18 @@ namespace TerminusDotNetCore.Modules
             public async Task ShowAllPlaylists()
             {
                 await _service.ShowAllRadioPlaylists();
+            }
+        }
+
+        [Group("event")]
+        public class EventAudioModule : ServiceControlModule
+        {
+            private AudioService _service;
+            public EventAudioModule(IConfiguration config, AudioService service) : base(config)
+            {
+                //do not need to set service config here - passed into audioSvc constructor via DI
+                _service = service;
+                _service.ParentModule = this;
             }
         }
     }

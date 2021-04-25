@@ -1498,6 +1498,24 @@ namespace TerminusDotNetCore.Services
             AttachmentHelper.DeleteFiles(AttachmentHelper.GetTempAssets("*.mp4"));
             AttachmentHelper.DeleteFiles(AttachmentHelper.GetTempAssets("*.webm"));
         }
+
+        public string GetAliasedSongPath(string aliasName)
+        {
+            foreach (string line in File.ReadAllLines(Path.Combine(AudioPath, "audioaliases.txt")))
+            {
+                if (line.StartsWith("#") || String.IsNullOrEmpty(line))
+                {
+                    continue;
+                }
+                string[] currEntry = line.Split(" ");
+                if (currEntry[0] == aliasName)
+                {
+                    return Path.Combine(AudioPath, currEntry[1]);
+                }
+            }
+            
+            return null;
+        }
         #endregion
 
         #region Hideki ZONE
