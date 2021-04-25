@@ -18,9 +18,6 @@ using Google.Apis.Services;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using YoutubeExplode;
-using YoutubeExplode.Videos.Streams;
-using System.Net.Http;
-using System.Net;
 
 namespace TerminusDotNetCore.Services
 {
@@ -1079,9 +1076,22 @@ namespace TerminusDotNetCore.Services
         {
             //get the weed channel ID and queue the weed song
             ulong weedID = ulong.Parse(Config["WeedChannelId"]);
-            await EnqueueSong(new LocalAudioItem() { Path = Path.Combine(AudioPath, "weedlmao.mp3"), PlayChannelId = weedID, AudioSource = FileAudioType.Local, DisplayName = "weed", OwnerName = "Terminus.NET" }, false);
-            await SaveQueueContents("weed-queue.json");
+            LocalAudioItem weedEvent = new LocalAudioItem() 
+            { 
+                Path = Path.Combine(AudioPath, "weedlmao.mp3"), 
+                PlayChannelId = weedID, AudioSource = FileAudioType.Local, 
+                DisplayName = "weed", 
+                OwnerName = "Terminus.NET" 
+            };
+            await PlayAudioEvent(weedEvent);
+        }
+        #endregion
 
+        #region audio events
+        public async Task PlayAudioEvent(LocalAudioItem audioEvent)
+        {
+            await EnqueueSong(audioEvent);
+            await SaveQueueContents("event-queue.json");
             if (!_playing)
             {
                 await PlayNextInQueue(false);
@@ -1090,7 +1100,7 @@ namespace TerminusDotNetCore.Services
             {
                 //load the current queue with the weed song added to the front of it
                 await StopAllAudio();
-                await LoadQueueContents("weed-queue.json", true);
+                await LoadQueueContents("event-queue.json", true);
             }
         }
         #endregion
