@@ -33,7 +33,12 @@ namespace TerminusDotNetCore.Services
             Init();
         }
 
-        public string ConvertMessage(string message)
+        public string ConvertToPlaintext(string message)
+        {
+            return $"`{message}`";
+        }
+
+        public string ConvertToFullWidth(string message)
         {
             message = message.Replace(" ", "  ");
 

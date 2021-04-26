@@ -34,14 +34,36 @@ namespace TerminusDotNetCore.Modules
                 var priorMessage = messages.Last();
                 if (!string.IsNullOrEmpty(priorMessage.Content))
                 {
-                    wideText = _textEditService.ConvertMessage(priorMessage.Content);
+                    wideText = _textEditService.ConvertToFullWidth(priorMessage.Content);
                 }
             }
             else 
             {
-                wideText = _textEditService.ConvertMessage(message);
+                wideText = _textEditService.ConvertToFullWidth(message);
             }
             await ReplyAsync(wideText);
+        }
+
+        [Command("plaintext", RunMode = RunMode.Async)]
+        [Summary("Escape @mentions, #channels, and other Discord formatting.")]
+        public async Task ConvertMessageToPlaintextAsync([Summary("the message to convert")][Remainder] string message = null)
+        {
+            string plaintext = string.Empty;
+            if (string.IsNullOrEmpty(message))
+            {
+                //check if the previous message has any text
+                var messages = await Context.Channel.GetMessagesAsync(2).FlattenAsync();
+                var priorMessage = messages.Last();
+                if (!string.IsNullOrEmpty(priorMessage.Content))
+                {
+                    plaintext = _textEditService.ConvertToPlaintext(priorMessage.Content);
+                }
+            }
+            else
+            {
+                plaintext = _textEditService.ConvertToPlaintext(message);
+            }
+            await ReplyAsync(plaintext);
         }
 
         [Command("memecase", RunMode = RunMode.Async)]
