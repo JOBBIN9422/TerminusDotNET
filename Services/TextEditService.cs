@@ -35,7 +35,7 @@ namespace TerminusDotNetCore.Services
 
         public string ConvertToPlaintext(string message)
         {
-            return $"`{message}`";
+            return $"`{message.Replace("`", string.Empty)}`";
         }
 
         public string ConvertToFullWidth(string message)
