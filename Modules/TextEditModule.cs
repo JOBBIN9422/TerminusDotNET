@@ -44,9 +44,9 @@ namespace TerminusDotNetCore.Modules
             await ReplyAsync(wideText);
         }
 
-        [Command("plaintext", RunMode = RunMode.Async)]
+        [Command("escape", RunMode = RunMode.Async)]
         [Summary("Escape @mentions, #channels, and other Discord formatting.")]
-        public async Task ConvertMessageToPlaintextAsync([Summary("the message to convert")][Remainder] string message = null)
+        public async Task EscapeTextAsync([Summary("the message to convert")][Remainder] string message = null)
         {
             string plaintext = string.Empty;
             if (string.IsNullOrEmpty(message))
@@ -56,12 +56,12 @@ namespace TerminusDotNetCore.Modules
                 var priorMessage = messages.Last();
                 if (!string.IsNullOrEmpty(priorMessage.Content))
                 {
-                    plaintext = _textEditService.ConvertToPlaintext(priorMessage.Content);
+                    plaintext = _textEditService.EscapeText(priorMessage.Content);
                 }
             }
             else
             {
-                plaintext = _textEditService.ConvertToPlaintext(message);
+                plaintext = _textEditService.EscapeText(message);
             }
             await ReplyAsync(plaintext);
         }

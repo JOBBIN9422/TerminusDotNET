@@ -33,9 +33,9 @@ namespace TerminusDotNetCore.Services
             Init();
         }
 
-        public string ConvertToPlaintext(string message)
+        public string EscapeText(string message)
         {
-            return $"`{message.Replace("`", string.Empty)}`";
+            return $"`{message}`";
         }
 
         public string ConvertToFullWidth(string message)
