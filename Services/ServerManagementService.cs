@@ -32,7 +32,7 @@ namespace TerminusDotNetCore.Services
         private static async Task<string> RunBashCommand(string cmd, string user)
         {
             string escapedCmd = cmd.Replace("'", @"'\''");
-            Console.WriteLine($"'{escapedCmd}'");
+            Console.WriteLine($"-s /bin/bash -c '{escapedCmd}' {user}");
             using (var bashProcess = Process.Start(
                 new ProcessStartInfo
                 {
