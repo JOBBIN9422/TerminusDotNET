@@ -36,7 +36,7 @@ namespace TerminusDotNetCore.Services
                 new ProcessStartInfo
                 {
                     FileName = "sudo",
-                    Arguments = $"-u {user} sh -c {escapedCmd}",
+                    Arguments = $"-u {user} sh -c \"{escapedCmd}\"",
                     UseShellExecute = false,
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
