@@ -496,6 +496,8 @@ namespace TerminusDotNetCore.Modules
                 _service.ParentModule = this;
             }
 
+            [Command("create", RunMode = RunMode.Async)]
+            [Summary("Create an audio event.")]
             public async Task CreateAudioEvent(AudioEventCreateArgs namedArgs = null)
             {
                 if (namedArgs == null)
@@ -512,6 +514,8 @@ namespace TerminusDotNetCore.Modules
                 {
                     await ReplyAsync("Please provide a song name.");
                 }
+
+                await _service.CreateAudioEvent(namedArgs.SongName, namedArgs.Cron);
             }
         }
     }
