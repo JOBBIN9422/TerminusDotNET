@@ -54,6 +54,7 @@ namespace TerminusDotNetCore
 
             //init custom services
             _serviceProvider = await InstallServices();
+            InitScheduler();
 
             //load libraries into version dict
             PopulateInstalledLibrariesList();
@@ -222,8 +223,6 @@ namespace TerminusDotNetCore
         {
             ISchedulerFactory schedulerFactory = new StdSchedulerFactory();
             IScheduler scheduler = await schedulerFactory.GetScheduler();
-            IJobFactory jobFactory = new AudioEventJobFactory(_serviceProvider);
-            scheduler.JobFactory = jobFactory;
 
             var serviceCollection = new ServiceCollection();
 
@@ -243,6 +242,13 @@ namespace TerminusDotNetCore
                              .AddTransient<AudioEventJob>(); 
 
             return serviceCollection.BuildServiceProvider();
+        }
+
+        private void InitScheduler()
+        {
+            IScheduler scheduler = _serviceProvider.GetService(typeof(IScheduler)) as IScheduler;
+            IJobFactory jobFactory = new AudioEventJobFactory(_serviceProvider);
+            scheduler.JobFactory = jobFactory;
         }
 
         //check the given message for regex matches and send responses accordingly
