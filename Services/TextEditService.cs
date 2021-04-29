@@ -33,7 +33,12 @@ namespace TerminusDotNetCore.Services
             Init();
         }
 
-        public string ConvertMessage(string message)
+        public string EscapeText(string message)
+        {
+            return $"`{message}`";
+        }
+
+        public string ConvertToFullWidth(string message)
         {
             message = message.Replace(" ", "  ");
 

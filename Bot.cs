@@ -174,24 +174,32 @@ namespace TerminusDotNetCore
         {
             try
             {
-                if (!result.IsSuccess && result is ExecuteResult execResult)
+                if (!result.IsSuccess)
                 {
-                    //alert user and print error details to console
-                    await context.Channel.SendMessageAsync(result.ErrorReason);
-                    await Logger.Log(new LogMessage(LogSeverity.Error, "CommandExecution", $"Error in command '{LastCommandString}': {execResult.ErrorReason}"));
-
-                    //dump exception details to error log
-                    string currLogFilename = $"errors_{DateTime.Today.ToString("MM-dd-yyyy")}.txt";
-                    using (StreamWriter writer = new StreamWriter(Path.Combine(Logger.ErrorLogDir,currLogFilename), true))
+                    if (result is ExecuteResult execResult)
                     {
-                        writer.WriteLine($"   Date/Time: {DateTime.Now}");
-                        writer.WriteLine($"     Command: {LastCommandString}");
-                        writer.WriteLine($"Error Reason: {execResult.ErrorReason}");
-                        writer.WriteLine($"  Error Type: {execResult.Error}");
-                        writer.WriteLine();
-                        writer.WriteLine(execResult.Exception.ToString());
-                        writer.WriteLine();
-                        writer.WriteLine();
+                        //alert user and print error details to console
+                        await context.Channel.SendMessageAsync(result.ErrorReason);
+                        await Logger.Log(new LogMessage(LogSeverity.Error, "CommandExecution", $"Error in command '{LastCommandString}': {execResult.ErrorReason}"));
+
+                        //dump exception details to error log
+                        string currLogFilename = $"errors_{DateTime.Today.ToString("MM-dd-yyyy")}.txt";
+                        using (StreamWriter writer = new StreamWriter(Path.Combine(Logger.ErrorLogDir, currLogFilename), true))
+                        {
+                            writer.WriteLine($"   Date/Time: {DateTime.Now}");
+                            writer.WriteLine($"     Command: {LastCommandString}");
+                            writer.WriteLine($"Error Reason: {execResult.ErrorReason}");
+                            writer.WriteLine($"  Error Type: {execResult.Error}");
+                            writer.WriteLine();
+                            writer.WriteLine(execResult.Exception.ToString());
+                            writer.WriteLine();
+                            writer.WriteLine();
+                        }
+                    }
+                    else
+                    {
+                        await context.Channel.SendMessageAsync($"Unknown command.");
+                        await Logger.Log(new LogMessage(LogSeverity.Error, "CommandExecution", $"Unknown command: '{LastCommandString}'"));
                     }
                 }
                 else
