@@ -60,23 +60,11 @@ namespace TerminusDotNetCore.Modules
             {
                 useFile = true;
             }
-            foreach (string line in File.ReadAllLines(Path.Combine(_service.AudioPath, "audioaliases.txt")))
+            else
             {
-                if (line.StartsWith("#") || String.IsNullOrEmpty(line))
-                {
-                    continue;
-                }
-                string[] tmp = line.Split(" ");
-                if (song.Equals(tmp[0]))
-                {
-                    path = Path.Combine(path, tmp[1]);
-                    break;
-                }
+                path = _service.GetAliasedSongPath(song);
             }
-            if (path.Equals(_service.AudioPath))
-            {
-                path = Path.Combine(path, song);
-            }
+
             if (useFile)
             {
                 IReadOnlyCollection<Attachment> atts = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Media);
