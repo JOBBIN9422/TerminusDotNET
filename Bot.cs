@@ -222,7 +222,9 @@ namespace TerminusDotNetCore
         {
             ISchedulerFactory schedulerFactory = new StdSchedulerFactory();
             IScheduler scheduler = await schedulerFactory.GetScheduler();
-            
+            IJobFactory jobFactory = new AudioEventJobFactory(_serviceProvider);
+            scheduler.JobFactory = jobFactory;
+
             var serviceCollection = new ServiceCollection();
 
             //new custom services (and objects passed via DI) get added here
@@ -238,10 +240,7 @@ namespace TerminusDotNetCore
                              .AddSingleton(new Random())
                              .AddSingleton(this)
                              .AddSingleton(scheduler)
-                             .AddTransient<AudioEventJob>();
-
-            IJobFactory jobFactory = new AudioEventJobFactory(_serviceProvider);
-            scheduler.JobFactory = jobFactory;
+                             .AddTransient<AudioEventJob>(); 
 
             return serviceCollection.BuildServiceProvider();
         }
