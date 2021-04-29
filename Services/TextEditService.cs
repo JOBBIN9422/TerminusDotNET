@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using TerminusDotNetCore.Modules;
 
@@ -35,7 +36,7 @@ namespace TerminusDotNetCore.Services
 
         public string EscapeText(string message)
         {
-            return $"`{message}`";
+            return string.Join(' ', message.Split().Select(word => word = $"`{word}`").ToArray());
         }
 
         public string ConvertToFullWidth(string message)
