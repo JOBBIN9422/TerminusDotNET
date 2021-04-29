@@ -36,7 +36,7 @@ namespace TerminusDotNetCore.Services
 
         public string EscapeText(string message)
         {
-            return string.Join(' ', message.Split().Where(s => !string.IsNullOrEmpty(s)).Select(word => word = $"`{word}`").ToArray());
+            return $"`{message.Replace("`", string.Empty)}`";
         }
 
         public string ConvertToFullWidth(string message)
