@@ -1079,6 +1079,11 @@ namespace TerminusDotNetCore.Services
         #region audio events
         public async Task CreateAudioEvent(string songName, string cronString)
         {
+            if (!_scheduler.IsStarted)
+            {
+                await _scheduler.Start();
+            }
+
             string jobId = Guid.NewGuid().ToString("N");
             IJobDetail job = JobBuilder.Create<AudioEventJob>()
                 .WithIdentity(jobId, "group1")
