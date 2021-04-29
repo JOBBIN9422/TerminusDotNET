@@ -495,6 +495,24 @@ namespace TerminusDotNetCore.Modules
                 _service = service;
                 _service.ParentModule = this;
             }
+
+            public async Task CreateAudioEvent(AudioEventCreateArgs namedArgs = null)
+            {
+                if (namedArgs == null)
+                {
+                    await ReplyAsync("Please supply arguments (`songName: <song name> cron: <cron string>`).");
+                    return;
+                }
+                if (string.IsNullOrEmpty(namedArgs.Cron))
+                {
+                    await ReplyAsync("Please provide a cron string.");
+                    return;
+                }
+                if (string.IsNullOrEmpty(namedArgs.SongName))
+                {
+                    await ReplyAsync("Please provide a song name.");
+                }
+            }
         }
     }
 }
