@@ -1086,7 +1086,7 @@ namespace TerminusDotNetCore.Services
 
             ITrigger trigger = TriggerBuilder.Create()
                 .WithIdentity(Guid.NewGuid().ToString("N"), "group1")
-                .WithCronSchedule("0 0/2 * * * ?")
+                .WithCronSchedule(cronString)
                 .ForJob(jobId, "group1")
                 .Build();
 
