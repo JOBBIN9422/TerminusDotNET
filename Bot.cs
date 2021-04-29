@@ -12,6 +12,9 @@ using Microsoft.Extensions.DependencyInjection;
 using TerminusDotNetCore.Helpers;
 using System.Xml.Linq;
 using System.Linq;
+using Quartz.Impl;
+using Quartz;
+using Quartz.Spi;
 
 namespace TerminusDotNetCore
 {
@@ -50,7 +53,7 @@ namespace TerminusDotNetCore
             StartTime = DateTime.Now;
 
             //init custom services
-            _serviceProvider = InstallServices();
+            _serviceProvider = await InstallServices();
 
             //load libraries into version dict
             PopulateInstalledLibrariesList();
@@ -215,8 +218,11 @@ namespace TerminusDotNetCore
             }
         }
 
-        private IServiceProvider InstallServices()
+        private async Task<IServiceProvider> InstallServices()
         {
+            ISchedulerFactory schedulerFactory = new StdSchedulerFactory();
+            IScheduler scheduler = await schedulerFactory.GetScheduler();
+            
             var serviceCollection = new ServiceCollection();
 
             //new custom services (and objects passed via DI) get added here
@@ -230,7 +236,12 @@ namespace TerminusDotNetCore
                              .AddSingleton<IronPythonService>()
                              .AddSingleton<ServerManagementService>()
                              .AddSingleton(new Random())
-                             .AddSingleton(this);
+                             .AddSingleton(this)
+                             .AddSingleton(scheduler)
+                             .AddTransient<AudioEventJob>();
+
+            IJobFactory jobFactory = new AudioEventJobFactory(_serviceProvider);
+            scheduler.JobFactory = jobFactory;
 
             return serviceCollection.BuildServiceProvider();
         }

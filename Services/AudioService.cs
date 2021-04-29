@@ -18,6 +18,7 @@ using Google.Apis.Services;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using YoutubeExplode;
+using Quartz;
 
 namespace TerminusDotNetCore.Services
 {
@@ -85,13 +86,17 @@ namespace TerminusDotNetCore.Services
 
         //RNG
         private Random _random;
+
+        //Quartz scheduler
+        private IScheduler _scheduler;
         #endregion
 
         #region init
-        public AudioService(IConfiguration config, Random random)
+        public AudioService(IConfiguration config, Random random, IScheduler scheduler)
         {
             _random = random;
             Config = config;
+            _scheduler = scheduler;
 
             //init weed timer
             DateTime now = DateTime.Now;
@@ -1068,6 +1073,24 @@ namespace TerminusDotNetCore.Services
             {
                 await ParentModule.ServiceReplyAsync(embed: embed);
             }
+        }
+        #endregion
+
+        #region audio events
+        public async Task CreateAudioEvent(string songName, string cronString)
+        {
+            string jobId = Guid.NewGuid().ToString("N");
+            IJobDetail job = JobBuilder.Create<AudioEventJob>()
+                .WithIdentity(jobId, "group1")
+                .Build();
+
+            ITrigger trigger = TriggerBuilder.Create()
+                .WithIdentity(Guid.NewGuid().ToString("N"), "group1")
+                .WithCronSchedule("0 0/2 * * * ?")
+                .ForJob(jobId, "group1")
+                .Build();
+
+            await _scheduler.ScheduleJob(job, trigger);
         }
         #endregion
 

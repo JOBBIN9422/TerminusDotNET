@@ -10,13 +10,18 @@ namespace TerminusDotNetCore.Helpers
 {
     public class AudioEventJob : IJob
     {
+        private readonly AudioService _audioService;
+        public AudioEventJob(AudioService service)
+        {
+            _audioService = service;
+        }
+
         public async Task Execute(IJobExecutionContext context)
         {
             JobDataMap dataMap = context.JobDetail.JobDataMap;
-            AudioService audioService = (AudioService)dataMap.Get("AudioService");
-            LocalAudioItem audioEvent = (LocalAudioItem)dataMap.Get("AudioEvent");
+            //string songName = (string)dataMap.Get("SongName");
 
-            await audioService.PlayAudioEvent(audioEvent);
+            await _audioService.PlayWeed();
         }
     }
 }
