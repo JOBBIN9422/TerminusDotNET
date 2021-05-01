@@ -1077,7 +1077,7 @@ namespace TerminusDotNetCore.Services
         #endregion
 
         #region audio events
-        public async Task CreateAudioEvent(string songName, string cronString)
+        public async Task CreateAudioEvent(string songName, string cronString, ulong channelId)
         {
             if (!_scheduler.IsStarted)
             {
@@ -1087,6 +1087,8 @@ namespace TerminusDotNetCore.Services
             string jobId = Guid.NewGuid().ToString("N");
             IJobDetail job = JobBuilder.Create<AudioEventJob>()
                 .WithIdentity(jobId, "group1")
+                .UsingJobData("SongName", songName)
+                .UsingJobData("ChannelId", channelId.ToString())
                 .Build();
 
             ITrigger trigger = TriggerBuilder.Create()

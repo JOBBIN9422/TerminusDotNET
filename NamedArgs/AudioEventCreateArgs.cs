@@ -18,5 +18,8 @@ namespace TerminusDotNetCore.NamedArgs
         [Description("Cron string used to set the event's schedule.")]
         public string Cron { get; set; }
 
+        [Description("Name of channel to play the song in (`main` or `weed`).")]
+        public string ChannelName { get; set; } = "main";
+
     }
 }

@@ -19,9 +19,19 @@ namespace TerminusDotNetCore.Helpers
         public async Task Execute(IJobExecutionContext context)
         {
             JobDataMap dataMap = context.JobDetail.JobDataMap;
-            //string songName = (string)dataMap.Get("SongName");
+            string songName = (string)dataMap.Get("SongName");
+            ulong channelId = ulong.Parse((string)dataMap.Get("ChannelId"));
 
-            await _audioService.PlayWeed();
+            LocalAudioItem song = new LocalAudioItem()
+            {
+                Path = _audioService.GetAliasedSongPath(songName),
+                PlayChannelId = channelId,
+                AudioSource = FileAudioType.Local,
+                OwnerName = "Terminus.NET",
+                DisplayName = songName,
+                StartTime = DateTime.Now
+            };
+            await _audioService.PlayAudioEvent(song);
         }
     }
 }

@@ -16,7 +16,7 @@ namespace TerminusDotNetCore.Modules
     {
         private AudioService _service;
 
-        private Dictionary<string, ulong> _channelNameToIdMap = new Dictionary<string, ulong>();
+        public static Dictionary<string, ulong> ChannelNameToIdMap { get; private set; } = new Dictionary<string, ulong>();
 
         private static AudioQueueArgs DEFAULT_ARGS = new AudioQueueArgs
         {
@@ -32,8 +32,8 @@ namespace TerminusDotNetCore.Modules
             _service.ParentModule = this;
 
             //create a mapping from channel names to their IDs
-            _channelNameToIdMap.Add("main", ulong.Parse(config["AudioChannelId"]));
-            _channelNameToIdMap.Add("weed", ulong.Parse(config["WeedChannelId"]));
+            ChannelNameToIdMap.Add("main", ulong.Parse(config["AudioChannelId"]));
+            ChannelNameToIdMap.Add("weed", ulong.Parse(config["WeedChannelId"]));
         }
 
         [Command("play", RunMode = RunMode.Async)]
@@ -46,12 +46,12 @@ namespace TerminusDotNetCore.Modules
             }
 
             //check if channel id is valid and exists
-            if (!_channelNameToIdMap.ContainsKey(namedArgs.Channel))
+            if (!ChannelNameToIdMap.ContainsKey(namedArgs.Channel))
             {
                 await ReplyAsync("Invalid channel name (please use `main` or `weed`).");
                 return;
             }
-            ulong voiceID = _channelNameToIdMap[namedArgs.Channel];
+            ulong voiceID = ChannelNameToIdMap[namedArgs.Channel];
 
             //check if path is valid and exists
             bool useFile = false;
@@ -97,12 +97,12 @@ namespace TerminusDotNetCore.Modules
             }
 
             //check if channel id is valid and exists
-            if (!_channelNameToIdMap.ContainsKey(namedArgs.Channel))
+            if (!ChannelNameToIdMap.ContainsKey(namedArgs.Channel))
             {
                 await ReplyAsync("Invalid channel name (please use `main` or `weed`).");
                 return;
             }
-            ulong voiceID = _channelNameToIdMap[namedArgs.Channel];
+            ulong voiceID = ChannelNameToIdMap[namedArgs.Channel];
 
             await _service.QueueSearchedYoutubeSong(Context.Message.Author, searchTerm, voiceID, namedArgs.Append);
         }
@@ -117,12 +117,12 @@ namespace TerminusDotNetCore.Modules
             }
 
             //check if channel id is valid and exists
-            if (!_channelNameToIdMap.ContainsKey(namedArgs.Channel))
+            if (!ChannelNameToIdMap.ContainsKey(namedArgs.Channel))
             {
                 await ReplyAsync("Invalid channel name (please use `main` or `weed`).");
                 return;
             }
-            ulong voiceID = _channelNameToIdMap[namedArgs.Channel];
+            ulong voiceID = ChannelNameToIdMap[namedArgs.Channel];
 
             await _service.QueueYoutubePlaylist(Context.Message.Author, playlistUrl, voiceID, namedArgs.Append, namedArgs.Shuffle);
         }
@@ -153,12 +153,12 @@ namespace TerminusDotNetCore.Modules
             }
 
             //check if channel id is valid and exists
-            if (!_channelNameToIdMap.ContainsKey(namedArgs.Channel))
+            if (!ChannelNameToIdMap.ContainsKey(namedArgs.Channel))
             {
                 await ReplyAsync("Invalid channel name (please use `main` or `weed`).");
                 return;
             }
-            ulong voiceID = _channelNameToIdMap[namedArgs.Channel];
+            ulong voiceID = ChannelNameToIdMap[namedArgs.Channel];
 
             await _service.QueueYoutubeSongPreDownloaded(Context.Message.Author, url, voiceID, namedArgs.Append);
         }
@@ -515,7 +515,7 @@ namespace TerminusDotNetCore.Modules
                     await ReplyAsync("Please provide a song name.");
                 }
 
-                await _service.CreateAudioEvent(namedArgs.SongName, namedArgs.Cron);
+                await _service.CreateAudioEvent(namedArgs.SongName, namedArgs.Cron, ChannelNameToIdMap[namedArgs.ChannelName]);
             }
         }
     }
