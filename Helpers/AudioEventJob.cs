@@ -10,6 +10,8 @@ namespace TerminusDotNetCore.Helpers
 {
     public class AudioEventJob : IJob
     {
+        public string Name { get; set; }
+
         private readonly AudioService _audioService;
         public AudioEventJob(AudioService service)
         {
@@ -19,16 +21,19 @@ namespace TerminusDotNetCore.Helpers
         public async Task Execute(IJobExecutionContext context)
         {
             JobDataMap dataMap = context.JobDetail.JobDataMap;
-            string songName = (string)dataMap.Get("SongName");
+            string cronString = (string)dataMap.Get("CronString");
+            Name = (string)dataMap.Get("SongName");
             ulong channelId = ulong.Parse((string)dataMap.Get("ChannelId"));
+
+            await _audioService.SaveAudioEvent(Name, cronString);
 
             LocalAudioItem song = new LocalAudioItem()
             {
-                Path = _audioService.GetAliasedSongPath(songName),
+                Path = _audioService.GetAliasedSongPath(Name),
                 PlayChannelId = channelId,
                 AudioSource = FileAudioType.Local,
                 OwnerName = "Terminus.NET",
-                DisplayName = songName,
+                DisplayName = Name,
                 StartTime = DateTime.Now
             };
             await _audioService.PlayAudioEvent(song);

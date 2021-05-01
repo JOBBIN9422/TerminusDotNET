@@ -83,6 +83,7 @@ namespace TerminusDotNetCore.Services
         public string AudioPath { get; } = Path.Combine("assets", "audio");
         public string TempPath { get; } = Path.Combine("assets", "temp");
         public string RadioPath { get; } = Path.Combine("assets", "audio", "playlists");
+        public string EventsPath { get; } = Path.Combine("assets", "audio", "events");
 
         //RNG
         private Random _random;
@@ -1077,6 +1078,28 @@ namespace TerminusDotNetCore.Services
         #endregion
 
         #region audio events
+        public async Task SaveAudioEvent(string songName, string cronString)
+        {
+            AudioEventState state = new AudioEventState()
+            {
+                SongName = songName,
+                CronString = cronString
+            };
+            string eventFilename = Path.Combine(EventsPath, $"{songName}.json");
+            await File.WriteAllTextAsync(eventFilename, JsonConvert.SerializeObject(state, JSON_SETTINGS));
+        }
+
+        public async Task<AudioEventState> LoadAudioEvent(string songName)
+        {
+            string eventFilename = Path.Combine(EventsPath, $"{songName}.json");
+            if (!File.Exists(eventFilename))
+            {
+                return null;
+            }
+
+            return JsonConvert.DeserializeObject<AudioEventState>(await File.ReadAllTextAsync(eventFilename));
+        }
+
         public async Task CreateAudioEvent(string songName, string cronString, ulong channelId)
         {
             if (!_scheduler.IsStarted)
@@ -1088,6 +1111,7 @@ namespace TerminusDotNetCore.Services
             IJobDetail job = JobBuilder.Create<AudioEventJob>()
                 .WithIdentity(jobId, "group1")
                 .UsingJobData("SongName", songName)
+                .UsingJobData("CronString", cronString)
                 .UsingJobData("ChannelId", channelId.ToString())
                 .Build();
 
