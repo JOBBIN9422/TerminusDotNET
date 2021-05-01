@@ -32,8 +32,14 @@ namespace TerminusDotNetCore.Modules
             _service.ParentModule = this;
 
             //create a mapping from channel names to their IDs
-            ChannelNameToIdMap.Add("main", ulong.Parse(config["AudioChannelId"]));
-            ChannelNameToIdMap.Add("weed", ulong.Parse(config["WeedChannelId"]));
+            if (!ChannelNameToIdMap.ContainsKey("main"))
+            {
+                ChannelNameToIdMap.Add("main", ulong.Parse(config["AudioChannelId"]));
+            }
+            if (!ChannelNameToIdMap.ContainsKey("weed"))
+            {
+                ChannelNameToIdMap.Add("weed", ulong.Parse(config["WeedChannelId"]));
+            }
         }
 
         [Command("play", RunMode = RunMode.Async)]
