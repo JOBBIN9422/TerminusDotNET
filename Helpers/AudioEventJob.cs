@@ -22,6 +22,7 @@ namespace TerminusDotNetCore.Helpers
 
         public async Task Execute(IJobExecutionContext context)
         {
+            await Logger.Log(new LogMessage(LogSeverity.Info, "AudioEvent", $"Executing job"));
             JobDataMap dataMap = context.JobDetail.JobDataMap;
             Name = (string)dataMap.Get("SongName");
             ulong channelId = ulong.Parse((string)dataMap.Get("ChannelId"));
