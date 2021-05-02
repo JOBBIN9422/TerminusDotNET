@@ -1136,9 +1136,10 @@ namespace TerminusDotNetCore.Services
                 .ForJob(jobId, "group1")
                 .Build();
 
-            await Logger.Log(new LogMessage(LogSeverity.Info, "Scheduler", $"Created audio event '{songName}' scheduled with '{cronString}' in channel '{channelId}'."));
+            //await Logger.Log(new LogMessage(LogSeverity.Info, "Scheduler", $"Created audio event '{songName}' scheduled with '{cronString}' in channel '{channelId}'."));
             await SaveAudioEvent(songName, cronString, channelId);
-            await _scheduler.ScheduleJob(job, trigger);
+            DateTimeOffset triggerOffset = await _scheduler.ScheduleJob(job, trigger);
+            await Logger.Log(new LogMessage(LogSeverity.Info, "Scheduler", $"Scheduled audio event '{songName}' in channel '{channelId}' at {triggerOffset}."));
         }
         #endregion
 
