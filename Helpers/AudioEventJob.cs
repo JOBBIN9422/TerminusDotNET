@@ -1,4 +1,5 @@
-﻿using Quartz;
+﻿using Discord;
+using Quartz;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,6 +17,7 @@ namespace TerminusDotNetCore.Helpers
         public AudioEventJob(AudioService service)
         {
             _audioService = service;
+            Task.Run(async () => await Logger.Log(new LogMessage(LogSeverity.Info, "AudioEvent", $"Service provider init: {_audioService != null}")));
         }
 
         public async Task Execute(IJobExecutionContext context)
