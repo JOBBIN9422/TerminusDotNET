@@ -1078,7 +1078,7 @@ namespace TerminusDotNetCore.Services
         #endregion
 
         #region audio events
-        public async Task SaveAudioEvent(string songName, string cronString)
+        public async Task SaveAudioEvent(string songName, string cronString, ulong channelId)
         {
             AudioEventState state = new AudioEventState()
             {
@@ -1100,13 +1100,24 @@ namespace TerminusDotNetCore.Services
             return JsonConvert.DeserializeObject<AudioEventState>(await File.ReadAllTextAsync(eventFilename));
         }
 
+        public async Task LoadAllAudioEvents()
+        {
+            foreach (var file in Directory.GetFiles(EventsPath))
+            {
+                AudioEventState state = await LoadAudioEvent(Path.GetFileNameWithoutExtension(file));
+                await CreateAudioEvent(state.SongName, state.CronString, state.ChannelId);
+            }
+        }
+
         public async Task CreateAudioEvent(string songName, string cronString, ulong channelId)
         {
+            //start scheduler if needed
             if (!_scheduler.IsStarted)
             {
                 await _scheduler.Start();
             }
 
+            //create job (pass cron string, song name, channel ID)
             string jobId = Guid.NewGuid().ToString("N");
             IJobDetail job = JobBuilder.Create<AudioEventJob>()
                 .WithIdentity(jobId, "group1")
@@ -1115,12 +1126,14 @@ namespace TerminusDotNetCore.Services
                 .UsingJobData("ChannelId", channelId.ToString())
                 .Build();
 
+            //create trigger from cron string
             ITrigger trigger = TriggerBuilder.Create()
                 .WithIdentity(Guid.NewGuid().ToString("N"), "group1")
                 .WithCronSchedule(cronString)
                 .ForJob(jobId, "group1")
                 .Build();
 
+            await Logger.Log(new LogMessage(LogSeverity.Info, "Scheduler", $"Created audio event '{songName}' scheduled with '{cronString}' in channel '{channelId}'."));
             await _scheduler.ScheduleJob(job, trigger);
         }
         #endregion

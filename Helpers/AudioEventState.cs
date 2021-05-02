@@ -10,5 +10,6 @@ namespace TerminusDotNetCore.Helpers
     {
         public string SongName { get; set; }
         public string CronString { get; set; }
+        public ulong ChannelId { get; set; }
     }
 }

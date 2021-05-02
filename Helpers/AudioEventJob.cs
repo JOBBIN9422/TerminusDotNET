@@ -25,7 +25,7 @@ namespace TerminusDotNetCore.Helpers
             Name = (string)dataMap.Get("SongName");
             ulong channelId = ulong.Parse((string)dataMap.Get("ChannelId"));
 
-            await _audioService.SaveAudioEvent(Name, cronString);
+            await _audioService.SaveAudioEvent(Name, cronString, channelId);
 
             LocalAudioItem song = new LocalAudioItem()
             {
