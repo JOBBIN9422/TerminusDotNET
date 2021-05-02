@@ -111,6 +111,7 @@ namespace TerminusDotNetCore.Services
             _timer = new Timer(async _ => await PlayWeed(), null, fourTwentyMs, (int)new TimeSpan(24, 0, 0).TotalMilliseconds);
 
             Task.Run(async () => await InitYoutubeService());
+            Task.Run(async () => await LoadAllAudioEvents());
 
             //init youtube downloader dict
             _youtubeDownloaders.Add("libvideo", typeof(LibVideoDownloader));
