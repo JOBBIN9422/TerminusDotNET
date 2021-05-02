@@ -1084,7 +1084,8 @@ namespace TerminusDotNetCore.Services
             AudioEventState state = new AudioEventState()
             {
                 SongName = songName,
-                CronString = cronString
+                CronString = cronString,
+                ChannelId = channelId
             };
             string eventFilename = Path.Combine(EventsPath, $"{songName}.json");
             await File.WriteAllTextAsync(eventFilename, JsonConvert.SerializeObject(state, JSON_SETTINGS));
