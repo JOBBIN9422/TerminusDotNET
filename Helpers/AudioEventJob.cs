@@ -21,11 +21,8 @@ namespace TerminusDotNetCore.Helpers
         public async Task Execute(IJobExecutionContext context)
         {
             JobDataMap dataMap = context.JobDetail.JobDataMap;
-            string cronString = (string)dataMap.Get("CronString");
             Name = (string)dataMap.Get("SongName");
             ulong channelId = ulong.Parse((string)dataMap.Get("ChannelId"));
-
-            await _audioService.SaveAudioEvent(Name, cronString, channelId);
 
             LocalAudioItem song = new LocalAudioItem()
             {

@@ -1124,7 +1124,6 @@ namespace TerminusDotNetCore.Services
                 .WithIdentity(jobId, "group1")
                 .UsingJobData("SongName", songName)
                 .UsingJobData("CronString", cronString)
-                .UsingJobData("ChannelId", channelId.ToString())
                 .Build();
 
             //create trigger from cron string
@@ -1135,6 +1134,7 @@ namespace TerminusDotNetCore.Services
                 .Build();
 
             await Logger.Log(new LogMessage(LogSeverity.Info, "Scheduler", $"Created audio event '{songName}' scheduled with '{cronString}' in channel '{channelId}'."));
+            await SaveAudioEvent(songName, cronString, channelId);
             await _scheduler.ScheduleJob(job, trigger);
         }
         #endregion
