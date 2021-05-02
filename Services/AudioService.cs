@@ -1126,7 +1126,7 @@ namespace TerminusDotNetCore.Services
             IJobDetail job = JobBuilder.Create<AudioEventJob>()
                 .WithIdentity(jobId, "group1")
                 .UsingJobData("SongName", songName)
-                .UsingJobData("CronString", cronString)
+                .UsingJobData("ChannelId", channelId.ToString())
                 .Build();
 
             //create trigger from cron string
