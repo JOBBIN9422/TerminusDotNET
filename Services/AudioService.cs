@@ -1116,6 +1116,8 @@ namespace TerminusDotNetCore.Services
             if (!_scheduler.IsStarted)
             {
                 await _scheduler.Start();
+                await Logger.Log(new LogMessage(LogSeverity.Info, "Scheduler", $"Started scheduler."));
+
             }
 
             //create job (pass cron string, song name, channel ID)
