@@ -37,8 +37,8 @@ namespace TerminusDotNetCore.Services
                     FileName = "sudo",
                     ArgumentList = {
                         "-u",
-                        $"{user}",
-                        $"{cmd}"
+                        user,
+                        cmd
                     },
                     UseShellExecute = false,
                     RedirectStandardOutput = true,
