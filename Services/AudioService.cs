@@ -1122,9 +1122,8 @@ namespace TerminusDotNetCore.Services
             }
 
             //create job (pass cron string, song name, channel ID)
-            string jobId = Guid.NewGuid().ToString("N");
             IJobDetail job = JobBuilder.Create<AudioEventJob>()
-                .WithIdentity(jobId, "group1")
+                .WithIdentity(songName, "group1")
                 .UsingJobData("SongName", songName)
                 .UsingJobData("ChannelId", channelId.ToString())
                 .Build();
@@ -1133,9 +1132,10 @@ namespace TerminusDotNetCore.Services
             ITrigger trigger = TriggerBuilder.Create()
                 .WithIdentity(Guid.NewGuid().ToString("N"), "group1")
                 .WithCronSchedule(cronString)
-                .ForJob(jobId, "group1")
+                .ForJob(songName, "group1")
                 .Build();
 
+            //save to file 
             await SaveAudioEvent(songName, cronString, channelId);
             DateTimeOffset triggerOffset = await _scheduler.ScheduleJob(job, trigger);
             await Logger.Log(new LogMessage(LogSeverity.Info, "Scheduler", $"Scheduled audio event '{songName}' in channel '{channelId}' at {triggerOffset}."));
