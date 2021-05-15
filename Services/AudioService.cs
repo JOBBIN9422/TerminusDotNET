@@ -19,6 +19,7 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using YoutubeExplode;
 using Quartz;
+using Quartz.Impl.Matchers;
 
 namespace TerminusDotNetCore.Services
 {
@@ -1142,7 +1143,7 @@ namespace TerminusDotNetCore.Services
         }
         private async Task<List<Embed>> ListAudioEvents()
         {
-            IReadOnlyCollection<IJobExecutionContext> executingJobs = await _scheduler.GetCurrentlyExecutingJobs();
+            IReadOnlyCollection<string> groupNames = await _scheduler.GetJobGroupNames();
 
             //need a list of embeds since each embed can only have 25 fields max
             List<Embed> jobList = new List<Embed>();
@@ -1150,25 +1151,33 @@ namespace TerminusDotNetCore.Services
 
             var embed = new EmbedBuilder
             {
-                Title = $"{executingJobs.Count} Audio Events"
+                Title = $"Audio Events"
             };
 
-            foreach (IJobExecutionContext job in executingJobs)
+            foreach (string groupName in groupNames)
             {
-                entryCount++;
-
-                //if we have 25 entries in an embed already, need to make a new one 
-                if (entryCount % EmbedBuilder.MaxFieldCount == 0 && entryCount > 0)
+                GroupMatcher<JobKey> groupMatcher = GroupMatcher<JobKey>.GroupContains(groupName);
+                IReadOnlyCollection<JobKey> jobKeys = await _scheduler.GetJobKeys(groupMatcher);
+                foreach (JobKey jobKey in jobKeys)
                 {
-                    jobList.Add(embed.Build());
-                    embed = new EmbedBuilder();
+                    var jobDetail = await _scheduler.GetJobDetail(jobKey);
+                    IReadOnlyCollection<ITrigger> triggers = await _scheduler.GetTriggersOfJob(jobKey);
+                    entryCount++;
+
+                    //if we have 25 entries in an embed already, need to make a new one 
+                    if (entryCount % EmbedBuilder.MaxFieldCount == 0 && entryCount > 0)
+                    {
+                        jobList.Add(embed.Build());
+                        embed = new EmbedBuilder();
+                    }
+
+                    string jobName = jobKey.Name;
+                    string nextJobTime = triggers.FirstOrDefault().GetNextFireTimeUtc().GetValueOrDefault().ToLocalTime().ToString();
+
+                    embed.AddField(jobName, nextJobTime);
                 }
-
-                string jobName = job.JobDetail.Key.Name;
-                string nextJobTime = job.Trigger.GetNextFireTimeUtc().ToString();
-
-                embed.AddField(jobName, nextJobTime);
             }
+ 
 
             //add the most recently built embed if it's not in the list yet 
             if (jobList.Count == 0 || !jobList.Contains(embed.Build()))
