@@ -1140,6 +1140,69 @@ namespace TerminusDotNetCore.Services
             DateTimeOffset triggerOffset = await _scheduler.ScheduleJob(job, trigger);
             await Logger.Log(new LogMessage(LogSeverity.Info, "Scheduler", $"Scheduled audio event '{songName}' in channel '{channelId}' at {triggerOffset}."));
         }
+        private async Task<List<Embed>> ListAudioEvents()
+        {
+            IReadOnlyCollection<IJobExecutionContext> executingJobs = await _scheduler.GetCurrentlyExecutingJobs();
+
+            //need a list of embeds since each embed can only have 25 fields max
+            List<Embed> jobList = new List<Embed>();
+            int entryCount = 0;
+
+            var embed = new EmbedBuilder
+            {
+                Title = $"{executingJobs.Count} Audio Events"
+            };
+
+            foreach (IJobExecutionContext job in executingJobs)
+            {
+                entryCount++;
+
+                //if we have 25 entries in an embed already, need to make a new one 
+                if (entryCount % EmbedBuilder.MaxFieldCount == 0 && entryCount > 0)
+                {
+                    jobList.Add(embed.Build());
+                    embed = new EmbedBuilder();
+                }
+
+                string jobName = job.JobDetail.Key.Name;
+                string nextJobTime = job.Trigger.GetNextFireTimeUtc().ToString();
+
+                embed.AddField(jobName, nextJobTime);
+            }
+
+            //add the most recently built embed if it's not in the list yet 
+            if (jobList.Count == 0 || !jobList.Contains(embed.Build()))
+            {
+                jobList.Add(embed.Build());
+            }
+
+            return jobList;
+        }
+
+        public async Task ShowAudioEvents()
+        {
+            List<Embed> jobs = await ListAudioEvents();
+            foreach (Embed embed in jobs)
+            {
+                await ParentModule.ServiceReplyAsync(embed: embed);
+            }
+        }
+
+        public async Task PlayAudioEvent(LocalAudioItem audioEvent)
+        {
+            await EnqueueSong(audioEvent);
+            await SaveQueueContents("event-queue.json");
+            if (!_playing)
+            {
+                await PlayNextInQueue(false);
+            }
+            else
+            {
+                //load the current queue with the weed song added to the front of it
+                await StopAllAudio();
+                await LoadQueueContents("event-queue.json", true);
+            }
+        }
         #endregion
 
         #region weed
@@ -1158,23 +1221,6 @@ namespace TerminusDotNetCore.Services
         }
         #endregion
 
-        #region audio events
-        public async Task PlayAudioEvent(LocalAudioItem audioEvent)
-        {
-            await EnqueueSong(audioEvent);
-            await SaveQueueContents("event-queue.json");
-            if (!_playing)
-            {
-                await PlayNextInQueue(false);
-            }
-            else
-            {
-                //load the current queue with the weed song added to the front of it
-                await StopAllAudio();
-                await LoadQueueContents("event-queue.json", true);
-            }
-        }
-        #endregion
 
         #region song display methods
         public async Task<Embed> DisplayCurrentSong()

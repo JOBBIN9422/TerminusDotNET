@@ -501,6 +501,12 @@ namespace TerminusDotNetCore.Modules
                 _service = service;
                 _service.ParentModule = this;
             }
+            [Command("list", RunMode = RunMode.Async)]
+            [Summary("List all scheduled audio events.")]
+            public async Task ListAudioEvents()
+            {
+                await _service.ShowAudioEvents();
+            }
 
             [Command("create", RunMode = RunMode.Async)]
             [Summary("Create an audio event.")]
