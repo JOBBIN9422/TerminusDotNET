@@ -1141,6 +1141,17 @@ namespace TerminusDotNetCore.Services
             DateTimeOffset triggerOffset = await _scheduler.ScheduleJob(job, trigger);
             await Logger.Log(new LogMessage(LogSeverity.Info, "Scheduler", $"Scheduled audio event '{songName}' in channel '{channelId}' at {triggerOffset}."));
         }
+
+        public async Task PauseAudioEvent(string songName)
+        {
+            await _scheduler.PauseJob(new JobKey(songName, "group1"));
+        }
+
+        public async Task ResumeAudioEvent(string songName)
+        {
+            await _scheduler.ResumeJob(new JobKey(songName, "group1"));
+        }
+
         private async Task<List<Embed>> ListAudioEvents()
         {
             IReadOnlyCollection<string> groupNames = await _scheduler.GetJobGroupNames();
@@ -1154,10 +1165,13 @@ namespace TerminusDotNetCore.Services
                 Title = $"Audio Events"
             };
 
+            //iterate job groups (currently only 1, hard-coded)
             foreach (string groupName in groupNames)
             {
                 GroupMatcher<JobKey> groupMatcher = GroupMatcher<JobKey>.GroupContains(groupName);
                 IReadOnlyCollection<JobKey> jobKeys = await _scheduler.GetJobKeys(groupMatcher);
+
+                //iterate over each job key and add an embed entry for that job
                 foreach (JobKey jobKey in jobKeys)
                 {
                     var jobDetail = await _scheduler.GetJobDetail(jobKey);
@@ -1177,7 +1191,6 @@ namespace TerminusDotNetCore.Services
                     embed.AddField(jobName, nextJobTime);
                 }
             }
- 
 
             //add the most recently built embed if it's not in the list yet 
             if (jobList.Count == 0 || !jobList.Contains(embed.Build()))
