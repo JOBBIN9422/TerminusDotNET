@@ -152,9 +152,12 @@ namespace TerminusDotNetCore.Services
 
             foreach (var image in images)
             {
-                using (var img = ImageHelper.WatermarkImage(image, Path.Combine("assets", "images", "initial-d.png"), AnchorPositionMode.TopLeft, 0.0, 0.0, 1.0, 1.0f))
+                using (var initialDImg = SixLabors.ImageSharp.Image.Load(Path.Combine("assets", "images", "initial-d.png")))
+                using (var baseImg = SixLabors.ImageSharp.Image.Load(image))
                 {
-                    img.Save(image);
+                    int newHeight = (int)(initialDImg.Height * .70);
+                    baseImg.Mutate(x => x.DrawImage(initialDImg, 1.0f));
+                    baseImg.Save(image);
                 }
             }
 
