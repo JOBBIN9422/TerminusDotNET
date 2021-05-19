@@ -156,15 +156,14 @@ namespace TerminusDotNetCore.Services
                 using (var baseImg = new Image<Rgba32>(initialDImg.Width, initialDImg.Height))
                 using (var userImg = SixLabors.ImageSharp.Image.Load(image))
                 {
+                    //scale the input image to 65% of initial d img height to get the full pic in the winshield (dude trust me)
                     int newHeight = (int)(initialDImg.Height * 0.65);
-                    ResizeOptions options = new ResizeOptions()
-                    {
-                        Size = new SixLabors.ImageSharp.Size(initialDImg.Width, newHeight)
-                    };
-
                     userImg.Mutate(x => x.Resize(initialDImg.Width, newHeight));
+
+                    //draw scaled-down input and initial d overlay on the blank image 
                     baseImg.Mutate(x => x.DrawImage(userImg, 1.0f));
                     baseImg.Mutate(x => x.DrawImage(initialDImg, 1.0f));
+
                     baseImg.Save(image);
                 }
             }
