@@ -158,7 +158,7 @@ namespace TerminusDotNetCore.Services
                     int newHeight = (int)(initialDImg.Height * 0.65);
                     ResizeOptions options = new ResizeOptions()
                     {
-                        TargetRectangle = new SixLabors.ImageSharp.Rectangle(0, 0, initialDImg.Width, newHeight),
+                        Size = new SixLabors.ImageSharp.Size(initialDImg.Width, newHeight),
                         Mode = ResizeMode.Pad
                     };
 
