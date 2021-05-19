@@ -153,7 +153,8 @@ namespace TerminusDotNetCore.Services
             foreach (var image in images)
             {
                 using (var initialDImg = SixLabors.ImageSharp.Image.Load(Path.Combine("assets", "images", "initial-d.png")))
-                using (var baseImg = SixLabors.ImageSharp.Image.Load(image))
+                using (var baseImg = new Image<Rgba32>(initialDImg.Width, initialDImg.Height))
+                using (var userImg = SixLabors.ImageSharp.Image.Load(image))
                 {
                     int newHeight = (int)(initialDImg.Height * 0.65);
                     ResizeOptions options = new ResizeOptions()
@@ -162,7 +163,8 @@ namespace TerminusDotNetCore.Services
                         Mode = ResizeMode.Stretch
                     };
 
-                    baseImg.Mutate(x => x.Resize(options));
+                    userImg.Mutate(x => x.Resize(options));
+                    baseImg.Mutate(x => x.DrawImage(userImg, 1.0f));
                     baseImg.Mutate(x => x.DrawImage(initialDImg, 1.0f));
                     baseImg.Save(image);
                 }
