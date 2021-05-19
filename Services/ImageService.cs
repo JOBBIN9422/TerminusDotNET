@@ -159,11 +159,10 @@ namespace TerminusDotNetCore.Services
                     int newHeight = (int)(initialDImg.Height * 0.65);
                     ResizeOptions options = new ResizeOptions()
                     {
-                        Size = new SixLabors.ImageSharp.Size(initialDImg.Width, newHeight),
-                        Mode = ResizeMode.Stretch
+                        Size = new SixLabors.ImageSharp.Size(initialDImg.Width, newHeight)
                     };
 
-                    userImg.Mutate(x => x.Resize(options));
+                    userImg.Mutate(x => x.Resize(initialDImg.Width, newHeight));
                     baseImg.Mutate(x => x.DrawImage(userImg, 1.0f));
                     baseImg.Mutate(x => x.DrawImage(initialDImg, 1.0f));
                     baseImg.Save(image);
