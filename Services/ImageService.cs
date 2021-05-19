@@ -155,7 +155,7 @@ namespace TerminusDotNetCore.Services
                 using (var initialDImg = SixLabors.ImageSharp.Image.Load(Path.Combine("assets", "images", "initial-d.png")))
                 using (var baseImg = SixLabors.ImageSharp.Image.Load(image))
                 {
-                    int newHeight = (int)(initialDImg.Height * .70);
+                    int newHeight = (int)(initialDImg.Height * .60);
                     baseImg.Mutate(x => x.Resize(initialDImg.Width, newHeight));
                     baseImg.Mutate(x => x.DrawImage(initialDImg, 1.0f));
                     baseImg.Save(image);
