@@ -146,6 +146,21 @@ namespace TerminusDotNetCore.Services
             AttachmentHelper.DeleteFiles(images);
         }
 
+        public List<string> InitialDImages(IReadOnlyCollection<Attachment> attachments)
+        {
+            var images = AttachmentHelper.DownloadAttachments(attachments);
+
+            foreach (var image in images)
+            {
+                using (var img = ImageHelper.WatermarkImage(image, Path.Combine("assets", "images", "initial-d.png"), AnchorPositionMode.TopLeft, 0.0, 0.0, 1.0, 1.0f))
+                {
+                    img.Save(image);
+                }
+            }
+
+            return images;
+        }
+
         public List<string> MorrowindImages(IReadOnlyCollection<Attachment> attachments)
         {
             var images = AttachmentHelper.DownloadAttachments(attachments);
