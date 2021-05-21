@@ -1148,7 +1148,7 @@ namespace TerminusDotNetCore.Services
             IJobDetail jobDetail = await _scheduler.GetJobDetail(key);
             if (jobDetail == null)
             {
-                await ParentModule.ServiceReplyAsync($"No audio event `${songName}` found.");
+                await ParentModule.ServiceReplyAsync($"No audio event `{songName}` found.");
                 return;
             }
             
@@ -1156,7 +1156,7 @@ namespace TerminusDotNetCore.Services
             File.Delete(eventFilename);
             await _scheduler.DeleteJob(key);
 
-            await ParentModule.ServiceReplyAsync($"Deleted audio event `${songName}`.");
+            await ParentModule.ServiceReplyAsync($"Deleted audio event `{songName}`.");
         }
 
         public async Task PauseAudioEvent(string songName)
@@ -1165,11 +1165,11 @@ namespace TerminusDotNetCore.Services
             IJobDetail jobDetail = await _scheduler.GetJobDetail(key);
             if (jobDetail == null)
             {
-                await ParentModule.ServiceReplyAsync($"No audio event `${songName}` found.");
+                await ParentModule.ServiceReplyAsync($"No audio event `{songName}` found.");
                 return;
             }
             await _scheduler.PauseJob(key);
-            await ParentModule.ServiceReplyAsync($"Paused audio event ${songName}.");
+            await ParentModule.ServiceReplyAsync($"Paused audio event {songName}.");
         }
 
         public async Task ResumeAudioEvent(string songName)
@@ -1178,11 +1178,11 @@ namespace TerminusDotNetCore.Services
             IJobDetail jobDetail = await _scheduler.GetJobDetail(key);
             if (jobDetail == null)
             {
-                await ParentModule.ServiceReplyAsync($"No audio event `${songName}` found.");
+                await ParentModule.ServiceReplyAsync($"No audio event `{songName}` found.");
                 return;
             }
             await _scheduler.ResumeJob(key);
-            await ParentModule.ServiceReplyAsync($"Resumed audio event ${songName}.");
+            await ParentModule.ServiceReplyAsync($"Resumed audio event {songName}.");
         }
 
         private async Task<List<Embed>> ListAudioEvents()
