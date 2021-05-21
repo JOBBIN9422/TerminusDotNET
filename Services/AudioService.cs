@@ -1122,6 +1122,15 @@ namespace TerminusDotNetCore.Services
 
             }
 
+            //check if a job with the given name already exists
+            JobKey key = new JobKey(songName, "group1");
+            IJobDetail jobDetail = await _scheduler.GetJobDetail(key);
+            if (jobDetail != null)
+            {
+                await ParentModule.ServiceReplyAsync($"An event `{songName}` already exists.");
+                return;
+            }
+
             //create job (pass cron string, song name, channel ID)
             IJobDetail job = JobBuilder.Create<AudioEventJob>()
                 .WithIdentity(songName, "group1")
@@ -1220,8 +1229,11 @@ namespace TerminusDotNetCore.Services
 
                     string jobName = jobKey.Name;
                     string nextJobTime = triggers.FirstOrDefault().GetNextFireTimeUtc().GetValueOrDefault().ToLocalTime().ToString();
+                    TriggerState triggerState = await _scheduler.GetTriggerState(triggers.FirstOrDefault().Key);
 
-                    embed.AddField(jobName, nextJobTime);
+                    string jobDescription = $"Next play time: {(triggerState == TriggerState.Paused ? "N/A (paused)" : nextJobTime)}";
+
+                    embed.AddField(jobName, jobDescription);
                 }
             }
 
