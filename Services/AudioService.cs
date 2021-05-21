@@ -1109,6 +1109,7 @@ namespace TerminusDotNetCore.Services
             {
                 AudioEventState state = await LoadAudioEvent(Path.GetFileNameWithoutExtension(file));
                 await CreateAudioEvent(state.SongName, state.CronString, state.ChannelId);
+                await Logger.Log(new LogMessage(LogSeverity.Info, "Scheduler", $"Loaded event `file`."));
             }
         }
 
