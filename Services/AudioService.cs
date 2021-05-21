@@ -1180,7 +1180,7 @@ namespace TerminusDotNetCore.Services
                 return;
             }
             await _scheduler.PauseJob(key);
-            await ParentModule.ServiceReplyAsync($"Paused audio event {songName}.");
+            await ParentModule.ServiceReplyAsync($"Paused audio event `{songName}`.");
         }
 
         public async Task ResumeAudioEvent(string songName)
@@ -1193,7 +1193,7 @@ namespace TerminusDotNetCore.Services
                 return;
             }
             await _scheduler.ResumeJob(key);
-            await ParentModule.ServiceReplyAsync($"Resumed audio event {songName}.");
+            await ParentModule.ServiceReplyAsync($"Resumed audio event `{songName}`.");
         }
 
         private async Task<List<Embed>> ListAudioEvents()
