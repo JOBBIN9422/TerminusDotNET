@@ -1144,12 +1144,26 @@ namespace TerminusDotNetCore.Services
 
         public async Task PauseAudioEvent(string songName)
         {
-            await _scheduler.PauseJob(new JobKey(songName, "group1"));
+            JobKey key = new JobKey(songName, "group1");
+            IJobDetail jobDetail = await _scheduler.GetJobDetail(key);
+            if (jobDetail == null)
+            {
+                await ParentModule.ServiceReplyAsync("No audio event `${songName}` found.");
+                return;
+            }
+            await _scheduler.PauseJob(key);
         }
 
         public async Task ResumeAudioEvent(string songName)
         {
-            await _scheduler.ResumeJob(new JobKey(songName, "group1"));
+            JobKey key = new JobKey(songName, "group1");
+            IJobDetail jobDetail = await _scheduler.GetJobDetail(key);
+            if (jobDetail == null)
+            {
+                await ParentModule.ServiceReplyAsync("No audio event `${songName}` found.");
+                return;
+            }
+            await _scheduler.ResumeJob(key);
         }
 
         private async Task<List<Embed>> ListAudioEvents()
