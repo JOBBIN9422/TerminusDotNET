@@ -1113,9 +1113,10 @@ namespace TerminusDotNetCore.Services
             }
 
             string[] eventFiles = Directory.GetFiles(EventsPath);
+            await Logger.Log(new LogMessage(LogSeverity.Info, "Scheduler", $"`{eventFiles.Length}` events to load."));
+
             foreach (var file in eventFiles)
             {
-                await Logger.Log(new LogMessage(LogSeverity.Info, "Scheduler", $"Loaded event `{file}`."));
 
                 AudioEventState state = await LoadAudioEvent(Path.GetFileNameWithoutExtension(file));
                 await CreateAudioEvent(state.SongName, state.CronString, state.ChannelId);
