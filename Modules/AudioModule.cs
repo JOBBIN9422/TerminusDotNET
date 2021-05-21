@@ -530,6 +530,18 @@ namespace TerminusDotNetCore.Modules
                 await _service.CreateAudioEvent(namedArgs.SongName, namedArgs.Cron, ChannelNameToIdMap[namedArgs.ChannelName]);
             }
 
+            [Command("delete", RunMode = RunMode.Async)]
+            [Summary("Delete an audio event.")]
+            public async Task DeleteAudioEvent(string songName)
+            {
+                if (string.IsNullOrEmpty(songName))
+                {
+                    await ReplyAsync("Please provide a song name (view songs with `!alias` or events with `!event list`).");
+                    return;
+                }
+                await _service.DeleteAudioEvent(songName);
+            }
+
             [Command("pause", RunMode = RunMode.Async)]
             [Summary("Pause an audio event.")]
             public async Task PauseAudioEvent(string songName)

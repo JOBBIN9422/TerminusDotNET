@@ -1142,6 +1142,23 @@ namespace TerminusDotNetCore.Services
             await Logger.Log(new LogMessage(LogSeverity.Info, "Scheduler", $"Scheduled audio event '{songName}' in channel '{channelId}' at {triggerOffset}."));
         }
 
+        public async Task DeleteAudioEvent(string songName)
+        {
+            JobKey key = new JobKey(songName, "group1");
+            IJobDetail jobDetail = await _scheduler.GetJobDetail(key);
+            if (jobDetail == null)
+            {
+                await ParentModule.ServiceReplyAsync($"No audio event `${songName}` found.");
+                return;
+            }
+            
+            string eventFilename = Path.Combine(EventsPath, $"{songName}.json");
+            File.Delete(eventFilename);
+            await _scheduler.DeleteJob(key);
+
+            await ParentModule.ServiceReplyAsync($"Deleted audio event `${songName}`.");
+        }
+
         public async Task PauseAudioEvent(string songName)
         {
             JobKey key = new JobKey(songName, "group1");
