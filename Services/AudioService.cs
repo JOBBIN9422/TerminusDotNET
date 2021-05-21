@@ -1105,7 +1105,8 @@ namespace TerminusDotNetCore.Services
 
         public async Task LoadAllAudioEvents()
         {
-            foreach (var file in Directory.GetFiles(EventsPath))
+            string[] eventFiles = Directory.GetFiles(EventsPath);
+            foreach (var file in eventFiles)
             {
                 AudioEventState state = await LoadAudioEvent(Path.GetFileNameWithoutExtension(file));
                 await CreateAudioEvent(state.SongName, state.CronString, state.ChannelId);
