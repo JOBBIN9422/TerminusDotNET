@@ -1105,6 +1105,13 @@ namespace TerminusDotNetCore.Services
 
         public async Task LoadAllAudioEvents()
         {
+            //start scheduler if needed
+            if (!_scheduler.IsStarted)
+            {
+                await _scheduler.Start();
+                await Logger.Log(new LogMessage(LogSeverity.Info, "Scheduler", $"Started scheduler."));
+            }
+
             string[] eventFiles = Directory.GetFiles(EventsPath);
             foreach (var file in eventFiles)
             {
@@ -1117,14 +1124,6 @@ namespace TerminusDotNetCore.Services
 
         public async Task CreateAudioEvent(string songName, string cronString, ulong channelId)
         {
-            //start scheduler if needed
-            if (!_scheduler.IsStarted)
-            {
-                await _scheduler.Start();
-                await Logger.Log(new LogMessage(LogSeverity.Info, "Scheduler", $"Started scheduler."));
-
-            }
-
             //check if a job with the given name already exists
             JobKey key = new JobKey(songName, "group1");
             IJobDetail jobDetail = await _scheduler.GetJobDetail(key);
