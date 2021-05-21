@@ -1149,6 +1149,8 @@ namespace TerminusDotNetCore.Services
             await SaveAudioEvent(songName, cronString, channelId);
             DateTimeOffset triggerOffset = await _scheduler.ScheduleJob(job, trigger);
             await Logger.Log(new LogMessage(LogSeverity.Info, "Scheduler", $"Scheduled audio event '{songName}' in channel '{channelId}' at {triggerOffset}."));
+
+            await ParentModule.ServiceReplyAsync($"Created audio event `{songName}`.");
         }
 
         public async Task DeleteAudioEvent(string songName)
