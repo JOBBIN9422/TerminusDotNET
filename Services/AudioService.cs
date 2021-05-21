@@ -1120,12 +1120,12 @@ namespace TerminusDotNetCore.Services
                 await Logger.Log(new LogMessage(LogSeverity.Info, "Scheduler", $"loaded event {file}"));
 
                 await Logger.Log(new LogMessage(LogSeverity.Info, "Scheduler", $"creating event {file}"));
-                await CreateAudioEvent(state.SongName, state.CronString, state.ChannelId);
+                await CreateAudioEvent(state.SongName, state.CronString, state.ChannelId, false, false);
                 await Logger.Log(new LogMessage(LogSeverity.Info, "Scheduler", $"created event {file}"));
             }
         }
 
-        public async Task CreateAudioEvent(string songName, string cronString, ulong channelId)
+        public async Task CreateAudioEvent(string songName, string cronString, ulong channelId, bool respond = true, bool save = true)
         {
             //check if a job with the given name already exists
             JobKey key = new JobKey(songName, "group1");
@@ -1151,11 +1151,17 @@ namespace TerminusDotNetCore.Services
                 .Build();
 
             //save to file 
-            await SaveAudioEvent(songName, cronString, channelId);
+            if (save)
+            {
+                await SaveAudioEvent(songName, cronString, channelId);
+            }
             DateTimeOffset triggerOffset = await _scheduler.ScheduleJob(job, trigger);
             await Logger.Log(new LogMessage(LogSeverity.Info, "Scheduler", $"Scheduled audio event '{songName}' in channel '{channelId}' at {triggerOffset}."));
 
-            await ParentModule.ServiceReplyAsync($"Created audio event `{songName}`.");
+            if (respond)
+            {
+                await ParentModule.ServiceReplyAsync($"Created audio event `{songName}`.");
+            }
         }
 
         public async Task DeleteAudioEvent(string songName)
