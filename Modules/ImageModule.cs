@@ -154,6 +154,21 @@ namespace TerminusDotNetCore.Modules
             await SendImages(images);
         }
 
+        [Command("initiald", RunMode = RunMode.Async)]
+        [Summary("NANI??? KANSEI DORIFTO???")]
+        public async Task InitialDImagesAsync()
+        {
+            IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
+            if (attachments == null)
+            {
+                await ServiceReplyAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
+                return;
+            }
+
+            var images = _imageService.InitialDImages(attachments);
+            await SendImages(images);
+        }
+
         [Command("morrowind", RunMode = RunMode.Async)]
         [Summary("Places a Morrowind prompt on the attached image, or the image in the previous message (if any).")]
         public async Task MorrowindImageAsync()

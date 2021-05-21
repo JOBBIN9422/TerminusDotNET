@@ -241,6 +241,10 @@ namespace TerminusDotNetCore.Helpers
                         position = new Point(paddingHorizontal, baseImage.Height - watermarkImage.Height - paddingVertical);
                         break;
 
+                    case AnchorPositionMode.TopLeft:
+                        position = new Point(paddingHorizontal, paddingVertical);
+                        break;
+
                     default:
                         position = new Point(0, 0);
                         break;

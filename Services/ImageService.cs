@@ -146,6 +146,31 @@ namespace TerminusDotNetCore.Services
             AttachmentHelper.DeleteFiles(images);
         }
 
+        public List<string> InitialDImages(IReadOnlyCollection<Attachment> attachments)
+        {
+            var images = AttachmentHelper.DownloadAttachments(attachments);
+
+            foreach (var image in images)
+            {
+                using (var initialDImg = SixLabors.ImageSharp.Image.Load(Path.Combine("assets", "images", "initial-d.png")))
+                using (var baseImg = new Image<Rgba32>(initialDImg.Width, initialDImg.Height))
+                using (var userImg = SixLabors.ImageSharp.Image.Load(image))
+                {
+                    //scale the input image to 65% of initial d img height to get the full pic in the winshield (dude trust me)
+                    int newHeight = (int)(initialDImg.Height * 0.65);
+                    userImg.Mutate(x => x.Resize(initialDImg.Width, newHeight));
+
+                    //draw scaled-down input and initial d overlay on the blank image 
+                    baseImg.Mutate(x => x.DrawImage(userImg, 1.0f));
+                    baseImg.Mutate(x => x.DrawImage(initialDImg, 1.0f));
+
+                    baseImg.Save(image);
+                }
+            }
+
+            return images;
+        }
+
         public List<string> MorrowindImages(IReadOnlyCollection<Attachment> attachments)
         {
             var images = AttachmentHelper.DownloadAttachments(attachments);
