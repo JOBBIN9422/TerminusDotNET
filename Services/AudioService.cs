@@ -1113,12 +1113,11 @@ namespace TerminusDotNetCore.Services
             }
 
             string[] eventFiles = Directory.GetFiles(EventsPath);
-            await Logger.Log(new LogMessage(LogSeverity.Info, "Scheduler", $"`{eventFiles.Length}` events to load."));
-
             foreach (var file in eventFiles)
             {
-
                 AudioEventState state = await LoadAudioEvent(Path.GetFileNameWithoutExtension(file));
+                await Logger.Log(new LogMessage(LogSeverity.Info, "Scheduler", $"loaded event {file}"));
+
                 await CreateAudioEvent(state.SongName, state.CronString, state.ChannelId);
             }
         }
