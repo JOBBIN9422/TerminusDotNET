@@ -270,10 +270,11 @@ namespace TerminusDotNetCore.Services
                 finally
                 {
                     //make sure the current audio process is killed to prevent overlapping playback
+                    await output.FlushAsync();
+                    await stream.FlushAsync();
                     ffmpeg.Kill();
-                    await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"Killed ffmpeg process {ffmpeg.Id}."));
 
-                    await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"Finished playback."));
+                    await Logger.Log(new LogMessage(LogSeverity.Info, "AudioSvc", $"Killed ffmpeg process {ffmpeg.Id}."));
                     _playing = false;
 
                     // reset cancellation token source
