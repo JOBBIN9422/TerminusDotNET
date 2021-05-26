@@ -138,7 +138,7 @@ namespace TerminusDotNetCore.Helpers
             SolidBrush brush = new SolidBrush(Color.White);
             Pen pen = new Pen(Color.Black, outlineSize);
 
-            TextGraphicsOptions options = new TextGraphicsOptions()
+            DrawingOptions options = new DrawingOptions()
             {
                 TextOptions = new TextOptions()
                 {
@@ -537,7 +537,7 @@ namespace TerminusDotNetCore.Helpers
                 SolidBrush brush = new SolidBrush(Color.Black);
 
                 //wrap and align text before drawing
-                TextGraphicsOptions options = new TextGraphicsOptions()
+                DrawingOptions options = new DrawingOptions()
                 {
                     TextOptions = new TextOptions()
                     {
