@@ -16,7 +16,7 @@ namespace TerminusDotNetCore.Helpers
             YoutubeClient ytClient = new YoutubeClient();
             //get the stream & video info for the current video
             var streamManifest = await ytClient.Videos.Streams.GetManifestAsync(Regex.Match(url, @"(?<=v=)[\w-]+").Value);
-            var streamInfo = streamManifest.GetAudioOnly().WithHighestBitrate();
+            var streamInfo = streamManifest.GetAudioOnlyStreams().GetWithHighestBitrate();
 
             //download the current stream
             string videoDataFilename = Path.Combine(Path.Combine("assets", "temp"), $"{Guid.NewGuid().ToString("N")}.{streamInfo.Container}");
