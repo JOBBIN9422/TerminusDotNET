@@ -30,7 +30,7 @@ namespace TerminusDotNetCore.Modules
         }
 
         [Command("bash", RunMode = RunMode.Async)]
-        [Summary("Run the given `bash` command as a **non-root** user.")]
+        [Summary("Run the given `bash` command as a **non-root** user :tm:")]
         public async Task RunBashCommandNonRoot([Summary("Command to run.")][Remainder]string cmd)
         {
             await _service.RunBashCommandNonRoot(cmd);
