@@ -19,7 +19,7 @@ namespace TerminusDotNetCore.Modules
         }
 
 
-        [Command("test", RunMode = RunMode.Async)]
+        [Command("reddit-moment", RunMode = RunMode.Async)]
         public async Task TestRedditApi()
         {
             await _service.TestRedditApi();
