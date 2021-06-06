@@ -236,6 +236,7 @@ namespace TerminusDotNetCore
                              .AddSingleton<TicTacToeService>()
                              .AddSingleton<IronPythonService>()
                              .AddSingleton<ServerManagementService>()
+                             .AddSingleton<RedditService>()
                              .AddSingleton(new Random())
                              .AddSingleton(this)
                              .AddSingleton(scheduler)
