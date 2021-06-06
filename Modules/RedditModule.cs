@@ -14,7 +14,6 @@ namespace TerminusDotNetCore.Modules
         public RedditModule(IConfiguration config, RedditService service) : base(config)
         {
             _service = service;
-            _service.Config = config;
             _service.ParentModule = this;
         }
     }
