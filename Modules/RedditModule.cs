@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Discord.Commands;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,6 +16,13 @@ namespace TerminusDotNetCore.Modules
         {
             _service = service;
             _service.ParentModule = this;
+        }
+
+
+        [Command("test", RunMode = RunMode.Async)]
+        public async Task TestRedditApi()
+        {
+            await _service.TestRedditApi();
         }
     }
 }

@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using TerminusDotNetCore.Modules;
 using Reddit;
+using Reddit.Controllers;
 
 namespace TerminusDotNetCore.Services
 {
@@ -21,6 +22,12 @@ namespace TerminusDotNetCore.Services
             _redditClient = new RedditClient(appId: Config["RedditClientId"], appSecret: Config["RedditClientSecret"]);
         }
 
+        public async Task TestRedditApi()
+        {
+            Random rand = new Random();
+            List<Post> frontPagePosts = _redditClient.FrontPage;
+            await ParentModule.ServiceReplyAsync(frontPagePosts[rand.Next(frontPagePosts.Count)].Title);
+        }
     }
 
 }
