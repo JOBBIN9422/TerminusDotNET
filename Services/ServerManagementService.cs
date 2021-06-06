@@ -35,9 +35,12 @@ namespace TerminusDotNetCore.Services
                 new ProcessStartInfo
                 {
                     FileName = "sudo",
+                    // use ArgumentList unless you are running the full argument through String.Format
                     ArgumentList = {
                         "-u",
                         user,
+                        "sh",
+                        "-c",
                         cmd
                     },
                     UseShellExecute = false,
