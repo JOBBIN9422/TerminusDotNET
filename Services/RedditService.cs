@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 using TerminusDotNetCore.Modules;
 using Reddit;
 using Reddit.Controllers;
+using System.Net.Http;
+using System.Net.Http.Headers;
 
 namespace TerminusDotNetCore.Services
 {
@@ -19,8 +21,7 @@ namespace TerminusDotNetCore.Services
         public RedditService(IConfiguration config)
         {
             Config = config;
-            Console.WriteLine($"REDDIT ID: {Config["RedditClientId"]}, REDDIT SECRET: {Config["RedditClientSecret"]}");
-            _redditClient = new RedditClient(appId: Config["RedditClientId"], appSecret: Config["RedditClientSecret"]);
+            _redditClient = new RedditClient(appId: Config["RedditClientId"], appSecret: Config["RedditClientSecret"], refreshToken: Config["RedditRefreshToken"]);
         }
 
         public async Task TestRedditApi()
