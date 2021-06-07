@@ -19,6 +19,7 @@ namespace TerminusDotNetCore.Services
         public RedditService(IConfiguration config)
         {
             Config = config;
+            Console.WriteLine($"REDDIT ID: {Config["RedditClientId"]}, REDDIT SECRET: {Config["RedditClientSecret"]}");
             _redditClient = new RedditClient(appId: Config["RedditClientId"], appSecret: Config["RedditClientSecret"]);
         }
 
