@@ -7,6 +7,8 @@ using TerminusDotNetCore.Attributes;
 
 namespace TerminusDotNetCore.NamedArgs
 {
+    [NamedArgument]
+    [NamedArgumentType]
     public class RedditRandomCommentArgs
     {
         [Description("The name of the subreddit to pull a random comment from.")]
