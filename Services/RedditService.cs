@@ -41,18 +41,26 @@ namespace TerminusDotNetCore.Services
 
             switch (sortBy.ToLower())
             {
+                case "best":
+                    posts = subreddit.Posts.GetBest();
+                    break;
+
                 case "new":
                     posts = subreddit.Posts.GetNew();
                     break;
+
                 case "top":
                     posts = subreddit.Posts.GetTop();
                     break;
+
                 case "controversial":
                     posts = subreddit.Posts.GetControversial();
                     break;
+
                 case "rising":
                     posts = subreddit.Posts.GetRising();
                     break;
+
                 case "hot":
                     posts = subreddit.Posts.GetHot();
                     break;
