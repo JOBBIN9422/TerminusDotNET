@@ -67,7 +67,7 @@ namespace TerminusDotNetCore.Services
             }
 
             Post randomPost = posts.ElementAt(_random.Next(posts.Count));
-            List<Comment> randomComments = randomPost.Comments.GetRandom();
+            List<Comment> randomComments = randomPost.Comments.GetRandom(depth: 0);
             Comment randomComment = randomComments.ElementAt(_random.Next(randomComments.Count));
             await ParentModule.ServiceReplyAsync($"\"{randomComment.Body}\" - /u/{randomComment.Author}");
         }
