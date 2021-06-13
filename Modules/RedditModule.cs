@@ -32,6 +32,7 @@ namespace TerminusDotNetCore.Modules
             await _service.TestRedditApi();
         }
 
+        [Command("porn-review", RunMode = RunMode.Async)]
         public async Task PornReviewSerious(RedditRandomCommentArgs args = null)
         {
             if (args == null)
