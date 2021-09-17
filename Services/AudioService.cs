@@ -126,7 +126,7 @@ namespace TerminusDotNetCore.Services
             using (var credStream = new FileStream("youtube-secrets.json", FileMode.Open, FileAccess.Read))
             {
                 credentials = await GoogleWebAuthorizationBroker.AuthorizeAsync(
-                    GoogleClientSecrets.Load(credStream).Secrets,
+                    GoogleClientSecrets.FromStream(credStream).Secrets,
                     new[] { YouTubeService.Scope.Youtube },
                     "user",
                     CancellationToken.None,
