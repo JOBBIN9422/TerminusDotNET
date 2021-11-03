@@ -72,7 +72,7 @@ namespace TerminusDotNetCore.Services
 
         private YouTubeService _ytService;
 
-        private IYoutubeDownloader _ytDownloader = new YoutubeExplodeDownloader();
+        private IYoutubeDownloader _ytDownloader = new LibVideoDownloader();
 
         private Dictionary<string, Type> _youtubeDownloaders = new Dictionary<string, Type>();
 
