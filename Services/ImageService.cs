@@ -176,7 +176,7 @@ namespace TerminusDotNetCore.Services
         public List<string> RedditWatermarkImages(IReadOnlyCollection<Attachment> attachments, string subName)
         {
             var images = AttachmentHelper.DownloadAttachments(attachments);
-            SixLabors.Fonts.Font robotoFont = SixLabors.Fonts.SystemFonts.CreateFont("Roboto", 47.0f);
+            SixLabors.Fonts.Font robotoFont = SixLabors.Fonts.SystemFonts.CreateFont("Roboto", 48.0f);
 
             foreach (var image in images)
             {
@@ -185,7 +185,7 @@ namespace TerminusDotNetCore.Services
                 using (var baseImg = new Image<Rgba32>(userImg.Width, userImg.Height))
                 {
                     //draw subreddit name on watermark - @ (377, 79)?
-                    redditImg.Mutate(x => x.DrawText(subName, robotoFont, SixLabors.ImageSharp.Color.White, new SixLabors.ImageSharp.PointF(375, 50)));
+                    redditImg.Mutate(x => x.DrawText(subName, robotoFont, SixLabors.ImageSharp.Color.White, new SixLabors.ImageSharp.PointF(375, 60)));
 
                     //scale watermark to img dimensions
                     redditImg.ResizeProportional((double)userImg.Width / redditImg.Width);
