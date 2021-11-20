@@ -182,15 +182,21 @@ namespace TerminusDotNetCore.Services
             {
                 using (var redditImg = SixLabors.ImageSharp.Image.Load(Path.Combine("assets", "images", "reddit.png")))
                 using (var userImg = SixLabors.ImageSharp.Image.Load(image))
+                using (var baseImg = new Image<Rgba32>(userImg.Width, userImg.Height))
                 {
                     //draw subreddit name on watermark - @ (377, 79)?
-                    redditImg.Mutate(x => x.DrawText(subName, robotoFont, SixLabors.ImageSharp.Color.White, new SixLabors.ImageSharp.PointF(377, 79)));
+                    redditImg.Mutate(x => x.DrawText(subName, robotoFont, SixLabors.ImageSharp.Color.White, new SixLabors.ImageSharp.PointF(375, 50)));
 
                     //scale watermark to img dimensions
                     redditImg.ResizeProportional((double)userImg.Width / redditImg.Width);
 
-                    //draw reddit watermark on base image
-                    userImg.Mutate(x => x.DrawImage(redditImg, new SixLabors.ImageSharp.Point(0, userImg.Height - redditImg.Height), 1.0f));
+                    baseImg.Mutate(x => x.Resize(baseImg.Width, baseImg.Height + redditImg.Height));
+
+                    //draw input img and watermark on base image
+                    baseImg.Mutate(x => x.DrawImage(userImg, new SixLabors.ImageSharp.Point(0, 0), 1.0f));
+                    baseImg.Mutate(x => x.DrawImage(redditImg, new SixLabors.ImageSharp.Point(0, baseImg.Height - redditImg.Height), 1.0f));
+
+                    //userImg.Mutate(x => x.DrawImage(redditImg, new SixLabors.ImageSharp.Point(0, userImg.Height - redditImg.Height), 1.0f));
 
                     userImg.Save(image);
                 }
