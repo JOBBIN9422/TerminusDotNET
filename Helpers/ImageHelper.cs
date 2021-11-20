@@ -24,9 +24,9 @@ namespace TerminusDotNetCore.Helpers
         /// Deep-fries an image.
         /// </summary>
         /// <param name="imageFilename">Path to the input image.</param>
-        /// <param name="numPasses">Number of times to deep-fry.</param>
+        /// <param name="deepfryFactor">Number of times to deep-fry.</param>
         /// <returns>The deep-fried image.</returns>
-        public static Image DeepfryImage(string imageFilename, uint numPasses = 1)
+        public static Image DeepfryImage(string imageFilename, uint deepfryFactor = 1)
         {
             using (var image = Image.Load(imageFilename))
             using (var tempStream = new MemoryStream())
@@ -35,19 +35,16 @@ namespace TerminusDotNetCore.Helpers
                 image.SaveAsJpeg(tempStream);
                 var tempJpg = Image.Load(tempStream.ToArray(), new JpegDecoder());
 
-                for (uint i = 0; i < 1; i++)
-                {
-                    tempJpg = Image.Load(tempStream.ToArray(), new JpegDecoder());
-                    tempJpg.Mutate(x => x.Saturate(2.0f * numPasses)
-                                               .Contrast(2.0f * numPasses)
-                                               .GaussianSharpen());
+                tempJpg = Image.Load(tempStream.ToArray(), new JpegDecoder());
+                tempJpg.Mutate(x => x.Saturate(2.0f * deepfryFactor)
+                                           .Contrast(2.0f * deepfryFactor)
+                                           .GaussianSharpen(2.0f * deepfryFactor));
 
-                    //save with max compression
-                    tempJpg.SaveAsJpeg(tempStream, new JpegEncoder()
-                    {
-                        Quality = 0,
-                    });
-                }
+                //save with max compression
+                tempJpg.SaveAsJpeg(tempStream, new JpegEncoder()
+                {
+                    Quality = 0,
+                });
 
                 return tempJpg;
             }
@@ -197,12 +194,12 @@ namespace TerminusDotNetCore.Helpers
         /// <param name="paddingScale">How much padding to use in positioning.</param>
         /// <param name="watermarkScale">How much to scale the watermark when drawn.</param>
         /// <returns>The given base image with the watermark drawn on it.</returns>
-        public static Image WatermarkImage(string baseImageFilename, 
-            string watermarkImageFilename, 
-            AnchorPositionMode anchorPos = AnchorPositionMode.Bottom, 
-            double paddingPercentageHorizontal = 0.10, 
-            double paddingPercentageVertical = 0.1, 
-            double watermarkScale = 0.2, 
+        public static Image WatermarkImage(string baseImageFilename,
+            string watermarkImageFilename,
+            AnchorPositionMode anchorPos = AnchorPositionMode.Bottom,
+            double paddingPercentageHorizontal = 0.10,
+            double paddingPercentageVertical = 0.1,
+            double watermarkScale = 0.2,
             float opacity = 0.8f)
         {
             var baseImage = Image.Load(baseImageFilename);
@@ -257,7 +254,7 @@ namespace TerminusDotNetCore.Helpers
                 return baseImage;
             }
         }
-        
+
         public static Image MirrorImage(string imageFilename, FlipMode flipMode, bool topAndOrLeftHalf = true)
         {
             var image = Image.Load(imageFilename);
