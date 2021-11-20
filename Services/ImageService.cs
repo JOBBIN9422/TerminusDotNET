@@ -187,8 +187,8 @@ namespace TerminusDotNetCore.Services
                     //draw subreddit name on watermark - @ (377, 79)?
                     redditImg.Mutate(x => x.DrawText(subName, robotoFont, SixLabors.ImageSharp.Color.White, new SixLabors.ImageSharp.PointF(375, 56)));
 
-                    //scale watermark to img dimensions
-                    redditImg.ResizeProportional((double)userImg.Width / redditImg.Width);
+                    //scale watermark to img dimensions (maintain aspect ratio)
+                    redditImg.Mutate(x => x.Resize(baseImg.Width, 0));
 
                     baseImg.Mutate(x => x.Resize(baseImg.Width, baseImg.Height + redditImg.Height));
 
