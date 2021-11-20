@@ -38,7 +38,7 @@ namespace TerminusDotNetCore.Helpers
                 tempJpg = Image.Load(tempStream.ToArray(), new JpegDecoder());
                 tempJpg.Mutate(x => x.Saturate(2.0f * deepfryFactor)
                                            .Contrast(2.0f * deepfryFactor)
-                                           .GaussianSharpen(1.0f / deepfryFactor));
+                                           .GaussianSharpen());
 
                 //save with max compression
                 tempJpg.SaveAsJpeg(tempStream, new JpegEncoder()
