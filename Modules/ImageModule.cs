@@ -169,6 +169,21 @@ namespace TerminusDotNetCore.Modules
             await SendImages(images);
         }
 
+        [Command("reddit", RunMode = RunMode.Async)]
+        [Summary("Adds a reddit watermark to image.")]
+        public async Task RedditWatermarkImagesAsync([Summary("subreddit name")] string subName = "")
+        {
+            IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
+            if (attachments == null)
+            {
+                await ServiceReplyAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
+                return;
+            }
+
+            var images = _imageService.RedditWatermarkImages(attachments, subName);
+            await SendImages(images);
+        }
+
         [Command("morrowind", RunMode = RunMode.Async)]
         [Summary("Places a Morrowind prompt on the attached image, or the image in the previous message (if any).")]
         public async Task MorrowindImageAsync()

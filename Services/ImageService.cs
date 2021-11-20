@@ -13,6 +13,8 @@ using SixLabors.ImageSharp.Formats.Png;
 using System.Numerics;
 using SixLabors.Fonts;
 using Microsoft.Extensions.Configuration;
+using SixLabors.ImageSharp.Drawing.Processing;
+using SolidBrush = SixLabors.ImageSharp.Drawing.Processing.SolidBrush;
 
 namespace TerminusDotNetCore.Services
 {
@@ -165,6 +167,32 @@ namespace TerminusDotNetCore.Services
                     baseImg.Mutate(x => x.DrawImage(initialDImg, 1.0f));
 
                     baseImg.Save(image);
+                }
+            }
+
+            return images;
+        }
+
+        public List<string> RedditWatermarkImages(IReadOnlyCollection<Attachment> attachments, string subName)
+        {
+            var images = AttachmentHelper.DownloadAttachments(attachments);
+            SixLabors.Fonts.Font robotoFont = SixLabors.Fonts.SystemFonts.CreateFont("Roboto", 47.0f);
+
+            foreach (var image in images)
+            {
+                using (var redditImg = SixLabors.ImageSharp.Image.Load(Path.Combine("assets", "images", "reddit.png")))
+                using (var userImg = SixLabors.ImageSharp.Image.Load(image))
+                {
+                    //draw subreddit name on watermark - @ (377, 79)?
+                    redditImg.Mutate(x => x.DrawText(subName, robotoFont, SixLabors.ImageSharp.Color.White, new SixLabors.ImageSharp.PointF(377, 79)));
+
+                    //scale watermark to img dimensions
+                    redditImg.ResizeProportional((double)userImg.Width / redditImg.Width);
+
+                    //draw reddit watermark on base image
+                    userImg.Mutate(x => x.DrawImage(redditImg, new SixLabors.ImageSharp.Point(0, userImg.Height - redditImg.Height), 1.0f));
+
+                    userImg.Save(image);
                 }
             }
 
