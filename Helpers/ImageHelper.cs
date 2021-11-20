@@ -31,32 +31,25 @@ namespace TerminusDotNetCore.Helpers
             using (var image = Image.Load(imageFilename))
             using (var tempStream = new MemoryStream())
             {
-                image.Mutate(x => x.Saturate(2.0f * numPasses)
-                                               .Contrast(2.0f)
-                                               .GaussianSharpen());
-                image.SaveAsJpeg(imageFilename, new JpegEncoder()
+                //write input img to temporary stream for frying
+                image.SaveAsJpeg(tempStream);
+                var tempJpg = Image.Load(tempStream.ToArray(), new JpegDecoder());
+
+                for (uint i = 0; i < 1; i++)
                 {
-                    Quality = 0,
-                });
-                return image;
-                //image.SaveAsJpeg(tempStream);
-                //var tempJpg = Image.Load(tempStream.ToArray(), new JpegDecoder());
+                    tempJpg = Image.Load(tempStream.ToArray(), new JpegDecoder());
+                    tempJpg.Mutate(x => x.Saturate(2.0f * numPasses)
+                                               .Contrast(2.0f * numPasses)
+                                               .GaussianSharpen());
 
-                //for (uint i = 0; i < numPasses; i++)
-                //{
-                //    tempJpg = Image.Load(tempStream.ToArray(), new JpegDecoder());
-                //    tempJpg.Mutate(x => x.Saturate(4.0f)
-                //                               .Contrast(4.0f)
-                //                               .GaussianSharpen());
+                    //save with max compression
+                    tempJpg.SaveAsJpeg(tempStream, new JpegEncoder()
+                    {
+                        Quality = 0,
+                    });
+                }
 
-                //    //save with max compression
-                //    tempJpg.SaveAsJpeg(tempStream, new JpegEncoder()
-                //    {
-                //        Quality = 0,
-                //    });
-                //}
-
-                //return tempJpg;
+                return tempJpg;
             }
         }
 
