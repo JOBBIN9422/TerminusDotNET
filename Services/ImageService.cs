@@ -198,7 +198,7 @@ namespace TerminusDotNetCore.Services
 
                     //userImg.Mutate(x => x.DrawImage(redditImg, new SixLabors.ImageSharp.Point(0, userImg.Height - redditImg.Height), 1.0f));
 
-                    userImg.Save(image);
+                    baseImg.Save(image);
                 }
             }
 
