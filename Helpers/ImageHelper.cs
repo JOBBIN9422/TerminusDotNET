@@ -31,24 +31,32 @@ namespace TerminusDotNetCore.Helpers
             using (var image = Image.Load(imageFilename))
             using (var tempStream = new MemoryStream())
             {
-                image.SaveAsJpeg(tempStream);
-
-                var tempJpg = Image.Load(tempStream.ToArray(), new JpegDecoder());
-                for (uint i = 0; i < numPasses; i++)
-                {
-                    tempJpg = Image.Load(tempStream.ToArray(), new JpegDecoder());
-                    tempJpg.Mutate(x => x.Saturate(4.0f)
-                                               .Contrast(4.0f)
+                image.Mutate(x => x.Saturate(2.0f * numPasses)
+                                               .Contrast(2.0f)
                                                .GaussianSharpen());
+                image.SaveAsJpeg(imageFilename, new JpegEncoder()
+                {
+                    Quality = 0,
+                });
+                return image;
+                //image.SaveAsJpeg(tempStream);
+                //var tempJpg = Image.Load(tempStream.ToArray(), new JpegDecoder());
 
-                    //try to compress the image based on its file-type
-                    tempJpg.SaveAsJpeg(tempStream, new JpegEncoder()
-                    {
-                        Quality = 1,
-                    });
-                }
+                //for (uint i = 0; i < numPasses; i++)
+                //{
+                //    tempJpg = Image.Load(tempStream.ToArray(), new JpegDecoder());
+                //    tempJpg.Mutate(x => x.Saturate(4.0f)
+                //                               .Contrast(4.0f)
+                //                               .GaussianSharpen());
 
-                return tempJpg;
+                //    //save with max compression
+                //    tempJpg.SaveAsJpeg(tempStream, new JpegEncoder()
+                //    {
+                //        Quality = 0,
+                //    });
+                //}
+
+                //return tempJpg;
             }
         }
 
