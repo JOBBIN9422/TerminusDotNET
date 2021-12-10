@@ -87,5 +87,27 @@ namespace TerminusDotNetCore.Modules
             }
             await ReplyAsync(memeText);
         }
+
+        [Command("emojify", RunMode = RunMode.Async)]
+        [Summary("Emojifies the current message (or previous if no message passed)")]
+        public async Task EmojifyMessageAsync([Summary("the message to convert")][Remainder] string message = null)
+        {
+            string emojiText = string.Empty;
+            if (string.IsNullOrEmpty(message))
+            {
+                //check if the previous message has any text
+                var messages = await Context.Channel.GetMessagesAsync(2).FlattenAsync();
+                var priorMessage = messages.Last();
+                if (!string.IsNullOrEmpty(priorMessage.Content))
+                {
+                    emojiText = _textEditService.Emojify(priorMessage.Content);
+                }
+            }
+            else
+            {
+                emojiText = _textEditService.Emojify(message);
+            }
+            await ReplyAsync(emojiText);
+        }
     }
 }

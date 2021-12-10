@@ -3,6 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
+using TerminusDotNetCore.Helpers;
 using TerminusDotNetCore.Modules;
 
 namespace TerminusDotNetCore.Services
@@ -14,6 +16,10 @@ namespace TerminusDotNetCore.Services
         public ServiceControlModule ParentModule { get; set; }
 
         private Dictionary<char, char> _wideTextMap = new Dictionary<char, char>();
+
+        private EmojifyHelper _emojifyHelper = new EmojifyHelper();
+
+        private static readonly Regex _nonAlphanumericRegex = new Regex("[^a-zA-Z0-9]");
 
         //unicode table values for full-width char mapping (punctuation, a/A - z/Z, 0-9)
         private readonly int _fullWidthOffset = 65248;
@@ -82,6 +88,28 @@ namespace TerminusDotNetCore.Services
                 }
             }
             return newMsg;
+        }
+
+        public string Emojify(string message)
+        {
+            string[] messageTokens = message.Split();
+            string emojiMessage = string.Empty;
+
+            foreach (string currWord in messageTokens)
+            {
+                string currWordStripped = _nonAlphanumericRegex.Replace(currWord, string.Empty).ToLower().Trim();
+                string currEmoji = _emojifyHelper.GetEmojiWeighted(currWordStripped);
+                if (currEmoji != null)
+                {
+                    emojiMessage = $"{emojiMessage} {currWord} {currEmoji}";
+                }
+                else
+                {
+                    emojiMessage = $"{emojiMessage} {currWord}";
+                }
+            }
+
+            return emojiMessage;
         }
     }
 }
