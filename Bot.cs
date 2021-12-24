@@ -137,6 +137,8 @@ namespace TerminusDotNetCore
             await _interactionService.AddModulesAsync(assembly: Assembly.GetEntryAssembly(), services: _serviceProvider);
             _interactionService.SlashCommandExecuted += OnSlashCommandExecutedAsync;
 
+            await Logger.Log(new LogMessage(LogSeverity.Info, "Client", "Commands registered."));
+
             AudioService audioService = _serviceProvider.GetService(typeof(AudioService)) as AudioService;
             if (audioService != null)
             {
