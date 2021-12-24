@@ -12,7 +12,7 @@ using TerminusDotNetCore.Services;
 
 namespace TerminusDotNetCore.Modules
 {
-    public class TextEditModule : InteractionModule
+    public class TextEditModule : InteractionModuleBase
     {
         private TextEditService _textEditService;
 
