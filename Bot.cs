@@ -63,13 +63,6 @@ namespace TerminusDotNetCore
             Client.Log += Logger.Log;
             Client.Ready += InitInteractionService;
 
-            //init interaction service
-            InteractionServiceConfig intSvcConfig = new InteractionServiceConfig()
-            {
-                DefaultRunMode = Discord.Interactions.RunMode.Async
-            };
-            _interactionService = new InteractionService(Client.Rest, intSvcConfig);
-
             //verify that each required client secret is in the secrets file
             Dictionary<string, string> requiredSecrets = new Dictionary<string, string>()
             {
@@ -137,6 +130,13 @@ namespace TerminusDotNetCore
         private async Task InitInteractionService()
         {
             //init interaction service
+            InteractionServiceConfig intSvcConfig = new InteractionServiceConfig()
+            {
+                DefaultRunMode = Discord.Interactions.RunMode.Async
+            };
+            _interactionService = new InteractionService(Client.Rest, intSvcConfig);
+            _interactionService.Log += Logger.Log;
+
             await _interactionService.AddModulesAsync(assembly: Assembly.GetEntryAssembly(), services: _serviceProvider);
             var registeredCommands = await _interactionService.RegisterCommandsToGuildAsync(ulong.Parse(_config["ServerId"]));
             _interactionService.SlashCommandExecuted += OnSlashCommandExecutedAsync;
