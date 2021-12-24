@@ -119,7 +119,6 @@ namespace TerminusDotNetCore
         //slash command handler
         private async Task OnSlashCommandExecutedAsync(SlashCommandInfo arg1, IInteractionContext arg2, Discord.Interactions.IResult arg3)
         {
-            await _interactionService.ExecuteCommandAsync(arg2, _serviceProvider);
             if (!arg3.IsSuccess)
             {
                 await Logger.Log(new LogMessage(LogSeverity.Warning, "SlashCmdHandler", $"Error in {arg1.Name}: {arg3.ErrorReason}"));
