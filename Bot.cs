@@ -154,6 +154,7 @@ namespace TerminusDotNetCore
 
             //new custom services (and objects passed via DI) get added here
             serviceCollection.AddSingleton<TextEditService>()
+                             .AddSingleton(_config)
                              //.AddSingleton<ImageService>()
                              //.AddSingleton<TextEditService>()
                              //.AddSingleton<TwitterService>()
