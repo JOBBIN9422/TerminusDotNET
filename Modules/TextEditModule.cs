@@ -33,6 +33,7 @@ namespace TerminusDotNetCore.Modules
         public async Task ConvertMessageToFullWidthAsync(string input)
         {
             string wideText = string.Empty;
+            await DeferAsync();
             if (string.IsNullOrEmpty(input))
             {
 
@@ -41,7 +42,7 @@ namespace TerminusDotNetCore.Modules
             {
                 wideText = _textEditService.ConvertToFullWidth(input);
             }
-            await RespondAsync(wideText);
+            await FollowupAsync(wideText);
         }
 
         [SlashCommand("escape", "Display the input as plaintext (escape @mentions, #channels, and other Discord formatting)")]
