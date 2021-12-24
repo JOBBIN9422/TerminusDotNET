@@ -154,7 +154,7 @@ namespace TerminusDotNetCore
             var serviceCollection = new ServiceCollection();
 
             //new custom services (and objects passed via DI) get added here
-            serviceCollection.AddSingleton<TextEditService>();
+            serviceCollection.AddSingleton<TextEditService>()
                              //.AddSingleton<ImageService>()
                              //.AddSingleton<TextEditService>()
                              //.AddSingleton<TwitterService>()
@@ -165,8 +165,8 @@ namespace TerminusDotNetCore
                              //.AddSingleton<ServerManagementService>()
                              //.AddSingleton(new Random())
                              //.AddSingleton(this)
-                             //.AddSingleton(scheduler)
-                             //.AddTransient<AudioEventJob>(); 
+                             .AddSingleton(scheduler)
+                             .AddTransient<AudioEventJob>(); 
 
             return serviceCollection.BuildServiceProvider();
         }
