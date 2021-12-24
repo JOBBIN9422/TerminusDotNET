@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Discord.Interactions;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +14,7 @@ namespace TerminusDotNetCore.Services
     {
         public IConfiguration Config { get; set; }
 
-        public InteractionModule ParentModule { get; set; }
+        public InteractionModuleBase ParentModule { get; set; }
 
         private Dictionary<char, char> _wideTextMap = new Dictionary<char, char>();
 

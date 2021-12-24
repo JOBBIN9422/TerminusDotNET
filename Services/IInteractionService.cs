@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Discord.Interactions;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,6 +10,6 @@ namespace TerminusDotNetCore.Services
 {
     public interface IInteractionService
     {
-        public InteractionModule ParentModule { get; set; }
+        public InteractionModuleBase ParentModule { get; set; }
     }
 }
