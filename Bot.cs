@@ -133,7 +133,7 @@ namespace TerminusDotNetCore
         private async Task InitInteractionService()
         {
             //init interaction service
-            await _interactionService.RegisterCommandsGloballyAsync();
+            await _interactionService.RegisterCommandsToGuildAsync(ulong.Parse(_config["ServerId"]));
             await _interactionService.AddModulesAsync(assembly: Assembly.GetEntryAssembly(), services: _serviceProvider);
             _interactionService.SlashCommandExecuted += OnSlashCommandExecutedAsync;
 
