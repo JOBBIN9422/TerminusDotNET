@@ -35,9 +35,6 @@ namespace TerminusDotNetCore
 
         private InteractionService _interactionService;
 
-        //for detecting regex matches in messages
-        private RegexCommands _regexMsgParser;
-
         //ignored channels
         private List<ulong> _blacklistChannels = new List<ulong>();
 
@@ -56,8 +53,6 @@ namespace TerminusDotNetCore
 
             //load libraries into version dict
             PopulateInstalledLibrariesList();
-
-            _regexMsgParser = new RegexCommands();
 
             //instantiate client and register log event handler
             DiscordSocketConfig config = new DiscordSocketConfig()
@@ -159,19 +154,19 @@ namespace TerminusDotNetCore
             var serviceCollection = new ServiceCollection();
 
             //new custom services (and objects passed via DI) get added here
-            serviceCollection.AddSingleton(_config)
-                             .AddSingleton<ImageService>()
-                             .AddSingleton<TextEditService>()
-                             .AddSingleton<TwitterService>()
-                             .AddSingleton<AudioService>()
-                             .AddSingleton<MarkovService>()
-                             .AddSingleton<TicTacToeService>()
-                             .AddSingleton<IronPythonService>()
-                             .AddSingleton<ServerManagementService>()
-                             .AddSingleton(new Random())
-                             .AddSingleton(this)
-                             .AddSingleton(scheduler)
-                             .AddTransient<AudioEventJob>(); 
+            serviceCollection.AddSingleton<TextEditService>();
+                             //.AddSingleton<ImageService>()
+                             //.AddSingleton<TextEditService>()
+                             //.AddSingleton<TwitterService>()
+                             //.AddSingleton<AudioService>()
+                             //.AddSingleton<MarkovService>()
+                             //.AddSingleton<TicTacToeService>()
+                             //.AddSingleton<IronPythonService>()
+                             //.AddSingleton<ServerManagementService>()
+                             //.AddSingleton(new Random())
+                             //.AddSingleton(this)
+                             //.AddSingleton(scheduler)
+                             //.AddTransient<AudioEventJob>(); 
 
             return serviceCollection.BuildServiceProvider();
         }
@@ -181,37 +176,6 @@ namespace TerminusDotNetCore
             IScheduler scheduler = _serviceProvider.GetService(typeof(IScheduler)) as IScheduler;
             IJobFactory jobFactory = new AudioEventJobFactory(_serviceProvider);
             scheduler.JobFactory = jobFactory;
-        }
-
-        //check the given message for regex matches and send responses accordingly
-        private async Task HandleRegexResponses(SocketUserMessage message)
-        {
-            //don't respond to bots (maybe change this to only ignore itself)
-            int charPos = 0;
-            if (message.HasCharPrefix('!', ref charPos))
-            {
-                return;
-            }
-
-            //look for wildcards in the current message 
-            List<Tuple<string, string>> matches = _regexMsgParser.ParseMessage(message.Content);
-
-            //respond for each matching regex
-            if (matches.Count > 0 && !message.Author.IsBot)
-            {
-                foreach (var match in matches)
-                {
-                    await message.Channel.SendMessageAsync(match.Item1);
-                    if (!string.IsNullOrEmpty(match.Item2))
-                    {
-                        //play the audio file specified
-                        AudioService audioService = _serviceProvider.GetService(typeof(AudioService)) as AudioService;
-                        audioService.Guild = (message.Channel as SocketGuildChannel).Guild;
-
-                        _ = audioService.PlayRegexAudio(match.Item2);
-                    }
-                }
-            }
         }
 
         private void PopulateInstalledLibrariesList()
