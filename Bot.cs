@@ -111,9 +111,23 @@ namespace TerminusDotNetCore
                 _blacklistChannels.Add(id);
             }
 
+            Client.InteractionCreated += HandleInteractionAsync;
 
             //hang out for now
             await Task.Delay(-1);
+        }
+
+        private async Task HandleInteractionAsync(SocketInteraction arg)
+        {
+            try
+            {
+                var ctx = new SocketInteractionContext(Client, arg);
+                await _interactionService.ExecuteCommandAsync(ctx, _serviceProvider);
+            }
+            catch (Exception e)
+            {
+                await Logger.Log(new LogMessage(LogSeverity.Warning, "InteractionHandler", $"Error: {e}"));
+            }
         }
 
         //slash command handler
