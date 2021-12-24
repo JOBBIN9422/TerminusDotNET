@@ -11,7 +11,7 @@ using TerminusDotNetCore.Services;
 
 namespace TerminusDotNetCore.Modules
 {
-    public class TextEditModule : ServiceControlModule
+    public class TextEditModule : InteractionModule
     {
         private TextEditService _textEditService;
 

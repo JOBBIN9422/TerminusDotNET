@@ -15,6 +15,7 @@ using System.Linq;
 using Quartz.Impl;
 using Quartz;
 using Quartz.Spi;
+using Discord.Interactions;
 
 namespace TerminusDotNetCore
 {
@@ -25,9 +26,6 @@ namespace TerminusDotNetCore
 
         public DiscordSocketClient Client { get; private set; }
 
-        //Discord.NET command management
-        public CommandService CommandService { get; private set; }
-
         public bool IsRegexActive { get; set; } = true;
 
         public Dictionary<string, string> InstalledLibraries { get; private set; } = new Dictionary<string, string>();
@@ -35,13 +33,13 @@ namespace TerminusDotNetCore
         //command services
         private IServiceProvider _serviceProvider;
 
+        private InteractionService _interactionService;
+
         //for detecting regex matches in messages
         private RegexCommands _regexMsgParser;
 
         //ignored channels
         private List<ulong> _blacklistChannels = new List<ulong>();
-
-        public string LastCommandString { get; private set; }
 
         private IConfiguration _config = new ConfigurationBuilder()
                                         .AddJsonFile("appsettings.json", true, true)
@@ -60,10 +58,6 @@ namespace TerminusDotNetCore
             PopulateInstalledLibrariesList();
 
             _regexMsgParser = new RegexCommands();
-            CommandService = new CommandService();
-
-            //set command summary helper's command service ref
-            CommandSummaryHelper.CommandService = CommandService;
 
             //instantiate client and register log event handler
             DiscordSocketConfig config = new DiscordSocketConfig()
@@ -72,8 +66,14 @@ namespace TerminusDotNetCore
             };
             Client = new DiscordSocketClient(config);
             Client.Log += Logger.Log;
-            Client.MessageReceived += HandleCommandAsync;
             Client.Ready += SetAudioSvcGuildAndClient;
+
+            //init interaction service
+            InteractionServiceConfig intSvcConfig = new InteractionServiceConfig()
+            {
+                DefaultRunMode = Discord.Interactions.RunMode.Async
+            };
+            _interactionService = new InteractionService(Client.Rest, intSvcConfig);
 
             //verify that each required client secret is in the secrets file
             Dictionary<string, string> requiredSecrets = new Dictionary<string, string>()
@@ -123,12 +123,19 @@ namespace TerminusDotNetCore
                 _blacklistChannels.Add(id);
             }
 
-            //init commands service
-            await CommandService.AddModulesAsync(assembly: Assembly.GetEntryAssembly(), services: _serviceProvider);
-            CommandService.CommandExecuted += OnCommandExecutedAsync;
+            //init interaction service
+            await _interactionService.RegisterCommandsGloballyAsync();
+            await _interactionService.AddModulesAsync(assembly: Assembly.GetEntryAssembly(), services: _serviceProvider);
+            _interactionService.SlashCommandExecuted += OnSlashCommandExecutedAsync;
 
             //hang out for now
             await Task.Delay(-1);
+        }
+
+        //slash command handler
+        private async Task OnSlashCommandExecutedAsync(SlashCommandInfo arg1, IInteractionContext arg2, Discord.Interactions.IResult arg3)
+        {
+            await _interactionService.ExecuteCommandAsync(arg2, _serviceProvider);
         }
 
         //set client and guild for audio service BEFORE any playback commands are executed
@@ -142,85 +149,6 @@ namespace TerminusDotNetCore
             }
 
             return Task.CompletedTask;
-        }
-
-        //log message to file
-
-        private async Task HandleCommandAsync(SocketMessage messageParam)
-        {
-            var message = messageParam as SocketUserMessage;
-
-            //don't act in blacklisted channels
-            if (message == null || _blacklistChannels.Contains(message.Channel.Id))
-            {
-                return;
-            }
-
-            //track position of command prefix char 
-            int argPos = 0;
-
-            //look for regex matches and reply if any are found
-            if (IsRegexActive)
-            {
-                await HandleRegexResponses(message);
-            }
-
-            //check if message is not command or sent by bot ( except for bean stalk :'} )
-            if (!(message.HasCharPrefix('!', ref argPos) || message.HasMentionPrefix(Client.CurrentUser, ref argPos))
-            || (message.Author.IsBot && message.Author.Id != BeanId))
-            {
-                return;
-            }
-
-            //handle commands
-            var context = new SocketCommandContext(Client, message);
-            LastCommandString = messageParam.Content;
-            var commandResult = await CommandService.ExecuteAsync(context: context, argPos: argPos, services: _serviceProvider);
-        }
-
-        private async Task OnCommandExecutedAsync(Optional<CommandInfo> command, ICommandContext context, IResult result)
-        {
-            try
-            {
-                if (!result.IsSuccess)
-                {
-                    if (result is ExecuteResult execResult)
-                    {
-                        //alert user and print error details to console
-                        await context.Channel.SendMessageAsync(result.ErrorReason);
-                        await Logger.Log(new LogMessage(LogSeverity.Error, "CommandExecution", $"Error in command '{LastCommandString}': {execResult.ErrorReason}"));
-
-                        //dump exception details to error log
-                        string currLogFilename = $"errors_{DateTime.Today.ToString("MM-dd-yyyy")}.txt";
-                        using (StreamWriter writer = new StreamWriter(Path.Combine(Logger.ErrorLogDir, currLogFilename), true))
-                        {
-                            writer.WriteLine($"   Date/Time: {DateTime.Now}");
-                            writer.WriteLine($"     Command: {LastCommandString}");
-                            writer.WriteLine($"Error Reason: {execResult.ErrorReason}");
-                            writer.WriteLine($"  Error Type: {execResult.Error}");
-                            writer.WriteLine();
-                            writer.WriteLine(execResult.Exception.ToString());
-                            writer.WriteLine();
-                            writer.WriteLine();
-                        }
-                    }
-                    else
-                    {
-                        await context.Channel.SendMessageAsync($"Unknown command.");
-                        await Logger.Log(new LogMessage(LogSeverity.Error, "CommandExecution", $"Unknown command: '{LastCommandString}'"));
-                    }
-                }
-                else
-                {
-                    //on successful command execution
-                    await Logger.Log(new LogMessage(LogSeverity.Info, "CommandExecution", $"Command '{LastCommandString}' executed successfully."));
-                }
-            }
-            catch (InvalidOperationException)
-            {
-                await context.Channel.SendMessageAsync($"Unknown command.");
-                await Logger.Log(new LogMessage(LogSeverity.Error, "CommandExecution", $"Unknown command."));
-            }
         }
 
         private async Task<IServiceProvider> InstallServices()
