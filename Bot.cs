@@ -66,7 +66,11 @@ namespace TerminusDotNetCore
             CommandSummaryHelper.CommandService = CommandService;
 
             //instantiate client and register log event handler
-            Client = new DiscordSocketClient();
+            DiscordSocketConfig config = new DiscordSocketConfig()
+            {
+                GatewayIntents = GatewayIntents.All
+            };
+            Client = new DiscordSocketClient(config);
             Client.Log += Logger.Log;
             Client.MessageReceived += HandleCommandAsync;
             Client.Ready += SetAudioSvcGuildAndClient;
