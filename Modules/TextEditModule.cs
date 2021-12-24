@@ -23,7 +23,7 @@ namespace TerminusDotNetCore.Modules
             _textEditService.ParentModule = this;
         }
 
-        [SlashCommand("echo", "Echo the input")]
+        [SlashCommand("echo", "Echo the input", runMode: Discord.Interactions.RunMode.Async)]
         public async Task Echo(string input)
         {
             await RespondAsync(input);
