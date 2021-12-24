@@ -10,6 +10,6 @@ namespace TerminusDotNetCore.Services
 {
     public interface IInteractionService
     {
-        public InteractionModuleBase ParentModule { get; set; }
+        public InteractionModule ParentModule { get; set; }
     }
 }

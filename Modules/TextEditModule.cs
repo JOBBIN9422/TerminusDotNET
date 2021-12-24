@@ -12,11 +12,11 @@ using TerminusDotNetCore.Services;
 
 namespace TerminusDotNetCore.Modules
 {
-    public class TextEditModule : InteractionModuleBase
+    public class TextEditModule : InteractionModule
     {
         private TextEditService _textEditService;
 
-        public TextEditModule(IConfiguration config, TextEditService service)
+        public TextEditModule(IConfiguration config, TextEditService service) : base(config)
         {
             _textEditService = service;
             _textEditService.Config = config;

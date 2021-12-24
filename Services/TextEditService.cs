@@ -14,7 +14,7 @@ namespace TerminusDotNetCore.Services
     {
         public IConfiguration Config { get; set; }
 
-        public InteractionModuleBase ParentModule { get; set; }
+        public InteractionModule ParentModule { get; set; }
 
         private Dictionary<char, char> _wideTextMap = new Dictionary<char, char>();
 
