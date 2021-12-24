@@ -133,8 +133,8 @@ namespace TerminusDotNetCore
         private async Task InitInteractionService()
         {
             //init interaction service
-            var registeredCommands = await _interactionService.RegisterCommandsToGuildAsync(ulong.Parse(_config["ServerId"]));
             await _interactionService.AddModulesAsync(assembly: Assembly.GetEntryAssembly(), services: _serviceProvider);
+            var registeredCommands = await _interactionService.RegisterCommandsToGuildAsync(ulong.Parse(_config["ServerId"]));
             _interactionService.SlashCommandExecuted += OnSlashCommandExecutedAsync;
 
             foreach (var command in registeredCommands)
