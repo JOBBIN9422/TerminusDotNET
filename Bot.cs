@@ -61,7 +61,7 @@ namespace TerminusDotNetCore
             };
             Client = new DiscordSocketClient(config);
             Client.Log += Logger.Log;
-            Client.Ready += SetAudioSvcGuildAndClient;
+            Client.Ready += InitInteractionService;
 
             //init interaction service
             InteractionServiceConfig intSvcConfig = new InteractionServiceConfig()
@@ -118,10 +118,6 @@ namespace TerminusDotNetCore
                 _blacklistChannels.Add(id);
             }
 
-            //init interaction service
-            await _interactionService.RegisterCommandsGloballyAsync();
-            await _interactionService.AddModulesAsync(assembly: Assembly.GetEntryAssembly(), services: _serviceProvider);
-            _interactionService.SlashCommandExecuted += OnSlashCommandExecutedAsync;
 
             //hang out for now
             await Task.Delay(-1);
@@ -134,16 +130,19 @@ namespace TerminusDotNetCore
         }
 
         //set client and guild for audio service BEFORE any playback commands are executed
-        private Task SetAudioSvcGuildAndClient()
+        private async Task InitInteractionService()
         {
+            //init interaction service
+            await _interactionService.RegisterCommandsGloballyAsync();
+            await _interactionService.AddModulesAsync(assembly: Assembly.GetEntryAssembly(), services: _serviceProvider);
+            _interactionService.SlashCommandExecuted += OnSlashCommandExecutedAsync;
+
             AudioService audioService = _serviceProvider.GetService(typeof(AudioService)) as AudioService;
             if (audioService != null)
             {
                 audioService.Client = Client;
                 audioService.Guild = Client.GetGuild(ulong.Parse(_config["ServerId"]));
             }
-
-            return Task.CompletedTask;
         }
 
         private async Task<IServiceProvider> InstallServices()
