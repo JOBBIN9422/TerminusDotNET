@@ -23,6 +23,12 @@ namespace TerminusDotNetCore.Modules
             _textEditService.ParentModule = this;
         }
 
+        [SlashCommand("echo", "Echo the input")]
+        public async Task Echo(string input)
+        {
+            await RespondAsync(input);
+        }
+
         [SlashCommand("wide", "Convert the input to full-width text")]
         public async Task ConvertMessageToFullWidthAsync(string input)
         {
