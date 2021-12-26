@@ -18,9 +18,9 @@ using SolidBrush = SixLabors.ImageSharp.Drawing.Processing.SolidBrush;
 
 namespace TerminusDotNetCore.Services
 {
-    public class ImageService : ICustomService
+    public class ImageService : IInteractionService
     {
-        public ServiceControlModule ParentModule { get; set; }
+        public InteractionModule ParentModule { get; set; }
         public IConfiguration Config { get; set; }
 
         public List<string> DeepfryImages(IReadOnlyCollection<Attachment> attachments, uint numPasses = 1)

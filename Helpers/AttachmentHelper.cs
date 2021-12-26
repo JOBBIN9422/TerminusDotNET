@@ -55,43 +55,24 @@ namespace TerminusDotNetCore.Helpers
         };
 
         //get the most recently posted attachments for the given context, or null if none exist
-        public async static Task<IReadOnlyCollection<Attachment>> GetMostRecentAttachmentsAsync(SocketCommandContext context, AttachmentFilter filter, int priorMsgCount = 20)
+        public async static Task<IReadOnlyCollection<Attachment>> GetMostRecentAttachmentsAsync(IInteractionContext context, AttachmentFilter filter, int priorMsgCount = 20)
         {
             //filter attachments by file category
             string[] validExtensions = GetValidExtensions(filter);
-            var attachments = context.Message.Attachments;
-
-            if (attachments == null || attachments.Count == 0)
+            var recentMsgs = context.Channel.GetMessagesAsync(limit: priorMsgCount).Flatten();
+            await foreach (var message in recentMsgs)
             {
-                //look backwords by priorMsgCount messages for the most recent attachments
-                var messages = await context.Channel.GetMessagesAsync(priorMsgCount).FlattenAsync();
-                foreach (var message in messages)
+                if (message.Attachments.Count > 0)
                 {
-                    if (message.Attachments.Count > 0)
+                    //if we've found valid attachments
+                    if (AttachmentsAreValid(message.Attachments, validExtensions))
                     {
-                        //if we've found valid attachments
-                        if (AttachmentsAreValid(message.Attachments, validExtensions))
-                        {
-                            return (IReadOnlyCollection<Attachment>)message.Attachments;
-                        }
+                        return (IReadOnlyCollection<Attachment>)message.Attachments;
                     }
                 }
+            }
 
-                //if none of the previous messages had any filtered attachments
-                return null;
-            }
-            //if there are valid attachments in the current message
-            else
-            {
-                if (AttachmentsAreValid(attachments, validExtensions))
-                {
-                    return attachments;
-                }
-                else
-                {
-                    return null;
-                }
-            }
+            return null;
         }
 
         //get a list of valid extensions for the given file category

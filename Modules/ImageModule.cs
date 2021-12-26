@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Discord;
-using Discord.Commands;
 using TerminusDotNetCore.Services;
 using TerminusDotNetCore.Helpers;
 using Microsoft.Extensions.Configuration;
+using Discord.Interactions;
 
 namespace TerminusDotNetCore.Modules
 {
@@ -18,11 +18,11 @@ namespace TerminusDotNetCore.Modules
         None
     }
 
-    public class ImageModule : ServiceControlModule
+    public class ImageModule : InteractionModule
     {
         private ImageService _imageService;
 
-        private const string NO_ATTACHMENTS_FOUND_MESSAGE = "No images were found in the current message or previous messages.";
+        private const string NO_ATTACHMENTS_FOUND_MESSAGE = "No images found in the current or previous messages.";
 
         public ImageModule(IConfiguration config, ImageService service) : base(config)
         {
@@ -31,26 +31,16 @@ namespace TerminusDotNetCore.Modules
             _imageService.ParentModule = this;
         }
 
-        public async Task SendFileAsync(string filename)
-        {
-            await Context.Channel.SendFileAsync(filename);
-        }
-
         private async Task SendImages(List<string> images)
         {
             try
             {
-                foreach (var image in images)
+                List<FileAttachment> attachments = new List<FileAttachment>();
+                foreach (string image in images)
                 {
-                    try
-                    {
-                        await SendFileAsync(image);
-                    }
-                    catch (Exception)
-                    {
-                        await ServiceReplyAsync($"Error sending file {System.IO.Path.GetFileName(image)}.");
-                    }
+                    attachments.Add(new FileAttachment(image));
                 }
+                await Context.Interaction.RespondWithFilesAsync(attachments);
             }
             finally
             {
@@ -60,18 +50,17 @@ namespace TerminusDotNetCore.Modules
 
         private async Task SendImage(string image)
         {
-            await SendFileAsync(image);
+            await Context.Interaction.RespondWithFileAsync(image);
             System.IO.File.Delete(image);
         }
 
-        [Command("mirror", RunMode = RunMode.Async)]
-        [Summary("mirrors an attached image, or the image in the previous message (if any).")]
-        public async Task MirrorImagesAsync([Summary("axis to mirror the image on")]string flipMode = "horizontal")
+        [SlashCommand("mirror", "Mirror the given image across an axis")]
+        public async Task MirrorImagesAsync([Summary(description: "axis to mirror the image on (`horizontal` or `vertical`)")]string flipMode = "horizontal")
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null)
             {
-                await ServiceReplyAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
+                await RespondAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
                 return;
             }
 
@@ -79,29 +68,27 @@ namespace TerminusDotNetCore.Modules
             await SendImages(images);
         }
 
-        [Command("deepfry", RunMode = RunMode.Async)]
-        [Summary("Deep-fries an attached image, or the image in the previous message (if any).")]
-        public async Task DeepFryImageAsync([Summary("how many times to fry the image")]uint numPasses = 1)
+        [SlashCommand("deepfry", "Deepfry the given image")]
+        public async Task DeepFryImageAsync([Summary(description: "how ,uch to fry the image")]uint deepfryFactor = 1)
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null)
             {
-                await ServiceReplyAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
+                await RespondAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
                 return;
             }
 
-            var images = _imageService.DeepfryImages(attachments, numPasses);
+            var images = _imageService.DeepfryImages(attachments, deepfryFactor);
             await SendImages(images);
         }
 
-        [Command("grayscale", RunMode = RunMode.Async)]
-        [Summary("Converts an attached image to grayscale, or the image in the previous message (if any).")]
+        [SlashCommand("grayscale", "Convert the given image to grayscale")]
         public async Task GrayscaleImageAsync()
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null)
             {
-                await ServiceReplyAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
+                await RespondAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
                 return;
             }
 
@@ -109,14 +96,13 @@ namespace TerminusDotNetCore.Modules
             await SendImages(images);
         }
 
-        [Command("polaroid", RunMode = RunMode.Async)]
-        [Summary("Applies a Polaroid filter to the attached image, or the image in the previous message (if any).")]
+        [SlashCommand("polaroid", "Apply a shitty Polaroid filter to the given image")]
         public async Task PolaroidImageAsync()
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null)
             {
-                await ServiceReplyAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
+                await RespondAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
                 return;
             }
 
@@ -124,14 +110,13 @@ namespace TerminusDotNetCore.Modules
             await SendImages(images);
         }
 
-        [Command("kodak", RunMode = RunMode.Async)]
-        [Summary("Applies a Kodachrome filter to the attached image, or the image in the previous message (if any).")]
+        [SlashCommand("kodak", "Apply a shitty Kodachrome filter to the given image")]
         public async Task KodakImageAsync()
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null)
             {
-                await ServiceReplyAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
+                await RespondAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
                 return;
             }
 
@@ -139,14 +124,13 @@ namespace TerminusDotNetCore.Modules
             await SendImages(images);
         }
 
-        [Command("invert", RunMode = RunMode.Async)]
-        [Summary("Inverts to the attached image, or the image in the previous message (if any).")]
+        [SlashCommand("invert", "Invert the colors of the given image")]
         public async Task InvertImageAsync()
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null)
             {
-                await ServiceReplyAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
+                await RespondAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
                 return;
             }
 
@@ -154,14 +138,13 @@ namespace TerminusDotNetCore.Modules
             await SendImages(images);
         }
 
-        [Command("initiald", RunMode = RunMode.Async)]
-        [Summary("NANI??? KANSEI DORIFTO???")]
+        [SlashCommand("initiald", "NANI???? KANSEI DORIFTO?!?!?!?!?")]
         public async Task InitialDImagesAsync()
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null)
             {
-                await ServiceReplyAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
+                await RespondAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
                 return;
             }
 
@@ -169,14 +152,13 @@ namespace TerminusDotNetCore.Modules
             await SendImages(images);
         }
 
-        [Command("reddit", RunMode = RunMode.Async)]
-        [Summary("Adds a reddit watermark to image.")]
-        public async Task RedditWatermarkImagesAsync([Summary("subreddit name")] string subName = "")
+        [SlashCommand("reddit", "Apply le funny REDDIT watermark to the given image")]
+        public async Task RedditWatermarkImagesAsync([Summary(description: "subreddit name")] string subName = "")
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null)
             {
-                await ServiceReplyAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
+                await RespondAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
                 return;
             }
 
@@ -184,14 +166,13 @@ namespace TerminusDotNetCore.Modules
             await SendImages(images);
         }
 
-        [Command("morrowind", RunMode = RunMode.Async)]
-        [Summary("Places a Morrowind prompt on the attached image, or the image in the previous message (if any).")]
+        [SlashCommand("morrowind", "With this character's death, the thread of prophecy is severed. Restore a saved game to restore the weave of fate, or persist in the doomed world you have created.")]
         public async Task MorrowindImageAsync()
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null)
             {
-                await ServiceReplyAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
+                await RespondAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
                 return;
             }
 
@@ -199,14 +180,13 @@ namespace TerminusDotNetCore.Modules
             await SendImages(images);
         }
 
-        [Command("dmc", RunMode = RunMode.Async)]
-        [Summary("Places a DMC watermark on the attached image, or the image in the previous message (if any).")]
+        [SlashCommand("dmc", "Featuring Dante from the Devil May Cry series")]
         public async Task DMCWatermarkImagesAsync()
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null)
             {
-                await ServiceReplyAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
+                await RespondAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
                 return;
             }
 
@@ -214,14 +194,13 @@ namespace TerminusDotNetCore.Modules
             await SendImages(images);
         }
 
-        [Command("bebop", RunMode = RunMode.Async)]
-        [Summary("Places a *See you space cowboy...* watermark on the attached image, or the image in the previous message (if any).")]
+        [SlashCommand("bebop", "SEE YOU SPACE COWBOY...")]
         public async Task BebopWatermarkImagesAsync()
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null)
             {
-                await ServiceReplyAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
+                await RespondAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
                 return;
             }
 
@@ -229,14 +208,13 @@ namespace TerminusDotNetCore.Modules
             await SendImages(images);
         }
 
-        [Command("nintendo", RunMode = RunMode.Async)]
-        [Summary("Places a Nintendo seal of approval watermark on the attached image, or the image in the previous message (if any).")]
+        [SlashCommand("nintendo", "Add a Nintendo seal of approval to the given image")]
         public async Task NintendoWatermarkImagesAsync()
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null)
             {
-                await ServiceReplyAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
+                await RespondAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
                 return;
             }
 
@@ -244,15 +222,13 @@ namespace TerminusDotNetCore.Modules
             await SendImages(images);
         }
 
-        [Command("gimp", RunMode = RunMode.Async)]
-        [Summary("Converts the attached image (or the image in the previous message) into a GIMP pepper mosaic.")]
-
+        [SlashCommand("gimp", "Funny GNU pepper command haha")]
         public async Task MosaicImageAsync()
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null)
             {
-                await ServiceReplyAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
+                await RespondAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
                 return;
             }
 
@@ -260,20 +236,19 @@ namespace TerminusDotNetCore.Modules
             await SendImages(images);
         }
 
-        [Command("meme", RunMode = RunMode.Async)]
-        [Summary("Adds top text and bottom text to the attached image, or the image in the previous message (if any).")]
-        public async Task MemeCaptionImageAsync([Summary("top text to add")]string topText = null, [Summary("bottom text to add")]string bottomText = null)
+        [SlashCommand("meme", "BOTTOM TEXT")]
+        public async Task MemeCaptionImageAsync([Summary(description: "top text to add")]string topText = null, [Summary(description: "bottom text to add")]string bottomText = null)
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null)
             {
-                await ServiceReplyAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
+                await RespondAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
                 return;
             }
 
             if (topText == null && bottomText == null)
             {
-                await ServiceReplyAsync("Please add a caption.");
+                await RespondAsync("Please add a caption.");
                 return;
             }
 
@@ -281,29 +256,27 @@ namespace TerminusDotNetCore.Modules
             await SendImages(images);
         }
 
-        [Command("thicc", RunMode = RunMode.Async)]
-        [Summary("Stretches the attached image, or the image in the previous message (if any).")]
-        public async Task ThiccImageAsync([Summary("factor to scale the image width by")]int thiccCount = 2)
+        [SlashCommand("thicc", "Stretch the given image")]
+        public async Task ThiccImageAsync([Summary(description: "factor to scale the image width by")]int thiccFactor = 2)
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null)
             {
-                await ServiceReplyAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
+                await RespondAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
                 return;
             }
 
-            var images = _imageService.ThiccImages(attachments, thiccCount);
+            var images = _imageService.ThiccImages(attachments, thiccFactor);
             await SendImages(images);
         }
 
-        [Command("pixelate", RunMode = RunMode.Async)]
-        [Summary("Pixelate the attached image, or the image in the previous message (if any).")]
-        public async Task PixelateImageAsync([Summary("Pixel size")]int pixelSize = 0)
+        [SlashCommand("pixelate", "Pixelate the given image")]
+        public async Task PixelateImageAsync([Summary(description: "Pixel size")]int pixelSize = 0)
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null)
             {
-                await ServiceReplyAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
+                await RespondAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
                 return;
             }
 
@@ -311,14 +284,13 @@ namespace TerminusDotNetCore.Modules
             await SendImages(images);
         }
 
-        [Command("contrast", RunMode = RunMode.Async)]
-        [Summary("Change the contrast of the attached image, or the image in the previous message (if any).")]
-        public async Task ContrastImageAsync([Summary("Contrast amount")]float amount = 2.0f)
+        [SlashCommand("contrast", "Change the contrast of the given image")]
+        public async Task ContrastImageAsync([Summary(description:"Contrast amount")]float amount = 2.0f)
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null)
             {
-                await ServiceReplyAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
+                await RespondAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
                 return;
             }
 
@@ -326,14 +298,13 @@ namespace TerminusDotNetCore.Modules
             await SendImages(images);
         }
 
-        [Command("saturate", RunMode = RunMode.Async)]
-        [Summary("Change the saturation of the attached image, or the image in the previous message (if any).")]
+        [SlashCommand("saturate", "Change the saturation of the given image")]
         public async Task SaturateImageAsync([Summary("Contrast amount")]float amount = 2.0f)
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null)
             {
-                await ServiceReplyAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
+                await RespondAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
                 return;
             }
 
@@ -361,14 +332,13 @@ namespace TerminusDotNetCore.Modules
             }
         }
 
-        [Command("bobross", RunMode = RunMode.Async)]
-        [Summary("Paints the attached/most recent image(s) on Bob's happy little canvas. If text is supplied, draws the text on Bob's canvas instead.")]
-        public async Task BobRossImagesAsync([Remainder][Summary("Text to project onto the canvas. If a number is supplied, number of times to repeat the projection instead.")]string text = null)
+        [SlashCommand("bobross", "Draw the given image on Bob's canvas")]
+        public async Task BobRossImagesAsync([Summary(description: "Text to project onto the canvas. If a number is supplied, number of times to repeat the projection instead.")]string text = null)
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null && text == null)
             {
-                await ServiceReplyAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
+                await RespondAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
                 return;
             }
 
@@ -394,14 +364,13 @@ namespace TerminusDotNetCore.Modules
             }
         }
 
-        [Command("pc", RunMode = RunMode.Async)]
-        [Summary("Paints the attached/most recent image(s) on a stock photo of someone at their computer.")]
-        public async Task PCImagesAsync([Remainder][Summary("Text to project onto the canvas. If a number is supplied, number of times to repeat the projection instead.")]string text = null)
+        [SlashCommand("pc", "I want to KMS")]
+        public async Task PCImagesAsync([Summary(description: "Text to project onto the canvas. If a number is supplied, number of times to repeat the projection instead.")]string text = null)
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null && text == null)
             {
-                await ServiceReplyAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
+                await RespondAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
                 return;
             }
 
@@ -427,14 +396,13 @@ namespace TerminusDotNetCore.Modules
             }
         }
 
-        [Command("trump", RunMode = RunMode.Async)]
-        [Summary("Overlays a custom image attachment onto a book held by President Trump.")]
-        public async Task TrumpImagesAsync([Remainder][Summary("Text to project onto the canvas. If a number is supplied, number of times to repeat the projection instead.")]string text = null)
+        [SlashCommand("trump", "Orang man")]
+        public async Task TrumpImagesAsync([Summary(description: "Text to project onto the canvas. If a number is supplied, number of times to repeat the projection instead.")]string text = null)
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null && text == null)
             {
-                await ServiceReplyAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
+                await RespondAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
                 return;
             }
 
@@ -460,14 +428,13 @@ namespace TerminusDotNetCore.Modules
             }
         }
 
-        [Command("walter", RunMode = RunMode.Async)]
-        [Summary("Overlays a custom image attachment onto Dr. D's whiteboard.")]
-        public async Task WalterImagesAsync([Remainder][Summary("Text to project onto the canvas. If a number is supplied, number of times to repeat the projection instead.")]string text = null)
+        [SlashCommand("walter", "Doctor D")]
+        public async Task WalterImagesAsync([Summary(description: "Text to project onto the canvas. If a number is supplied, number of times to repeat the projection instead.")]string text = null)
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null && text == null)
             {
-                await ServiceReplyAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
+                await RespondAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
                 return;
             }
 
@@ -493,14 +460,13 @@ namespace TerminusDotNetCore.Modules
             }
         }
 
-        [Command("hank", RunMode = RunMode.Async)]
-        [Summary("Overlays a custom image attachment onto Hank's TV.")]
-        public async Task HankImagesAsync([Remainder][Summary("Text to project onto the canvas. If a number is supplied, number of times to repeat the projection instead.")]string text = null)
+        [SlashCommand("hank", "Hink Hall")]
+        public async Task HankImagesAsync([Summary(description: "Text to project onto the canvas. If a number is supplied, number of times to repeat the projection instead.")]string text = null)
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null && text == null)
             {
-                await ServiceReplyAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
+                await RespondAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
                 return;
             }
 
@@ -526,14 +492,13 @@ namespace TerminusDotNetCore.Modules
             }
         }
 
-        [Command("emmy", RunMode = RunMode.Async)]
-        [Summary("Overlays a custom image attachment onto Emerson's TV.")]
-        public async Task EmmyImagesAsync([Remainder][Summary("Text to project onto the canvas. If a number is supplied, number of times to repeat the projection instead.")] string text = null)
+        [SlashCommand("emmy", "Emmy")]
+        public async Task EmmyImagesAsync([Summary(description: "Text to project onto the canvas. If a number is supplied, number of times to repeat the projection instead.")] string text = null)
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null && text == null)
             {
-                await ServiceReplyAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
+                await RespondAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
                 return;
             }
 
