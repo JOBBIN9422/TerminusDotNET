@@ -119,14 +119,18 @@ namespace TerminusDotNetCore
 
         private async Task HandleInteractionAsync(SocketInteraction arg)
         {
+            SocketInteractionContext ctx = new SocketInteractionContext(Client, arg);
             try
             {
-                var ctx = new SocketInteractionContext(Client, arg);
                 await _interactionService.ExecuteCommandAsync(ctx, _serviceProvider);
             }
             catch (Exception e)
             {
                 await Logger.Log(new LogMessage(LogSeverity.Warning, "InteractionHandler", $"Error: {e}"));
+                string logErrorMsg = $"Error in {arg.ToString()}";
+                await Logger.Log(new LogMessage(LogSeverity.Warning, "InteractionHandler", $"{logErrorMsg}"));
+
+                await ctx.Interaction.RespondAsync($"`{e.Message}`");
             }
         }
 
@@ -135,7 +139,7 @@ namespace TerminusDotNetCore
         {
             if (!arg3.IsSuccess)
             {
-                await Logger.Log(new LogMessage(LogSeverity.Warning, "SlashCmdHandler", $"Error in {arg1.Name}: {arg3.ErrorReason}"));
+                await Logger.Log(new LogMessage(LogSeverity.Warning, "SlashCmd", $"Error in {arg1.Name}: {arg3.Error}"));
             }
         }
 

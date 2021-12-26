@@ -26,7 +26,7 @@ namespace TerminusDotNetCore.Modules
         [SlashCommand("echo", "Echo the input")]
         public async Task Echo(string input)
         {
-            throw new Exception("E");
+            throw new Exception("exception reason");
             await RespondAsync(input);
         }
 

@@ -60,5 +60,22 @@ namespace TerminusDotNetCore.Helpers
                 _readWriteLock.ExitWriteLock();
             }
         }
+
+        private static void LogError(string errorMsg)
+        {
+            _readWriteLock.EnterWriteLock();
+            try
+            {
+                string currLogFilename = $"errors_{DateTime.Today.ToString("MM-dd-yyyy")}.txt";
+                using (StreamWriter writer = new StreamWriter(Path.Combine(ErrorLogDir, currLogFilename), true))
+                {
+                    writer.WriteLine(errorMsg.ToString());
+                }
+            }
+            finally
+            {
+                _readWriteLock.ExitWriteLock();
+            }
+        }
     }
 }
