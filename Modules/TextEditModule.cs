@@ -26,23 +26,15 @@ namespace TerminusDotNetCore.Modules
         [SlashCommand("echo", "Echo the input")]
         public async Task Echo(string input)
         {
-            await RespondAsync(input);
+            await new Task(() => throw new Exception("i am an error"));
         }
 
         [SlashCommand("wide", "Convert the input to full-width text")]
         public async Task ConvertMessageToFullWidthAsync(string input)
         {
-            string wideText = string.Empty;
             await DeferAsync();
-            if (string.IsNullOrEmpty(input))
-            {
-
-            }
-            else 
-            {
-                wideText = _textEditService.ConvertToFullWidth(input);
-            }
-            await FollowupAsync(wideText);
+            string output = _textEditService.ConvertToFullWidth(input);
+            await FollowupAsync(output);
         }
 
         [SlashCommand("escape", "Display the input as plaintext (escape @mentions, #channels, and other Discord formatting)")]
