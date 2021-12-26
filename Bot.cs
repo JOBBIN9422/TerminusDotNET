@@ -126,7 +126,7 @@ namespace TerminusDotNetCore
             }
             catch (Exception e)
             {
-                await Logger.Log(new LogMessage(LogSeverity.Warning, "InteractionHandler", $"Error: {e}"));
+                await Logger.Log(new LogMessage(LogSeverity.Warning, "InteractionHandler", $"{e}"));
             }
         }
 
@@ -135,12 +135,11 @@ namespace TerminusDotNetCore
         {
             if (!arg3.IsSuccess)
             {
-                await Logger.Log(new LogMessage(LogSeverity.Warning, "SlashCmd", $"Error in {arg1.Name} {arg1.Parameters}: {arg3.Error}"));
+                await Logger.Log(new LogMessage(LogSeverity.Warning, "SlashCmd", $"Error in {arg1.Name}: {arg3.Error}"));
                 await arg2.Interaction.RespondAsync($"`{arg3.ErrorReason}`");
             }
         }
 
-        //set client and guild for audio service BEFORE any playback commands are executed
         private async Task InitInteractionService()
         {
             //init interaction service
@@ -160,6 +159,7 @@ namespace TerminusDotNetCore
                 await Logger.Log(new LogMessage(LogSeverity.Info, "Client", $"Registered command: {command.Name}"));
             }
 
+            //set client and guild for audio service BEFORE any playback commands are executed
             AudioService audioService = _serviceProvider.GetService(typeof(AudioService)) as AudioService;
             if (audioService != null)
             {

@@ -112,10 +112,5 @@ namespace TerminusDotNetCore.Services
 
             return emojiMessage;
         }
-
-        public void ErrorTest()
-        {
-            throw new Exception("service exception");
-        }
     }
 }

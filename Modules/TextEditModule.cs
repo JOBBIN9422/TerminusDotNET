@@ -26,7 +26,6 @@ namespace TerminusDotNetCore.Modules
         [SlashCommand("echo", "Echo the input")]
         public async Task Echo(string input)
         {
-            _textEditService.ErrorTest();
             await RespondAsync(input);
         }
 
@@ -41,45 +40,25 @@ namespace TerminusDotNetCore.Modules
         [SlashCommand("escape", "Display the input as plaintext (escape @mentions, #channels, and other Discord formatting)")]
         public async Task EscapeTextAsync(string input)
         {
-            string plaintext = string.Empty;
-            if (string.IsNullOrEmpty(input))
-            {
-            }
-            else
-            {
-                plaintext = _textEditService.EscapeText(input);
-            }
-            await RespondAsync(plaintext);
+            await DeferAsync();
+            string output = _textEditService.EscapeText(input);
+            await FollowupAsync(output);
         }
 
         [SlashCommand("memecase", "Convert the input to MeMeCaSe")]
         public async Task ConvertMessageToMemeCaseAsync(string input)
         {
-            string memeText = string.Empty;
-            if (string.IsNullOrEmpty(input))
-            {
-
-            }
-            else 
-            {
-                memeText = _textEditService.ConvertToMemeCase(input);
-            }
-            await RespondAsync(memeText);
+            await DeferAsync();
+            string output = _textEditService.ConvertToMemeCase(input);
+            await FollowupAsync(output);
         }
 
         [SlashCommand("emojify", "Emojify the input")]
         public async Task EmojifyMessageAsync(string input)
         {
-            string emojiText = string.Empty;
-            if (string.IsNullOrEmpty(input))
-            {
-
-            }
-            else
-            {
-                emojiText = _textEditService.Emojify(input);
-            }
-            await RespondAsync(emojiText);
+            await DeferAsync();
+            string output = _textEditService.Emojify(input);
+            await FollowupAsync(output);
         }
     }
 }
