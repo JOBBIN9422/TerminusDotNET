@@ -127,10 +127,6 @@ namespace TerminusDotNetCore
             catch (Exception e)
             {
                 await Logger.Log(new LogMessage(LogSeverity.Warning, "InteractionHandler", $"Error: {e}"));
-                string logErrorMsg = $"Error in {arg.ToString()}";
-                await Logger.Log(new LogMessage(LogSeverity.Warning, "InteractionHandler", $"{logErrorMsg}"));
-
-                await ctx.Interaction.RespondAsync($"`{e.Message}`");
             }
         }
 
@@ -139,7 +135,8 @@ namespace TerminusDotNetCore
         {
             if (!arg3.IsSuccess)
             {
-                await Logger.Log(new LogMessage(LogSeverity.Warning, "SlashCmd", $"Error in {arg1.Name}: {arg3.Error}"));
+                await Logger.Log(new LogMessage(LogSeverity.Warning, "SlashCmd", $"Error in {arg1.Name} {arg1.Parameters}: {arg3.Error}"));
+                await arg2.Interaction.RespondAsync($"`{arg3.ErrorReason}`");
             }
         }
 
