@@ -73,7 +73,7 @@ namespace TerminusDotNetCore.Modules
 
             if (useFile)
             {
-                IReadOnlyCollection<Attachment> atts = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Media);
+                IReadOnlyCollection<Attachment> atts = await AttachmentHelper.GetMostRecentAttachmentsAsync((IInteractionContext)Context, AttachmentFilter.Media);
                 if (atts == null)
                 {
                     throw new NullReferenceException("No media attachments were found in the current or previous 20 messages.");
@@ -224,7 +224,7 @@ namespace TerminusDotNetCore.Modules
         [Summary("Store an audio file on the server and give an alias for use in !play commands.")]
         public async Task AddSong([Summary("alias to use when playing this song in the future")] string alias)
         {
-            IReadOnlyCollection<Attachment> atts = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Media);
+            IReadOnlyCollection<Attachment> atts = await AttachmentHelper.GetMostRecentAttachmentsAsync((IInteractionContext)Context, AttachmentFilter.Media);
             if (atts == null)
             {
                 throw new NullReferenceException("No media attachments were found in the current or previous 20 messages.");
