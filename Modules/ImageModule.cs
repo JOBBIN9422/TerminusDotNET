@@ -333,7 +333,7 @@ namespace TerminusDotNetCore.Modules
         }
 
         [SlashCommand("bobross", "Draw the given image on Bob's canvas")]
-        public async Task BobRossImagesAsync([Summary(description: "Text to project onto the canvas. If a number is supplied, number of times to repeat the projection instead.")]string text = null)
+        public async Task BobRossImagesAsync([Summary(description: "Text to project onto the canvas. Numeric value repeats the projection.")]string text = null)
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null && text == null)
@@ -365,7 +365,7 @@ namespace TerminusDotNetCore.Modules
         }
 
         [SlashCommand("pc", "I want to KMS")]
-        public async Task PCImagesAsync([Summary(description: "Text to project onto the canvas. If a number is supplied, number of times to repeat the projection instead.")]string text = null)
+        public async Task PCImagesAsync([Summary(description: "Text to project onto the canvas. Numeric value repeats the projection.")]string text = null)
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null && text == null)
@@ -397,7 +397,7 @@ namespace TerminusDotNetCore.Modules
         }
 
         [SlashCommand("trump", "Orang man")]
-        public async Task TrumpImagesAsync([Summary(description: "Text to project onto the canvas. If a number is supplied, number of times to repeat the projection instead.")]string text = null)
+        public async Task TrumpImagesAsync([Summary(description: "Text to project onto the canvas. Numeric value repeats the projection.")]string text = null)
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null && text == null)
@@ -429,7 +429,7 @@ namespace TerminusDotNetCore.Modules
         }
 
         [SlashCommand("walter", "Doctor D")]
-        public async Task WalterImagesAsync([Summary(description: "Text to project onto the canvas. If a number is supplied, number of times to repeat the projection instead.")]string text = null)
+        public async Task WalterImagesAsync([Summary(description: "Text to project onto the canvas. Numeric value repeats the projection.")]string text = null)
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null && text == null)
@@ -461,7 +461,7 @@ namespace TerminusDotNetCore.Modules
         }
 
         [SlashCommand("hank", "Hink Hall")]
-        public async Task HankImagesAsync([Summary(description: "Text to project onto the canvas. If a number is supplied, number of times to repeat the projection instead.")]string text = null)
+        public async Task HankImagesAsync([Summary(description: "Text to project onto the canvas. Numeric value repeats the projection.")]string text = null)
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null && text == null)
@@ -493,7 +493,7 @@ namespace TerminusDotNetCore.Modules
         }
 
         [SlashCommand("emmy", "Emmy")]
-        public async Task EmmyImagesAsync([Summary(description: "Text to project onto the canvas. If a number is supplied, number of times to repeat the projection instead.")] string text = null)
+        public async Task EmmyImagesAsync([Summary(description: "Text to project onto the canvas. Numeric value repeats the projection.")] string text = null)
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null && text == null)
