@@ -26,7 +26,8 @@ namespace TerminusDotNetCore.Modules
         [SlashCommand("echo", "Echo the input")]
         public async Task Echo(string input)
         {
-            await new Task(() => throw new Exception("i am an error"));
+            throw new Exception("E");
+            await RespondAsync(input);
         }
 
         [SlashCommand("wide", "Convert the input to full-width text")]
