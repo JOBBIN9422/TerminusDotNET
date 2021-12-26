@@ -69,7 +69,7 @@ namespace TerminusDotNetCore.Modules
         }
 
         [SlashCommand("deepfry", "Deepfry the given image")]
-        public async Task DeepFryImageAsync([Summary(description: "how ,uch to fry the image")]uint deepfryFactor = 1)
+        public async Task DeepFryImageAsync([Summary(description: "how much to fry the image")]uint deepfryFactor = 1)
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null)
@@ -166,7 +166,7 @@ namespace TerminusDotNetCore.Modules
             await SendImages(images);
         }
 
-        [SlashCommand("morrowind", "With this character's death, the thread of prophecy is severed. Restore a saved game to restore the weave of fate, or persist in the doomed world you have created.")]
+        [SlashCommand("morrowind", "With this character's death, the thread of prophecy is severed.")]
         public async Task MorrowindImageAsync()
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
