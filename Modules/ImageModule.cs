@@ -124,7 +124,7 @@ namespace TerminusDotNetCore.Modules
             await SendImages(images);
         }
 
-        //[SlashCommand("invert", "Invert the colors of the given image")]
+        [SlashCommand("invert", "Invert the colors of the given image")]
         public async Task InvertImageAsync()
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
