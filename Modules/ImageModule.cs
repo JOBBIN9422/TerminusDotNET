@@ -152,7 +152,7 @@ namespace TerminusDotNetCore.Modules
             await SendImages(images);
         }
 
-        //[SlashCommand("reddit", "Apply le funny REDDIT watermark to the given image")]
+        [SlashCommand("reddit", "Apply le funny REDDIT watermark to the given image")]
         public async Task RedditWatermarkImagesAsync([Summary(description: "subreddit name")] string subName = "")
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
