@@ -82,7 +82,7 @@ namespace TerminusDotNetCore.Modules
             await SendImages(images);
         }
 
-        //[SlashCommand("grayscale", "Convert the given image to grayscale")]
+        [SlashCommand("grayscale", "Convert the given image to grayscale")]
         public async Task GrayscaleImageAsync()
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
