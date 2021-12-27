@@ -284,7 +284,7 @@ namespace TerminusDotNetCore.Modules
             await SendImages(images);
         }
 
-        //[SlashCommand("contrast", "Change the contrast of the given image")]
+        [SlashCommand("contrast", "Change the contrast of the given image")]
         public async Task ContrastImageAsync([Summary(description:"Contrast amount")]float amount = 2.0f)
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
@@ -298,7 +298,7 @@ namespace TerminusDotNetCore.Modules
             await SendImages(images);
         }
 
-        //[SlashCommand("saturate", "Change the saturation of the given image")]
+        [SlashCommand("saturate", "Change the saturation of the given image")]
         public async Task SaturateImageAsync([Summary("Contrast amount")]float amount = 2.0f)
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
