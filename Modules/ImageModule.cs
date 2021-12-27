@@ -68,7 +68,7 @@ namespace TerminusDotNetCore.Modules
             await SendImages(images);
         }
 
-        [SlashCommand("deepfry", "Deepfry the given image")]
+        //[SlashCommand("deepfry", "Deepfry the given image")]
         public async Task DeepFryImageAsync([Summary(description: "how much to fry the image")]uint deepfryFactor = 1)
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
@@ -82,7 +82,7 @@ namespace TerminusDotNetCore.Modules
             await SendImages(images);
         }
 
-        [SlashCommand("grayscale", "Convert the given image to grayscale")]
+        //[SlashCommand("grayscale", "Convert the given image to grayscale")]
         public async Task GrayscaleImageAsync()
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
@@ -96,7 +96,7 @@ namespace TerminusDotNetCore.Modules
             await SendImages(images);
         }
 
-        [SlashCommand("polaroid", "Apply a shitty Polaroid filter to the given image")]
+        //[SlashCommand("polaroid", "Apply a shitty Polaroid filter to the given image")]
         public async Task PolaroidImageAsync()
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
@@ -110,7 +110,7 @@ namespace TerminusDotNetCore.Modules
             await SendImages(images);
         }
 
-        [SlashCommand("kodak", "Apply a shitty Kodachrome filter to the given image")]
+        //[SlashCommand("kodak", "Apply a shitty Kodachrome filter to the given image")]
         public async Task KodakImageAsync()
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
@@ -124,7 +124,7 @@ namespace TerminusDotNetCore.Modules
             await SendImages(images);
         }
 
-        [SlashCommand("invert", "Invert the colors of the given image")]
+        //[SlashCommand("invert", "Invert the colors of the given image")]
         public async Task InvertImageAsync()
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
@@ -138,7 +138,7 @@ namespace TerminusDotNetCore.Modules
             await SendImages(images);
         }
 
-        [SlashCommand("initiald", "NANI???? KANSEI DORIFTO?!?!?!?!?")]
+        //[SlashCommand("initiald", "NANI???? KANSEI DORIFTO?!?!?!?!?")]
         public async Task InitialDImagesAsync()
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
@@ -152,7 +152,7 @@ namespace TerminusDotNetCore.Modules
             await SendImages(images);
         }
 
-        [SlashCommand("reddit", "Apply le funny REDDIT watermark to the given image")]
+        //[SlashCommand("reddit", "Apply le funny REDDIT watermark to the given image")]
         public async Task RedditWatermarkImagesAsync([Summary(description: "subreddit name")] string subName = "")
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
@@ -166,7 +166,7 @@ namespace TerminusDotNetCore.Modules
             await SendImages(images);
         }
 
-        [SlashCommand("morrowind", "With this character's death, the thread of prophecy is severed.")]
+        //[SlashCommand("morrowind", "With this character's death, the thread of prophecy is severed.")]
         public async Task MorrowindImageAsync()
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
@@ -180,7 +180,7 @@ namespace TerminusDotNetCore.Modules
             await SendImages(images);
         }
 
-        [SlashCommand("dmc", "Featuring Dante from the Devil May Cry series")]
+        //[SlashCommand("dmc", "Featuring Dante from the Devil May Cry series")]
         public async Task DMCWatermarkImagesAsync()
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
@@ -194,7 +194,7 @@ namespace TerminusDotNetCore.Modules
             await SendImages(images);
         }
 
-        [SlashCommand("bebop", "SEE YOU SPACE COWBOY...")]
+        //[SlashCommand("bebop", "SEE YOU SPACE COWBOY...")]
         public async Task BebopWatermarkImagesAsync()
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
@@ -208,7 +208,7 @@ namespace TerminusDotNetCore.Modules
             await SendImages(images);
         }
 
-        [SlashCommand("nintendo", "Add a Nintendo seal of approval to the given image")]
+        //[SlashCommand("nintendo", "Add a Nintendo seal of approval to the given image")]
         public async Task NintendoWatermarkImagesAsync()
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
@@ -222,7 +222,7 @@ namespace TerminusDotNetCore.Modules
             await SendImages(images);
         }
 
-        [SlashCommand("gimp", "Funny GNU pepper command haha")]
+        //[SlashCommand("gimp", "Funny GNU pepper command haha")]
         public async Task MosaicImageAsync()
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
@@ -236,7 +236,7 @@ namespace TerminusDotNetCore.Modules
             await SendImages(images);
         }
 
-        [SlashCommand("meme", "BOTTOM TEXT")]
+        //[SlashCommand("meme", "BOTTOM TEXT")]
         public async Task MemeCaptionImageAsync([Summary(description: "top text to add")]string topText = null, [Summary(description: "bottom text to add")]string bottomText = null)
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
@@ -256,7 +256,7 @@ namespace TerminusDotNetCore.Modules
             await SendImages(images);
         }
 
-        [SlashCommand("thicc", "Stretch the given image")]
+        //[SlashCommand("thicc", "Stretch the given image")]
         public async Task ThiccImageAsync([Summary(description: "factor to scale the image width by")]int thiccFactor = 2)
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
@@ -270,7 +270,7 @@ namespace TerminusDotNetCore.Modules
             await SendImages(images);
         }
 
-        [SlashCommand("pixelate", "Pixelate the given image")]
+        //[SlashCommand("pixelate", "Pixelate the given image")]
         public async Task PixelateImageAsync([Summary(description: "Pixel size")]int pixelSize = 0)
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
@@ -284,7 +284,7 @@ namespace TerminusDotNetCore.Modules
             await SendImages(images);
         }
 
-        [SlashCommand("contrast", "Change the contrast of the given image")]
+        //[SlashCommand("contrast", "Change the contrast of the given image")]
         public async Task ContrastImageAsync([Summary(description:"Contrast amount")]float amount = 2.0f)
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
@@ -298,7 +298,7 @@ namespace TerminusDotNetCore.Modules
             await SendImages(images);
         }
 
-        [SlashCommand("saturate", "Change the saturation of the given image")]
+        //[SlashCommand("saturate", "Change the saturation of the given image")]
         public async Task SaturateImageAsync([Summary("Contrast amount")]float amount = 2.0f)
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
@@ -332,7 +332,7 @@ namespace TerminusDotNetCore.Modules
             }
         }
 
-        [SlashCommand("bobross", "Draw the given image on Bob's canvas")]
+        //[SlashCommand("bobross", "Draw the given image on Bob's canvas")]
         public async Task BobRossImagesAsync([Summary(description: "Text to project onto the canvas. Numeric value repeats the projection.")]string text = null)
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
@@ -364,7 +364,7 @@ namespace TerminusDotNetCore.Modules
             }
         }
 
-        [SlashCommand("pc", "I want to KMS")]
+        //[SlashCommand("pc", "I want to KMS")]
         public async Task PCImagesAsync([Summary(description: "Text to project onto the canvas. Numeric value repeats the projection.")]string text = null)
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
@@ -396,7 +396,7 @@ namespace TerminusDotNetCore.Modules
             }
         }
 
-        [SlashCommand("trump", "Orang man")]
+        //[SlashCommand("trump", "Orang man")]
         public async Task TrumpImagesAsync([Summary(description: "Text to project onto the canvas. Numeric value repeats the projection.")]string text = null)
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
@@ -428,7 +428,7 @@ namespace TerminusDotNetCore.Modules
             }
         }
 
-        [SlashCommand("walter", "Doctor D")]
+        //[SlashCommand("walter", "Doctor D")]
         public async Task WalterImagesAsync([Summary(description: "Text to project onto the canvas. Numeric value repeats the projection.")]string text = null)
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
@@ -460,7 +460,7 @@ namespace TerminusDotNetCore.Modules
             }
         }
 
-        [SlashCommand("hank", "Hink Hall")]
+        //[SlashCommand("hank", "Hink Hall")]
         public async Task HankImagesAsync([Summary(description: "Text to project onto the canvas. Numeric value repeats the projection.")]string text = null)
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
@@ -492,7 +492,7 @@ namespace TerminusDotNetCore.Modules
             }
         }
 
-        [SlashCommand("emmy", "Emmy")]
+        //[SlashCommand("emmy", "Emmy")]
         public async Task EmmyImagesAsync([Summary(description: "Text to project onto the canvas. Numeric value repeats the projection.")] string text = null)
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
