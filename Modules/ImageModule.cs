@@ -68,7 +68,7 @@ namespace TerminusDotNetCore.Modules
             await SendImages(images);
         }
 
-        //[SlashCommand("deepfry", "Deepfry the given image")]
+        [SlashCommand("deepfry", "Deepfry the given image")]
         public async Task DeepFryImageAsync([Summary(description: "how much to fry the image")]uint deepfryFactor = 1)
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
