@@ -256,7 +256,7 @@ namespace TerminusDotNetCore.Modules
             await SendImages(images);
         }
 
-        //[SlashCommand("thicc", "Stretch the given image")]
+        [SlashCommand("thicc", "Stretch the given image")]
         public async Task ThiccImageAsync([Summary(description: "factor to scale the image width by")]int thiccFactor = 2)
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
