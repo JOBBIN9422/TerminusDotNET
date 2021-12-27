@@ -57,6 +57,8 @@ namespace TerminusDotNetCore.Modules
         [SlashCommand("mirror", "Mirror the given image across an axis")]
         public async Task MirrorImagesAsync([Summary(description: "axis to mirror the image on (`horizontal` or `vertical`)")]string flipMode = "horizontal")
         {
+            await DeferAsync();
+
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null)
             {
@@ -71,6 +73,8 @@ namespace TerminusDotNetCore.Modules
         [SlashCommand("deepfry", "Deepfry the given image")]
         public async Task DeepFryImageAsync([Summary(description: "how much to fry the image")]uint deepfryFactor = 1)
         {
+            await DeferAsync();
+
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null)
             {
@@ -85,6 +89,8 @@ namespace TerminusDotNetCore.Modules
         [SlashCommand("grayscale", "Convert the given image to grayscale")]
         public async Task GrayscaleImageAsync()
         {
+            await DeferAsync();
+
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null)
             {
@@ -99,6 +105,8 @@ namespace TerminusDotNetCore.Modules
         [SlashCommand("polaroid", "Apply a shitty Polaroid filter to the given image")]
         public async Task PolaroidImageAsync()
         {
+            await DeferAsync();
+
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null)
             {
@@ -113,6 +121,8 @@ namespace TerminusDotNetCore.Modules
         [SlashCommand("kodak", "Apply a shitty Kodachrome filter to the given image")]
         public async Task KodakImageAsync()
         {
+            await DeferAsync();
+
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null)
             {
@@ -127,6 +137,8 @@ namespace TerminusDotNetCore.Modules
         [SlashCommand("invert", "Invert the colors of the given image")]
         public async Task InvertImageAsync()
         {
+            await DeferAsync();
+
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null)
             {
@@ -141,6 +153,8 @@ namespace TerminusDotNetCore.Modules
         [SlashCommand("initiald", "NANI???? KANSEI DORIFTO?!?!?!?!?")]
         public async Task InitialDImagesAsync()
         {
+            await DeferAsync();
+
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null)
             {
@@ -155,6 +169,8 @@ namespace TerminusDotNetCore.Modules
         [SlashCommand("reddit", "Apply le funny REDDIT watermark to the given image")]
         public async Task RedditWatermarkImagesAsync([Summary(description: "subreddit name")] string subName = "")
         {
+            await DeferAsync();
+
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null)
             {
@@ -169,6 +185,8 @@ namespace TerminusDotNetCore.Modules
         [SlashCommand("morrowind", "With this character's death, the thread of prophecy is severed.")]
         public async Task MorrowindImageAsync()
         {
+            await DeferAsync();
+
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null)
             {
@@ -183,6 +201,8 @@ namespace TerminusDotNetCore.Modules
         [SlashCommand("dmc", "Featuring Dante from the Devil May Cry series")]
         public async Task DMCWatermarkImagesAsync()
         {
+            await DeferAsync();
+
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null)
             {
@@ -197,6 +217,8 @@ namespace TerminusDotNetCore.Modules
         [SlashCommand("bebop", "SEE YOU SPACE COWBOY...")]
         public async Task BebopWatermarkImagesAsync()
         {
+            await DeferAsync();
+
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null)
             {
@@ -211,6 +233,8 @@ namespace TerminusDotNetCore.Modules
         [SlashCommand("nintendo", "Add a Nintendo seal of approval to the given image")]
         public async Task NintendoWatermarkImagesAsync()
         {
+            await DeferAsync();
+
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null)
             {
@@ -225,6 +249,8 @@ namespace TerminusDotNetCore.Modules
         [SlashCommand("gimp", "Funny GNU pepper command haha")]
         public async Task MosaicImageAsync()
         {
+            await DeferAsync();
+
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null)
             {
@@ -239,6 +265,8 @@ namespace TerminusDotNetCore.Modules
         [SlashCommand("meme", "BOTTOM TEXT")]
         public async Task MemeCaptionImageAsync([Summary(description: "top text to add")]string topText = null, [Summary(description: "bottom text to add")]string bottomText = null)
         {
+            await DeferAsync();
+
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null)
             {
@@ -259,6 +287,8 @@ namespace TerminusDotNetCore.Modules
         [SlashCommand("thicc", "Stretch the given image")]
         public async Task ThiccImageAsync([Summary(description: "factor to scale the image width by")]int thiccFactor = 2)
         {
+            await DeferAsync();
+
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null)
             {
@@ -273,6 +303,8 @@ namespace TerminusDotNetCore.Modules
         [SlashCommand("pixelate", "Pixelate the given image")]
         public async Task PixelateImageAsync([Summary(description: "Pixel size")]int pixelSize = 0)
         {
+            await DeferAsync();
+
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null)
             {
@@ -287,6 +319,8 @@ namespace TerminusDotNetCore.Modules
         [SlashCommand("contrast", "Change the contrast of the given image")]
         public async Task ContrastImageAsync([Summary(description:"Contrast amount")]float amount = 2.0f)
         {
+            await DeferAsync();
+
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null)
             {
@@ -301,6 +335,8 @@ namespace TerminusDotNetCore.Modules
         [SlashCommand("saturate", "Change the saturation of the given image")]
         public async Task SaturateImageAsync([Summary(description: "Contrast amount")]float amount = 2.0f)
         {
+            await DeferAsync();
+
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null)
             {
@@ -335,6 +371,8 @@ namespace TerminusDotNetCore.Modules
         [SlashCommand("bobross", "Draw the given image on Bob's canvas")]
         public async Task BobRossImagesAsync([Summary(description: "Text to project onto the canvas. Numeric value repeats the projection.")]string text = null)
         {
+            await DeferAsync();
+
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null && text == null)
             {
@@ -367,6 +405,8 @@ namespace TerminusDotNetCore.Modules
         [SlashCommand("pc", "I want to KMS")]
         public async Task PCImagesAsync([Summary(description: "Text to project onto the canvas. Numeric value repeats the projection.")]string text = null)
         {
+            await DeferAsync();
+
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null && text == null)
             {
@@ -399,6 +439,8 @@ namespace TerminusDotNetCore.Modules
         [SlashCommand("trump", "Orang man")]
         public async Task TrumpImagesAsync([Summary(description: "Text to project onto the canvas. Numeric value repeats the projection.")]string text = null)
         {
+            await DeferAsync();
+
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null && text == null)
             {
@@ -431,6 +473,8 @@ namespace TerminusDotNetCore.Modules
         [SlashCommand("walter", "Doctor D")]
         public async Task WalterImagesAsync([Summary(description: "Text to project onto the canvas. Numeric value repeats the projection.")]string text = null)
         {
+            await DeferAsync();
+
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null && text == null)
             {
@@ -463,6 +507,8 @@ namespace TerminusDotNetCore.Modules
         [SlashCommand("hank", "Hink Hall")]
         public async Task HankImagesAsync([Summary(description: "Text to project onto the canvas. Numeric value repeats the projection.")]string text = null)
         {
+            await DeferAsync();
+
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null && text == null)
             {
@@ -495,6 +541,8 @@ namespace TerminusDotNetCore.Modules
         [SlashCommand("emmy", "Emmy")]
         public async Task EmmyImagesAsync([Summary(description: "Text to project onto the canvas. Numeric value repeats the projection.")] string text = null)
         {
+            await DeferAsync();
+
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null && text == null)
             {
