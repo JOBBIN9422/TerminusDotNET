@@ -270,7 +270,7 @@ namespace TerminusDotNetCore.Modules
             await SendImages(images);
         }
 
-        //[SlashCommand("pixelate", "Pixelate the given image")]
+        [SlashCommand("pixelate", "Pixelate the given image")]
         public async Task PixelateImageAsync([Summary(description: "Pixel size")]int pixelSize = 0)
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
