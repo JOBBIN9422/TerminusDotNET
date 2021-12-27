@@ -180,7 +180,7 @@ namespace TerminusDotNetCore.Modules
             await SendImages(images);
         }
 
-        //[SlashCommand("dmc", "Featuring Dante from the Devil May Cry series")]
+        [SlashCommand("dmc", "Featuring Dante from the Devil May Cry series")]
         public async Task DMCWatermarkImagesAsync()
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
@@ -194,7 +194,7 @@ namespace TerminusDotNetCore.Modules
             await SendImages(images);
         }
 
-        //[SlashCommand("bebop", "SEE YOU SPACE COWBOY...")]
+        [SlashCommand("bebop", "SEE YOU SPACE COWBOY...")]
         public async Task BebopWatermarkImagesAsync()
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
@@ -208,7 +208,7 @@ namespace TerminusDotNetCore.Modules
             await SendImages(images);
         }
 
-        //[SlashCommand("nintendo", "Add a Nintendo seal of approval to the given image")]
+        [SlashCommand("nintendo", "Add a Nintendo seal of approval to the given image")]
         public async Task NintendoWatermarkImagesAsync()
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
@@ -222,7 +222,7 @@ namespace TerminusDotNetCore.Modules
             await SendImages(images);
         }
 
-        //[SlashCommand("gimp", "Funny GNU pepper command haha")]
+        [SlashCommand("gimp", "Funny GNU pepper command haha")]
         public async Task MosaicImageAsync()
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
