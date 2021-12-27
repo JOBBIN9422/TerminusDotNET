@@ -34,7 +34,7 @@ namespace TerminusDotNetCore.Modules
         {
             await DeferAsync();
             string output = _textEditService.ConvertToFullWidth(input);
-            await FollowupAsync(output);
+            await RespondAsync(output);
         }
 
         [SlashCommand("escape", "Display the input as plaintext (escape @mentions, #channels, and other Discord formatting)")]
@@ -42,7 +42,7 @@ namespace TerminusDotNetCore.Modules
         {
             await DeferAsync();
             string output = _textEditService.EscapeText(input);
-            await FollowupAsync(output);
+            await RespondAsync(output);
         }
 
         [SlashCommand("memecase", "Convert the input to MeMeCaSe")]
@@ -50,7 +50,7 @@ namespace TerminusDotNetCore.Modules
         {
             await DeferAsync();
             string output = _textEditService.ConvertToMemeCase(input);
-            await FollowupAsync(output);
+            await RespondAsync(output);
         }
 
         [SlashCommand("emojify", "Emojify the input")]
@@ -58,7 +58,7 @@ namespace TerminusDotNetCore.Modules
         {
             await DeferAsync();
             string output = _textEditService.Emojify(input);
-            await FollowupAsync(output);
+            await RespondAsync(output);
         }
     }
 }
