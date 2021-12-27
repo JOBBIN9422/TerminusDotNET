@@ -138,7 +138,7 @@ namespace TerminusDotNetCore.Modules
             await SendImages(images);
         }
 
-        //[SlashCommand("initiald", "NANI???? KANSEI DORIFTO?!?!?!?!?")]
+        [SlashCommand("initiald", "NANI???? KANSEI DORIFTO?!?!?!?!?")]
         public async Task InitialDImagesAsync()
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
