@@ -96,7 +96,7 @@ namespace TerminusDotNetCore.Modules
             await SendImages(images);
         }
 
-        //[SlashCommand("polaroid", "Apply a shitty Polaroid filter to the given image")]
+        [SlashCommand("polaroid", "Apply a shitty Polaroid filter to the given image")]
         public async Task PolaroidImageAsync()
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
