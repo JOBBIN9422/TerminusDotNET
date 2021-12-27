@@ -31,7 +31,7 @@ namespace TerminusDotNetCore.Modules
             _imageService.ParentModule = this;
         }
 
-        private async Task SendImages(List<string> images)
+        private async Task SendImages(List<string> images, bool followUp = false)
         {
             try
             {
@@ -40,7 +40,14 @@ namespace TerminusDotNetCore.Modules
                 {
                     attachments.Add(new FileAttachment(image));
                 }
-                await Context.Interaction.RespondWithFilesAsync(attachments);
+                if (followUp)
+                {
+                    await Context.Interaction.FollowupWithFilesAsync(attachments);
+                }
+                else
+                {
+                    await Context.Interaction.RespondWithFilesAsync(attachments);
+                }
             }
             finally
             {
@@ -48,10 +55,23 @@ namespace TerminusDotNetCore.Modules
             }
         }
 
-        private async Task SendImage(string image)
+        private async Task SendImage(string image, bool followUp = false)
         {
-            await Context.Interaction.RespondWithFileAsync(image);
-            System.IO.File.Delete(image);
+            try
+            {
+                if (followUp)
+                {
+                    await Context.Interaction.FollowupWithFileAsync(image);
+                }
+                else
+                {
+                    await Context.Interaction.RespondWithFileAsync(image);
+                }
+            }
+            finally
+            {
+                System.IO.File.Delete(image);
+            }
         }
 
         [SlashCommand("mirror", "Mirror the given image across an axis")]
@@ -62,12 +82,12 @@ namespace TerminusDotNetCore.Modules
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null)
             {
-                await RespondAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
+                await FollowupAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
                 return;
             }
 
             var images = _imageService.MirrorImages(attachments, flipMode);
-            await SendImages(images);
+            await SendImages(images, true);
         }
 
         [SlashCommand("deepfry", "Deepfry the given image")]
@@ -78,12 +98,12 @@ namespace TerminusDotNetCore.Modules
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null)
             {
-                await RespondAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
+                await FollowupAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
                 return;
             }
 
             var images = _imageService.DeepfryImages(attachments, deepfryFactor);
-            await SendImages(images);
+            await SendImages(images, true);
         }
 
         [SlashCommand("grayscale", "Convert the given image to grayscale")]
@@ -94,12 +114,12 @@ namespace TerminusDotNetCore.Modules
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null)
             {
-                await RespondAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
+                await FollowupAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
                 return;
             }
 
             var images = _imageService.GrayscaleImages(attachments);
-            await SendImages(images);
+            await SendImages(images, true);
         }
 
         [SlashCommand("polaroid", "Apply a shitty Polaroid filter to the given image")]
@@ -110,12 +130,12 @@ namespace TerminusDotNetCore.Modules
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null)
             {
-                await RespondAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
+                await FollowupAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
                 return;
             }
 
             var images = _imageService.PolaroidImages(attachments);
-            await SendImages(images);
+            await SendImages(images, true);
         }
 
         [SlashCommand("kodak", "Apply a shitty Kodachrome filter to the given image")]
@@ -126,12 +146,12 @@ namespace TerminusDotNetCore.Modules
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null)
             {
-                await RespondAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
+                await FollowupAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
                 return;
             }
 
             var images = _imageService.KodakImages(attachments);
-            await SendImages(images);
+            await SendImages(images, true);
         }
 
         [SlashCommand("invert", "Invert the colors of the given image")]
@@ -142,12 +162,12 @@ namespace TerminusDotNetCore.Modules
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null)
             {
-                await RespondAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
+                await FollowupAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
                 return;
             }
 
             var images = _imageService.InvertImages(attachments);
-            await SendImages(images);
+            await SendImages(images, true);
         }
 
         [SlashCommand("initiald", "NANI???? KANSEI DORIFTO?!?!?!?!?")]
@@ -158,12 +178,12 @@ namespace TerminusDotNetCore.Modules
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null)
             {
-                await RespondAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
+                await FollowupAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
                 return;
             }
 
             var images = _imageService.InitialDImages(attachments);
-            await SendImages(images);
+            await SendImages(images, true);
         }
 
         [SlashCommand("reddit", "Apply le funny REDDIT watermark to the given image")]
@@ -174,12 +194,12 @@ namespace TerminusDotNetCore.Modules
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null)
             {
-                await RespondAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
+                await FollowupAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
                 return;
             }
 
             var images = _imageService.RedditWatermarkImages(attachments, subName);
-            await SendImages(images);
+            await SendImages(images, true);
         }
 
         [SlashCommand("morrowind", "With this character's death, the thread of prophecy is severed.")]
@@ -190,12 +210,12 @@ namespace TerminusDotNetCore.Modules
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null)
             {
-                await RespondAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
+                await FollowupAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
                 return;
             }
 
             var images = _imageService.MorrowindImages(attachments);
-            await SendImages(images);
+            await SendImages(images, true);
         }
 
         [SlashCommand("dmc", "Featuring Dante from the Devil May Cry series")]
@@ -206,12 +226,12 @@ namespace TerminusDotNetCore.Modules
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null)
             {
-                await RespondAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
+                await FollowupAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
                 return;
             }
 
             var images = _imageService.DMCWatermarkImages(attachments);
-            await SendImages(images);
+            await SendImages(images, true);
         }
 
         [SlashCommand("bebop", "SEE YOU SPACE COWBOY...")]
@@ -222,12 +242,12 @@ namespace TerminusDotNetCore.Modules
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null)
             {
-                await RespondAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
+                await FollowupAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
                 return;
             }
 
             var images = _imageService.BebopWatermarkImages(attachments);
-            await SendImages(images);
+            await SendImages(images, true);
         }
 
         [SlashCommand("nintendo", "Add a Nintendo seal of approval to the given image")]
@@ -238,12 +258,12 @@ namespace TerminusDotNetCore.Modules
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null)
             {
-                await RespondAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
+                await FollowupAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
                 return;
             }
 
             var images = _imageService.NintendoWatermarkImages(attachments);
-            await SendImages(images);
+            await SendImages(images, true);
         }
 
         [SlashCommand("gimp", "Funny GNU pepper command haha")]
@@ -254,12 +274,12 @@ namespace TerminusDotNetCore.Modules
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null)
             {
-                await RespondAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
+                await FollowupAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
                 return;
             }
 
             var images = _imageService.MosaicImages(attachments);
-            await SendImages(images);
+            await SendImages(images, true);
         }
 
         [SlashCommand("meme", "BOTTOM TEXT")]
@@ -270,18 +290,18 @@ namespace TerminusDotNetCore.Modules
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null)
             {
-                await RespondAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
+                await FollowupAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
                 return;
             }
 
             if (topText == null && bottomText == null)
             {
-                await RespondAsync("Please add a caption.");
+                await FollowupAsync("Please add a caption.");
                 return;
             }
 
             var images = _imageService.MemeCaptionImages(attachments, topText, bottomText);
-            await SendImages(images);
+            await SendImages(images, true);
         }
 
         [SlashCommand("thicc", "Stretch the given image")]
@@ -292,12 +312,12 @@ namespace TerminusDotNetCore.Modules
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null)
             {
-                await RespondAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
+                await FollowupAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
                 return;
             }
 
             var images = _imageService.ThiccImages(attachments, thiccFactor);
-            await SendImages(images);
+            await SendImages(images, true);
         }
 
         [SlashCommand("pixelate", "Pixelate the given image")]
@@ -308,12 +328,12 @@ namespace TerminusDotNetCore.Modules
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null)
             {
-                await RespondAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
+                await FollowupAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
                 return;
             }
 
             var images = _imageService.PixelateImages(attachments, pixelSize);
-            await SendImages(images);
+            await SendImages(images, true);
         }
 
         [SlashCommand("contrast", "Change the contrast of the given image")]
@@ -324,12 +344,12 @@ namespace TerminusDotNetCore.Modules
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null)
             {
-                await RespondAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
+                await FollowupAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
                 return;
             }
 
             var images = _imageService.ContrastImages(attachments, amount);
-            await SendImages(images);
+            await SendImages(images, true);
         }
 
         [SlashCommand("saturate", "Change the saturation of the given image")]
@@ -340,12 +360,12 @@ namespace TerminusDotNetCore.Modules
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null)
             {
-                await RespondAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
+                await FollowupAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
                 return;
             }
 
             var images = _imageService.SaturateImages(attachments, amount);
-            await SendImages(images);
+            await SendImages(images, true);
         }
 
         private ParamType ParseParamType(string paramText)
@@ -376,7 +396,7 @@ namespace TerminusDotNetCore.Modules
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null && text == null)
             {
-                await RespondAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
+                await FollowupAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
                 return;
             }
 
@@ -387,17 +407,17 @@ namespace TerminusDotNetCore.Modules
             {
                 case ParamType.Numeric:
                     images = _imageService.ProjectImagesOnto("bobross.json", attachments, uint.Parse(text));
-                    await SendImages(images);
+                    await SendImages(images, true);
                     break;
 
                 case ParamType.Text:
                     string textImg = _imageService.ProjectTextOnto("bobross.json", text);
-                    await SendImage(textImg);
+                    await SendImage(textImg, true);
                     break;
 
                 case ParamType.None:
                     images = _imageService.ProjectImagesOnto("bobross.json", attachments);
-                    await SendImages(images);
+                    await SendImages(images, true);
                     break;
             }
         }
@@ -410,7 +430,7 @@ namespace TerminusDotNetCore.Modules
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null && text == null)
             {
-                await RespondAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
+                await FollowupAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
                 return;
             }
 
@@ -421,17 +441,17 @@ namespace TerminusDotNetCore.Modules
             {
                 case ParamType.Numeric:
                     images = _imageService.ProjectImagesOnto("pc.json", attachments, uint.Parse(text));
-                    await SendImages(images);
+                    await SendImages(images, true);
                     break;
 
                 case ParamType.Text:
                     string textImg = _imageService.ProjectTextOnto("pc.json", text);
-                    await SendImage(textImg);
+                    await SendImage(textImg, true);
                     break;
 
                 case ParamType.None:
                     images = _imageService.ProjectImagesOnto("pc.json", attachments);
-                    await SendImages(images);
+                    await SendImages(images, true);
                     break;
             }
         }
@@ -444,7 +464,7 @@ namespace TerminusDotNetCore.Modules
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null && text == null)
             {
-                await RespondAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
+                await FollowupAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
                 return;
             }
 
@@ -455,17 +475,17 @@ namespace TerminusDotNetCore.Modules
             {
                 case ParamType.Numeric:
                     images = _imageService.ProjectImagesOnto("trump.json", attachments, uint.Parse(text));
-                    await SendImages(images);
+                    await SendImages(images, true);
                     break;
 
                 case ParamType.Text:
                     string textImg = _imageService.ProjectTextOnto("trump.json", text);
-                    await SendImage(textImg);
+                    await SendImage(textImg, true);
                     break;
 
                 case ParamType.None:
                     images = _imageService.ProjectImagesOnto("trump.json", attachments);
-                    await SendImages(images);
+                    await SendImages(images, true);
                     break;
             }
         }
@@ -478,7 +498,7 @@ namespace TerminusDotNetCore.Modules
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null && text == null)
             {
-                await RespondAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
+                await FollowupAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
                 return;
             }
 
@@ -489,17 +509,17 @@ namespace TerminusDotNetCore.Modules
             {
                 case ParamType.Numeric:
                     images = _imageService.ProjectImagesOnto("walter.json", attachments, uint.Parse(text));
-                    await SendImages(images);
+                    await SendImages(images, true);
                     break;
 
                 case ParamType.Text:
                     string textImg = _imageService.ProjectTextOnto("walter.json", text);
-                    await SendImage(textImg);
+                    await SendImage(textImg, true);
                     break;
 
                 case ParamType.None:
                     images = _imageService.ProjectImagesOnto("walter.json", attachments);
-                    await SendImages(images);
+                    await SendImages(images, true);
                     break;
             }
         }
@@ -512,7 +532,7 @@ namespace TerminusDotNetCore.Modules
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null && text == null)
             {
-                await RespondAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
+                await FollowupAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
                 return;
             }
 
@@ -523,17 +543,17 @@ namespace TerminusDotNetCore.Modules
             {
                 case ParamType.Numeric:
                     images = _imageService.ProjectImagesOnto("hank.json", attachments, uint.Parse(text));
-                    await SendImages(images);
+                    await SendImages(images, true);
                     break;
 
                 case ParamType.Text:
                     string textImg = _imageService.ProjectTextOnto("hank.json", text);
-                    await SendImage(textImg);
+                    await SendImage(textImg, true);
                     break;
 
                 case ParamType.None:
                     images = _imageService.ProjectImagesOnto("hank.json", attachments);
-                    await SendImages(images);
+                    await SendImages(images, true);
                     break;
             }
         }
@@ -546,7 +566,7 @@ namespace TerminusDotNetCore.Modules
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
             if (attachments == null && text == null)
             {
-                await RespondAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
+                await FollowupAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
                 return;
             }
 
@@ -557,17 +577,17 @@ namespace TerminusDotNetCore.Modules
             {
                 case ParamType.Numeric:
                     images = _imageService.ProjectImagesOnto("emmy.json", attachments, uint.Parse(text));
-                    await SendImages(images);
+                    await SendImages(images, true);
                     break;
 
                 case ParamType.Text:
                     string textImg = _imageService.ProjectTextOnto("emmy.json", text);
-                    await SendImage(textImg);
+                    await SendImage(textImg, true);
                     break;
 
                 case ParamType.None:
                     images = _imageService.ProjectImagesOnto("emmy.json", attachments);
-                    await SendImages(images);
+                    await SendImages(images, true);
                     break;
             }
         }
