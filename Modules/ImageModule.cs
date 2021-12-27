@@ -166,7 +166,7 @@ namespace TerminusDotNetCore.Modules
             await SendImages(images);
         }
 
-        //[SlashCommand("morrowind", "With this character's death, the thread of prophecy is severed.")]
+        [SlashCommand("morrowind", "With this character's death, the thread of prophecy is severed.")]
         public async Task MorrowindImageAsync()
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
