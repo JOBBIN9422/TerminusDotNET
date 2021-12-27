@@ -110,7 +110,7 @@ namespace TerminusDotNetCore.Modules
             await SendImages(images);
         }
 
-        //[SlashCommand("kodak", "Apply a shitty Kodachrome filter to the given image")]
+        [SlashCommand("kodak", "Apply a shitty Kodachrome filter to the given image")]
         public async Task KodakImageAsync()
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
