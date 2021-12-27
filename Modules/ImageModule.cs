@@ -236,7 +236,7 @@ namespace TerminusDotNetCore.Modules
             await SendImages(images);
         }
 
-        //[SlashCommand("meme", "BOTTOM TEXT")]
+        [SlashCommand("meme", "BOTTOM TEXT")]
         public async Task MemeCaptionImageAsync([Summary(description: "top text to add")]string topText = null, [Summary(description: "bottom text to add")]string bottomText = null)
         {
             IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
