@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
+using System.Net.Http;
 
 namespace TerminusDotNetCore.Helpers
 {
@@ -19,6 +20,8 @@ namespace TerminusDotNetCore.Helpers
     
     public static class AttachmentHelper
     {
+        private static readonly string TEMP_DIR = Path.Combine("assets", "temp");
+
         private static readonly string[] _wildcardExtension = {
             "*"
         };
@@ -160,12 +163,24 @@ namespace TerminusDotNetCore.Helpers
                     var fileIdString = Guid.NewGuid().ToString("N");
 
                     //preserve file's extension in the full name
-                    var downloadFilename = Path.Combine("assets", "temp", $"{fileIdString}{Path.GetExtension(filename)}");
+                    var downloadFilename = Path.Combine(TEMP_DIR, $"{fileIdString}{Path.GetExtension(filename)}");
                     webClient.DownloadFile(url, downloadFilename);
 
                     attachmentFiles.Add(downloadFilename);
                 }
                 return attachmentFiles;
+            }
+        }
+
+        public static async Task<string> DownloadAttachment(IAttachment attachment)
+        {
+            using (var httpClient = new HttpClient())
+            {
+                string outputFilename = Path.Combine(TEMP_DIR, attachment.Filename);
+                byte[] fileData = await httpClient.GetByteArrayAsync(attachment.Url);
+                await File.WriteAllBytesAsync(Path.Combine(TEMP_DIR, outputFilename), fileData);
+
+                return outputFilename;
             }
         }
 
