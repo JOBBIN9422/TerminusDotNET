@@ -75,19 +75,28 @@ namespace TerminusDotNetCore.Modules
         }
 
         [SlashCommand("mirror", "Mirror the given image across an axis")]
-        public async Task MirrorImagesAsync([Summary(description: "axis to mirror the image on (`horizontal` or `vertical`)")]string flipMode = "horizontal")
+        public async Task MirrorImagesAsync([Summary(description: "image to operate on")]IAttachment image = null, 
+            [Summary(description: "axis to mirror the image on (`horizontal` or `vertical`)")]string flipMode = "horizontal",
+            [Summary(description: "Which side of the image to flip (`heads` or `tails`)")]string flipSide = "heads")
         {
             await DeferAsync();
-
-            IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
-            if (attachments == null)
+            if (image == null)
             {
-                await FollowupAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
-                return;
+                string imageFilename = _imageService.MirrorImage(image, flipMode, flipSide);
+                await SendImage(imageFilename, true);
             }
+            else
+            {
+                IReadOnlyCollection<Attachment> attachments = await AttachmentHelper.GetMostRecentAttachmentsAsync(Context, AttachmentFilter.Images);
+                if (attachments == null)
+                {
+                    await FollowupAsync(NO_ATTACHMENTS_FOUND_MESSAGE);
+                    return;
+                }
 
-            var images = _imageService.MirrorImages(attachments, flipMode);
-            await SendImages(images, true);
+                var images = _imageService.MirrorImages(attachments, flipMode);
+                await SendImages(images, true);
+            }
         }
 
         [SlashCommand("deepfry", "Deepfry the given image")]

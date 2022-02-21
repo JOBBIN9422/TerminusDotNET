@@ -310,6 +310,16 @@ namespace TerminusDotNetCore.Services
             return images;
         }
 
+        public string MirrorImage(IAttachment image, string flipModeStr, string flipSideStr)
+        {
+            FlipMode flipMode = FlipMode.Horizontal;
+            if (flipModeStr == "vertical" || flipModeStr == "vert")
+            {
+                flipMode = FlipMode.Vertical;
+            }
+            MirrorImage(image.Filename, flipMode, flipSideStr.ToLower() == "heads");
+        }
+
         public List<string> MirrorImages(IReadOnlyCollection<Attachment> attachments, string flipModeStr)
         {
             var returnImgs = new List<string>();
