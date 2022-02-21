@@ -52,7 +52,7 @@ namespace TerminusDotNetCore.Services
             await auth.AuthorizeAsync();
             _twitterContext = new TwitterContext(auth);
         }
-        
+
         private async Task<List<Media>> GetMediaFromAttachments(IReadOnlyCollection<IAttachment> attachments)
         {
             if (attachments == null || attachments.Count == 0)
@@ -83,33 +83,20 @@ namespace TerminusDotNetCore.Services
             }
         }
 
-        public async Task<string> TweetAsync(string tweetContent, IReadOnlyCollection<IAttachment> attachments = null)
+        public async Task<string> TweetAsync(string tweetContent)
         {
-            Status tweet = null;
+            Tweet tweet = await _twitterContext.TweetAsync(tweetContent);
 
-            //get media from message attachments (if any)
-            List<Media> mediaContent = await GetMediaFromAttachments(attachments);
-            if (mediaContent != null)
-            {
-                var mediaIDs = mediaContent.Select(x => x.MediaID);
-                tweet = await _twitterContext.TweetAsync(tweetContent, mediaIDs);
-            }
-            else
-            {
-                //if no media provided, just tweet the text 
-                tweet = await _twitterContext.TweetAsync(tweetContent);
-            }
-            
             if (tweet != null)
             {
-                return $"<:succ:501947977435185162>essfully tweeted status:  https://twitter.com/Yeetman04889000/status/{tweet.StatusID}";
+                return $"<:succ:501947977435185162>essfully tweeted status:  https://twitter.com/Yeetman04889000/status/{tweet.ID}";
             }
             else
             {
                 return "An error occurred while attempting to post the tweet.";
             }
         }
-        
+
         public async Task<string> GetLastNotchTweet()
         {
             var user =

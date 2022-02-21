@@ -119,7 +119,7 @@ namespace TerminusDotNetCore.Helpers
             Font font = SystemFonts.CreateFont("Impact", fontSize);
 
             //compute text render size and font outline size
-            FontRectangle botTextSize = TextMeasurer.Measure(bottomText, new RendererOptions(font));
+            FontRectangle botTextSize = TextMeasurer.Measure(bottomText, new TextOptions(font));
             float outlineSize = fontSize / 15.0f;
 
             //determine top & bottom text location
@@ -136,23 +136,28 @@ namespace TerminusDotNetCore.Helpers
             SolidBrush brush = new SolidBrush(Color.White);
             Pen pen = new Pen(Color.Black, outlineSize);
 
-            DrawingOptions options = new DrawingOptions()
-            {
-                TextOptions = new TextOptions()
-                {
-                    WrapTextWidth = textMaxWidth,
-                    HorizontalAlignment = HorizontalAlignment.Center
-                }
-            };
-
             //render text
             if (!string.IsNullOrEmpty(topText))
             {
-                image.Mutate(x => x.DrawText(options, topText, font, brush, pen, topLeftLocation));
+                TextOptions topTextOptions = new(font)
+                {
+                    WrappingLength = textMaxWidth,
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    Origin = topLeftLocation
+                };
+
+                image.Mutate(x => x.DrawText(topTextOptions, topText, brush, pen));
             }
             if (!string.IsNullOrEmpty(bottomText))
             {
-                image.Mutate(x => x.DrawText(options, bottomText, font, brush, pen, bottomLeftLocation));
+                TextOptions botTextOptions = new(font)
+                {
+                    WrappingLength = textMaxWidth,
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    Origin = bottomLeftLocation
+                };
+
+                image.Mutate(x => x.DrawText(botTextOptions, bottomText, brush, pen));
             }
 
             return image;
@@ -535,18 +540,16 @@ namespace TerminusDotNetCore.Helpers
                 SolidBrush brush = new SolidBrush(Color.Black);
 
                 //wrap and align text before drawing
-                DrawingOptions options = new DrawingOptions()
+                TextOptions textOptions = new(font)
                 {
-                    TextOptions = new TextOptions()
-                    {
-                        WrapTextWidth = textMaxWidth,
-                        HorizontalAlignment = HorizontalAlignment.Center
-                    }
+                    WrappingLength = textMaxWidth,
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    Origin = topLeftLocation
                 };
 
                 //draw text on the text canvas
                 textImage.Mutate(x => x.BackgroundColor(Color.White));
-                textImage.Mutate(x => x.DrawText(options, text, font, brush, topLeftLocation));
+                textImage.Mutate(x => x.DrawText(textOptions, text, brush));
 
                 //compute the transformation matrix based on the destination points and apply it to the text image
                 Matrix4x4 transformMat = TransformHelper.ComputeTransformMatrix(textImage.Width, textImage.Height, topLeft, topRight, bottomLeft, bottomRight);

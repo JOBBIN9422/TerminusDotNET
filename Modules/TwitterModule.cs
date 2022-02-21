@@ -53,7 +53,7 @@ namespace TerminusDotNetCore.Modules
                 //check for attachments in the current message
                 if (Context.Message.Attachments.Count > 0)
                 {
-                    result = await _twitterService.TweetAsync("", Context.Message.Attachments);
+                    result = await _twitterService.TweetAsync("");
                 }
 
                 //if no attachents or text in the current message
@@ -63,12 +63,12 @@ namespace TerminusDotNetCore.Modules
                     var messages = await Context.Channel.GetMessagesAsync(2).FlattenAsync();
                     var priorMessage = messages.Last();
 
-                    result = await _twitterService.TweetAsync(priorMessage.Content, priorMessage.Attachments);
+                    result = await _twitterService.TweetAsync(priorMessage.Content);
                 }
             }
             else
             {
-                result = await _twitterService.TweetAsync(tweet, Context.Message.Attachments);
+                result = await _twitterService.TweetAsync(tweet);
             }
             await ReplyAsync(result);
         }
