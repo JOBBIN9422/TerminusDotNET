@@ -178,7 +178,7 @@ namespace TerminusDotNetCore.Helpers
             {
                 string outputFilename = Path.Combine(TEMP_DIR, attachment.Filename);
                 byte[] fileData = await httpClient.GetByteArrayAsync(attachment.Url);
-                await File.WriteAllBytesAsync(Path.Combine(TEMP_DIR, outputFilename), fileData);
+                await File.WriteAllBytesAsync(outputFilename, fileData);
 
                 return outputFilename;
             }
