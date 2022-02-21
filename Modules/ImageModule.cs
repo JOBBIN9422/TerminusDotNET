@@ -82,7 +82,7 @@ namespace TerminusDotNetCore.Modules
             await DeferAsync();
             if (image != null)
             {
-                string imageFilename = _imageService.MirrorImage(image, flipMode, flipSide);
+                string imageFilename = await _imageService.MirrorImageAsync(image, flipMode, flipSide);
                 await SendImage(imageFilename, true);
             }
             else

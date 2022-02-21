@@ -15,6 +15,7 @@ using SixLabors.Fonts;
 using Microsoft.Extensions.Configuration;
 using SixLabors.ImageSharp.Drawing.Processing;
 using SolidBrush = SixLabors.ImageSharp.Drawing.Processing.SolidBrush;
+using System.Threading.Tasks;
 
 namespace TerminusDotNetCore.Services
 {
@@ -310,16 +311,17 @@ namespace TerminusDotNetCore.Services
             return images;
         }
 
-        public string MirrorImage(IAttachment image, string flipModeStr, string flipSideStr)
+        public async Task<string> MirrorImageAsync(IAttachment image, string flipModeStr, string flipSideStr)
         {
             FlipMode flipMode = FlipMode.Horizontal;
             if (flipModeStr == "vertical" || flipModeStr == "vert")
             {
                 flipMode = FlipMode.Vertical;
             }
-            MirrorImage(image.Filename, flipMode, flipSideStr.ToLower() == "heads");
+            string imgPath = await AttachmentHelper.DownloadAttachment(image);
+            MirrorImage(imgPath, flipMode, flipSideStr.ToLower() == "heads");
 
-            return image.Filename;
+            return imgPath;
         }
 
         public List<string> MirrorImages(IReadOnlyCollection<Attachment> attachments, string flipModeStr)
