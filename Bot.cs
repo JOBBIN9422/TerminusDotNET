@@ -127,6 +127,10 @@ namespace TerminusDotNetCore
             catch (Exception e)
             {
                 await Logger.Log(new LogMessage(LogSeverity.Warning, "InteractionHandler", $"{e}"));
+                if (arg.Type == InteractionType.ApplicationCommand)
+                {
+                    await arg.GetOriginalResponseAsync().ContinueWith(async (msg) => await msg.Result.DeleteAsync());
+                }
             }
         }
 
