@@ -80,7 +80,7 @@ namespace TerminusDotNetCore.Modules
             [Summary(description: "Which side of the image to flip (`heads` or `tails`)")]string flipSide = "heads")
         {
             await DeferAsync();
-            if (image == null)
+            if (image != null)
             {
                 string imageFilename = _imageService.MirrorImage(image, flipMode, flipSide);
                 await SendImage(imageFilename, true);
