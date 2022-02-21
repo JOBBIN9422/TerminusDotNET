@@ -318,6 +318,8 @@ namespace TerminusDotNetCore.Services
                 flipMode = FlipMode.Vertical;
             }
             MirrorImage(image.Filename, flipMode, flipSideStr.ToLower() == "heads");
+
+            return image.Filename;
         }
 
         public List<string> MirrorImages(IReadOnlyCollection<Attachment> attachments, string flipModeStr)
